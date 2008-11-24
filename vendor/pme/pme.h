@@ -13,7 +13,7 @@
 #ifndef PME_H
 #define PME_H
 
-#include <string>
+#include <string.h>
 #include <algorithm>
 #include <vector>
 #include <stdexcept>
