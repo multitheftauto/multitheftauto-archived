@@ -1,11 +1,14 @@
+#ifdef WIN32
 #pragma message("Compiling precompiled header.\n")
 
 #include <windows.h>
+#include <winsock.h>
+#include <mmsystem.h>
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include <mmsystem.h>
-#include <winsock.h>
 #include <pthread.h>
 
 #include <list>

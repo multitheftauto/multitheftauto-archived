@@ -31,6 +31,7 @@
     #endif
 #else
 	char szNetworkLibName [] = "net.so";
+  char szXMLLibName[]      = "xmll.so";
 #endif
 
 using namespace std;
