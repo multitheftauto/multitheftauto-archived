@@ -2,12 +2,24 @@ INCLUDES += -I$(srcdir)/logic/
 INCLUDES += -I$(srcdir)/../../sdk/
 INCLUDES += -I$(srcdir)/../../../Shared/sdk/
 INCLUDES += -I$(srcdir)/../../../Shared/publicsdk/include/
+INCLUDES += -I$(srcdir)/../../../vendor/
+INCLUDES += -I$(srcdir)/../../../vendor/pme/
+INCLUDES += -I$(srcdir)/../../../vendor/json-c/
 
 
 lib_LTLIBRARIES = \
 	libdeathmatch.la
 
 libdeathmatch_la_SOURCES = \
+	utils/CHTTPClient.cpp \
+	utils/zip/crc32.cpp \
+	utils/CHTTPRequest.cpp \
+	utils/CHTTPResponse.cpp \
+	utils/CTCPClientSocketImpl.cpp \
+	utils/base64.cpp \
+	utils/CTCPImpl.cpp \
+	CServer.cpp \
+	Server.cpp \
 	logic/CResourceHTMLItem.cpp \
 	logic/CMapFile.cpp \
 	logic/CCommandFile.cpp \
@@ -187,14 +199,5 @@ libdeathmatch_la_SOURCES = \
 	logic/CResourceClientConfigItem.cpp \
 	logic/CEvents.cpp \
 	logic/TaskNames.cpp \
-	utils/CHTTPClient.cpp \
-	utils/zip/crc32.cpp \
-	utils/CHTTPRequest.cpp \
-	utils/CHTTPResponse.cpp \
-	utils/CTCPClientSocketImpl.cpp \
-	utils/base64.cpp \
-	utils/CTCPImpl.cpp \
-	CServer.cpp \
-	Server.cpp \
 	StdInc.cpp 
 

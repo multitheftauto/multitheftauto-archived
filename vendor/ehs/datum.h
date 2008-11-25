@@ -3,6 +3,8 @@
 #define DATUM_H
 
 #include <string>
+#include <strings.h>
+#include <stdlib.h>
 
 
 /// class that makes it easy to go between numbers and strings

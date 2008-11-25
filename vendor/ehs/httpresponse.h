@@ -10,6 +10,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <string.h>
 #include <sstream>
 
 #include <assert.h>
