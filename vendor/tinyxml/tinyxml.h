@@ -958,6 +958,10 @@ public:
 
 	virtual ~TiXmlElement();
 
+	// Puts the given attribute to the attributelist. You should not add it to
+	// more than one element and this node is the owner from now.
+	void    AddAttribute ( TiXmlAttribute& Attrib ) { attributeSet.Add ( &Attrib ); };
+
 	/** Given an attribute name, Attribute() returns the value
 		for the attribute of that name, or null if none exists.
 	*/
