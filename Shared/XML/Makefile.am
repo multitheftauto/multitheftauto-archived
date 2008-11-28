@@ -1,20 +1,8 @@
 INCLUDES += -I$(srcdir)/../sdk/
-INCLUDES += -I$(srcdir)/tinyxml/
+INCLUDES += -I$(srcdir)/../../vendor/tinyxml/
 
 noinst_LIBRARIES = \
-  libtinyxml.a \
 	libxml.a
-
-libtinyxml_a_SOURCES = \
-  tinyxml/tinystr.cpp \
-  tinyxml/tinystr.h \
-  tinyxml/tinyxml.cpp \
-  tinyxml/tinyxmlerror.cpp \
-  tinyxml/tinyxml.h \
-  tinyxml/tinyxmlparser.cpp
-
-libtinyxml_a_CXXFLAGS = \
-  -DTIXML_USE_STL
 
 libxml_a_SOURCES = \
 	CXMLArray.cpp \

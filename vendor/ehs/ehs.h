@@ -79,7 +79,7 @@
 // STL headers
 #include <algorithm>
 #include <cctype>
-#include <deque>
+//#include <deque>
 #include <functional>
 #include <list>
 #include <map>
