@@ -771,74 +771,39 @@ void CModelInfoSA::MakeCustomModel ( void )
 }
 
 
-// Imported from CPedModelInfoSA!
-void CModelInfoSA::SetPedVoice ( eVoiceGens VoiceGen, char szVoiceBankFirst[], char szVoiceBankLast[] )
+void CModelInfoSA::GetVoice ( short* psVoiceType, short* psVoiceID )
 {
-    if ( m_dwModelID > MODELINFO_LAST_PLAYER_ID && m_pInterface ) return;
-
-    DEBUG_TRACE("void CModelInfoSA::SetPedVoice ( eVoiceGens VoiceGen, char szVoiceBankFirst[], char szVoiceBankLast[] )\n");
-
-    DWORD dwFunc = (DWORD)FUNC_CAEPedSpeechAudioEntity__GetVoice;
-    DWORD dwBuffer, dwGen;
-    short FirstVoice = 0, LastVoice = 0;
-
-    // Get the appropriate FirstVoice index
-    dwBuffer    = (DWORD)&szVoiceBankFirst[0];
-    dwGen       = (DWORD)VoiceGen;
-    _asm
-    {
-        push    dwGen
-        push    dwBuffer
-        call    dwFunc
-        add		esp, 8
-        mov     FirstVoice, ax
-    }
-
-    // Get the appropriate LastVoice index
-    dwBuffer    = (DWORD)&szVoiceBankLast[0];
-    dwGen       = (DWORD)VoiceGen;
-    _asm
-    {
-        push    dwGen
-        push    dwBuffer
-        call    dwFunc
-        add		esp, 8
-        mov     LastVoice, ax
-    }
-
-    char buf[1024] = {0};
-    _snprintf(buf,1023,"First voice: %u\nLast voice: %u\n", FirstVoice, LastVoice);
-    OutputDebugString(buf);
-
-    // Set appropriate voices
-    CPedModelInfoSAInterface * pInterface = reinterpret_cast < CPedModelInfoSAInterface * > ( m_pInterface );
-    pInterface->FirstVoice = FirstVoice;
-    pInterface->LastVoice = LastVoice;
-    pInterface->NextVoice = FirstVoice;
+    if ( psVoiceType )
+        *psVoiceType = GetPedModelInfoInterface ()->sVoiceType;
+    if ( psVoiceID )
+        *psVoiceID = GetPedModelInfoInterface ()->sFirstVoice;
 }
 
-void CModelInfoSA::SetPedAudioType ( const char *szPedAudioType )
+void CModelInfoSA::GetVoice ( const char** pszVoiceType, const char** pszVoice )
 {
-    if ( m_dwModelID > MODELINFO_LAST_PLAYER_ID && m_pInterface ) return;
+    short sVoiceType, sVoiceID;
+    GetVoice ( &sVoiceType, &sVoiceID );
+    if ( pszVoiceType )
+        *pszVoiceType = CPedSoundSA::GetVoiceTypeNameFromID ( sVoiceType );
+    if ( pszVoice )
+        *pszVoice = CPedSoundSA::GetVoiceNameFromID ( sVoiceType, sVoiceID );
+}
 
-    DEBUG_TRACE("void CModelInfoSA::SetPedAudioType ( const char *szPedAudioType )\n");
+void CModelInfoSA::SetVoice ( short sVoiceType, short sVoiceID )
+{
+    GetPedModelInfoInterface ()->sVoiceType = sVoiceType;
+    GetPedModelInfoInterface ()->sFirstVoice = sVoiceID;
+    GetPedModelInfoInterface ()->sLastVoice = sVoiceID;
+    GetPedModelInfoInterface ()->sNextVoice = sVoiceID;
+}
 
-    DWORD dwFunc = (DWORD)FUNC_CAEPedSpeechAudioEntity__GetAudioPedType;
-    DWORD dwBuffer = (DWORD)szPedAudioType;
-    short pedAudioType = 0;
-
-    _asm
-    {
-        push    dwBuffer
-        call    dwFunc
-        add     esp, 4
-        mov     pedAudioType, ax
-    }
-
-    char buf[1024] = {0};
-    _snprintf(buf,1023,"Audio type: %u\n", pedAudioType);
-    OutputDebugString(buf);
-
-    CPedModelInfoSAInterface * pInterface = reinterpret_cast < CPedModelInfoSAInterface * > ( m_pInterface );
-    pInterface->pedAudioType = pedAudioType;
+void CModelInfoSA::SetVoice ( const char* szVoiceType, const char* szVoice )
+{
+    short sVoiceType = CPedSoundSA::GetVoiceTypeIDFromName ( szVoiceType );
+    if ( sVoiceType < 0 )
+        return;
+    short sVoiceID = CPedSoundSA::GetVoiceIDFromName ( sVoiceType, szVoice );
+    if ( sVoiceID < 0 )
+        return;
+    SetVoice ( sVoiceType, sVoiceID );
 }

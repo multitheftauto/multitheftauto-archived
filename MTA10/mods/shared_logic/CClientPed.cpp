@@ -208,6 +208,10 @@ CClientPed::~CClientPed ( void )
     {
 		SetHealth ( GetMaxHealth () );
         SetPosition ( CVector ( 2488.562f, -1662.40f, 23.335f ) );
+        SetInterior ( 0 );
+        SetDimension ( 0 );
+        SetVoice ( "PED_TYPE_PLAYER", "VOICE_PLY_CR" );
+        SetHeadless ( false );
     }
     else
     {
@@ -2691,6 +2695,11 @@ void CClientPed::_CreateModel ( void )
             delete [] szAnimName;
         }
 
+        // Set the voice that corresponds to our model
+        short sVoiceType, sVoiceID;
+        static_cast < CPedModelInfo * > ( m_pModelInfo )->GetVoice ( &sVoiceType, &sVoiceID );
+        SetVoice ( sVoiceType, sVoiceID );
+
         // Tell the streamer we created the player
         NotifyCreate ();
 	}
@@ -2732,7 +2741,7 @@ void CClientPed::_CreateLocalModel ( void )
 		// Give him the default fighting style
 		m_pPlayerPed->SetFightingStyle ( m_FightingStyle, 6 );
         m_pPlayerPed->SetMoveAnim ( m_MoveAnim );
-		SetHasJetPack ( m_bHasJetPack );            
+		SetHasJetPack ( m_bHasJetPack );
 
 		// Rebuild him so he gets his clothes
 		RebuildModel ();
@@ -2913,6 +2922,11 @@ void CClientPed::_ChangeModel ( void )
                 RunNamedAnimation ( m_pAnimationBlock, szAnimName, m_bLoopAnimation, m_bUpdatePositionAnimation );
                 delete [] szAnimName;
             }
+
+            // Set the voice that corresponds to the new model
+            short sVoiceType, sVoiceID;
+            m_pModelInfo->GetVoice ( &sVoiceType, &sVoiceID );
+            SetVoice ( sVoiceType, sVoiceID );
         }
         else
         {
@@ -4343,8 +4357,10 @@ void CClientPed::RunAnimation ( AssocGroupId animGroup, AnimationId animID )
 
 void CClientPed::RunNamedAnimation ( CAnimBlock * pBlock, const char * szAnimName, int iTime, bool bLoop, bool bUpdatePosition, bool bInteruptable, bool bOffsetPed, bool bHoldLastFrame )
 {
+    /* lil_Toady: this seems to break things
     // Kill any current animation that might be running
     KillAnimation ();
+    */
 
     // Are we streamed in?
     if ( m_pPlayerPed )
@@ -4440,4 +4456,28 @@ void CClientPed::SetOnFire ( bool bIsOnFire )
         m_pPlayerPed->SetOnFire ( bIsOnFire );
     }
     m_bIsOnFire = bIsOnFire;
+}
+
+void CClientPed::GetVoice ( short* psVoiceType, short* psVoiceID )
+{
+    if ( m_pPlayerPed )
+        m_pPlayerPed->GetVoice ( psVoiceType, psVoiceID );
+}
+
+void CClientPed::GetVoice ( const char** pszVoiceType, const char** pszVoice )
+{
+    if ( m_pPlayerPed )
+        m_pPlayerPed->GetVoice ( pszVoiceType, pszVoice );
+}
+
+void CClientPed::SetVoice ( short sVoiceType, short sVoiceID )
+{
+    if ( m_pPlayerPed )
+        m_pPlayerPed->SetVoice ( sVoiceType, sVoiceID );
+}
+
+void CClientPed::SetVoice ( const char* szVoiceType, const char* szVoice )
+{
+    if ( m_pPlayerPed )
+        m_pPlayerPed->SetVoice ( szVoiceType, szVoice );
 }

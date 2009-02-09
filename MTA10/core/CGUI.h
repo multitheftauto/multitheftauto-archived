@@ -43,6 +43,7 @@ class CLocalGUI;
 #include "CMainMenu.h"
 #include "CSetCursorPosHook.h"
 #include "CSingleton.h"
+#include "CCommunityRegistration.h"
 
 #include <windows.h>
 
@@ -61,6 +62,8 @@ public:
     void                CreateObjects               ( IUnknown* pDevice );
     void                DestroyObjects              ( void );
     CD3DMGEng*          GetRenderingLibrary         ( void );
+
+    void                DoPulse                     ( void );
 
     void                Draw                        ( void );
     void                Invalidate                  ( void );
@@ -90,6 +93,8 @@ public:
     bool                IsDebugViewVisible          ( void );
     void                EchoDebug                   ( const char* szText );
 
+    CCommunityRegistration* GetCommunityRegistration ( void )               { return &m_CommunityRegistration; };
+
     bool                ProcessMessage              ( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
     bool                InputGoesToGUI              ( void );
     inline bool         IsCursorForcedVisible       ( void )                { return m_bForceCursorVisible; }
@@ -105,26 +110,28 @@ public:
 
 
 private:
-    void                UpdateCursor                ( void );
+    void                    UpdateCursor                ( void );
 
-    DWORD               TranslateScanCodeToGUIKey   ( DWORD dwCharacter );
+    DWORD                   TranslateScanCodeToGUIKey   ( DWORD dwCharacter );
 
-    CConsole*           m_pConsole;
-    CMainMenu*          m_pMainMenu;
-    //CChatBox*           m_pChatBox;
-    CChat*              m_pChat;
-    CDebugView*         m_pDebugView;
-    CD3DMGEng*          m_pRendererLibrary;
+    CConsole*               m_pConsole;
+    CMainMenu*              m_pMainMenu;
+    //CChatBox*             m_pChatBox;
+    CChat*                  m_pChat;
+    CDebugView*             m_pDebugView;
+    CD3DMGEng*              m_pRendererLibrary;
 
-	CGUILabel*			m_pLabelVersionTag;
+    CCommunityRegistration  m_CommunityRegistration;
 
-	int					m_iVisibleWindows;
-	bool				m_bVisibleWindows;
+	CGUILabel*			    m_pLabelVersionTag;
 
-    bool                m_bForceCursorVisible;
-    bool                m_bChatboxVisible;
-    bool                m_pDebugViewVisible;
-    bool                m_bGUIHasInput;
+	int					    m_iVisibleWindows;
+	bool				    m_bVisibleWindows;
+
+    bool                    m_bForceCursorVisible;
+    bool                    m_bChatboxVisible;
+    bool                    m_pDebugViewVisible;
+    bool                    m_bGUIHasInput;
 };
 
 #endif

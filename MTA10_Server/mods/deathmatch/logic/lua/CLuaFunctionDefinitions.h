@@ -35,7 +35,7 @@ class CLuaFunctionDefinitions
 public:
     static void     SetBlipManager                      ( class CBlipManager* pBlipManager );
     static void     SetLuaManager                       ( class CLuaManager* pLuaManager );
-    static void     SetMarkerManager                    ( class CMarkers* pMarkerManager );
+    static void     SetMarkerManager                    ( class CMarkerManager* pMarkerManager );
     static void     SetObjectManager                    ( class CObjectManager* pObjectManager );
     static void     SetPickupManager                    ( class CPickupManager* pPickupManager );
     static void     SetPlayerManager                    ( class CPlayerManager* pPlayerManager );
@@ -66,14 +66,6 @@ public:
 	static int      GetCancelReason                     ( lua_State* luaVM );
     static int      WasEventCancelled                   ( lua_State* luaVM );
 
-    // Client get functions
-    static int      GetClientName                       ( lua_State* luaVM );
-    static int      GetClientIP                         ( lua_State* luaVM );
-    static int      GetClientAccount                    ( lua_State* luaVM );
-
-    // Client set functions
-    static int      SetClientName                       ( lua_State* luaVM );
-
     // Player get functions
     static int      GetPlayerCount                      ( lua_State* luaVM );
     static int      GetPlayerAmmoInClip                 ( lua_State* luaVM );
@@ -82,12 +74,9 @@ public:
     static int      GetPlayerWeapon                     ( lua_State* luaVM );
     static int      GetPlayerFromNick                   ( lua_State* luaVM );
     static int      GetPlayerMoney                      ( lua_State* luaVM );
-    static int      GetPlayerOccupiedVehicle            ( lua_State* luaVM );
-    static int      GetPlayerOccupiedVehicleSeat        ( lua_State* luaVM );
     static int      GetPlayerPing                       ( lua_State* luaVM );
     static int      GetRandomPlayer                     ( lua_State* luaVM );
     static int      IsPlayerMuted                       ( lua_State* luaVM );
-    static int      IsPlayerInVehicle                   ( lua_State* luaVM );
     static int      GetPlayerTeam                       ( lua_State* luaVM );
     static int      CanPlayerUseFunction                ( lua_State* luaVM );
     static int      GetPlayerWantedLevel                ( lua_State* luaVM );
@@ -104,6 +93,9 @@ public:
     static int      IsPlayerQA                          ( lua_State* luaVM );
     static int      GetPlayerUserName                   ( lua_State* luaVM );
     static int      GetPlayerBlurLevel                  ( lua_State* luaVM );
+    static int      GetPlayerName                       ( lua_State* luaVM );
+    static int      GetPlayerIP                         ( lua_State* luaVM );
+    static int      GetPlayerAccount                    ( lua_State* luaVM );
 
     // Player set functions
     static int      SetPlayerMoney                      ( lua_State* luaVM );
@@ -118,7 +110,9 @@ public:
     static int      SetPlayerNametagShowing             ( lua_State* luaVM );
     static int		SetPlayerMuted						( lua_State* luaVM );
     static int      SetPlayerBlurLevel                  ( lua_State* luaVM );
-    
+    static int      RedirectPlayer                      ( lua_State* luaVM );
+    static int      SetPlayerName                       ( lua_State* luaVM );
+
     // Ped get functions
     static int      CreatePed                           ( lua_State* luaVM );
     static int      GetPedArmor                         ( lua_State* luaVM );    
@@ -139,6 +133,9 @@ public:
     static int      IsPedDoingGangDriveby               ( lua_State* luaVM );
     static int      IsPedOnFire                         ( lua_State* luaVM );
     static int      IsPedHeadless                       ( lua_State* luaVM );
+    static int      GetPedOccupiedVehicle               ( lua_State* luaVM );
+    static int      GetPedOccupiedVehicleSeat           ( lua_State* luaVM );
+    static int      IsPedInVehicle                      ( lua_State* luaVM );
 
     // Player set functions
     static int      SetPedArmor                         ( lua_State* luaVM );    
@@ -353,6 +350,7 @@ public:
     static int      CreateColCuboid                     ( lua_State* luaVM );
     static int      CreateColSphere                     ( lua_State* luaVM );
     static int      CreateColRectangle                  ( lua_State* luaVM );
+    static int      CreateColPolygon                    ( lua_State* luaVM );
     static int      CreateColTube                       ( lua_State* luaVM );
 
     // Weapon funcs
@@ -388,8 +386,6 @@ public:
 
     // Util functions to make scripting easier for the end user
     // Some of these are based on standard mIRC script funcs as a lot of people will be used to them
-    static int      RandInt                             ( lua_State* luaVM );
-    static int      RandFloat                           ( lua_State* luaVM );
     static int      GetTickCount_                       ( lua_State* luaVM );
     static int      GetCTime                            ( lua_State* luaVM );
     static int      Split                               ( lua_State* luaVM );
@@ -450,12 +446,18 @@ public:
     static int      KickPlayer                          ( lua_State* luaVM );
     static int      BanPlayer                           ( lua_State* luaVM );
 
-    static int      BanIP                               ( lua_State* luaVM );
-    static int      UnbanIP                             ( lua_State* luaVM );
-	static int		BanSerial							( lua_State* luaVM );
-	static int		UnbanSerial							( lua_State* luaVM );
+    static int      AddBan                              ( lua_State* luaVM );
+    static int      RemoveBan                           ( lua_State* luaVM );
 
-	static int		GetBansXML							( lua_State* luaVM );
+    static int		GetBans							    ( lua_State* luaVM );
+
+    static int		GetBanIP							( lua_State* luaVM );
+    static int		GetBanSerial						( lua_State* luaVM );
+    static int		GetBanUsername						( lua_State* luaVM );
+    static int		GetBanNick							( lua_State* luaVM );
+    static int		GetBanTime							( lua_State* luaVM );
+    static int		GetBanReason						( lua_State* luaVM );
+    static int		GetBanAdmin						    ( lua_State* luaVM );
 
     // Cursor get funcs
     static int      IsCursorShowing                     ( lua_State* luaVM );
@@ -473,6 +475,8 @@ public:
 	// Settings registry funcs
 	static int		Get									( lua_State* luaVM );
 	static int		Set									( lua_State* luaVM );
+
+    static int      Md5                                 ( lua_State* luaVM );
 };
 
 #endif

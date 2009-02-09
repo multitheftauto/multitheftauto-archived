@@ -131,15 +131,15 @@ CClientGame::CClientGame ( bool bLocalPlay )
     }
 
     // Override CGUI's global events
-    g_pCore->GetGUI ()->SetKeyDownHandler           ( GUI_CALLBACK_KEY ( CClientGame::OnKeyDown, this ) );
-    g_pCore->GetGUI ()->SetMouseClickHandler        ( GUI_CALLBACK_MOUSE ( CClientGame::OnMouseClick, this ) );
-    g_pCore->GetGUI ()->SetMouseDoubleClickHandler  ( GUI_CALLBACK_MOUSE ( CClientGame::OnMouseDoubleClick, this ) );
-    g_pCore->GetGUI ()->SetMouseMoveHandler         ( GUI_CALLBACK_MOUSE ( CClientGame::OnMouseMove, this ) );
-    g_pCore->GetGUI ()->SetMouseEnterHandler        ( GUI_CALLBACK_MOUSE ( CClientGame::OnMouseEnter, this ) );
-    g_pCore->GetGUI ()->SetMouseLeaveHandler        ( GUI_CALLBACK_MOUSE ( CClientGame::OnMouseLeave, this ) );
-    g_pCore->GetGUI ()->SetMouseWheelHandler        ( GUI_CALLBACK_MOUSE ( CClientGame::OnMouseWheel, this ) );
-    g_pCore->GetGUI ()->SetMovedHandler             ( GUI_CALLBACK ( CClientGame::OnMove, this ) );
-    g_pCore->GetGUI ()->SetSizedHandler             ( GUI_CALLBACK ( CClientGame::OnSize, this ) );
+    g_pCore->GetGUI ()->SetKeyDownHandler           ( GUI_CALLBACK_KEY ( &CClientGame::OnKeyDown, this ) );
+    g_pCore->GetGUI ()->SetMouseClickHandler        ( GUI_CALLBACK_MOUSE ( &CClientGame::OnMouseClick, this ) );
+    g_pCore->GetGUI ()->SetMouseDoubleClickHandler  ( GUI_CALLBACK_MOUSE ( &CClientGame::OnMouseDoubleClick, this ) );
+    g_pCore->GetGUI ()->SetMouseMoveHandler         ( GUI_CALLBACK_MOUSE ( &CClientGame::OnMouseMove, this ) );
+    g_pCore->GetGUI ()->SetMouseEnterHandler        ( GUI_CALLBACK_MOUSE ( &CClientGame::OnMouseEnter, this ) );
+    g_pCore->GetGUI ()->SetMouseLeaveHandler        ( GUI_CALLBACK_MOUSE ( &CClientGame::OnMouseLeave, this ) );
+    g_pCore->GetGUI ()->SetMouseWheelHandler        ( GUI_CALLBACK_MOUSE ( &CClientGame::OnMouseWheel, this ) );
+    g_pCore->GetGUI ()->SetMovedHandler             ( GUI_CALLBACK ( &CClientGame::OnMove, this ) );
+    g_pCore->GetGUI ()->SetSizedHandler             ( GUI_CALLBACK ( &CClientGame::OnSize, this ) );
 
     // Initialize our root entity with an invalid id, we dont know the true id until map-start
     m_pRootEntity = new CClientDummy ( NULL, INVALID_ELEMENT_ID, "root" );
@@ -257,8 +257,9 @@ CClientGame::CClientGame ( bool bLocalPlay )
     m_Foo.Init ( this );
 
     // Load some stuff from the core config
-    CMainConfigInterface * pConfig = g_pCore->GetConfig ();
-    CClientTextDisplay::SetGlobalScale ( pConfig->GetTextScale () );
+    float fScale;
+    g_pCore->GetCVars ()->Get ( "text_scale", fScale );
+    CClientTextDisplay::SetGlobalScale ( fScale );
 }
 
 
@@ -513,10 +514,13 @@ void CClientGame::SetupLocalGame ( const char* szConfig )
 }
 
 
-bool CClientGame::StartLocalGame ( const char* szNick, const char* szConfig, const char* szPassword )
+bool CClientGame::StartLocalGame ( const char* szConfig, const char* szPassword )
 {
     // Verify that the nickname is valid
-    if ( !IsNickValid ( szNick ) )
+    std::string strNick;
+    g_pCore->GetCVars()->Get ( "nick", strNick );
+
+    if ( !IsNickValid ( strNick.c_str() ) )
     {
         g_pCore->ShowMessageBox ( "Error", "A valid nickname isn't set. Please go to Settings and set a new.", MB_BUTTON_OK | MB_ICON_ERROR );
         g_pCore->GetModManager ()->RequestUnload ();
@@ -536,7 +540,7 @@ bool CClientGame::StartLocalGame ( const char* szNick, const char* szConfig, con
     }
 
     // Store our nickname
-    strncpy ( m_szLocalNick, szNick, MAX_PLAYER_NICK_LENGTH );
+    strncpy ( m_szLocalNick, strNick.c_str(), MAX_PLAYER_NICK_LENGTH );
     m_szLocalNick [MAX_PLAYER_NICK_LENGTH] = 0;
 
     // Got a server?
@@ -1781,6 +1785,7 @@ void CClientGame::SetAllDimensions ( unsigned short usDimension )
     m_pManager->GetRadarAreaManager ()->SetDimension ( usDimension );
     m_pManager->GetVehicleStreamer ()->SetDimension ( usDimension );
     m_pManager->GetRadarMarkerManager ()->SetDimension ( usDimension );
+    m_pManager->GetSoundManager ()->SetDimension ( usDimension );
     m_pNametags->SetDimension ( usDimension );
 }
 
@@ -2781,9 +2786,6 @@ void CClientGame::Event_OnIngame ( void )
     //g_pGame->GetPlayerInfo()->GetWanted()->SetMaximumWantedLevel ( 0 );
     g_pGame->GetPlayerInfo()->GetWanted()->SetWantedLevel ( 0 );  
 
-    // Make sure key config is set to keyboard+mouse
-    g_pGame->GetControllerConfigManager ()->SetInputType ( 1 );
-
     // Set the FPS limit
     g_pGame->SetFramelimiter ( 60 );    // about 40fps
 
@@ -3019,11 +3021,13 @@ bool CClientGame::DamageHandler ( CPed* pDamagePed, CEventDamage * pEvent )
 
     // Grab the damaged ped
     CClientPed* pDamagedPed = NULL;    
-    if ( pDamagePed ) pDamagedPed = m_pPedManager->Get ( dynamic_cast < CPlayerPed* > ( pDamagePed ), true, true );
+    if ( pDamagePed )
+        pDamagedPed = m_pPedManager->Get ( dynamic_cast < CPlayerPed* > ( pDamagePed ), true, true );
 
     // Grab the inflictor
     CClientEntity* pInflictingEntity = NULL;
-    if ( pInflictor ) pInflictingEntity = m_pManager->FindEntity ( pInflictor );
+    if ( pInflictor )
+        pInflictingEntity = m_pManager->FindEntity ( pInflictor );
 
     // If the damage was caused by an explosion
     if ( weaponUsed == WEAPONTYPE_EXPLOSION )
@@ -3031,7 +3035,8 @@ bool CClientGame::DamageHandler ( CPed* pDamagePed, CEventDamage * pEvent )
         CClientEntity * pLastExplosionCreator = m_pManager->GetExplosionManager ()->m_pLastCreator;
         
         // If we don't have an inflictor, look for the last explosion creator
-        if ( !pInflictor && pLastExplosionCreator ) pInflictingEntity = pLastExplosionCreator;
+        if ( !pInflictor && pLastExplosionCreator )
+            pInflictingEntity = pLastExplosionCreator;
         
         // Change the weapon used to whatever created the explosion
         weaponUsed = m_pManager->GetExplosionManager ()->m_LastWeaponType;
@@ -3039,7 +3044,7 @@ bool CClientGame::DamageHandler ( CPed* pDamagePed, CEventDamage * pEvent )
 
     // Do we have a damaged ped?
     if ( pDamagedPed )
-    {               
+    {
         float fPreviousHealth = pDamagedPed->m_fHealth;
         float fCurrentHealth = pDamagedPed->GetGamePlayer ()->GetHealth ();
         float fPreviousArmor = pDamagedPed->m_fArmor;
@@ -3071,7 +3076,7 @@ bool CClientGame::DamageHandler ( CPed* pDamagePed, CEventDamage * pEvent )
                 if ( pTeam )
                 {
                     // Is this friendly-fire from a team-mate?
-                    if ( pDamagedPlayer->IsOnMyTeam ( pInflictingPlayer ) && !pTeam->GetFriendlyFire () )
+                    if ( pDamagedPlayer->IsOnMyTeam ( pInflictingPlayer ) && !pTeam->GetFriendlyFire () && pDamagedPlayer != pInflictingPlayer )
                     {
                         return false;
                     }
@@ -3708,6 +3713,8 @@ void CClientGame::ResetMapInfo ( void )
     g_pGame->GetHud ()->DisableAll ( false );
     // Disable area names as they are on load until camera unfades
     g_pGame->GetHud ()->DisableAreaName ( true );
+    g_pGame->GetHud ()->DisableVitalStats ( true );
+
     m_bHudAreaNameDisabled = false;       
 
     // Gravity
@@ -3736,6 +3743,9 @@ void CClientGame::ResetMapInfo ( void )
     // Wave-level
     g_pMultiplayer->SetWaveLevel ( DEFAULT_WAVE_LEVEL );
 
+    // Water areas
+    g_pGame->GetWaterManager ()->Reset ();
+
     // Players
     m_pPlayerManager->ResetAll ();
 
@@ -3756,6 +3766,21 @@ void CClientGame::ResetMapInfo ( void )
     for ( unsigned char i = 0 ; (pGarage = pGarages->GetGarage( i )) != NULL ; i++ )
     {
         pGarage->SetOpen ( false );
+    }
+
+    // Player specific stuff
+    if ( m_pLocalPlayer )
+    {
+        // Interior
+        m_pLocalPlayer->SetInterior ( 0 );
+
+        // Headless state
+        m_pLocalPlayer->SetHeadless ( false );
+
+        // Voice
+        short sVoiceType, sVoiceID;
+        m_pLocalPlayer->GetModelInfo ()->GetVoice ( &sVoiceType, &sVoiceID );
+        m_pLocalPlayer->SetVoice ( sVoiceType, sVoiceID );
     }
 }
 

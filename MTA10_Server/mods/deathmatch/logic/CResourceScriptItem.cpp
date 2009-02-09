@@ -17,7 +17,7 @@
 
 #include "StdInc.h"
 
-CResourceScriptItem::CResourceScriptItem ( CResource * resource, char * szShortName, char * szResourceFileName ) : CResourceFile ( resource, szShortName, szResourceFileName )
+CResourceScriptItem::CResourceScriptItem ( CResource * resource, const char * szShortName, const char * szResourceFileName, CXMLAttributes * xmlAttributes ) : CResourceFile ( resource, szShortName, szResourceFileName, xmlAttributes )
 {
     m_type = RESOURCE_FILE_TYPE_SCRIPT;
 }

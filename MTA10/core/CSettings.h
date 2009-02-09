@@ -19,7 +19,6 @@ class CSettings;
 #ifndef __CSETTINGS_H
 #define __CSETTINGS_H
 
-#include "CMainConfig.h"
 #include "CMainMenu.h"
 
 struct SKeyBindSection
@@ -82,6 +81,8 @@ class CSettings
     void                LoadData                ( void );
 
     inline bool         IsCapturingKey          ( void )            { return m_bCaptureKey; }
+    void                UpdateCaptureAxis       ();
+    void                UpdateJoypadTab         ();
 
     void                AddKeyBindSection       ( char * szSectionName );
     void                RemoveKeyBindSection    ( char * szSectionName );
@@ -91,6 +92,8 @@ class CSettings
     void                OnLoginStateChange      ( bool bResult );
 
 protected:
+    const static int    SecKeyNum = 3;     // Number of secondary keys
+
 	// Keep these protected so we can access them in the event handlers of CClientGame
     CGUIWindow*         m_pWindow;
 	CGUITabPanel*	    m_pTabs;
@@ -98,16 +101,38 @@ protected:
 	CGUIButton*		    m_pButtonCancel;
     CGUILabel*          m_pLabelNick;
     CGUIEdit*           m_pEditNick;
-	//CGUICheckBox*	    m_pCheckBoxVideoWindowed;
+    CGUILabel*          m_pLabelConnection;
+    CGUIComboBox*       m_pComboConnection;
+	CGUICheckBox*	    m_pSavePasswords;
 
+    CGUILabel*		    m_pVideoGeneralLabel;
+    CGUILabel*		    m_pVideoResolutionLabel;
+    CGUIComboBox*       m_pComboResolution;
+    CGUICheckBox*       m_pCheckBoxWindowed;
+    CGUICheckBox*       m_pCheckBoxWideScreen;
 	CGUILabel*		    m_pVideoRenderingLabel;
 	CGUICheckBox*	    m_pCheckBoxMenuDynamic;
 	CGUICheckBox*	    m_pCheckBoxMenuVideo;
 	CGUICheckBox*	    m_pCheckBoxMenuPostEffects;
 	
+    CGUILabel*          m_pLabelRadioVolume;
+    CGUILabel*          m_pLabelSFXVolume;
+    CGUILabel*          m_pLabelMTAVolume;
+    CGUIProgressBar*    m_pAudioRadioVolume;
+    CGUIProgressBar*    m_pAudioSFXVolume;
+    CGUIProgressBar*    m_pAudioMTAVolume;
+
 	CGUIGridList*	    m_pBindsList;
 	CGUIButton*		    m_pBindsDefButton;
-	CGUIHandle		    m_hBind, m_hPriKey, m_hSecKey;
+	CGUIHandle		    m_hBind, m_hPriKey, m_hSecKeys[SecKeyNum];
+
+    CGUILabel*              m_pJoypadName;
+    CGUILabel*              m_pJoypadUnderline;
+    CGUIEdit*               m_pEditDeadzone;
+    CGUIEdit*               m_pEditSaturation;
+    vector < CGUILabel* >   m_pJoypadLabels;
+    vector < CGUIButton* >  m_pJoypadButtons;
+    int                     m_JoypadSettingsRevision;
 
 	CGUILabel*			m_pLabelCommunity;
 	CGUILabel*			m_pLabelUser;
@@ -115,32 +140,42 @@ protected:
 	CGUIEdit*			m_pEditUser;
 	CGUIEdit*			m_pEditPass;
 	CGUIButton*			m_pButtonLogin;
+    CGUIButton*			m_pButtonRegister;
 
     CGUILabel*          m_pControlsMouseLabel;
     CGUICheckBox*       m_pInvertMouse;
     CGUICheckBox*       m_pSteerWithMouse;
     CGUICheckBox*       m_pFlyWithMouse;
 
+    CGUILabel*          m_pControlsJoypadLabel;
+    CGUIScrollPane*     m_pControlsInputTypePane;
+    CGUIRadioButton*    m_pStandardControls;
+    CGUIRadioButton*    m_pClassicControls;
+
+    bool			    OnJoypadTextChanged	    ( CGUIElement* pElement );
+	bool			    OnAxisSelectClick       ( CGUIElement* pElement );
+	bool			    OnJoypadDefaultClick    ( CGUIElement* pElement );
 	bool			    OnBindsDefaultClick		( CGUIElement* pElement );
 	bool			    OnBindsListClick		( CGUIElement* pElement );
 	bool			    OnCheckBoxClick         ( CGUIElement* pElement );
     bool                OnOKButtonClick         ( CGUIElement* pElement );
     bool                OnCancelButtonClick     ( CGUIElement* pElement );
 	bool				OnLoginButtonClick		( CGUIElement* pElement );
+    bool				OnRegisterButtonClick	( CGUIElement* pElement );
 
 	bool			    OnMouseDoubleClick		( CGUIMouseEventArgs Args );
 
 private:
 	void			    ProcessKeyBinds			( void );
-	
+	void			    ProcessJoypad			( void );
+
     void                SaveData                ( void );
 
 	unsigned int	    m_uiCaptureKey;
     bool                m_bCaptureKey;
+    bool                m_bCaptureAxis;
 
 	CGUIListItem*	    m_pSelectedBind;
-
-	CMainConfig*	    m_pConfig;
 
 	DWORD			    m_dwFrameCount;
 

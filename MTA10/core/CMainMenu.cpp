@@ -61,8 +61,6 @@ CMainMenu::CMainMenu ( CGUI* pManager )
 	m_ucFade = FADE_INVISIBLE;
 	m_bFadeToCredits = false;
 
-	m_pConfig = CCore::GetSingleton().GetConfig ();
-
 	m_iButtons =			6;
 	m_fWindowX =			260.0f;
 	m_fWindowY =			330.0f;
@@ -115,6 +113,11 @@ CMainMenu::CMainMenu ( CGUI* pManager )
     m_pCommunityLabel->SetAlpha ( 0.7f );
     m_pCommunityLabel->SetVisible ( false );
 
+    std::string strUsername;
+    CCore::GetSingleton().GetCommunity()->GetUsername ( strUsername );
+    if ( CCore::GetSingleton().GetCommunity()->IsLoggedIn() && !strUsername.empty() )
+        ChangeCommunityState ( true, strUsername );
+
 	// Determine some variables based on the current screen size
 	unsigned int uiItemStartY = ScreenSize.fY / 2;
 	//unsigned int uiItemHeight = ( uiItemStartY / 1.55f ) / CORE_MTA_MENU_ITEMS;
@@ -148,18 +151,39 @@ CMainMenu::CMainMenu ( CGUI* pManager )
 	// Null the scene pointer
 	m_pMainMenuScene = new CMainMenuScene ( this );
 
+    // Load the server lists
+    CXMLNode* pConfig = CCore::GetSingletonPtr ()->GetConfig ();
+    m_ServerBrowser.LoadServerList ( pConfig->FindSubNode ( CONFIG_NODE_SERVER_FAV ),
+        CONFIG_FAVOURITE_LIST_TAG, m_ServerBrowser.GetFavouritesList () );
+    m_ServerBrowser.LoadServerList ( pConfig->FindSubNode ( CONFIG_NODE_SERVER_REC ),
+        CONFIG_RECENT_LIST_TAG, m_ServerBrowser.GetRecentList () );
+
 	// This class is destroyed when the video mode is changed (vid), so the config can already be loaded
 	// If it is already loaded (and this constructor is not called on startup) then load the menu options
-	if ( m_pConfig->IsLoaded () )
-		LoadMenuOptions ();
+//    if ( CClientVariables::GetSingleton ().IsLoaded () )
+//		LoadMenuOptions ();
 }
 
 
 CMainMenu::~CMainMenu ( void )
 {
+    // Save server lists
+    CXMLNode* pConfig = CCore::GetSingletonPtr ()->GetConfig ();
+
+    CXMLNode* pFavourites = pConfig->FindSubNode ( CONFIG_NODE_SERVER_FAV );
+    if ( !pFavourites )
+        pFavourites = pConfig->CreateSubNode ( CONFIG_NODE_SERVER_FAV );
+    m_ServerBrowser.SaveServerList ( pFavourites, CONFIG_FAVOURITE_LIST_TAG, m_ServerBrowser.GetFavouritesList () );
+    
+    CXMLNode* pRecent = pConfig->FindSubNode ( CONFIG_NODE_SERVER_REC );
+    if ( !pRecent )
+        pRecent = pConfig->CreateSubNode ( CONFIG_NODE_SERVER_REC );
+    m_ServerBrowser.SaveServerList ( pRecent, CONFIG_RECENT_LIST_TAG, m_ServerBrowser.GetRecentList () );
+
 	// Delete menu items
 	for ( unsigned int i = 0; i < CORE_MTA_MENU_ITEMS; i++ ) {
-		if ( m_pItems[i] ) delete m_pItems[i];
+		if ( m_pItems[i] )
+            delete m_pItems[i];
 	}
 
     // Destroy GUI items
@@ -283,13 +307,17 @@ void CMainMenu::Update ( void )
     {
 		// Initialize our 3D scene once the device is available
 		IDirect3DDevice9 * pDevice = m_pGraphics->GetDevice ();
-		if ( !m_bInitialized && pDevice ) {
+		if ( !m_bInitialized && pDevice )
+        {            
 			m_bInitialized = true;
 
 			// If the static flag has not already been set
-			if ( m_bStaticBackground ) {
+			if ( m_bStaticBackground )
+            {
 				SetStaticBackground ( true );
-			} else {
+			}
+            else
+            {
 				// Create the texture to be used in the background
 				CVector2D ScreenSize = m_pManager->GetResolution ();
 				m_pRenderTarget = m_pManager->CreateTexture ();
@@ -728,7 +756,9 @@ void CMainMenu::SetStaticBackground ( bool bEnabled )
 	// And disable the dynamic scene option (if we're not ingame, cause that means Init3DScene has failed)
 	if (!m_bIsIngame) {
 		DWORD dwSelect = (DWORD) !m_bStaticBackground;
-		m_pConfig->iMenuOptions = ( m_pConfig->iMenuOptions & ~CMainMenu::eMenuOptions::MENU_DYNAMIC ) | ( dwSelect * CMainMenu::eMenuOptions::MENU_DYNAMIC );
+        int iMenuOptions;
+        CVARS_GET ( "menu_options", iMenuOptions );
+		CVARS_SET ( "menu_options", (unsigned int)(( iMenuOptions & ~CMainMenu::eMenuOptions::MENU_DYNAMIC ) | ( dwSelect * CMainMenu::eMenuOptions::MENU_DYNAMIC )) );
 	}
 }
 
@@ -763,7 +793,8 @@ void CMainMenu::DisableItem ( unsigned int uiIndex, bool bHide )
 
 void CMainMenu::LoadMenuOptions ( void )
 {
-	int iMenuOptions = m_pConfig->iMenuOptions;
+	int iMenuOptions;
+    CVARS_GET ( "menu_options", iMenuOptions );
 	
 	// Reload the menu options, in case they have changed
 	SetStaticBackground                            ( !(iMenuOptions & eMenuOptions::MENU_DYNAMIC) );            // Dynamic or static

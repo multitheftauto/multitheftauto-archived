@@ -58,6 +58,20 @@ public:
 
 	// Sound effects and synth functions
 	LUA_DECLARE ( SynthProcessMIDI );
+    LUA_DECLARE ( PlaySound );
+    LUA_DECLARE ( PlaySound3D );
+    LUA_DECLARE ( StopSound );
+    LUA_DECLARE ( SetSoundPosition );
+    LUA_DECLARE ( GetSoundPosition );
+    LUA_DECLARE ( GetSoundLength );
+    LUA_DECLARE ( SetSoundPaused );
+    LUA_DECLARE ( IsSoundPaused );
+    LUA_DECLARE ( SetSoundVolume );
+    LUA_DECLARE ( GetSoundVolume );
+    LUA_DECLARE ( SetSoundMinDistance );
+    LUA_DECLARE ( GetSoundMinDistance );
+    LUA_DECLARE ( SetSoundMaxDistance );
+    LUA_DECLARE ( GetSoundMaxDistance );
 
     // Output functions
     LUA_DECLARE ( OutputConsole );
@@ -130,7 +144,7 @@ public:
     LUA_DECLARE ( GetPlayerFromNick );
     LUA_DECLARE ( GetPlayerNametagText );
     LUA_DECLARE ( GetPlayerNametagColor );
-    LUA_DECLARE ( IsPlayerMuted );
+    LUA_DECLARE ( IsPlayerNametagShowing );
     LUA_DECLARE ( GetPlayerPing );
     LUA_DECLARE ( GetPlayerTeam );
     LUA_DECLARE ( IsPlayerDead );
@@ -144,11 +158,12 @@ public:
     LUA_DECLARE ( TakePlayerMoney );
     LUA_DECLARE ( SetPlayerNametagText );
     LUA_DECLARE ( SetPlayerNametagColor );
+    LUA_DECLARE ( SetPlayerNametagShowing );
 
     // Ped funcs
     LUA_DECLARE ( CreatePed );
 
-    LUA_DECLARE ( SetPedAudioType );
+    LUA_DECLARE ( GetPedVoice );
     LUA_DECLARE ( SetPedVoice );
     LUA_DECLARE ( GetPedTarget );
     LUA_DECLARE ( GetPedTargetStart );
@@ -293,6 +308,9 @@ public:
     // Explosion functions
     LUA_DECLARE ( CreateExplosion );
 
+	// Fire functions
+	LUA_DECLARE ( CreateFire );
+
     // Audio funcs
     LUA_DECLARE ( PlayMissionAudio );
     LUA_DECLARE ( PlaySoundFrontEnd );
@@ -391,6 +409,7 @@ public:
     LUA_DECLARE ( dxDrawLine3D );
     LUA_DECLARE ( dxDrawText );
     LUA_DECLARE ( dxDrawRectangle );
+    LUA_DECLARE ( dxDrawImage );
     LUA_DECLARE ( dxGetTextWidth );
     LUA_DECLARE ( dxGetFontHeight );
 
@@ -406,8 +425,6 @@ public:
     LUA_DECLARE ( tocolor );
     LUA_DECLARE ( Reference );
     LUA_DECLARE ( Dereference );
-    LUA_DECLARE ( RandInt );
-    LUA_DECLARE ( RandFloat );
     LUA_DECLARE ( GetColorFromString );
 	
 	// GUI funcs
@@ -440,6 +457,7 @@ public:
 	LUA_DECLARE ( GUIGridListSetSortingEnabled );
 	LUA_DECLARE ( GUIGridListAddColumn );
 	LUA_DECLARE ( GUIGridListRemoveColumn );
+	LUA_DECLARE ( GUIGridListSetColumnWidth );
 	LUA_DECLARE ( GUIGridListSetScrollBars );
 	LUA_DECLARE ( GUIGridListGetRowCount );
 	LUA_DECLARE ( GUIGridListAddRow );
@@ -513,7 +531,9 @@ public:
     LUA_DECLARE ( ProcessLineOfSight );
     LUA_DECLARE ( IsLineOfSightClear );
     LUA_DECLARE ( TestLineAgainstWater );
+    LUA_DECLARE ( CreateWater );
     LUA_DECLARE ( GetWaterLevel );
+    LUA_DECLARE ( SetWaterLevel );
     LUA_DECLARE ( GetWorldFromScreenPosition );
     LUA_DECLARE ( GetScreenFromWorldPosition  );
     LUA_DECLARE ( GetWeather );
@@ -543,6 +563,7 @@ public:
     LUA_DECLARE ( UnbindKey );
     LUA_DECLARE ( GetKeyState );
     LUA_DECLARE ( GetControlState );
+    LUA_DECLARE ( GetAnalogControlState );
     LUA_DECLARE ( IsControlEnabled );
     LUA_DECLARE ( GetBoundKeys );
 
@@ -577,6 +598,7 @@ public:
     LUA_DECLARE ( CreateColCuboid );
     LUA_DECLARE ( CreateColSphere );
     LUA_DECLARE ( CreateColRectangle );
+    LUA_DECLARE ( CreateColPolygon );
     LUA_DECLARE ( CreateColTube );
 
     // Team get funcs  
@@ -606,6 +628,9 @@ public:
     // Map funcs
     LUA_DECLARE ( IsPlayerMapForced );
     LUA_DECLARE ( IsPlayerMapVisible );
+    LUA_DECLARE ( GetPlayerMapBoundingBox );
+
+    LUA_DECLARE ( Md5 );
 
 #ifdef MTA_VOICE
 	// Voice funcs

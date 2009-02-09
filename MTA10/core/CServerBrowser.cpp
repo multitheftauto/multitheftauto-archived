@@ -18,6 +18,9 @@ extern CCore* g_pCore;
 
 template<> CServerBrowser * CSingleton < CServerBrowser >::m_pSingleton = NULL;
 
+#define BROWSER_DEFAULTWIDTH	720.0f
+#define BROWSER_DEFAULTHEIGHT    495.0f
+
 CServerBrowser::CServerBrowser ( void )
 {
     CGUI *pManager = g_pCore->GetGUI ();
@@ -29,26 +32,26 @@ CServerBrowser::CServerBrowser ( void )
     m_pWindow = reinterpret_cast < CGUIWindow* > ( pManager->CreateWnd ( NULL, "Server Browser" ) );
     m_pWindow->SetCloseButtonEnabled ( false );
     m_pWindow->SetMovable ( true );
-    m_pWindow->SetSizingEnabled ( false );
+    m_pWindow->SetSizingEnabled ( true );
     CVector2D resolution = CCore::GetSingleton().GetGUI()->GetResolution();
-    float yoff = resolution.fY > 600 ? resolution.fY / 12 : 0.0f;
-    m_pWindow->SetPosition ( CVector2D ( resolution.fX / 2 - 720.0f / 2, resolution.fY / 2 - 495.0f / 2 + yoff  ), false );
-    m_pWindow->SetSize ( CVector2D ( 720.0f, 495.0f ) );
+    m_pWindow->SetPosition ( CVector2D ( resolution.fX / 2 - BROWSER_DEFAULTWIDTH / 2, resolution.fY / 2 - BROWSER_DEFAULTHEIGHT / 2  ), false );
+    m_pWindow->SetSize ( CVector2D ( BROWSER_DEFAULTWIDTH, BROWSER_DEFAULTHEIGHT ) );
     m_pWindow->SetAlwaysOnTop ( true );
+    m_pWindow->SetMinimumSize ( CVector2D ( BROWSER_DEFAULTWIDTH, BROWSER_DEFAULTHEIGHT ) );
 
 	// Create the serverlist tab panel and some tabs
 	m_pTabs = reinterpret_cast < CGUITabPanel* > ( pManager->CreateTabPanel ( m_pWindow ) );
-	m_pTabs->SetPosition ( CVector2D ( 0.0f, 0.05f ), true );
-	m_pTabs->SetSize ( CVector2D ( 1.0f, 0.878f ), true );		// ACHTUNG: ABSOLUTIFY
+	m_pTabs->SetPosition ( CVector2D ( 0.0f, 25.0f ) );
+	m_pTabs->SetSize ( CVector2D ( BROWSER_DEFAULTWIDTH, BROWSER_DEFAULTHEIGHT - 60.0f ) );
     
     // Back button
     m_pButtonBack = reinterpret_cast < CGUIButton* > ( pManager->CreateButton ( m_pWindow, "Back" ) );
-    m_pButtonBack->SetPosition ( CVector2D ( 0.83f, 0.935f ), true );
-    m_pButtonBack->SetSize ( CVector2D ( 0.15f, 0.04f ), true );
+    m_pButtonBack->SetPosition ( CVector2D ( BROWSER_DEFAULTWIDTH - 123.0f, BROWSER_DEFAULTHEIGHT - 32.0f ), false );
+    m_pButtonBack->SetSize ( CVector2D ( 108.0f, 20.0f ), false );
 
     // Create the serverlist status label
     m_pServerListStatus = reinterpret_cast < CGUILabel* > ( pManager->CreateLabel ( m_pWindow, "Loading..." ) );
-    m_pServerListStatus->SetPosition ( CVector2D ( 0.02f, 0.937f ), true );
+    m_pServerListStatus->SetPosition ( CVector2D ( 14.0f, BROWSER_DEFAULTHEIGHT - 30.0f ) );
 	m_pServerListStatus->SetSize ( CVector2D ( 0.40f, 0.40f ), true );
     //m_pServerListStatus->SetMinimumSize ( CVector2D ( 1.0f, 1.0f ) );
     //m_pServerListStatus->SetMaximumSize ( CVector2D ( 1.0f, 1.0f ) );
@@ -65,23 +68,28 @@ CServerBrowser::CServerBrowser ( void )
 	m_pSerialIcon->SetFrameEnabled ( false );
 	m_pSerialIcon->LoadFromFile ( "cgui\\images\\shield.png" );
 
+    //Set necessary handlers
     m_pButtonBack->SetOnClickHandler ( GUI_CALLBACK ( &CServerBrowser::OnBackClick, this ) );
+    m_pWindow->SetSizedHandler ( GUI_CALLBACK ( &CServerBrowser::OnWindowSize, this ) );
 
     // Create the tabs
     CreateTab ( ServerBrowserType::INTERNET, "Internet" );
 	CreateTab ( ServerBrowserType::LAN, "Lan" );
     CreateTab ( ServerBrowserType::FAVOURITES, "Favourites" );
     CreateTab ( ServerBrowserType::RECENTLY_PLAYED, "Recently Played" );
-
+    
     // Create the "Add to favourites by IP" button
-    m_pButtonFavouritesByIP = reinterpret_cast < CGUIButton * > ( pManager->CreateButton ( m_pTab [ ServerBrowserType::FAVOURITES ], "Add by IP" ) );
+    m_pButtonFavouritesByIP = reinterpret_cast < CGUIButton * > ( pManager->CreateButton ( m_pTab [ ServerBrowserType::FAVOURITES ], "Add by host/port" ) );
     m_pButtonFavouritesByIP->SetPosition ( CVector2D ( 0.30f, 0.93f ), true );
     m_pButtonFavouritesByIP->SetSize ( CVector2D ( 0.25f, 0.04f ), true );
     m_pButtonFavouritesByIP->SetOnClickHandler ( GUI_CALLBACK ( &CServerBrowser::OnFavouritesByIPClick, this ) );
 
     // Create the "Add to favourites by IP" dialog
-    m_pBrowserLogin.SetVisible ( false );
-    m_pBrowserLogin.SetCallback ( &CServerBrowser::CompleteConnect );
+    m_pFavouritesAddByIP.SetCallback ( GUI_CALLBACK ( &CServerBrowser::OnFavouritesByIPAddClick, this ) );
+
+    // Login dialog
+    m_pCommunityLogin.SetVisible ( false );
+    m_pCommunityLogin.SetCallback ( &CServerBrowser::CompleteConnect );
 }
 
 
@@ -110,7 +118,7 @@ void CServerBrowser::CreateTab ( ServerBrowserType type, const char* szName )
     m_pServerList [ type ] = reinterpret_cast < CGUIGridList* > ( pManager->CreateGridList ( m_pTab [ type ] ) );
     m_pServerList [ type ]->SetPosition ( CVector2D ( 0.02f, 0.10f ), true );
     m_pServerList [ type ]->SetSize ( CVector2D ( 0.80f, 0.815f ), true );
-
+    
     // Server player list label
     m_pServerPlayerListLabel [ type ] = reinterpret_cast < CGUILabel* > ( pManager->CreateLabel ( m_pTab [ type ], "Player List:" ) );
     m_pServerPlayerListLabel [ type ]->SetPosition ( CVector2D ( 0.83f, 0.29f ), true );
@@ -200,6 +208,10 @@ void CServerBrowser::CreateTab ( ServerBrowserType type, const char* szName )
     m_hMap [ type ] = m_pServerList [ type ]->AddColumn ( "Map", 0.25f );
     m_hHost [ type ] = m_pServerList [ type ]->AddColumn ( "Host", 0.25f );
 
+    // Disable resizing of the first and second columns (Serial Auth & Locked)
+    m_pServerList [ type ]->SetColumnSegmentSizingEnabled(0, false);
+    m_pServerList [ type ]->SetColumnSegmentSizingEnabled(1, false);
+
     // Player List Columns
     m_hPlayerName [ type ] = m_pServerPlayerList [ type ]->AddColumn ( "Name", 0.75f );
 }
@@ -260,8 +272,8 @@ void CServerBrowser::Update ( void )
     // Update the current server list class
     pList->Pulse ();
 
-    // If an update is needed, the serverbrowser is visible and it has gone a second since last update
-    if ( pList->IsUpdated () && m_pWindow->IsVisible () && ( m_ulLastUpdateTime < CClientTime::GetTime () - SERVER_BROWSER_UPDATE_INTERVAL ) )
+    // If an update is needed, the serverbrowser is visible and it has gone some time since last update
+    if ( pList->IsUpdated () && m_ulLastUpdateTime < CClientTime::GetTime () - SERVER_BROWSER_UPDATE_INTERVAL )
     {
         // Update the GUI
         UpdateServerList ( GetCurrentServerBrowserType () );
@@ -274,18 +286,62 @@ void CServerBrowser::Update ( void )
     }
 }
 
+CVector2D CServerBrowser::GetSize ( void )
+{
+    if ( m_pWindow )
+    {
+        return m_pWindow->GetSize ();
+    }
+    return CVector2D ();
+}
+
+
+void CServerBrowser::SetSize ( CVector2D& vecSize )
+{
+    if ( m_pWindow )
+    {
+        CVector2D resolution = CCore::GetSingleton().GetGUI()->GetResolution();
+        // OnWindowSize should do the rest
+        m_pWindow->SetSize ( vecSize );
+        // Centre the window
+        m_pWindow->SetPosition ( CVector2D ( resolution.fX / 2 - vecSize.fX / 2, resolution.fY / 2 - vecSize.fY / 2 ), false );
+    }
+}
+
+bool CServerBrowser::OnWindowSize ( CGUIElement* pElement )
+{
+    CVector2D WindowSize = m_pWindow->GetSize ();
+
+	// Update the Tab panel size
+	m_pTabs->SetSize ( CVector2D ( WindowSize.fX, WindowSize.fY - 60.0f ) );
+    
+    // Back button position
+    m_pButtonBack->SetPosition ( CVector2D ( WindowSize.fX - 123.0f, WindowSize.fY - 32.0f ) );
+
+    //Status label position
+    m_pServerListStatus->SetPosition ( CVector2D ( 14.0f, WindowSize.fY - 30.0f ) );
+    
+    //Make sure the Icon columns are of the correct size.  Its of a forced relative size - 0.03*562 was the default size.
+    for ( unsigned int i = 0; i < SERVER_BROWSER_TYPE_COUNT; i++ )
+    {
+        m_pServerList [ i ]->SetColumnWidth ( 0, 18.0f, false );
+        m_pServerList [ i ]->SetColumnWidth ( 1, 18.0f, false );
+    }
+        
+    return true;
+}
+
 
 void CServerBrowser::SetVisible ( bool bVisible )
 {
     m_pWindow->SetVisible ( bVisible );
     m_pWindow->BringToFront ();
-
     // Are we making this window visible?
     if ( bVisible )
     {
         // Start refreshing all servers
         for ( unsigned int i = 0; i < SERVER_BROWSER_TYPE_COUNT; i++ )
-            GetServerList ( (ServerBrowserType)i )->Refresh ();
+            GetServerList ( (ServerBrowserType)i )->Refresh ();          
     }
     else
     {
@@ -336,6 +392,7 @@ void CServerBrowser::UpdateServerList ( ServerBrowserType Type )
     m_pWindow->SetText ( szTitle );
     */
     m_pServerList [ Type ]->ForceUpdate ();
+    pList->SetUpdated ( false );
 }
 
 
@@ -356,14 +413,15 @@ void CServerBrowser::AddServerToList ( CServerListItem * pServer, ServerBrowserT
 
         // Format some text data
         char buf[32] = {0};
-        stringstream ss;
-        ss << pServer->nPlayers << " / " << pServer->nMaxPlayers;
+        stringstream ssPlayers;
+        ssPlayers << pServer->nPlayers << " / " << pServer->nMaxPlayers;
+        std::string strEndpoint = pServer->strHost + ":" + itoa ( pServer->usGamePort, buf, 10 );
 
         m_pServerList [ Type ]->SetItemText ( iIndex, m_hName [ Type ],     pServer->strName.c_str (), false, false, true );
         m_pServerList [ Type ]->SetItemText ( iIndex, m_hGame [ Type ],     pServer->strType.c_str (), false, false, true );
         m_pServerList [ Type ]->SetItemText ( iIndex, m_hMap [ Type ],      pServer->strMap.c_str (), false, false, true );
-        m_pServerList [ Type ]->SetItemText ( iIndex, m_hHost [ Type ],     pServer->strHost.c_str (), true, false, true );
-        m_pServerList [ Type ]->SetItemText ( iIndex, m_hPlayers [ Type ],  ss.str ().c_str (), true, false, true );
+        m_pServerList [ Type ]->SetItemText ( iIndex, m_hHost [ Type ],     strEndpoint.c_str (), true, false, true );
+        m_pServerList [ Type ]->SetItemText ( iIndex, m_hPlayers [ Type ],  ssPlayers.str ().c_str (), true, false, true );
         m_pServerList [ Type ]->SetItemText ( iIndex, m_hPing [ Type ],     itoa ( pServer->nPing, buf, 10 ), true, false, true );
 
 		// Locked icon
@@ -400,6 +458,8 @@ bool CServerBrowser::OnClick ( CGUIElement* pElement )
     ServerBrowserType Type = GetCurrentServerBrowserType ();
 
     m_pServerPlayerList [ Type ]->Clear ();
+
+    char buf[32];
  
     // If there is one item selected
     if ( m_pServerList [ Type ]->GetSelectedCount () >= 1 )
@@ -410,17 +470,31 @@ bool CServerBrowser::OnClick ( CGUIElement* pElement )
         // Walk the server list looking for this server
         CServerList * pList = GetServerList ( Type );
         CServerListIterator i, i_b = pList->IteratorBegin (), i_e = pList->IteratorEnd ();
-        std::string strHost = m_pServerList [ Type ]->GetItemText ( iSelectedIndex, m_hHost [ Type ] );
-        for ( i = i_b; i != i_e; i++ ) {
+        std::string strSelectedEndpoint = m_pServerList [ Type ]->GetItemText ( iSelectedIndex, m_hHost [ Type ] );
+        for ( i = i_b; i != i_e; i++ ) 
+        {
             CServerListItem * pServer = *i;
-            if ( strHost.compare ( pServer->strHost ) == 0 ) {
+            std::string strEndpoint = pServer->strHost + ":" + itoa ( pServer->usGamePort, buf, 10 );
+            if ( strSelectedEndpoint.compare ( strEndpoint ) == 0 ) 
+            {
                 // We found the server, add all the players
-                for ( unsigned int j = 0; j < pServer->vecPlayers.size (); j++ ) {
+                for ( unsigned int j = 0; j < pServer->vecPlayers.size (); j++ ) 
+                {
                     int k = m_pServerPlayerList [ Type ]->AddRow ();
                     m_pServerPlayerList [ Type ]->SetItemText ( k, m_hPlayerName [ Type ], pServer->vecPlayers[k].strName.c_str () );
                 }
             }
+            bool bSavedPasswords;
+            CVARS_GET ( "serverbrowser_size", bSavedPasswords );
+            if ( pServer->bPassworded && bSavedPasswords )
+            {
+                    m_pEditPassword [ Type ]->SetText ( GetServerPassword(strEndpoint).c_str() );
+            }
         }
+    }
+    else
+    {
+        m_pEditPassword [ Type ]->SetText ( "" );
     }
 
     return true;
@@ -448,6 +522,8 @@ bool CServerBrowser::ConnectToSelectedServer ( void )
     ServerBrowserType Type = GetCurrentServerBrowserType ();
     g_pCore->GetConsole()->Printf ( "Test: %d", m_pServerList [ Type ]->GetSelectedCount () );
     m_pServerPlayerList [ Type ]->Clear ();
+
+    char buf[32];
  
     // If there is one item selected
     if ( m_pServerList [ Type ]->GetSelectedCount () >= 1 )
@@ -458,20 +534,22 @@ bool CServerBrowser::ConnectToSelectedServer ( void )
         // Walk the server list looking for this server
         CServerList * pList = GetServerList ( Type );
         CServerListIterator i, i_b = pList->IteratorBegin (), i_e = pList->IteratorEnd ();
-        std::string strHost = m_pServerList [ Type ]->GetItemText ( iSelectedIndex, m_hHost [ Type ] );
+        std::string strSelectedEndpoint = m_pServerList [ Type ]->GetItemText ( iSelectedIndex, m_hHost [ Type ] );
         for ( i = i_b; i != i_e; i++ ) {
             CServerListItem * pServer = *i;
-            if ( strHost.compare ( pServer->strHost ) == 0 ) {
+            std::string strEndpoint = pServer->strHost + ":" + itoa ( pServer->usGamePort, buf, 10 );
+            if ( strSelectedEndpoint.compare ( strEndpoint ) == 0 ) {
                 if ( ( pServer->bSerials ) && ( !g_pCore->GetCommunity()->IsLoggedIn() ) )
                 {
-                    m_pBrowserLogin.SetVisible ( true );
+                    m_pCommunityLogin.SetVisible ( true );
                     return true;
                 }
                 // Get the nick from the config
-                const char* szNick = g_pCore->GetConfig ()->strNick.c_str ();
+                std::string strNick;
+                CVARS_GET ( "nick", strNick );
 
                 // Valid nick?
-                if ( !CCore::GetSingleton ().IsValidNick ( szNick ) )
+                if ( !CCore::GetSingleton ().IsValidNick ( strNick.c_str () ) )
                 {
                     CCore::GetSingleton ().ShowMessageBox ( "Error", "Invalid nickname! Please go to Settings and set a new!", MB_BUTTON_OK | MB_ICON_INFO );
                     return true;
@@ -481,10 +559,17 @@ bool CServerBrowser::ConnectToSelectedServer ( void )
                 char szPassword [48];
                 szPassword [47] = 0;
                 strncpy ( szPassword, m_pEditPassword [ Type ]->GetText ().c_str (), 47 );
+                
+                bool bSavedPasswords;
+                CVARS_GET ( "serverbrowser_size", bSavedPasswords );
+                if ( pServer->bPassworded && bSavedPasswords )
+                {
+                    SetServerPassword ( strEndpoint, ( std::string )szPassword );
+                }
+                
 
                 // Start the connect
-                std::string strIP = pServer->strHost.substr ( 0, pServer->strHost.find ( ':' ) );
-                CCore::GetSingleton ().GetConnectManager ()->Connect ( strIP.c_str (), pServer->usGamePort, szNick, szPassword );
+                CCore::GetSingleton ().GetConnectManager ()->Connect ( pServer->strHost.c_str (), pServer->usGamePort, strNick.c_str (), szPassword );
             }
         }
     }
@@ -505,7 +590,6 @@ bool CServerBrowser::OnRefreshClick ( CGUIElement* pElement )
 
 bool CServerBrowser::OnFavouritesClick ( CGUIElement* pElement )
 {
-    /*
     ServerBrowserType currentServerBrowserType = GetCurrentServerBrowserType ();
 
     // If there are more than 0 items selected in the browser
@@ -520,42 +604,34 @@ bool CServerBrowser::OnFavouritesClick ( CGUIElement* pElement )
         char* szName = m_pServerList [ currentServerBrowserType ]->GetItemText ( iIndex, m_hName [ currentServerBrowserType ] );
         char* szAddress = m_pServerList [ currentServerBrowserType ]->GetItemText ( iIndex, m_hHost [ currentServerBrowserType ] );
 
-        if ( !strncmp( szName, "[Offline] ", 10 ) )
-        {
-            // Remove the "[Offline] " tag for offline servers
-            szName += 10;
-        }
-
         char* szHost = strtok ( szAddress, ":" );
         char* szPort = strtok ( NULL, "\0" );
 
         if ( szName && szHost && szPort )
         {
-            unsigned short usPort = static_cast < unsigned short > ( atoi ( szPort ) );
+            unsigned short usPort = static_cast < unsigned short > ( atoi ( szPort ) ) + SERVER_LIST_QUERY_PORT_OFFSET;
+
+            in_addr Address;
+
+            CServerListItem::Parse ( szHost, Address );
+
+            CServerListItem pServer ( Address, usPort );
 
             if ( currentServerBrowserType == ServerBrowserType::FAVOURITES )
             {
-                g_pCore->GetConfig ()->GetFavouriteServers ().RemoveServer ( szHost, usPort );
+                m_ServersFavourites.Remove ( pServer );
             }
             else
             {
                 // Make sure the user didn't pull a Talidan and add the server again
-                if ( !g_pCore->GetConfig ()->GetFavouriteServers ().Exists ( szHost, usPort ) )
+                if ( !m_ServersFavourites.Exists ( pServer ) )
                 {
-                    CSavedServer* pSavedServer = g_pCore->GetConfig ()->GetFavouriteServers ().AddServer ( szName, szHost, usPort );
-                    if ( pSavedServer )
-                    {
-                        pSavedServer->SetOnline ( true, iServerListID );
-                    }
+                    m_ServersFavourites.Add ( pServer );
                 }
             }
-
-            UpdateServerList ();
+            UpdateServerList ( ServerBrowserType::FAVOURITES );
         }
     }
-
-    return true;
-    */
     return true;
 }
 
@@ -678,7 +754,7 @@ bool CServerBrowser::OnFavouritesByIPAddClick ( CGUIElement* pElement )
     int iPort = m_pFavouritesAddByIP.GetPort () + SERVER_LIST_QUERY_PORT_OFFSET;
 
     // Parse string and verify correct parameters
-    if ( !CServerListItem::Parse ( strHost, Address ) || strHost.length () == 0 || iPort <= 0 )
+    if ( !CServerListItem::Parse ( strHost.c_str (), Address ) || strHost.length () == 0 || iPort <= 0 )
     {
         CCore::GetSingleton ().ShowMessageBox ( "Error", "Incorrect host or port specified!", MB_BUTTON_OK | MB_ICON_INFO );
         return true;
@@ -698,4 +774,148 @@ bool CServerBrowser::OnFavouritesByIPAddClick ( CGUIElement* pElement )
     m_pFavouritesAddByIP.SetVisible ( false );
 
     return true;
+}
+
+bool CServerBrowser::LoadServerList ( CXMLNode* pNode, std::string strTagName, CServerList *pList )
+{
+    CXMLNode* pSubNode = NULL;
+    in_addr Address;
+    int iPort;
+
+    if ( !pNode )
+        return false;
+
+    // Loop through all subnodes looking for relevant nodes
+    unsigned int uiCount = pNode->GetSubNodeCount ();
+    for ( unsigned int i = 0; i < uiCount; i++ )
+    {
+        pSubNode = pNode->GetSubNode ( i );
+        if ( pSubNode && pSubNode->GetTagName ().compare ( strTagName ) == 0 )
+        {
+            // This node is relevant, so get the attributes we need and add it to the list
+            CXMLAttribute* pHostAttribute = pSubNode->GetAttributes ().Find ( "host" );
+            CXMLAttribute* pPortAttribute = pSubNode->GetAttributes ().Find ( "port" );
+            if ( pHostAttribute && pPortAttribute ) {
+                if ( CServerListItem::Parse ( pHostAttribute->GetValue ().c_str (), Address ) )
+                {
+                    iPort = atoi ( pPortAttribute->GetValue ().c_str () ) + SERVER_LIST_QUERY_PORT_OFFSET;
+                    if ( iPort > 0 )
+                        pList->Add ( CServerListItem ( Address, iPort ) );
+                }
+            }
+        }
+    }
+    pList->SetUpdated ( true );
+    return true;
+}
+
+
+bool CServerBrowser::SaveServerList ( CXMLNode* pNode, std::string strTagName, CServerList *pList )
+{
+    if ( !pNode )
+        return false;
+
+    // Start by clearing out all previous nodes
+    pNode->DeleteAllSubNodes ();
+
+    // Iterate through the list, adding any items to our node
+    CServerListIterator i, i_b = pList->IteratorBegin (), i_e = pList->IteratorEnd ();
+    int j = 0;
+    int k = pList->GetServerCount ();
+    if ( k > 0 ) {
+        for ( CServerListIterator i = i_b; i != i_e; i++ ) {
+            CServerListItem * pServer = *i;
+
+            // Add the (scanned) item to the node
+            if ( pServer->bScanned ) {
+                CXMLNode * pSubNode = pNode->CreateSubNode ( strTagName.c_str () );
+                if ( pSubNode )
+                {
+                    CXMLAttribute* pHostAttribute = pSubNode->GetAttributes ().Create ( "host" );
+					pHostAttribute->SetValue ( pServer->strHost.c_str () );
+                    
+                    CXMLAttribute* pPortAttribute = pSubNode->GetAttributes ().Create ( "port" );
+					pPortAttribute->SetValue ( pServer->usGamePort );
+                }
+            }
+            j++;
+        }
+    }
+    return true;
+}
+
+void CServerBrowser::SetServerPassword ( std::string strHost, std::string strPassword )
+{
+    CXMLNode* pConfig = CCore::GetSingletonPtr ()->GetConfig ();
+    CXMLNode* pServerPasswords = pConfig->FindSubNode ( CONFIG_NODE_SERVER_SAVED );
+    if ( !pServerPasswords )
+    {
+        pServerPasswords = pConfig ->CreateSubNode ( CONFIG_NODE_SERVER_SAVED );
+    }
+    //Check if the server password already exists
+    for ( unsigned int i = 0 ; i < pServerPasswords->GetSubNodeCount() ; i++ )
+    {    
+        CXMLAttributes* pAttributes = &(pServerPasswords->GetSubNode(i)->GetAttributes());
+        if ( pAttributes->Find( "host" ) )
+        {
+            if ( CXMLAttribute* pHost = pAttributes->Find ( "host" ) )
+            {
+                std::string strXMLHost = pHost->GetValue();
+                if ( strXMLHost == strHost )
+                {
+                    CXMLAttribute* pPassword = pAttributes->Create( "password" );
+                    pPassword->SetValue(strPassword.c_str());
+                    return;
+                }
+            }
+        }
+        
+    }
+
+    // Otherwise create the node from scratch
+    CXMLNode* pNode = pServerPasswords->CreateSubNode( "server" );
+    CXMLAttribute* pHostAttribute = pNode->GetAttributes().Create ( "host" );
+    pHostAttribute->SetValue(strHost.c_str());
+    CXMLAttribute* pPasswordAttribute = pNode->GetAttributes().Create ( "password" );
+    pPasswordAttribute->SetValue(strPassword.c_str());
+}
+
+
+std::string CServerBrowser::GetServerPassword ( std::string strHost )
+{
+    CXMLNode* pConfig = CCore::GetSingletonPtr ()->GetConfig ();
+    CXMLNode* pServerPasswords = pConfig->FindSubNode ( CONFIG_NODE_SERVER_SAVED );
+    if ( !pServerPasswords )
+    {
+        pServerPasswords = pConfig ->CreateSubNode ( CONFIG_NODE_SERVER_SAVED );
+    }
+    //Check if the server password already exists
+    for ( unsigned int i = 0 ; i < pServerPasswords->GetSubNodeCount() ; i++ )
+    {    
+        CXMLAttributes* pAttributes = &(pServerPasswords->GetSubNode(i)->GetAttributes());
+        if ( pAttributes->Find( "host" ) )
+        {
+            if ( CXMLAttribute* pHost = pAttributes->Find ( "host" ) )
+            {
+                std::string strXMLHost = pHost->GetValue();
+                if ( strXMLHost == strHost )
+                {
+                    CXMLAttribute* pPassword = pAttributes->Create( "password" );
+                    std::string strPassword = pPassword->GetValue();
+                    return strPassword;
+                }
+            }
+        }
+        
+    }
+    return "";
+}
+
+
+void CServerBrowser::ClearServerPasswords ()
+{
+    CXMLNode* pConfig = CCore::GetSingletonPtr ()->GetConfig ();
+    CXMLNode* pServerPasswords = pConfig->FindSubNode ( CONFIG_NODE_SERVER_SAVED );
+    pServerPasswords->DeleteAllSubNodes();
+    pConfig->DeleteSubNode ( pServerPasswords );
 }

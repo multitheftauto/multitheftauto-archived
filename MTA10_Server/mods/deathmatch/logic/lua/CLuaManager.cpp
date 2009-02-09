@@ -204,7 +204,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setPlayerArmor", CLuaFunctionDefinitions::SetPedArmor );
     CLuaCFunctions::AddFunction ( "setPlayerWeaponSlot", CLuaFunctionDefinitions::SetPedWeaponSlot );
     CLuaCFunctions::AddFunction ( "killPlayer", CLuaFunctionDefinitions::KillPed );
-    CLuaCFunctions::AddFunction ( "setPedRotation", CLuaFunctionDefinitions::SetPedRotation );
+    CLuaCFunctions::AddFunction ( "setPlayerRotation", CLuaFunctionDefinitions::SetPedRotation );
     CLuaCFunctions::AddFunction ( "setPlayerStat", CLuaFunctionDefinitions::SetPedStat );
     CLuaCFunctions::AddFunction ( "addPlayerClothes", CLuaFunctionDefinitions::AddPedClothes );
     CLuaCFunctions::AddFunction ( "removePlayerClothes", CLuaFunctionDefinitions::RemovePedClothes );
@@ -215,6 +215,13 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setPlayerChoking", CLuaFunctionDefinitions::SetPedChoking );
     CLuaCFunctions::AddFunction ( "warpPlayerIntoVehicle", CLuaFunctionDefinitions::WarpPedIntoVehicle );
     CLuaCFunctions::AddFunction ( "removePlayerFromVehicle", CLuaFunctionDefinitions::RemovePedFromVehicle );
+    CLuaCFunctions::AddFunction ( "getPlayerOccupiedVehicle", CLuaFunctionDefinitions::GetPedOccupiedVehicle );
+    CLuaCFunctions::AddFunction ( "getPlayerOccupiedVehicleSeat", CLuaFunctionDefinitions::GetPedOccupiedVehicleSeat );
+    CLuaCFunctions::AddFunction ( "isPlayerInVehicle", CLuaFunctionDefinitions::IsPedInVehicle );
+    CLuaCFunctions::AddFunction ( "getClientName", CLuaFunctionDefinitions::GetPlayerName );
+    CLuaCFunctions::AddFunction ( "getClientIP", CLuaFunctionDefinitions::GetPlayerIP );
+    CLuaCFunctions::AddFunction ( "getClientAccount", CLuaFunctionDefinitions::GetPlayerAccount );
+    CLuaCFunctions::AddFunction ( "setClientName", CLuaFunctionDefinitions::SetPlayerName );
     // ** END OF BACKWARDS COMPATIBILITY FUNCS. **
 
     CLuaCFunctions::AddFunction ( "addEvent", CLuaFunctionDefinitions::AddEvent );
@@ -226,14 +233,6 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "wasEventCancelled", CLuaFunctionDefinitions::WasEventCancelled );
 	CLuaCFunctions::AddFunction ( "getCancelReason", CLuaFunctionDefinitions::GetCancelReason );
 
-    // Client get funcs
-    CLuaCFunctions::AddFunction ( "getClientName", CLuaFunctionDefinitions::GetClientName );
-    CLuaCFunctions::AddFunction ( "getClientIP", CLuaFunctionDefinitions::GetClientIP );
-    CLuaCFunctions::AddFunction ( "getClientAccount", CLuaFunctionDefinitions::GetClientAccount );
-
-    // Client set funcs
-    CLuaCFunctions::AddFunction ( "setClientName", CLuaFunctionDefinitions::SetClientName );
-
     // Ped funcs
     CLuaCFunctions::AddFunction ( "createPed", CLuaFunctionDefinitions::CreatePed );
 
@@ -244,12 +243,9 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "getPlayerTotalAmmo", CLuaFunctionDefinitions::GetPlayerTotalAmmo );
     CLuaCFunctions::AddFunction ( "getPlayerFromNick", CLuaFunctionDefinitions::GetPlayerFromNick );
     CLuaCFunctions::AddFunction ( "getPlayerMoney", CLuaFunctionDefinitions::GetPlayerMoney );
-    CLuaCFunctions::AddFunction ( "getPlayerOccupiedVehicle", CLuaFunctionDefinitions::GetPlayerOccupiedVehicle );
-    CLuaCFunctions::AddFunction ( "getPlayerOccupiedVehicleSeat", CLuaFunctionDefinitions::GetPlayerOccupiedVehicleSeat );
     CLuaCFunctions::AddFunction ( "getPlayerPing", CLuaFunctionDefinitions::GetPlayerPing );
     CLuaCFunctions::AddFunction ( "getRandomPlayer", CLuaFunctionDefinitions::GetRandomPlayer );
     CLuaCFunctions::AddFunction ( "isPlayerMuted", CLuaFunctionDefinitions::IsPlayerMuted );
-    CLuaCFunctions::AddFunction ( "isPlayerInVehicle", CLuaFunctionDefinitions::IsPlayerInVehicle );
     CLuaCFunctions::AddFunction ( "getPlayerTeam", CLuaFunctionDefinitions::GetPlayerTeam );
     CLuaCFunctions::AddFunction ( "getPlayerWantedLevel", CLuaFunctionDefinitions::GetPlayerWantedLevel );
     CLuaCFunctions::AddFunction ( "getAlivePlayers", CLuaFunctionDefinitions::GetAlivePlayers );
@@ -263,7 +259,10 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "getPlayerUserName", CLuaFunctionDefinitions::GetPlayerUserName );
 	CLuaCFunctions::AddFunction ( "getPlayerCommunityID", CLuaFunctionDefinitions::GetPlayerCommunityID );
     CLuaCFunctions::AddFunction ( "getPlayerBlurLevel", CLuaFunctionDefinitions::GetPlayerBlurLevel );
-    
+    CLuaCFunctions::AddFunction ( "getPlayerName", CLuaFunctionDefinitions::GetPlayerName );
+    CLuaCFunctions::AddFunction ( "getPlayerIP", CLuaFunctionDefinitions::GetPlayerIP );
+    CLuaCFunctions::AddFunction ( "getPlayerAccount", CLuaFunctionDefinitions::GetPlayerAccount );
+
     // Player set funcs
     CLuaCFunctions::AddFunction ( "setPlayerMoney", CLuaFunctionDefinitions::SetPlayerMoney );
     CLuaCFunctions::AddFunction ( "setPlayerAmmo", CLuaFunctionDefinitions::SetPlayerAmmo );
@@ -278,7 +277,9 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setPlayerNametagShowing", CLuaFunctionDefinitions::SetPlayerNametagShowing );
     CLuaCFunctions::AddFunction ( "setPlayerMuted", CLuaFunctionDefinitions::SetPlayerMuted );
     CLuaCFunctions::AddFunction ( "setPlayerBlurLevel", CLuaFunctionDefinitions::SetPlayerBlurLevel );
-    
+    CLuaCFunctions::AddFunction ( "redirectPlayer", CLuaFunctionDefinitions::RedirectPlayer );
+    CLuaCFunctions::AddFunction ( "setPlayerName", CLuaFunctionDefinitions::SetPlayerName );
+
     // Ped get functions
     CLuaCFunctions::AddFunction ( "getPedWeaponSlot", CLuaFunctionDefinitions::GetPedWeaponSlot );
     CLuaCFunctions::AddFunction ( "getPedArmor", CLuaFunctionDefinitions::GetPedArmor );
@@ -298,6 +299,9 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "isPedDoingGangDriveby", CLuaFunctionDefinitions::IsPedDoingGangDriveby );
     CLuaCFunctions::AddFunction ( "isPedOnFire", CLuaFunctionDefinitions::IsPedOnFire );
     CLuaCFunctions::AddFunction ( "isPedHeadless", CLuaFunctionDefinitions::IsPedHeadless );
+    CLuaCFunctions::AddFunction ( "getPedOccupiedVehicle", CLuaFunctionDefinitions::GetPedOccupiedVehicle );
+    CLuaCFunctions::AddFunction ( "getPedOccupiedVehicleSeat", CLuaFunctionDefinitions::GetPedOccupiedVehicleSeat );
+    CLuaCFunctions::AddFunction ( "isPedInVehicle", CLuaFunctionDefinitions::IsPedInVehicle );
 
     // Ped set functions
     CLuaCFunctions::AddFunction ( "setPedArmor", CLuaFunctionDefinitions::SetPedArmor );
@@ -319,6 +323,8 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setPedAnimation", CLuaFunctionDefinitions::SetPedAnimation );
     CLuaCFunctions::AddFunction ( "setPedOnFire", CLuaFunctionDefinitions::SetPedOnFire );
     CLuaCFunctions::AddFunction ( "setPedHeadless", CLuaFunctionDefinitions::SetPedHeadless );
+    CLuaCFunctions::AddFunction ( "getPedSkin", CLuaElementDefs::getElementModel );
+    CLuaCFunctions::AddFunction ( "setPedSkin", CLuaElementDefs::setElementModel );
 
     // Weapon give/take functions
     CLuaCFunctions::AddFunction ( "giveWeapon", CLuaFunctionDefinitions::GiveWeapon );
@@ -463,7 +469,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "createExplosion", CLuaFunctionDefinitions::CreateExplosion );
 
     // Fire create funcs
-    //CLuaCFunctions::AddFunction ( "createFire", CLuaFunctionDefinitions::CreateFire ); TODO
+    //CLuaCFunctions::AddFunction ( "createFire", CLuaFunctionDefinitions::CreateFire );
 
     // Audio funcs
     //CLuaCFunctions::AddFunction ( "playMissionAudio", CLuaFunctionDefinitions::PlayMissionAudio );
@@ -512,6 +518,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "createColCuboid", CLuaFunctionDefinitions::CreateColCuboid );
     CLuaCFunctions::AddFunction ( "createColSphere", CLuaFunctionDefinitions::CreateColSphere );
     CLuaCFunctions::AddFunction ( "createColRectangle", CLuaFunctionDefinitions::CreateColRectangle );
+    CLuaCFunctions::AddFunction ( "createColPolygon", CLuaFunctionDefinitions::CreateColPolygon );
     CLuaCFunctions::AddFunction ( "createColTube", CLuaFunctionDefinitions::CreateColTube );
 
     // Weapon funcs
@@ -545,8 +552,6 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "getDistanceBetweenPoints3D", CLuaFunctionDefinitions::GetDistanceBetweenPoints3D );
 
     // Util funcs
-    CLuaCFunctions::AddFunction ( "randInt", CLuaFunctionDefinitions::RandInt );
-    CLuaCFunctions::AddFunction ( "randFloat", CLuaFunctionDefinitions::RandFloat );
     CLuaCFunctions::AddFunction ( "getTickCount", CLuaFunctionDefinitions::GetTickCount_ );
     CLuaCFunctions::AddFunction ( "getRealTime", CLuaFunctionDefinitions::GetCTime );
     CLuaCFunctions::AddFunction ( "split", CLuaFunctionDefinitions::Split );
@@ -616,12 +621,19 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "kickPlayer", CLuaFunctionDefinitions::KickPlayer );
     CLuaCFunctions::AddFunction ( "banPlayer", CLuaFunctionDefinitions::BanPlayer );
 
-    CLuaCFunctions::AddFunction ( "banIP", CLuaFunctionDefinitions::BanIP );
-    CLuaCFunctions::AddFunction ( "unbanIP", CLuaFunctionDefinitions::UnbanIP );
-	CLuaCFunctions::AddFunction ( "banSerial", CLuaFunctionDefinitions::BanSerial );
-	CLuaCFunctions::AddFunction ( "unbanSerial", CLuaFunctionDefinitions::UnbanSerial );
+    CLuaCFunctions::AddFunction ( "addBan", CLuaFunctionDefinitions::AddBan );
+    CLuaCFunctions::AddFunction ( "removeBan", CLuaFunctionDefinitions::RemoveBan );
 
-	CLuaCFunctions::AddFunction ( "getBansXML", CLuaFunctionDefinitions::GetBansXML );
+    CLuaCFunctions::AddFunction ( "getBans", CLuaFunctionDefinitions::GetBans );
+
+    CLuaCFunctions::AddFunction ( "getBanIP", CLuaFunctionDefinitions::GetBanIP );
+    CLuaCFunctions::AddFunction ( "getBanSerial", CLuaFunctionDefinitions::GetBanSerial );
+    CLuaCFunctions::AddFunction ( "getBanUsername", CLuaFunctionDefinitions::GetBanUsername );
+    CLuaCFunctions::AddFunction ( "getBanNick", CLuaFunctionDefinitions::GetBanNick );
+    CLuaCFunctions::AddFunction ( "getBanTime", CLuaFunctionDefinitions::GetBanTime );
+    CLuaCFunctions::AddFunction ( "getBanReason", CLuaFunctionDefinitions::GetBanReason );
+    CLuaCFunctions::AddFunction ( "getBanAdmin", CLuaFunctionDefinitions::GetBanAdmin );
+
     /*
     CLuaCFunctions::AddFunction ( "aexec", CLuaFunctionDefinitions::Aexec );
     CLuaCFunctions::AddFunction ( "kickPlayer", CLuaFunctionDefinitions::KickPlayer );
@@ -654,4 +666,6 @@ void CLuaManager::LoadCFunctions ( void )
     // Settings registry funcs
     CLuaCFunctions::AddFunction ( "get", CLuaFunctionDefinitions::Get );
     CLuaCFunctions::AddFunction ( "set", CLuaFunctionDefinitions::Set );
+
+    CLuaCFunctions::AddFunction ( "md5", CLuaFunctionDefinitions::Md5 );
 }

@@ -123,6 +123,44 @@ SBindableKey g_bkKeys[] =
     { "num_enter", 0x0D,        GTA_KEY_NUMPADENTER,    DATA_EXTENDED,          0 },
     { "clear",   0x0C,          NO_KEY_DEFINED,         DATA_NUMPAD,            70 },
 
+    { "joy1",    VK_JOY(1),          GTA_KEY_JOY(1),            DATA_NONE,              0 },
+    { "joy2",    VK_JOY(2),          GTA_KEY_JOY(2),            DATA_NONE,              0 },
+    { "joy3",    VK_JOY(3),          GTA_KEY_JOY(3),            DATA_NONE,              0 },
+    { "joy4",    VK_JOY(4),          GTA_KEY_JOY(4),            DATA_NONE,              0 },
+    { "joy5",    VK_JOY(5),          GTA_KEY_JOY(5),            DATA_NONE,              0 },
+    { "joy6",    VK_JOY(6),          GTA_KEY_JOY(6),            DATA_NONE,              0 },
+    { "joy7",    VK_JOY(7),          GTA_KEY_JOY(7),            DATA_NONE,              0 },
+    { "joy8",    VK_JOY(8),          GTA_KEY_JOY(8),            DATA_NONE,              0 },
+    { "joy9",    VK_JOY(9),          GTA_KEY_JOY(9),            DATA_NONE,              0 },
+    { "joy10",    VK_JOY(10),          GTA_KEY_JOY(10),            DATA_NONE,              0 },
+    { "joy11",    VK_JOY(11),          GTA_KEY_JOY(11),            DATA_NONE,              0 },
+    { "joy12",    VK_JOY(12),          GTA_KEY_JOY(12),            DATA_NONE,              0 },
+    { "joy13",    VK_JOY(13),          GTA_KEY_JOY(13),            DATA_NONE,              0 },
+    { "joy14",    VK_JOY(14),          GTA_KEY_JOY(14),            DATA_NONE,              0 },
+    { "joy15",    VK_JOY(15),          GTA_KEY_JOY(15),            DATA_NONE,              0 },
+    { "joy16",    VK_JOY(16),          GTA_KEY_JOY(16),            DATA_NONE,              0 },
+    { "joy17",    VK_JOY(17),          GTA_KEY_JOY(17),            DATA_NONE,              0 },
+    { "joy18",    VK_JOY(18),          GTA_KEY_JOY(18),            DATA_NONE,              0 },
+    { "joy19",    VK_JOY(19),          GTA_KEY_JOY(19),            DATA_NONE,              0 },
+    { "joy20",    VK_JOY(20),          GTA_KEY_JOY(20),            DATA_NONE,              0 },
+    { "joy21",    VK_JOY(21),          GTA_KEY_JOY(21),            DATA_NONE,              0 },
+    { "joy22",    VK_JOY(22),          GTA_KEY_JOY(22),            DATA_NONE,              0 },
+    { "joy23",    VK_JOY(23),          GTA_KEY_JOY(23),            DATA_NONE,              0 },
+    { "joy24",    VK_JOY(24),          GTA_KEY_JOY(24),            DATA_NONE,              0 },
+    { "joy25",    VK_JOY(25),          GTA_KEY_JOY(25),            DATA_NONE,              0 },
+    { "joy26",    VK_JOY(26),          GTA_KEY_JOY(26),            DATA_NONE,              0 },
+    { "joy27",    VK_JOY(27),          GTA_KEY_JOY(27),            DATA_NONE,              0 },
+    { "joy28",    VK_JOY(28),          GTA_KEY_JOY(28),            DATA_NONE,              0 },
+    { "joy29",    VK_JOY(29),          GTA_KEY_JOY(29),            DATA_NONE,              0 },
+    { "joy30",    VK_JOY(30),          GTA_KEY_JOY(30),            DATA_NONE,              0 },
+    { "joy31",    VK_JOY(31),          GTA_KEY_JOY(31),            DATA_NONE,              0 },
+    { "joy32",    VK_JOY(32),          GTA_KEY_JOY(32),            DATA_NONE,              0 },
+
+    { "pov_up",     VK_POV(1),          NO_KEY_DEFINED,            DATA_NONE,              0 },
+    { "pov_right",  VK_POV(2),          NO_KEY_DEFINED,            DATA_NONE,              0 },
+    { "pov_down",   VK_POV(3),          NO_KEY_DEFINED,            DATA_NONE,              0 },
+    { "pov_left",   VK_POV(4),          NO_KEY_DEFINED,            DATA_NONE,              0 },
+
     { "",           0,          NO_KEY_DEFINED,         DATA_NONE }
 };
 
@@ -238,7 +276,6 @@ bool CKeyBinds::ProcessKeyStroke ( const SBindableKey * pKey, bool bState )
     {
         if ( !bIsCursorForced )
         {
-            SetAllControls ( false );
             bIsCursorForced = true;
         }
     }
@@ -267,7 +304,7 @@ bool CKeyBinds::ProcessKeyStroke ( const SBindableKey * pKey, bool bState )
             {
                 case KEY_BIND_GTA_CONTROL:
                 {
-                    if ( !bState || ( !bInputGoesToGUI && !m_pCore->IsCursorForcedVisible () ) )
+                    if ( !bState || !bInputGoesToGUI )
                     {
                         CallGTAControlBind ( static_cast < CGTAControlBind* > ( *iter ), bState );
                         bFound = true;
@@ -1167,7 +1204,7 @@ bool CKeyBinds::RemoveFunction ( const SBindableKey* pKey, KeyFunctionBindHandle
     list < CKeyBind* > ::iterator iter = m_pList->begin ();
     while ( iter != m_pList->end () )
     {
-        if ( (*iter)->GetType () == KEY_BIND_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_FUNCTION )
         {
             CKeyFunctionBind* pBind = static_cast < CKeyFunctionBind* > ( *iter );
             if ( pBind->Handler == Handler )
@@ -1204,7 +1241,7 @@ bool CKeyBinds::RemoveAllFunctions ( KeyFunctionBindHandler Handler )
     list < CKeyBind* > ::iterator iter = m_pList->begin ();
     while ( iter != m_pList->end () )
     {
-        if ( (*iter)->GetType () == KEY_BIND_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_FUNCTION )
         {
             CKeyFunctionBind* pBind = static_cast < CKeyFunctionBind* > ( *iter );
             if ( pBind->Handler == Handler )
@@ -1235,7 +1272,7 @@ bool CKeyBinds::RemoveAllFunctions ( void )
     list < CKeyBind* > ::iterator iter = m_pList->begin ();
     while ( iter != m_pList->end () )
     {
-        if ( (*iter)->GetType () == KEY_BIND_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_FUNCTION )
         {
             if ( m_bProcessingKeyStroke )
             {
@@ -1272,7 +1309,7 @@ bool CKeyBinds::FunctionExists ( const SBindableKey* pKey, KeyFunctionBindHandle
     list < CKeyBind* > ::const_iterator iter = m_pList->begin ();
     for ( ; iter != m_pList->end (); iter++ )
     {
-        if ( (*iter)->GetType () == KEY_BIND_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_FUNCTION )
         {
             CKeyFunctionBind* pBind = static_cast < CKeyFunctionBind* > ( *iter );
             if ( !Handler || pBind->Handler == Handler )
@@ -1355,7 +1392,7 @@ bool CKeyBinds::RemoveControlFunction ( SBindableGTAControl* pControl, ControlFu
     list < CKeyBind* > ::iterator iter = m_pList->begin ();
     while ( iter != m_pList->end () )
     {
-        if ( (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
         {
             CControlFunctionBind* pBind = static_cast < CControlFunctionBind* > ( *iter );
             if ( pBind->Handler == Handler )
@@ -1392,7 +1429,7 @@ bool CKeyBinds::RemoveAllControlFunctions ( ControlFunctionBindHandler Handler )
     list < CKeyBind* > ::iterator iter = m_pList->begin ();
     while ( iter != m_pList->end () )
     {
-        if ( (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
         {
             CControlFunctionBind* pBind = static_cast < CControlFunctionBind* > ( *iter );
             if ( pBind->Handler == Handler )
@@ -1423,7 +1460,7 @@ bool CKeyBinds::RemoveAllControlFunctions ( void )
     list < CKeyBind* > ::iterator iter = m_pList->begin ();
     while ( iter != m_pList->end () )
     {
-        if ( (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
         {
             if ( m_bProcessingKeyStroke )
             {
@@ -1460,7 +1497,7 @@ bool CKeyBinds::ControlFunctionExists ( SBindableGTAControl* pControl, ControlFu
     list < CKeyBind* > ::const_iterator iter = m_pList->begin ();
     for ( ; iter != m_pList->end (); iter++ )
     {
-        if ( (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
+        if ( !(*iter)->IsBeingDeleted () && (*iter)->GetType () == KEY_BIND_CONTROL_FUNCTION )
         {
             CControlFunctionBind* pBind = static_cast < CControlFunctionBind* > ( *iter );
             if ( pBind->Handler == Handler )
@@ -1981,6 +2018,8 @@ void CKeyBinds::DoPostFramePulse ( void )
         }
         cs.ButtonTriangle = ( g_bcControls [ 9 ].bState ) ? 255 : 0; // Enter Exit
         cs.Select = ( g_bcControls [ 10 ].bState ) ? 255 : 0; // Change View   
+
+        GetJoystickManager ()->ApplyAxes ( cs );
     }
         
     m_pCore->GetGame ()->GetPad ()->SetCurrentControllerState ( &cs );
@@ -2311,14 +2350,11 @@ void CKeyBinds::LoadDefaultControls ( void )
 
 void CKeyBinds::LoadDefaultCommands ( void )
 {
-	AddCommand ( "mouse2", "driveby", "1", true );
-	AddCommand ( "mouse2", "driveby", "0", false );
     AddCommand ( "g", "enter_passenger", NULL, true );
     AddCommand ( "F12", "screenshot", NULL, true );
     AddCommand ( "t", "chatbox", "chatboxsay", true );
     AddCommand ( "y", "chatbox", "teamsay 255 0 0", true );
-    AddCommand ( "F11", "radar", "1", true );
-    AddCommand ( "F11", "radar", "0", false );
+    AddCommand ( "F11", "radar", "-1", true );
     AddCommand ( "num_add", "radar_zoom_in", NULL, true );
     AddCommand ( "num_sub", "radar_zoom_out", NULL, true );
     AddCommand ( "num_8", "radar_move_north", NULL, true );
@@ -2362,6 +2398,15 @@ void CKeyBinds::LoadControlsFromGTA ( void )
                 if ( iKey != NO_KEY_DEFINED )
                 {
                     const SBindableKey* pKey = GetBindableFromGTARelative ( iKey );
+                    if ( pKey )
+                        AddGTAControl ( pKey, pControl );
+                }
+
+                // Joystick
+                iKey = pGame->GetControllerConfigManager()->GetControllerKeyAssociatedWithAction ( (eControllerAction)i, JOYSTICK );
+                if ( iKey )
+                {
+                    const SBindableKey* pKey = GetBindableFromGTARelative ( GTA_KEY_JOY(iKey) );
                     if ( pKey )
                         AddGTAControl ( pKey, pControl );
                 }

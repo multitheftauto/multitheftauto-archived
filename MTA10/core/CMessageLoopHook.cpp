@@ -111,6 +111,11 @@ LRESULT CALLBACK CMessageLoopHook::ProcessMessage ( HWND hwnd,
             CSettings* pSettings = pMainMenu->GetSettingsWindow ();
             if ( pSettings )
             {
+                if ( uMsg == WM_KEYDOWN && wParam == VK_ESCAPE && GetJoystickManager ()->IsCapturingAxis () )
+                {
+                    GetJoystickManager ()->CancelCaptureAxis ( true );
+                    return true;
+                }
                 bWasCaptureKey = ( pSettings->IsCapturingKey () && pSettings->ProcessMessage ( uMsg, wParam, lParam ) );
 		        if ( !bWasCaptureKey )
 		        {
@@ -155,6 +160,7 @@ LRESULT CALLBACK CMessageLoopHook::ProcessMessage ( HWND hwnd,
 			        }
 
 			        // If the console is visible, and we pressed down/up, scroll the console history
+			        //                          or if we pressed tab, step through possible autocomplete matches
 			        if ( CLocalGUI::GetSingleton ().IsConsoleVisible () )
 			        {
 				        if ( uMsg == WM_KEYDOWN )
@@ -167,6 +173,16 @@ LRESULT CALLBACK CMessageLoopHook::ProcessMessage ( HWND hwnd,
 					        if ( wParam == VK_UP )
 					        {
 						        CLocalGUI::GetSingleton ().GetConsole ()->SetNextHistoryText ();
+					        }
+
+					        if ( wParam == VK_TAB )
+					        {
+						        CLocalGUI::GetSingleton ().GetConsole ()->SetNextAutoCompleteMatch ();
+            					return true; 
+					        }
+                            else
+					        {
+						        CLocalGUI::GetSingleton ().GetConsole ()->ResetAutoCompleteMatch ();
 					        }
 				        }
 			        }

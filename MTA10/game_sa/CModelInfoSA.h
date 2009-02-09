@@ -16,12 +16,13 @@
 #ifndef __CGAMESA_MODELINFO
 #define __CGAMESA_MODELINFO
 
-#include <game/CPedModelInfo.h>
 #include <game/CModelInfo.h>
 #include <game/Common.h>
 
 #include "CColModelSA.h"
 #include "CRenderWareSA.h"
+class CPedModelInfoSA;
+class CPedModelInfoSAInterface;
 
 #define		ARRAY_ModelLoaded				0x8E4CD0 // ##SA##
 
@@ -233,7 +234,8 @@ public:
                                     CModelInfoSA            ( void );
 	      			                CModelInfoSA            ( DWORD dwModelID );
 
-    CBaseModelInfoSAInterface *     GetInterface            ( void )                { return m_pInterface; }
+    CBaseModelInfoSAInterface *     GetInterface             ( void )              { return m_pInterface; }
+    CPedModelInfoSAInterface *      GetPedModelInfoInterface ( void )              { return reinterpret_cast < CPedModelInfoSAInterface * > ( GetInterface () ); }
 
 	BOOL			                IsBoat                  ( void );
 	BOOL			                IsCar                   ( void );
@@ -270,12 +272,14 @@ public:
     void                            SetCustomCarPlateText   ( char * szText );
     unsigned int                    GetNumRemaps            ( void );
 
-    // CPedModelInfo specific
-    void                            SetPedVoice             ( eVoiceGens VoiceGen, char szVoiceBankFirst[PED_VOICE_BANK_LENGTH], char szVoiceBankLast[PED_VOICE_BANK_LENGTH] );
-    void                            SetPedAudioType         ( const char *szPedAudioType );
-
     // Upgrades only!
     void                            RequestVehicleUpgrade   ( void );
+
+    // ONLY use for peds
+    void                            GetVoice                ( short* psVoiceType, short* psVoice );
+    void                            GetVoice                ( const char** pszVoiceType, const char** szVoice );
+    void                            SetVoice                ( short sVoiceType, short sVoice );
+    void                            SetVoice                ( const char* szVoiceType, const char* szVoice );
 
 	// Custom collision related functions
 	void			                SetCustomModel		    ( RpClump* pClump );

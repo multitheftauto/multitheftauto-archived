@@ -385,6 +385,13 @@ bool CConsoleCommands::InstallResource ( CConsole* pConsole, const char* szArgum
     return true;
 }
 
+bool CConsoleCommands::UpgradeResources ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
+{
+    g_pGame->GetResourceManager()->Upgrade();
+    return true;
+}
+
+
 bool CConsoleCommands::Say ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
 {
     // say <text>
@@ -1008,68 +1015,75 @@ bool CConsoleCommands::Nick ( CConsole* pConsole, const char* szArguments, CClie
             // Check its validity
             if ( IsNickValid ( szNewNick ) )
             {
-                // Verify the length
-                size_t sizeNewNick = strlen ( szNewNick );
-                if ( sizeNewNick >= MIN_NICK_LENGTH && sizeNewNick <= MAX_NICK_LENGTH )
+                if ( CheckNickProvided ( szNewNick ) )
                 {
-                    // Does the nickname differ from the previous nickname?
-                    const char* szNick = pClient->GetNick ();
-                    if ( !szNick || strcmp ( szNewNick, szNick ) != 0 )
+                    // Verify the length
+                    size_t sizeNewNick = strlen ( szNewNick );
+                    if ( sizeNewNick >= MIN_NICK_LENGTH && sizeNewNick <= MAX_NICK_LENGTH )
                     {
-                        // Check that it doesn't already exist, or if it matches our current nick case-independantly (means we changed to the same nick but in a different case)
-                        if ( szNick && stricmp ( szNick, szNewNick ) == 0 || !pConsole->GetPlayerManager ()->Get ( szNewNick ) )
+                        // Does the nickname differ from the previous nickname?
+                        const char* szNick = pClient->GetNick ();
+                        if ( !szNick || strcmp ( szNewNick, szNick ) != 0 )
                         {
-							CPlayer* pPlayer = static_cast < CPlayer* > ( pClient );
-							
-							// Call the event
-                            CLuaArguments Arguments;
-							Arguments.PushString ( pClient->GetNick () );
-                            Arguments.PushString ( szNewNick );
-							if ( pPlayer->CallEvent ( "onClientChangeNick", Arguments ) )
-							{
-								// Tell the console
-								CLogger::LogPrintf ( "NICK: %s is now known as %s\n", szNick, szNewNick );
-	
-								// Change the nick
-								pPlayer->SetNick ( szNewNick );
-	
-								// Tell all ingame players about the nick change
-								CPlayerChangeNickPacket Packet ( szNewNick );
-								Packet.SetSourceElement ( pPlayer );
-								pConsole->GetPlayerManager ()->BroadcastOnlyJoined ( Packet );
+                            // Check that it doesn't already exist, or if it matches our current nick case-independantly (means we changed to the same nick but in a different case)
+                            if ( szNick && stricmp ( szNick, szNewNick ) == 0 || !pConsole->GetPlayerManager ()->Get ( szNewNick ) )
+                            {
+							    CPlayer* pPlayer = static_cast < CPlayer* > ( pClient );
+    							
+							    // Call the event
+                                CLuaArguments Arguments;
+							    Arguments.PushString ( pClient->GetNick () );
+                                Arguments.PushString ( szNewNick );
+							    if ( pPlayer->CallEvent ( "onPlayerChangeNick", Arguments ) )
+							    {
+								    // Tell the console
+								    CLogger::LogPrintf ( "NICK: %s is now known as %s\n", szNick, szNewNick );
+    	
+								    // Change the nick
+								    pPlayer->SetNick ( szNewNick );
+    	
+								    // Tell all ingame players about the nick change
+								    CPlayerChangeNickPacket Packet ( szNewNick );
+								    Packet.SetSourceElement ( pPlayer );
+								    pConsole->GetPlayerManager ()->BroadcastOnlyJoined ( Packet );
 
-								return true;
-							}
-							else 
-								return false;
+								    return true;
+							    }
+							    else 
+								    return false;
+                            }
+                            else
+                            {
+                                pEchoClient->SendEcho ( "nick: Chosen nickname is already in use" );
+                            }
                         }
                         else
                         {
-                            pEchoClient->SendEcho ( "nick: Chosen nickname is already in use" );
+                            // Tell the player
+                            char szBuffer [128];
+                            szBuffer[0] = '\0';
+
+                            _snprintf ( szBuffer, 128, "nick: Nickname is already %s", szNick );
+                            szBuffer[127] = '\0';
+
+                            pEchoClient->SendEcho ( szBuffer );
                         }
                     }
                     else
                     {
                         // Tell the player
-                        char szBuffer [128];
+                        char szBuffer [64];
                         szBuffer[0] = '\0';
 
-                        _snprintf ( szBuffer, 128, "nick: Nickname is already %s", szNick );
-                        szBuffer[127] = '\0';
+                        _snprintf ( szBuffer, 64, "nick: Nick must be between %u and %u characters", MIN_NICK_LENGTH, MAX_NICK_LENGTH );
+                        szBuffer[63] = '\0';
 
                         pEchoClient->SendEcho ( szBuffer );
                     }
                 }
                 else
                 {
-                    // Tell the player
-                    char szBuffer [64];
-                    szBuffer[0] = '\0';
-
-                    _snprintf ( szBuffer, 64, "nick: Nick must be between %u and %u characters", MIN_NICK_LENGTH, MAX_NICK_LENGTH );
-                    szBuffer[63] = '\0';
-
-                    pEchoClient->SendEcho ( szBuffer );
+                    pEchoClient->SendEcho ( "nick: Chosen nickname is not allowed" );
                 }
             }
             else
@@ -1121,50 +1135,18 @@ bool CConsoleCommands::LogIn ( CConsole* pConsole, const char* szArguments, CCli
 
         if ( szNick && szPassword )
         {
-            // Is he already logged in?
-            if ( !pClient->IsRegistered () )
-            {
-                // Grab the account on his nick if any
-                CAccount* pAccount = g_pGame->GetAccountManager ()->Get ( szNick );
-                if ( pAccount )
-                {
-                    if ( !pAccount->GetClient () )
-                    {
-                        // Compare the passwords
-                        if ( pAccount->IsPassword ( szPassword ) )
-                        {
-                            g_pGame->GetAccountManager ()->LogIn ( pClient, pEchoClient, pAccount );
-                            return true;
-                        }
-                        else
-                        {
-                            pEchoClient->SendEcho ( "login: Bad password" );
-                            CLogger::LogPrintf ( "LOGIN: %s tried to log in with a bad password\n", szNick );
-                        }
-                    }
-                    else
-                    {
-                        pEchoClient->SendEcho ( "login: Account in use" );
-                    }
-                }
-                else
-                {
-                    pEchoClient->SendEcho ( "login: No account with your nick" );
-                }
-            }
-            else
-            {
-                pEchoClient->SendEcho ( "login: You are already logged in" );
-            }
+            return g_pGame->GetAccountManager ()->LogIn ( pClient, pEchoClient, szNick, szPassword );
         }
         else
         {
-            pEchoClient->SendEcho ( "login: Syntax is 'login [<nick>] <password>'" );
+            if ( pEchoClient )
+                pEchoClient->SendEcho ( "login: Syntax is 'login [<nick>] <password>'" );
         }
     }
     else
     {
-        pEchoClient->SendEcho ( "login: Syntax is 'login [<nick>] <password>'" );
+        if ( pEchoClient )
+            pEchoClient->SendEcho ( "login: Syntax is 'login [<nick>] <password>'" );
     }
 
     return false;
@@ -1174,62 +1156,7 @@ bool CConsoleCommands::LogIn ( CConsole* pConsole, const char* szArguments, CCli
 bool CConsoleCommands::LogOut ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
 {
     // logout
-
-    // Grab the sender's nick
-    const char* szNick = pClient->GetNick ();
-    if ( szNick )
-    {
-        // Is he logged in?
-        if ( pClient->IsRegistered () )
-        {
-            CAccount* pCurrentAccount = pClient->GetAccount ();
-            pCurrentAccount->SetClient ( NULL );
-            // TODO: copy any data?
-            CAccount* pAccount = new CAccount ( g_pGame->GetAccountManager (), false, "guest" );
-            pClient->SetAccount ( pAccount );
-
-            // Tell the console
-            CLogger::LogPrintf ( "LOGOUT: %s logged out\n", szNick );
-
-            // Tell him that he successfully logged out
-            char szBuffer [128];
-            _snprintf ( szBuffer, 128, "logout: You logged out" );
-            pEchoClient->SendEcho ( szBuffer );
-
-            CElement* pClientElement = NULL;
-            switch ( pClient->GetClientType () )
-            {
-                case CClient::CLIENT_PLAYER:
-                {
-                    CPlayer* pPlayer = static_cast < CPlayer* > ( pClient );
-                    pClientElement = static_cast < CElement* > ( pPlayer );
-                    break;
-                }
-                case CClient::CLIENT_CONSOLE:
-                {
-                    CConsoleClient* pConsoleClient = static_cast < CConsoleClient* > ( pClient );
-                    pClientElement = static_cast < CElement* > ( pConsoleClient );
-                    break;
-                }
-            }
-            if ( pClientElement )
-            {
-                // Call our script event
-                CLuaArguments Arguments;
-                Arguments.PushAccount ( pCurrentAccount );
-                Arguments.PushAccount ( pAccount );
-                pClientElement->CallEvent ( "onClientLogout", Arguments );
-            }
-
-            return true;
-        }
-        else
-        {
-            pEchoClient->SendEcho ( "logout: You were not logged in" );
-        }
-    }
-
-    return false;
+    return g_pGame->GetAccountManager ()->LogOut ( pClient, pEchoClient );
 }
 
 

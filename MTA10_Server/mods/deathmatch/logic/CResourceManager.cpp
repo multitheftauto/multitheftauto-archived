@@ -200,6 +200,13 @@ bool CResourceManager::Refresh ( void )
     return false;
 }
 
+void CResourceManager::Upgrade ( void )
+{
+    CResourceChecker::BeginUpgradeMode();
+    Refresh ();
+    CResourceChecker::EndUpgradeMode();
+}
+
 char * CResourceManager::GetResourceDirectory ( void )
 {
     return m_szResourceDirectory;
@@ -246,16 +253,16 @@ void CResourceManager::ListResourcesLoaded ( void )
         {
             if ( res->IsActive() )
             {
-                CLogger::LogPrintf ( "%-20.20s   RUNNING   (%d dependents)\n", res->GetName(), res->GetDependentCount() );
+                CLogger::LogPrintf ( "%-20.20s   RUNNING   (%d dependents)\n", res->GetName().c_str(), res->GetDependentCount() );
                 uiRunningCount++;
             }
             else
-                CLogger::LogPrintf ( "%-20.20s   STOPPED   (%d files)\n", res->GetName(), res->GetFileCount() );
+                CLogger::LogPrintf ( "%-20.20s   STOPPED   (%d files)\n", res->GetName().c_str(), res->GetFileCount() );
             uiCount ++;
         }
         else
         {
-            CLogger::LogPrintf ( "%-20.20s   FAILED    (see info command for reason)\n", (*iter)->GetName().c_str () );
+            CLogger::LogPrintf ( "%-20.20s   FAILED    (see info command for reason)\n", res->GetName().c_str () );
             uiFailedCount ++;
         }
     }
@@ -267,10 +274,10 @@ void CResourceManager::UnloadRemovedResources ( void )
 {
     list < CResource* > resourcesToDelete;
     list < CResource* > ::iterator iter = m_resources.begin ();
+    string strPath;
     for ( ; iter != m_resources.end (); iter++ )
     {
-        char szPath [ MAX_PATH ] = {'\n'};
-        if ( (*iter)->GetFilePath ( "meta.xml", szPath, MAX_PATH ) == NULL )
+        if ( ! (*iter)->GetFilePath ( "meta.xml", strPath ) )
         {
             if ( (*iter)->IsActive() )
                 CLogger::ErrorPrintf ( "Resource '%s' has been removed while running! Stopping resource.\n", (*iter)->GetName().c_str () );
@@ -337,6 +344,11 @@ CResource * CResourceManager::Load ( const char * szResourceName )
     iter = resourcesToDelete.begin ();
     for ( ; iter != resourcesToDelete.end (); iter++ )
     {
+        // Stop it first. This fixes bug #3729 because it isn't removed from the list before it's stopped.
+        // Removing it from the resources list first caused the resource pointer to be unverifyable, and
+        // the pointer wouldn't work in resource LUA functions.
+        (*iter)->Stop ( true );
+
         if ( !m_resources.empty() ) m_resources.remove ( *iter );
         m_resourcesToStartAfterRefresh.remove ( *iter );
         RemoveFromQueue ( *iter );
@@ -486,6 +498,7 @@ void CResourceManager::OnPlayerJoin ( CPlayer& Player )
 
 CResource* CResourceManager::GetResourceFromLuaState ( lua_State* luaVM )
 {
+    luaVM = lua_getmainstate ( luaVM );
     list < CResource* > ::iterator iter = m_resources.begin ();
     for ( ; iter != m_resources.end (); iter++ )
     {

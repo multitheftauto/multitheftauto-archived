@@ -12,7 +12,10 @@
 #include <pthread.h>
 
 #include <list>
+#include <map>
+#include <set>
 #include <string>
+#include <vector>
 #include <ctime>
 
 // SDK includes
@@ -116,7 +119,7 @@
 #include "CTeam.h"
 #include "CPickup.h"
 #include "CVehicleNames.h"
-#include "CMarkers.h"
+#include "CMarkerManager.h"
 #include "CKeyBinds.h"
 #include "CWhoWas.h"
 #include "CTextDisplay.h"
@@ -142,6 +145,7 @@
 #include "CZoneNames.h"
 #include "CConsoleCommand.h"
 #include "CColCuboid.h"
+#include "CColPolygon.h"
 #include "CCommandLineParser.h"
 #include "CEvents.h"
 #include "CStack.h"
@@ -216,6 +220,7 @@
 #include "CDummy.h"
 #include "CConfig.h"
 #include "CResource.h"
+#include "CResourceChecker.h"
 
 // Utility includes
 #include "utils/base64.h"

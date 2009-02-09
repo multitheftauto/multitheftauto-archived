@@ -42,6 +42,7 @@ static CRadarMap*                                   m_pRadarMap;
 static CClientCamera*                               m_pCamera;
 static CClientExplosionManager*                     m_pExplosionManager;
 static CClientProjectileManager*                    m_pProjectileManager;
+static CClientSoundManager*                         m_pSoundManager;
 
 // Used to run a function on all the children of the elements too
 #define RUN_CHILDREN list<CClientEntity*>::const_iterator iter=Entity.IterBegin();for(;iter!=Entity.IterEnd();iter++)
@@ -79,6 +80,7 @@ CStaticFunctionDefinitions::CStaticFunctionDefinitions (
     m_pCamera = pManager->GetCamera ();
     m_pExplosionManager = pManager->GetExplosionManager ();
     m_pProjectileManager = pManager->GetProjectileManager ();
+    m_pSoundManager = pManager->GetSoundManager ();
 }
 
 
@@ -1301,7 +1303,7 @@ bool CStaticFunctionDefinitions::IsPedDoingTask ( CClientPed& Ped, const char* s
                 pTask = pTask->GetSubTask ();
             }
         }
-        for ( i = 0 ; i < TASK_SECONDARY_MAX ; i++ )
+        for ( int i = 0 ; i < TASK_SECONDARY_MAX ; i++ )
         {
             pTask = pTaskManager->GetTaskSecondary ( i );
             while ( pTask )
@@ -1365,7 +1367,6 @@ bool CStaticFunctionDefinitions::GetPlayerNametagColor ( CClientPlayer & Player,
     Player.GetNametagColor ( ucR, ucG, ucB );
     return true;
 }
-
 
 bool CStaticFunctionDefinitions::SetPedWeaponSlot ( CClientEntity& Entity, int iSlot )
 {
@@ -1470,6 +1471,20 @@ bool CStaticFunctionDefinitions::SetPlayerNametagColor ( CClientEntity& Entity, 
         CClientPlayer& Player = static_cast < CClientPlayer& > ( Entity );
 
         Player.SetNametagOverrideColor ( ucR, ucG, ucB );
+        return true;
+    }
+    return false;
+}
+
+bool CStaticFunctionDefinitions::SetPlayerNametagShowing ( CClientEntity& Entity, bool bShowing )
+{
+    RUN_CHILDREN SetPlayerNametagShowing ( **iter, bShowing );
+
+    if ( IS_PED ( &Entity ) )
+    {
+        CClientPlayer& Player = static_cast < CClientPlayer& > ( Entity );
+
+        Player.SetNametagShowing ( bShowing );
         return true;
     }
     return false;
@@ -2218,8 +2233,7 @@ bool CStaticFunctionDefinitions::AttachTrailerToVehicle ( CClientVehicle& Vehicl
         if ( Trailer.GetTowedByVehicle () == NULL )
         {
             // Attach them
-            Vehicle.SetTowedVehicle ( &Trailer );
-            return true;
+            return Vehicle.SetTowedVehicle ( &Trailer );
         }
     }
 
@@ -2772,6 +2786,10 @@ bool CStaticFunctionDefinitions::CreateExplosion ( CVector& vecPosition, unsigne
     return true;
 }
 
+bool CStaticFunctionDefinitions::CreateFire ( CVector& vecPosition, float fSize )
+{
+	return g_pGame->GetFireManager ()->StartFire ( vecPosition, fSize ) != NULL;
+}
 
 bool CStaticFunctionDefinitions::PlayMissionAudio ( const CVector& vecPosition, unsigned short usSlot )
 {
@@ -3078,7 +3096,9 @@ bool CStaticFunctionDefinitions::GetCameraMatrix ( CVector & vecPosition, CVecto
 
 CClientEntity * CStaticFunctionDefinitions::GetCameraTarget ( void )
 {
-    return m_pCamera->GetTargetEntity ();
+    if ( !m_pCamera->IsInFixedMode() )
+        return m_pCamera->GetTargetEntity ();
+    return NULL;
 }
 
 
@@ -4182,19 +4202,30 @@ bool CStaticFunctionDefinitions::IsLineOfSightClear ( CVector& vecStart, CVector
 }
 
 
-bool CStaticFunctionDefinitions::TestLineAgainstWater ( CVector& vecStart, CVector& vecEnd, bool& bCollision, CVector& vecCollision )
+bool CStaticFunctionDefinitions::TestLineAgainstWater ( CVector& vecStart, CVector& vecEnd, CVector& vecCollision )
 {
-    bCollision = g_pGame->GetWorld ()->TestLineAgainstWater ( &vecStart, &vecEnd, &vecCollision );
-
-    return true;
+    return g_pGame->GetWaterManager ()->TestLineAgainstWater ( vecStart, vecEnd, &vecCollision );
 }
 
 
-bool CStaticFunctionDefinitions::GetWaterLevel ( CVector& vecPosition, bool& bFound, float& fWaterLevel, bool bCheckWaves, CVector& vecUnknown )
+bool CStaticFunctionDefinitions::CreateWater ( CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4, bool bShallow, void* pChangeSource )
 {
-    bFound = g_pGame->GetWorld ()->GetWaterLevel ( &vecPosition, &fWaterLevel, bCheckWaves, &vecUnknown );
+    if ( pV4 )
+        return g_pGame->GetWaterManager ()->CreateQuad ( *pV1, *pV2, *pV3, *pV4, bShallow, pChangeSource ) != NULL;
+    else
+        return g_pGame->GetWaterManager ()->CreateTriangle ( *pV1, *pV2, *pV3, bShallow, pChangeSource ) != NULL;
+}
 
-    return true;
+
+bool CStaticFunctionDefinitions::GetWaterLevel ( CVector& vecPosition, float& fWaterLevel, bool bCheckWaves, CVector& vecUnknown )
+{
+    return g_pGame->GetWaterManager ()->GetWaterLevel ( vecPosition, &fWaterLevel, bCheckWaves, &vecUnknown );
+}
+
+
+bool CStaticFunctionDefinitions::SetWaterLevel ( CVector& vecPosition, float fLevel, void* pChangeSource )
+{
+    return g_pGame->GetWaterManager ()->SetWaterLevel ( vecPosition, fLevel, pChangeSource );
 }
 
 
@@ -4579,6 +4610,19 @@ bool CStaticFunctionDefinitions::GetControlState ( const char* szControl, bool& 
     return false;
 }
 
+bool CStaticFunctionDefinitions::GetAnalogControlState ( const char * szControl, float & fState )
+{
+    CControllerState cs;
+    CClientPlayer* localPlayer = m_pPlayerManager->GetLocalPlayer ();
+    localPlayer->GetControllerState( cs );
+    bool bOnFoot = ( !localPlayer->GetRealOccupiedVehicle () );
+    if ( CClientPad::GetAnalogControlState ( szControl, cs, bOnFoot, fState ) )
+    {
+        return true;
+    }
+    return false;
+}
+
 
 bool CStaticFunctionDefinitions::IsControlEnabled ( const char* szControl, bool& bEnabled )
 {
@@ -4719,6 +4763,14 @@ CClientColRectangle* CStaticFunctionDefinitions::CreateColRectangle ( CResource&
 }
 
 
+CClientColPolygon* CStaticFunctionDefinitions::CreateColPolygon ( CResource& Resource, const CVector& vecPosition )
+{
+    CClientColPolygon * pShape = new CClientColPolygon ( m_pManager, INVALID_ELEMENT_ID, vecPosition );
+    pShape->SetParent ( Resource.GetResourceDynamicEntity () );
+    return pShape;
+}
+
+
 CClientColTube* CStaticFunctionDefinitions::CreateColTube ( CResource& Resource, const CVector& vecPosition, float fRadius, float fHeight )
 {
     CClientColTube* pShape = new CClientColTube ( m_pManager, INVALID_ELEMENT_ID, vecPosition, fRadius, fHeight );
@@ -4790,6 +4842,15 @@ bool CStaticFunctionDefinitions::IsPlayerMapVisible ( bool & bVisible )
 {
     bVisible = m_pRadarMap->GetRadarEnabled ();
     return true;
+}
+
+bool CStaticFunctionDefinitions::GetPlayerMapBoundingBox ( CVector &vecMin, CVector &vecMax )
+{
+    if ( m_pRadarMap->GetBoundingBox ( vecMin, vecMax ) )
+    {
+        return true;
+    }
+    return false;
 }
 
 
@@ -4887,6 +4948,106 @@ bool CStaticFunctionDefinitions::FxAddBulletSplash ( CVector & vecPosition )
 bool CStaticFunctionDefinitions::FxAddFootSplash ( CVector & vecPosition )
 {
     g_pGame->GetFx ()->TriggerFootSplash ( vecPosition );
+    return true;
+}
+
+
+CClientSound* CStaticFunctionDefinitions::PlaySound ( CResource* pResource, const char* szSound, bool bLoop )
+{
+    CClientSound* pSound = m_pSoundManager->PlaySound2D ( szSound, bLoop );
+    if ( pSound ) pSound->SetParent ( pResource->GetResourceDynamicEntity() );
+    return pSound;
+}
+
+
+CClientSound* CStaticFunctionDefinitions::PlaySound3D ( CResource* pResource, const char* szSound, CVector vecPosition, bool bLoop )
+{
+    CClientSound* pSound = m_pSoundManager->PlaySound3D ( szSound, vecPosition, bLoop );
+    if ( pSound ) pSound->SetParent ( pResource->GetResourceDynamicEntity() );
+    return pSound;
+}
+
+
+bool CStaticFunctionDefinitions::StopSound ( CClientSound& Sound )
+{
+    Sound.Stop ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetSoundPosition ( CClientSound& Sound, unsigned int uiPosition )
+{
+    Sound.SetPlayPosition ( uiPosition );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetSoundPosition ( CClientSound& Sound, unsigned int& uiPosition )
+{
+    uiPosition = Sound.GetPlayPosition ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetSoundLength ( CClientSound& Sound, unsigned int& uiLength )
+{
+    uiLength = Sound.GetLength ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetSoundPaused ( CClientSound& Sound, bool bPaused )
+{
+    Sound.SetPaused ( bPaused );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::IsSoundPaused ( CClientSound& Sound, bool& bPaused )
+{
+    bPaused = Sound.IsPaused ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetSoundVolume ( CClientSound& Sound, float fVolume )
+{
+    Sound.SetVolume ( fVolume );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetSoundVolume ( CClientSound& Sound, float& fVolume )
+{
+    fVolume = Sound.GetVolume ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetSoundMinDistance ( CClientSound& Sound, float fDistance )
+{
+    Sound.SetMinDistance ( fDistance );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetSoundMinDistance ( CClientSound& Sound, float& fDistance )
+{
+    fDistance = Sound.GetMinDistance ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetSoundMaxDistance ( CClientSound& Sound, float fDistance )
+{
+    Sound.SetMaxDistance ( fDistance );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetSoundMaxDistance ( CClientSound& Sound, float& fDistance )
+{
+    fDistance = Sound.GetMaxDistance ();
     return true;
 }
 

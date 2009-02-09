@@ -434,6 +434,9 @@
 				RelativePath="CPedSA.cpp">
 			</File>
 			<File
+				RelativePath=".\CPedSoundSA.cpp">
+			</File>
+			<File
 				RelativePath="CPhysicalSA.cpp">
 			</File>
 			<File
@@ -522,6 +525,9 @@
 			</File>
 			<File
 				RelativePath="CWantedSA.cpp">
+			</File>
+			<File
+				RelativePath=".\CWaterManagerSA.cpp">
 			</File>
 			<File
 				RelativePath="CWeaponInfoSA.cpp">
@@ -792,6 +798,9 @@
 				RelativePath="CPedSA.h">
 			</File>
 			<File
+				RelativePath=".\CPedSoundSA.h">
+			</File>
+			<File
 				RelativePath="CPhysicalSA.h">
 			</File>
 			<File
@@ -880,6 +889,9 @@
 			</File>
 			<File
 				RelativePath="CWantedSA.h">
+			</File>
+			<File
+				RelativePath=".\CWaterManagerSA.h">
 			</File>
 			<File
 				RelativePath="CWeaponInfoSA.h">

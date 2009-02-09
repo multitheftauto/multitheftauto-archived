@@ -22,8 +22,6 @@
 #define FUNC_CTimer_Update									0x561B10 // ##SA##
 #define FUNC_CRenderer_RequestObjectsInDirection			0x555CB0 // ##SA##
 #define FUNC_CStreaming_LoadScene							0x40EB70 // ##SA##
-#define FUNC_GetWaterLevel									0x6EB690 // ##SA##
-#define FUNC_TestLineAgainstWater							0x6E61B0 // ##SA##
 #define FUNC_IsLineOfSightClear								0x56A490 // ##SA##
 #define FUNC_HasCollisionBeenLoaded                         0x410CE0 // ##SA##
 #define FUNC_RemoveBuildingsNotInArea                       0x4094B0 // ##SA##
@@ -55,8 +53,6 @@ public:
 	FLOAT		FindGroundZForPosition(FLOAT fX, FLOAT fY);
 	FLOAT		FindGroundZFor3DPosition(CVector * vecPosition);
 	VOID		LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius);
-	bool		GetWaterLevel ( CVector * vecPosition, float * fWaterLevelZ, bool bUnknown, CVector * vecUnknown );
-	bool		TestLineAgainstWater ( CVector * vecStart, CVector * vecEnd, CVector * vecCollision );
 	bool		IsLineOfSightClear ( CVector * vecStart, CVector * vecEnd, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false );
     bool        HasCollisionBeenLoaded ( CVector * vecPosition );
     DWORD       GetCurrentArea ( void );

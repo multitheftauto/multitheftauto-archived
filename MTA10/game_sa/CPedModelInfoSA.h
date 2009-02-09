@@ -22,8 +22,6 @@ class ePedStats;
 typedef long AssocGroupID;
 
 #define		FUNC_SetMotionAnimGroup				            0x5b3580
-#define     FUNC_CAEPedSpeechAudioEntity__GetVoice          0x4e3cd0        // 4E3CD0 ; public: static short __cdecl CAEPedSpeechAudioEntity::GetVoice(char *,short)
-#define     FUNC_CAEPedSpeechAudioEntity__GetAudioPedType   0x4e3c60        // 4E3C60 ; public: static short __cdecl CAEPedSpeechAudioEntity::GetAudioPedType(char *)
 
 // CPedModelInfo:
 // +36 = Motion anim group (AssocGroupID, long)
@@ -55,21 +53,18 @@ public:
     BYTE                bSecondRadioStation;    // 57   Second radio station
     BYTE                bIsInRace;              // 58   Race (byte)
     BYTE                pad3 [ 1 ];             // 59   
-    short               pedAudioType;           // 60   Audio ped type (short)
-    short               FirstVoice;             // 62   First voice
-    short               LastVoice;              // 64   Last voice
-    short               NextVoice;              // 66   Next voice
+    short               sVoiceType;             // 60   Voice type
+    short               sFirstVoice;            // 62   First voice
+    short               sLastVoice;             // 64   Last voice
+    short               sNextVoice;             // 66   Next voice
 };
 
 class CPedModelInfoSA : public CModelInfoSA, public CPedModelInfo
 {
 public:
-    CPedModelInfoSAInterface *      GetPedInterface     ( void )        { return reinterpret_cast < CPedModelInfoSAInterface * > ( m_pInterface ); }
+    CPedModelInfoSAInterface *      GetPedModelInfoInterface   ( void )        { return reinterpret_cast < CPedModelInfoSAInterface * > ( m_pInterface ); }
 
-	void							SetMotionAnimGroup	( AssocGroupId animGroup );
-
-    void                            SetPedVoice         ( eVoiceGens VoiceGen, char szVoiceBankFirst[PED_VOICE_BANK_LENGTH], char szVoiceBankLast[PED_VOICE_BANK_LENGTH] );
-    void                            SetPedAudioType     ( const char *szPedAudioType );
+	void							SetMotionAnimGroup	       ( AssocGroupId animGroup );
 };
 
 #endif

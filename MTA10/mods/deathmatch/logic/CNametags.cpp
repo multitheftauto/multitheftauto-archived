@@ -154,7 +154,7 @@ void CNametags::DrawFromAim ( void )
             if ( pColPoint ) pColPoint->Destroy (); 
 
             // Un-ignore the local player
-            pLocalPlayer->WorldIgnore ( false );            
+            pLocalPlayer->WorldIgnore ( false );
 
             // Did we find an entity?
             if ( pEntity )
@@ -450,7 +450,7 @@ void CNametags::DrawTagForPlayer ( CClientPlayer* pPlayer, unsigned char ucAlpha
         // Draw his name
         unsigned char ucR, ucG, ucB;
         pPlayer->GetNametagColor ( ucR, ucG, ucB );
-        if ( g_pCore->IsUsingCEGUIForText () )
+        if ( g_pCore->GetGraphics ()->GetCEGUIUsed () )
 		{
             // Draw shadow first
             g_pCore->GetGraphics ()->DrawTextCEGUI ( ( int ) vecScreenPosition.fX + 1 - 17, ( int ) vecScreenPosition.fY + 1, ( int ) vecScreenPosition.fX + 1 - 17, ( int ) vecScreenPosition.fY + 1, COLOR_ARGB ( 255, 0, 0, 0 ), szNick, 1.0f, DT_NOCLIP | DT_CENTER );
@@ -472,6 +472,8 @@ void CNametags::DrawTagForPlayer ( CClientPlayer* pPlayer, unsigned char ucAlpha
             if ( fHealth > 255 )
             {
                 lRed = static_cast < long > ( 512.0f - fHealth );
+                if ( lRed > 255 )
+                    lRed = 255;
                 lGreen = 255;
             }
             else if ( fHealth <= 255 )

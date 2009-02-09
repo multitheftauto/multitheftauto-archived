@@ -91,17 +91,17 @@ CGUI_Impl::CGUI_Impl ( IDirect3DDevice9* pDevice )
 	// Mouse events
 	CEGUI::GlobalEventSet * pEvents = CEGUI::GlobalEventSet::getSingletonPtr ();
 
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventCharacterKey		, CEGUI::Event::Subscriber ( CGUI_Impl::Event_CharacterKey, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventKeyDown			, CEGUI::Event::Subscriber ( CGUI_Impl::Event_KeyDown, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseClick		, CEGUI::Event::Subscriber ( CGUI_Impl::Event_MouseClick, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseDoubleClick	, CEGUI::Event::Subscriber ( CGUI_Impl::Event_MouseDoubleClick, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseWheel		, CEGUI::Event::Subscriber ( CGUI_Impl::Event_MouseWheel, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseMove			, CEGUI::Event::Subscriber ( CGUI_Impl::Event_MouseMove, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseEnters		, CEGUI::Event::Subscriber ( CGUI_Impl::Event_MouseEnter, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseLeaves		, CEGUI::Event::Subscriber ( CGUI_Impl::Event_MouseLeave, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMoved				, CEGUI::Event::Subscriber ( CGUI_Impl::Event_Moved, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventSized				, CEGUI::Event::Subscriber ( CGUI_Impl::Event_Sized, this ) );
-	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventRedrawRequested	, CEGUI::Event::Subscriber ( CGUI_Impl::Event_RedrawRequested, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventCharacterKey		, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_CharacterKey, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventKeyDown			, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_KeyDown, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseClick		, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_MouseClick, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseDoubleClick	, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_MouseDoubleClick, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseWheel		, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_MouseWheel, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseMove			, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_MouseMove, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseEnters		, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_MouseEnter, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMouseLeaves		, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_MouseLeave, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventMoved				, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_Moved, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventSized				, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_Sized, this ) );
+	pEvents->subscribeEvent ( "Window/" + CEGUI::Window::EventRedrawRequested	, CEGUI::Event::Subscriber ( &CGUI_Impl::Event_RedrawRequested, this ) );
 
 	// Disallow input routing to the GUI
 	m_bSwitchGUIInput = false;
@@ -309,6 +309,12 @@ CGUIScrollPane* CGUI_Impl::_CreateScrollPane ( CGUIElement_Impl* pParent )
 CGUIScrollBar* CGUI_Impl::_CreateScrollBar ( bool bHorizontal, CGUIElement_Impl* pParent )
 {
     return new CGUIScrollBar_Impl ( this, bHorizontal, pParent );
+}
+
+
+CGUIComboBox* CGUI_Impl::_CreateComboBox ( CGUIElement_Impl* pParent, const char* szCaption )
+{
+    return new CGUIComboBox_Impl ( this, pParent, szCaption );
 }
 
 
@@ -1136,3 +1142,16 @@ CGUIScrollBar* CGUI_Impl::CreateScrollBar ( bool bHorizontal, CGUITab* pParent )
     return _CreateScrollBar ( bHorizontal, wnd );
 }
 
+
+CGUIComboBox* CGUI_Impl::CreateComboBox ( CGUIElement* pParent, const char* szCaption )
+{
+    CGUIWindow_Impl* wnd = reinterpret_cast < CGUIWindow_Impl* > ( pParent );
+    return _CreateComboBox ( wnd, szCaption );
+}
+
+
+CGUIComboBox* CGUI_Impl::CreateComboBox ( CGUIComboBox* pParent, const char* szCaption )
+{
+    CGUIComboBox_Impl* wnd = reinterpret_cast < CGUIComboBox_Impl* > ( pParent );
+    return _CreateComboBox ( wnd, szCaption );
+}

@@ -1250,7 +1250,7 @@ int CLuaFunctionDefinitions::dxDrawText ( lua_State* luaVM )
         m_pScriptDebugging->LogBadType ( luaVM, "dxDrawText" );
 
     // Failed
-    lua_pushboolean ( luaVM, true );
+    lua_pushboolean ( luaVM, false );
     return 1;
 }
 
@@ -1299,9 +1299,100 @@ int CLuaFunctionDefinitions::dxDrawRectangle ( lua_State* luaVM )
         m_pScriptDebugging->LogBadType ( luaVM, "dxDrawRectangle" );
 
     // Failed
-    lua_pushboolean ( luaVM, true );
+    lua_pushboolean ( luaVM, false );
     return 1;
 }
+
+
+int CLuaFunctionDefinitions::dxDrawImage ( lua_State* luaVM )
+{
+    // dxDrawImage ( float x,float y,float width,float height,string filename,[float rotation,
+    //            float rotCenOffX, float rotCenOffY, int color=0xffffffff, bool postgui] )
+
+    // Grab all argument types
+    int iArgument1 = lua_type ( luaVM, 1 );
+    int iArgument2 = lua_type ( luaVM, 2 );
+    int iArgument3 = lua_type ( luaVM, 3 );
+    int iArgument4 = lua_type ( luaVM, 4 );
+    int iArgument5 = lua_type ( luaVM, 5 );
+    if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) && 
+         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) && 
+         ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) && 
+         ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING ) &&
+         (                              iArgument5 == LUA_TSTRING ) )
+    {
+        float fX = static_cast < float > ( lua_tonumber ( luaVM, 1 ) );
+        float fY = static_cast < float > ( lua_tonumber ( luaVM, 2 ) );
+        float fWidth = static_cast < float > ( lua_tonumber ( luaVM, 3 ) );
+        float fHeight = static_cast < float > ( lua_tonumber ( luaVM, 4 ) );
+        const char * szFile = lua_tostring ( luaVM, 5 );
+        float fRotation = 0;
+        float fRotCenOffX = 0;
+        float fRotCenOffY = 0;
+        unsigned long ulColor = 0xFFFFFFFF;
+
+        int iArgument6 = lua_type ( luaVM, 6 );
+        if ( ( iArgument6 == LUA_TNUMBER || iArgument6 == LUA_TSTRING ) )
+        {
+            fRotation = static_cast < float > ( lua_tonumber ( luaVM, 6 ) );
+        }
+
+        int iArgument7 = lua_type ( luaVM, 7 );
+        if ( ( iArgument7 == LUA_TNUMBER || iArgument7 == LUA_TSTRING ) )
+        {
+            fRotCenOffX = static_cast < float > ( lua_tonumber ( luaVM, 7 ) );
+        }
+
+        int iArgument8 = lua_type ( luaVM, 8 );
+        if ( ( iArgument8 == LUA_TNUMBER || iArgument8 == LUA_TSTRING ) )
+        {
+            fRotCenOffY = static_cast < float > ( lua_tonumber ( luaVM, 8 ) );
+        }
+
+        int iArgument9 = lua_type ( luaVM, 9 );
+        if ( ( iArgument9 == LUA_TNUMBER || iArgument9 == LUA_TSTRING ) )
+        {
+            ulColor = static_cast < unsigned long > ( lua_tonumber ( luaVM, 9 ) );
+        }
+
+		// Got a post gui specifier?
+		bool bPostGUI = false;
+		int iArgument10 = lua_type ( luaVM, 10 );
+		if ( iArgument10 == LUA_TBOOLEAN )
+		{
+			bPostGUI = ( lua_toboolean ( luaVM, 10 ) ) ? true:false;
+		}
+
+		CLuaMain* pLuaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+		CResource* pResource = pLuaMain ? pLuaMain->GetResource() : NULL;
+
+	    // Check for a valid (and sane) file path
+	    if ( pResource && szFile && IsValidFilePath ( szFile ) )
+        {
+		    // Get the correct directory
+		    char szPath[MAX_PATH] = {0};
+
+		    snprintf ( szPath, MAX_PATH, "%s\\resources\\%s\\%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
+		    szPath[MAX_PATH-1] = '\0';
+
+            if ( g_pCore->GetGraphics ()->DrawTextureQueued ( fX, fY, fWidth, fHeight, szPath, fRotation, fRotCenOffX, fRotCenOffY, ulColor, bPostGUI ) )
+            {
+                // Success
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+
+            m_pScriptDebugging->LogError ( luaVM, "dxDrawImage can't load %s", szFile );
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "dxDrawImage" );
+
+    // Failed
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 
 int CLuaFunctionDefinitions::dxGetTextWidth ( lua_State* luaVM )
@@ -1337,7 +1428,7 @@ int CLuaFunctionDefinitions::dxGetTextWidth ( lua_State* luaVM )
         m_pScriptDebugging->LogBadType ( luaVM, "dxGetTextWidth" );
 
     // Failed
-    lua_pushboolean ( luaVM, true );
+    lua_pushboolean ( luaVM, false );
     return 1;
 }
 
@@ -2001,6 +2092,12 @@ int CLuaFunctionDefinitions::GetElementsByType ( lua_State* luaVM )
                 }
             }
 
+            bool bStreamedIn = false;
+            if ( lua_type ( luaVM, 3 ) == LUA_TBOOLEAN )
+            {
+                bStreamedIn = lua_toboolean ( luaVM, 3 ) ? true : false;
+            }
+
             // Grab the argument
             const char* szType = lua_tostring ( luaVM, 1 );
 
@@ -2008,7 +2105,7 @@ int CLuaFunctionDefinitions::GetElementsByType ( lua_State* luaVM )
             lua_newtable ( luaVM );
 
             // Add all the elements with a matching type to it
-            startAt->FindAllChildrenByType ( szType, pLuaMain );
+            startAt->FindAllChildrenByType ( szType, pLuaMain, bStreamedIn );
             return 1;
         }
         else
@@ -3464,64 +3561,58 @@ int CLuaFunctionDefinitions::GetPlayerName ( lua_State* luaVM )
     return 1;
 }
 
-
-int CLuaFunctionDefinitions::SetPedAudioType ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetPedVoice ( lua_State* luaVM )
 {
     // Right type?
-    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) && 
-         lua_istype ( luaVM, 2, LUA_TSTRING ) )
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
     {
         CClientPed* pPed = lua_toped ( luaVM, 1 );
-        const char* szAudioType = lua_tostring ( luaVM, 2 );
-
-		if ( pPed && szAudioType )
-		{
-            pPed->GetModelInfo ()->SetPedAudioType ( szAudioType );
-            lua_pushboolean ( luaVM, true );
-            return 1;
+        if ( pPed )
+        {
+            const char* szVoiceType = 0;
+            const char* szVoiceBank = 0;
+            pPed->GetVoice ( &szVoiceType, &szVoiceBank );
+            if ( szVoiceType && szVoiceBank )
+            {
+                lua_pushstring ( luaVM, szVoiceType );
+                lua_pushstring ( luaVM, szVoiceBank );
+                return 2;
+            }
         }
-        else if ( !pPed )
-            m_pScriptDebugging->LogBadPointer ( luaVM, "setPedAudioType", "ped", 1 );
-        else if ( !szAudioType )
-            m_pScriptDebugging->LogBadPointer ( luaVM, "setPedAudioType", "audiotype", 1 );
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getPedVoice", "ped", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "setPedAudioType" );
+        m_pScriptDebugging->LogBadType ( luaVM, "getPedVoice" );
 
     // Failed
     lua_pushboolean ( luaVM, false );
     return 1;
 }
 
-
 int CLuaFunctionDefinitions::SetPedVoice ( lua_State* luaVM )
 {
     // Right type?
     if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) && 
-         lua_istype ( luaVM, 2, LUA_TNUMBER ) && 
-         lua_istype ( luaVM, 3, LUA_TSTRING ) && 
-         lua_istype ( luaVM, 4, LUA_TSTRING ) )
+         lua_istype ( luaVM, 2, LUA_TSTRING ) && 
+         lua_istype ( luaVM, 3, LUA_TSTRING ) )
     {
         CClientPed* pPed = lua_toped ( luaVM, 1 );
-        int iVoiceGen = lua_tonumber ( luaVM, 2 );
-        const char* szVoiceBankFirst = lua_tostring ( luaVM, 3 );
-        const char* szVoiceBankLast = lua_tostring ( luaVM, 4 );
+        const char* szVoiceType = lua_tostring ( luaVM, 2 );
+        const char* szVoiceBank = lua_tostring ( luaVM, 3 );
 
-		if ( pPed && szVoiceBankFirst && szVoiceBankLast )
+		if ( pPed && szVoiceType && szVoiceBank )
 		{
-            char szFirst[PED_VOICE_BANK_LENGTH], szLast[PED_VOICE_BANK_LENGTH];
-            strncpy ( szFirst, szVoiceBankFirst, PED_VOICE_BANK_LENGTH );
-            strncpy ( szLast, szVoiceBankLast, PED_VOICE_BANK_LENGTH );
-            pPed->GetModelInfo ()->SetPedVoice ( (eVoiceGens) iVoiceGen, szFirst, szLast );
+            pPed->SetVoice ( szVoiceType, szVoiceBank );
             lua_pushboolean ( luaVM, true );
             return 1;
         }
         else if ( !pPed )
             m_pScriptDebugging->LogBadPointer ( luaVM, "setPedVoice", "ped", 1 );
-        else if ( !szVoiceBankFirst )
-            m_pScriptDebugging->LogBadPointer ( luaVM, "setPedVoice", "voicebankfirst", 1 );
-        else if ( !szVoiceBankLast )
-            m_pScriptDebugging->LogBadPointer ( luaVM, "setPedVoice", "voicebanklast", 1 );
+        else if ( !szVoiceType )
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setPedVoice", "voicetype", 1 );
+        else if ( !szVoiceBank )
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setPedVoice", "voicebank", 1 );
 
     }
     else
@@ -4069,6 +4160,28 @@ int CLuaFunctionDefinitions::GetPlayerNametagColor ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::IsPlayerNametagShowing ( lua_State* luaVM )
+{
+    int iArgument1 = lua_type ( luaVM, 1 );
+    if ( ( iArgument1 == LUA_TLIGHTUSERDATA ) )
+    {
+        CClientPlayer* pPlayer = lua_toplayer ( luaVM, 1 );
+        if ( pPlayer )
+        {
+            bool bIsNametagShowing = pPlayer->IsNametagShowing ();
+            lua_pushboolean ( luaVM, bIsNametagShowing );
+            return 1;
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "isPlayerNametagShowing", "player", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "isPlayerNametagShowing" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 int CLuaFunctionDefinitions::GetPedStat ( lua_State* luaVM )
 {
@@ -4228,32 +4341,6 @@ int CLuaFunctionDefinitions::IsPedDucked ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "isPedDucked" );
-
-    // Failed
-    lua_pushnil ( luaVM );
-    return 1;
-}
-
-
-int CLuaFunctionDefinitions::IsPlayerMuted ( lua_State* luaVM )
-{
-    // Check type
-    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
-    {
-        // Grab the player
-        CClientPlayer* pPlayer = lua_toplayer ( luaVM, 1 );
-        if ( pPlayer )
-        {
-            // Grab whether he's muted or not and return it
-            bool bMuted = pPlayer->GetMuted ();
-            lua_pushboolean ( luaVM, bMuted );
-            return 1;
-        }
-        else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "isPlayerMuted", "player", 1 );
-    }
-    else
-        m_pScriptDebugging->LogBadType ( luaVM, "isPlayerMuted" );
 
     // Failed
     lua_pushnil ( luaVM );
@@ -4674,6 +4761,38 @@ int CLuaFunctionDefinitions::SetPlayerNametagColor ( lua_State* luaVM )
     lua_pushboolean ( luaVM, false );
     return 1;
 }
+
+int CLuaFunctionDefinitions::SetPlayerNametagShowing ( lua_State* luaVM )
+{
+    // Check types
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TBOOLEAN ) )
+    {
+        // Grab the entity
+        CClientPlayer * pPlayer = lua_toplayer ( luaVM, 1 );
+        bool bShowing = ( lua_toboolean ( luaVM, 2 ) ) ? true:false;
+
+        // Valid pPlayer?
+        if ( pPlayer )
+		{
+            // Set the new rotation
+            if ( CStaticFunctionDefinitions::SetPlayerNametagShowing ( *pPlayer, bShowing ) )
+            {
+			    lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setPlayerNametagShowing", "element", 1 );
+	}
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setPlayerNametagShowing" );
+
+    // Failed
+	lua_pushboolean ( luaVM, false );
+	return 1;
+}
+
 
 
 int CLuaFunctionDefinitions::GetPedClothes ( lua_State* luaVM )
@@ -7455,6 +7574,38 @@ int CLuaFunctionDefinitions::CreateExplosion ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "createExplosion" );
+    
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+int CLuaFunctionDefinitions::CreateFire ( lua_State* luaVM )
+{
+	// Grab the argument types
+    int iArgument1 = lua_type ( luaVM, 1 );
+    int iArgument2 = lua_type ( luaVM, 2 );
+    int iArgument3 = lua_type ( luaVM, 3 );
+    int iArgument4 = lua_type ( luaVM, 4 );
+
+	if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
+         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) &&
+         ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) )
+    {
+        CVector vecPosition ( static_cast < float > ( lua_tonumber ( luaVM, 1 ) ),
+                              static_cast < float > ( lua_tonumber ( luaVM, 2 ) ),
+                              static_cast < float > ( lua_tonumber ( luaVM, 3 ) ) );
+		float fSize = 1.8f;
+		if ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING )
+			fSize = static_cast < float > ( lua_tonumber ( luaVM, 4 ) );
+
+        if ( CStaticFunctionDefinitions::CreateFire ( vecPosition, fSize ) )
+        {
+            lua_pushboolean ( luaVM, true );
+            return 1;
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "createFire" );
     
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -10315,6 +10466,30 @@ int CLuaFunctionDefinitions::GUIGridListRemoveColumn ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::GUIGridListSetColumnWidth ( lua_State* luaVM )
+{
+	if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TNUMBER ) &&
+         lua_istype ( luaVM, 3, LUA_TNUMBER ) &&
+         lua_istype ( luaVM, 4, LUA_TBOOLEAN ) )
+	{
+		CClientGUIElement *pGUIElement = lua_toguielement ( luaVM, 1 );
+		if ( pGUIElement && IS_CGUIELEMENT_GRIDLIST ( pGUIElement ) )
+        {
+            CStaticFunctionDefinitions::GUIGridListSetColumnWidth ( *pGUIElement, (static_cast < int > ( lua_tonumber ( luaVM, 2 ) ) ) -1, static_cast < float > ( lua_tonumber ( luaVM, 3 ) ), lua_toboolean ( luaVM, 4 ) ? true : false );
+
+		    lua_pushboolean ( luaVM, true );
+		    return 1;
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "guiGridListRemoveColumn", "gui-element", 1 );
+	}
+
+	// error: bad arguments
+	lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 int CLuaFunctionDefinitions::GUIGridListAddRow ( lua_State* luaVM )
 {
@@ -11282,47 +11457,6 @@ int CLuaFunctionDefinitions::GetTickCount_ ( lua_State* luaVM )
     return 1;
 }
 
-int CLuaFunctionDefinitions::RandInt ( lua_State* luaVM )
-{
-    // Valid types?
-    int iArgument1 = lua_type ( luaVM, 1 );
-    int iArgument2 = lua_type ( luaVM, 2 );
-    if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
-         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) )
-    {
-        // Grab the lower and the upper bound
-        int iLowerBound = static_cast < int > ( lua_tonumber ( luaVM, 1 ) );
-        int iUpperBound = static_cast < int > ( lua_tonumber ( luaVM, 2 ) );
-
-        // Upper bound must be bigger than lower bound
-        if ( iUpperBound >= iLowerBound )
-        {
-            // Grab the delta value and multiply it with a randomly generated float
-            int iRandom = GetRandom ( iLowerBound, iUpperBound );
-            
-            // Return it as an integer number
-            lua_pushnumber ( luaVM, static_cast < lua_Number > ( iRandom ) );
-            return 1;
-        }
-        else
-            m_pScriptDebugging->LogWarning ( luaVM, "Upper bound passed to randInt must be bigger or equal to lower bound" );
-    }
-    else
-        m_pScriptDebugging->LogBadType ( luaVM, "randInt" );
-
-    // Return false (failed)
-    lua_pushboolean ( luaVM, false );
-    return 1;
-}
-
-
-int CLuaFunctionDefinitions::RandFloat ( lua_State* luaVM )
-{
-    // Return it as float between 0 and 1
-    lua_pushnumber ( luaVM, static_cast < lua_Number > ( GetRandomDouble () ) );
-    return 1;
-}
-
 int CLuaFunctionDefinitions::GetCTime ( lua_State* luaVM )
 {
     time_t timer;
@@ -12023,18 +12157,13 @@ int CLuaFunctionDefinitions::TestLineAgainstWater ( lua_State* luaVM )
                            static_cast < float > ( lua_tonumber ( luaVM, 6 ) ) );
 
         CVector vecCollision;
-        bool bCollision;
-        if ( CStaticFunctionDefinitions::TestLineAgainstWater ( vecStart, vecEnd, bCollision, vecCollision ) )
+        if ( CStaticFunctionDefinitions::TestLineAgainstWater ( vecStart, vecEnd, vecCollision ) )
         {
-            lua_pushboolean ( luaVM, bCollision );
-            if ( bCollision )
-            {
-                lua_pushnumber ( luaVM, vecCollision.fX );
-                lua_pushnumber ( luaVM, vecCollision.fY );
-                lua_pushnumber ( luaVM, vecCollision.fZ );
-                return 4;
-            }
-            return 1;
+            lua_pushboolean ( luaVM, true );
+            lua_pushnumber ( luaVM, vecCollision.fX );
+            lua_pushnumber ( luaVM, vecCollision.fY );
+            lua_pushnumber ( luaVM, vecCollision.fZ );
+            return 4;
         }
     }
     else
@@ -12044,6 +12173,69 @@ int CLuaFunctionDefinitions::TestLineAgainstWater ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::CreateWater ( lua_State* luaVM )
+{
+    CLuaMain* pLuaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+    if ( pLuaMain )
+    {
+        CResource* pResource = pLuaMain->GetResource ();
+        if ( pResource )
+        {
+            int iArgument1  = lua_type ( luaVM, 1 );
+            int iArgument2  = lua_type ( luaVM, 2 );
+            int iArgument3  = lua_type ( luaVM, 3 );
+            int iArgument4  = lua_type ( luaVM, 4 );
+            int iArgument5  = lua_type ( luaVM, 5 );
+            int iArgument6  = lua_type ( luaVM, 6 );
+            int iArgument7  = lua_type ( luaVM, 7 );
+            int iArgument8  = lua_type ( luaVM, 8 );
+            int iArgument9  = lua_type ( luaVM, 9 );
+            int iArgument10 = lua_type ( luaVM, 10 );
+            int iArgument11 = lua_type ( luaVM, 11 );
+            int iArgument12 = lua_type ( luaVM, 12 );
+            if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
+                ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) &&
+                ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) &&
+                ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING ) &&
+                ( iArgument5 == LUA_TNUMBER || iArgument5 == LUA_TSTRING ) &&
+                ( iArgument6 == LUA_TNUMBER || iArgument6 == LUA_TSTRING ) &&
+                ( iArgument7 == LUA_TNUMBER || iArgument7 == LUA_TSTRING ) &&
+                ( iArgument8 == LUA_TNUMBER || iArgument8 == LUA_TSTRING ) &&
+                ( iArgument9 == LUA_TNUMBER || iArgument9 == LUA_TSTRING ) )
+            {
+                CVector v1 ( (float)lua_tonumber(luaVM, 1), (float)lua_tonumber(luaVM, 2), (float)lua_tonumber(luaVM, 3) );
+                CVector v2 ( (float)lua_tonumber(luaVM, 4), (float)lua_tonumber(luaVM, 5), (float)lua_tonumber(luaVM, 6) );
+                CVector v3 ( (float)lua_tonumber(luaVM, 7), (float)lua_tonumber(luaVM, 8), (float)lua_tonumber(luaVM, 9) );
+                if ( ( iArgument10 == LUA_TNUMBER || iArgument10 == LUA_TSTRING ) &&
+                    ( iArgument11 == LUA_TNUMBER || iArgument11 == LUA_TSTRING ) &&
+                    ( iArgument12 == LUA_TNUMBER || iArgument12 == LUA_TSTRING ) )
+                {
+                    CVector v4 ( (float)lua_tonumber(luaVM, 10), (float)lua_tonumber(luaVM, 11), (float)lua_tonumber(luaVM, 12) );
+                    bool bShallow = false;
+                    if ( lua_type ( luaVM, 13 ) == LUA_TBOOLEAN && lua_toboolean ( luaVM, 13 ) )
+                        bShallow = true;
+                    lua_pushboolean ( luaVM, CStaticFunctionDefinitions::CreateWater (
+                        &v1, &v2, &v3, &v4, bShallow, pResource ) );
+                    return 1;
+                }
+                else
+                {
+                    bool bShallow = false;
+                    if ( lua_type ( luaVM, 10 ) == LUA_TBOOLEAN && lua_toboolean ( luaVM, 10 ) )
+                        bShallow = true;
+                    lua_pushboolean ( luaVM, CStaticFunctionDefinitions::CreateWater (
+                        &v1, &v2, &v3, NULL, bShallow, pResource ) );
+                    return 1;
+                }
+            }
+            else
+                m_pScriptDebugging->LogBadType ( luaVM, "createWater" );
+        }
+    }
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
 
 int CLuaFunctionDefinitions::GetWaterLevel ( lua_State* luaVM )
 {
@@ -12063,14 +12255,10 @@ int CLuaFunctionDefinitions::GetWaterLevel ( lua_State* luaVM )
 
         float fWaterLevel;
         CVector vecUnknown;
-        bool bFound;
-        if ( CStaticFunctionDefinitions::GetWaterLevel ( vecPosition, bFound, fWaterLevel, bCheckWaves, vecUnknown ) )
+        if ( CStaticFunctionDefinitions::GetWaterLevel ( vecPosition, fWaterLevel, bCheckWaves, vecUnknown ) )
         {
-            if ( bFound )
-            {
-                lua_pushnumber ( luaVM, fWaterLevel );
-                return 1;
-            }
+            lua_pushnumber ( luaVM, fWaterLevel );
+            return 1;
         }
     }
     else
@@ -12080,6 +12268,41 @@ int CLuaFunctionDefinitions::GetWaterLevel ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::SetWaterLevel ( lua_State* luaVM )
+{
+    CLuaMain* pLuaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+    if ( pLuaMain )
+    {
+        CResource* pResource = pLuaMain->GetResource ();
+        if ( pResource )
+        {
+            int iArgument1 = lua_type ( luaVM, 1 );
+            int iArgument2 = lua_type ( luaVM, 2 );
+            int iArgument3 = lua_type ( luaVM, 3 );
+            int iArgument4 = lua_type ( luaVM, 4 );
+
+            if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
+                 ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) &&
+                 ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) &&
+                 ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING ) )
+            {
+                CVector vecPosition ( static_cast < float > ( lua_tonumber ( luaVM, 1 ) ),
+                                    static_cast < float > ( lua_tonumber ( luaVM, 2 ) ),
+                                    static_cast < float > ( lua_tonumber ( luaVM, 3 ) ) );
+                float fLevel = static_cast < float > ( lua_tonumber ( luaVM, 4 ) );
+                if ( CStaticFunctionDefinitions::SetWaterLevel ( vecPosition, fLevel, pResource ) )
+                {
+                    lua_pushboolean ( luaVM, true );
+                    return 1;
+                }
+            }
+            else
+                m_pScriptDebugging->LogBadType ( luaVM, "setWaterLevel" );
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
 
 int CLuaFunctionDefinitions::GetWorldFromScreenPosition ( lua_State * luaVM )
 {
@@ -12682,6 +12905,26 @@ int CLuaFunctionDefinitions::GetControlState ( lua_State * luaVM )
     lua_pushboolean ( luaVM, false );
     return 1;
 }
+
+int CLuaFunctionDefinitions::GetAnalogControlState ( lua_State * luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TSTRING ) )
+    {
+        const char* szControl = lua_tostring ( luaVM, 1 );
+        float fState;
+        if ( CStaticFunctionDefinitions::GetAnalogControlState ( szControl , fState ) )
+        {
+            lua_pushnumber ( luaVM, fState );
+            return 1;
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getAnalogControlState" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 
 int CLuaFunctionDefinitions::IsControlEnabled ( lua_State * luaVM )
@@ -13419,7 +13662,7 @@ int CLuaFunctionDefinitions::XMLCopyFile ( lua_State* luaVM )
         {
             // Grab the full filepath of the copied xml and make sure its legal
             char szFilename [ MAX_STRING_LENGTH ];
-		    snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\%s", m_pClientGame->GetModRoot(), lua_tostring ( luaVM, 2 ) );
+		    snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\resources\\%s\\%s", m_pClientGame->GetModRoot(), pLUA->GetResource()->GetName() ,lua_tostring ( luaVM, 2 ) );
 		    if ( IsValidFilePath ( lua_tostring ( luaVM, 2 ) ) )
             {
                 // Grab the source node
@@ -13783,6 +14026,67 @@ int CLuaFunctionDefinitions::CreateColRectangle ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "createColRectangle" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::CreateColPolygon ( lua_State* luaVM )
+{ // Formerly createColSquare
+    // Verify the argument types
+    int iArgument1 = lua_type ( luaVM, 1 );
+    int iArgument2 = lua_type ( luaVM, 2 );
+    if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
+         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) )
+    {
+        // Grab the values
+        CVector vecPosition = CVector ( ( float ) lua_tonumber ( luaVM, 1 ), ( float ) lua_tonumber ( luaVM, 2 ), 0.0f );
+
+		CLuaMain* pLuaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+		if ( pLuaMain )
+		{
+			CResource* pResource = pLuaMain->GetResource();
+			if ( pResource )
+			{
+				// Create it and return it
+				CClientColPolygon* pShape = CStaticFunctionDefinitions::CreateColPolygon ( *pResource, vecPosition );
+				if ( pShape )
+				{
+                    // Get the points
+                    int iArgument = 3;
+                    int iArgumentX = lua_type ( luaVM, iArgument++ );
+                    int iArgumentY = lua_type ( luaVM, iArgument++ );
+                    while ( iArgumentX != LUA_TNONE && iArgumentY != LUA_TNONE )
+                    {
+                        if ( ( iArgumentX == LUA_TNUMBER || iArgumentX == LUA_TSTRING ) &&
+                             ( iArgumentY == LUA_TNUMBER || iArgumentY == LUA_TSTRING ) )
+                        {
+                            pShape->AddPoint ( CVector2D ( ( float ) lua_tonumber ( luaVM, iArgument - 2 ),
+                                                           ( float ) lua_tonumber ( luaVM, iArgument - 1 ) ) );
+
+                            iArgumentX = lua_type ( luaVM, iArgument++ );
+                            iArgumentY = lua_type ( luaVM, iArgument++ );
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+					CElementGroup * pGroup = pResource->GetElementGroup();
+					if ( pGroup )
+					{
+						pGroup->Add ( pShape );
+					}
+					lua_pushelement ( luaVM, pShape );
+					return 1;
+				}
+			}
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "createColPolygon" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -14246,6 +14550,22 @@ int CLuaFunctionDefinitions::IsPlayerMapVisible ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::GetPlayerMapBoundingBox ( lua_State* luaVM )
+{    
+    // Grab the bounding box and return it
+    CVector vecMin, vecMax;
+    if ( CStaticFunctionDefinitions::GetPlayerMapBoundingBox ( vecMin, vecMax ) )
+    {
+        lua_pushnumber ( luaVM, vecMin.fX );
+        lua_pushnumber ( luaVM, vecMin.fY );
+        lua_pushnumber ( luaVM, vecMax.fX );
+        lua_pushnumber ( luaVM, vecMax.fY );
+        return 4;
+    }
+    //The map is invisible
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
 
 int CLuaFunctionDefinitions::SynthProcessMIDI ( lua_State* luaVM )
 {
@@ -14262,6 +14582,351 @@ int CLuaFunctionDefinitions::SynthProcessMIDI ( lua_State* luaVM )
 
 		lua_pushboolean ( luaVM, true );
 		return 1;
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::PlaySound ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TSTRING ) )
+    {
+        const char* szSound = lua_tostring ( luaVM, 1 );
+        CLuaMain * luaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+        if ( luaMain )
+        {
+            CResource* pResource = luaMain->GetResource();
+            if ( pResource )
+            {
+		        char szFilename [ MAX_STRING_LENGTH ];
+                snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), szSound );
+		        if ( IsValidFilePath ( lua_tostring ( luaVM, 1 ) ) )
+                {
+                    bool bLoop = false;
+                    if ( lua_istype ( luaVM, 2, LUA_TBOOLEAN ) )
+                    {
+                        bLoop = ( lua_toboolean ( luaVM, 2 ) ) ? true : false;
+                    }
+                    CClientSound* pSound = CStaticFunctionDefinitions::PlaySound ( pResource, szFilename, bLoop );
+                    if ( pSound )
+                    {
+                        lua_pushelement ( luaVM, pSound );
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::PlaySound3D ( lua_State* luaVM )
+{
+    int iArgument2 = lua_type ( luaVM, 2 );
+    int iArgument3 = lua_type ( luaVM, 3 );
+    int iArgument4 = lua_type ( luaVM, 4 );
+    if ( ( lua_istype ( luaVM, 1, LUA_TSTRING ) ) &&
+         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) &&
+         ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) &&
+         ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING ) )
+    {
+        CVector vecPosition ( static_cast < float > ( lua_tonumber ( luaVM, 2 ) ),
+                              static_cast < float > ( lua_tonumber ( luaVM, 3 ) ),
+                              static_cast < float > ( lua_tonumber ( luaVM, 4 ) ) );
+
+        const char* szSound = lua_tostring ( luaVM, 1 );
+
+        CLuaMain * luaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+        if ( luaMain )
+        {
+            CResource* pResource = luaMain->GetResource();
+            if ( pResource )
+            {
+		        char szFilename [ MAX_STRING_LENGTH ];
+                snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), szSound );
+		        if ( IsValidFilePath ( lua_tostring ( luaVM, 1 ) ) )
+                {
+                    bool bLoop = false;
+                    if ( lua_istype ( luaVM, 5, LUA_TBOOLEAN ) )
+                    {
+                        bLoop = ( lua_toboolean ( luaVM, 5 ) ) ? true : false;
+                    }
+                    CClientSound* pSound = CStaticFunctionDefinitions::PlaySound3D ( pResource, szFilename, vecPosition, bLoop );
+                    if ( pSound )
+                    {
+                        lua_pushelement ( luaVM, pSound );
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::StopSound ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            if ( CStaticFunctionDefinitions::StopSound ( *pSound ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetSoundPosition ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TNUMBER ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            unsigned int uiPosition = ( unsigned int ) lua_tonumber ( luaVM, 2 );
+            if ( CStaticFunctionDefinitions::SetSoundPosition ( *pSound, uiPosition ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetSoundPosition ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            unsigned int uiPosition = 0;
+            if ( CStaticFunctionDefinitions::GetSoundPosition ( *pSound, uiPosition ) )
+            {
+                lua_pushnumber ( luaVM, uiPosition );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetSoundLength ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            unsigned int uiLength = 0;
+            if ( CStaticFunctionDefinitions::GetSoundLength ( *pSound, uiLength ) )
+            {
+                lua_pushnumber ( luaVM, uiLength );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetSoundPaused ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TBOOLEAN ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            bool bPaused = ( lua_toboolean ( luaVM, 2 ) ) ? true : false;
+            if ( CStaticFunctionDefinitions::SetSoundPaused ( *pSound, bPaused ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::IsSoundPaused ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            bool bPaused = false;
+            if ( CStaticFunctionDefinitions::IsSoundPaused ( *pSound, bPaused ) )
+            {
+                lua_pushboolean ( luaVM, bPaused );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetSoundVolume ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TNUMBER ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            float fVolume = ( float ) lua_tonumber ( luaVM, 2 );
+            if ( CStaticFunctionDefinitions::SetSoundVolume ( *pSound, fVolume ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetSoundVolume ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            float fVolume = 0.0f;
+            if ( CStaticFunctionDefinitions::GetSoundVolume ( *pSound, fVolume ) )
+            {
+                lua_pushnumber ( luaVM, fVolume );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetSoundMinDistance ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TNUMBER ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            float fDistance = ( float ) lua_tonumber ( luaVM, 2 );
+            if ( CStaticFunctionDefinitions::SetSoundMinDistance ( *pSound, fDistance ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetSoundMinDistance ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            float fDistance = 0.0f;
+            if ( CStaticFunctionDefinitions::GetSoundMinDistance ( *pSound, fDistance ) )
+            {
+                lua_pushnumber ( luaVM, fDistance );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetSoundMaxDistance ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TNUMBER ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            float fDistance = ( float ) lua_tonumber ( luaVM, 2 );
+            if ( CStaticFunctionDefinitions::SetSoundMaxDistance ( *pSound, fDistance ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetSoundMaxDistance ( lua_State* luaVM )
+{
+    if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+    {
+        CClientSound* pSound = lua_tosound ( luaVM, 1 );
+        if ( pSound )
+        {
+            float fDistance = 0.0f;
+            if ( CStaticFunctionDefinitions::GetSoundMaxDistance ( *pSound, fDistance ) )
+            {
+                lua_pushnumber ( luaVM, fDistance );
+                return 1;
+            }
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+int CLuaFunctionDefinitions::Md5 ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TSTRING || lua_type ( luaVM, 1 ) == LUA_TNUMBER )
+    {
+        MD5 md5bytes;
+        char szResult[33];
+        CMD5Hasher hasher;
+        hasher.Calculate ( lua_tostring ( luaVM, 1 ), lua_objlen ( luaVM, 1 ), md5bytes );
+		hasher.ConvertToHex ( md5bytes, szResult );
+        lua_pushstring ( luaVM, szResult );
+        return 1;
+    }
+    else
+    {
+        m_pScriptDebugging->LogBadType ( luaVM, "md5" );
     }
     lua_pushboolean ( luaVM, false );
     return 1;

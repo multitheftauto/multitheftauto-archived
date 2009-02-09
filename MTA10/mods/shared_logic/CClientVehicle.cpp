@@ -247,16 +247,20 @@ void CClientVehicle::GetPosition ( CVector& vecPosition ) const
     // Is this a trailer being towed?
     else if ( m_pTowedByVehicle )
     {
-        // Is it streamed out, or not attached properly?
+        // Is it streamed out or not attached properly?
         if ( !m_pVehicle || !m_pVehicle->GetTowedByVehicle () )
         {
             // Grab the position behind the vehicle (should take X/Y rotation into acount)
-            m_pTowedByVehicle->GetPosition ( vecPosition );            
+            m_pTowedByVehicle->GetPosition ( vecPosition );
+
             CVector vecRotation;
             m_pTowedByVehicle->GetRotationRadians ( vecRotation );
             vecPosition.fX -= ( 5.0f * sin ( vecRotation.fZ ) );
             vecPosition.fY -= ( 5.0f * cos ( vecRotation.fZ ) );
-            return;
+        }
+        else
+        {
+            vecPosition = *m_pVehicle->GetPosition ( );
         }
     }
     // Streamed in?
@@ -651,6 +655,7 @@ void CClientVehicle::SetHealth ( float fHealth )
 void CClientVehicle::Fix ( void )
 {
     m_bBlown = false;
+    m_bBlowNextFrame = false;
     if ( m_pVehicle )
     {
         m_pVehicle->Fix ();
@@ -663,9 +668,9 @@ void CClientVehicle::Fix ( void )
     unsigned char ucDoorStates [ MAX_DOORS ];
     GetInitialDoorStates ( ucDoorStates );
     for ( int i = 0 ; i < MAX_DOORS ; i++ ) SetDoorStatus ( i, ucDoorStates [ i ] );
-    for ( i = 0 ; i < MAX_PANELS ; i++ ) SetPanelStatus ( i, 0 );
-    for ( i = 0 ; i < MAX_LIGHTS ; i++ ) SetLightStatus ( i, 0 );
-    for ( i = 0 ; i < MAX_WHEELS ; i++ ) SetWheelStatus ( i, 0 );    
+    for ( int i = 0 ; i < MAX_PANELS ; i++ ) SetPanelStatus ( i, 0 );
+    for ( int i = 0 ; i < MAX_LIGHTS ; i++ ) SetLightStatus ( i, 0 );
+    for ( int i = 0 ; i < MAX_WHEELS ; i++ ) SetWheelStatus ( i, 0 );    
 }
 
 
@@ -939,7 +944,7 @@ bool CClientVehicle::IsBelowWater ( void ) const
     GetPosition ( vecPosition );
     float fWaterLevel = 0.0f;
 
-    if ( g_pGame->GetWorld ()->GetWaterLevel ( &vecPosition, &fWaterLevel, 1, NULL ) )
+    if ( g_pGame->GetWaterManager ()->GetWaterLevel ( vecPosition, &fWaterLevel, true, NULL ) )
     {
         if ( vecPosition.fZ < fWaterLevel - 0.7 )
         {
@@ -1735,6 +1740,10 @@ void CClientVehicle::Create ( void )
     // If the vehicle doesn't exist
     if ( !m_pVehicle )
     {
+        #ifdef MTA_DEBUG
+            g_pCore->GetConsole ()->Printf ( "CClientVehicle::Create %d", GetModel() );
+        #endif
+
         // Check again that the limit isn't reached. We are required to do so because
         // we load async. The streamer isn't always aware of our limits.
         if ( CClientVehicleManager::IsVehicleLimitReached () )
@@ -1879,9 +1888,9 @@ void CClientVehicle::Create ( void )
 
             for ( int i = 0; i < MAX_DOORS; i++ )
                 pDamageManager->SetDoorStatus ( static_cast < eDoors > ( i ), m_ucDoorStates [i] );            
-            for ( i = 0; i < MAX_PANELS; i++ )
+            for ( int i = 0; i < MAX_PANELS; i++ )
                 pDamageManager->SetPanelStatus ( static_cast < ePanels > ( i ), m_ucPanelStates [i] );
-            for ( i = 0; i < MAX_LIGHTS; i++ )
+            for ( int i = 0; i < MAX_LIGHTS; i++ )
                 pDamageManager->SetLightStatus ( static_cast < eLights > ( i ), m_ucLightStates [i] );
         }
         for ( int i = 0; i < MAX_WHEELS; i++ )
@@ -1903,12 +1912,17 @@ void CClientVehicle::Create ( void )
         if ( m_pTowedVehicle )
         {
             CVehicle* pGameVehicle = m_pTowedVehicle->GetGameVehicle ();
-            if ( pGameVehicle ) pGameVehicle->SetTowLink ( m_pVehicle );
+            if ( pGameVehicle )
+                pGameVehicle->SetTowLink ( m_pVehicle );
         }
 
         // Reattach if we're being towed
         if ( m_pTowedByVehicle )
         {
+            CVector vecTowedByPos;
+            m_pTowedByVehicle->GetPosition ( vecTowedByPos );
+            SetPosition ( vecTowedByPos );
+
             CVehicle* pGameVehicle = m_pTowedByVehicle->GetGameVehicle ();
             if ( pGameVehicle )
             {
@@ -1948,6 +1962,11 @@ void CClientVehicle::Destroy ( void )
     // If the vehicle exists
     if ( m_pVehicle )
     {
+
+        #ifdef MTA_DEBUG
+            g_pCore->GetConsole ()->Printf ( "CClientVehicle::Destroy %d", GetModel() );
+        #endif
+
         // Invalidate
         m_pManager->InvalidateEntity ( this );
 
@@ -1977,9 +1996,9 @@ void CClientVehicle::Destroy ( void )
 
             for ( int i = 0; i < MAX_DOORS; i++ )
                 m_ucDoorStates [i] = pDamageManager->GetDoorStatus ( static_cast < eDoors > ( i ) );            
-            for ( i = 0; i < MAX_PANELS; i++ )
+            for ( int i = 0; i < MAX_PANELS; i++ )
                 m_ucPanelStates [i] = pDamageManager->GetPanelStatus ( static_cast < ePanels > ( i ) );
-            for ( i = 0; i < MAX_LIGHTS; i++ )
+            for ( int i = 0; i < MAX_LIGHTS; i++ )
                 m_ucLightStates [i] = pDamageManager->GetLightStatus ( static_cast < eLights > ( i ) );
         }
         for ( int i = 0; i < MAX_WHEELS; i++ )
@@ -2091,7 +2110,7 @@ CClientVehicle* CClientVehicle::GetRealTowedVehicle ( void )
 }
 
 
-void CClientVehicle::SetTowedVehicle ( CClientVehicle* pVehicle )
+bool CClientVehicle::SetTowedVehicle ( CClientVehicle* pVehicle )
 {
     // Do we already have a towed vehicle?
     if ( m_pTowedVehicle && pVehicle != m_pTowedVehicle )
@@ -2100,30 +2119,60 @@ void CClientVehicle::SetTowedVehicle ( CClientVehicle* pVehicle )
         CVehicle * pGameVehicle = m_pTowedVehicle->GetGameVehicle ();
         if ( pGameVehicle && m_pVehicle ) pGameVehicle->BreakTowLink ();
         m_pTowedVehicle->m_pTowedByVehicle = NULL;
+        m_pTowedVehicle = NULL;
     }
 
     // Do we have a new one to set?
     if ( pVehicle )
-    {      
-        // Add it
-        CVehicle * pGameVehicle = pVehicle->GetGameVehicle ();        
-        if ( pGameVehicle && m_pVehicle )
+    {
+        // Are we trying to establish a circular loop? (this would freeze everything up)
+        CClientVehicle* pCircTestVehicle = pVehicle;
+        while ( pCircTestVehicle )
         {
-            if ( m_pVehicle->GetTowedVehicle () != pGameVehicle )
-                pGameVehicle->SetTowLink ( m_pVehicle );
+            if ( pCircTestVehicle == this )
+                return false;
+            pCircTestVehicle = pCircTestVehicle->m_pTowedVehicle;
         }
+
         pVehicle->m_pTowedByVehicle = this;
+
+        // Add it
+        if ( m_pVehicle )
+        {
+            CVehicle * pGameVehicle = pVehicle->GetGameVehicle ();
+
+            if ( pGameVehicle )
+            {
+                // Both vehicles are streamed in
+                if ( m_pVehicle->GetTowedVehicle () != pGameVehicle )
+                    pGameVehicle->SetTowLink ( m_pVehicle );
+            }
+            else
+            {
+                // If only the towing vehicle is streamed in, force the towed vehicle to stream in
+                pVehicle->StreamIn ( true );
+            }
+        }
+        else
+        {
+            // If the towing vehicle is not streamed in, the towed vehicle can't be streamed in,
+            // so we move it to the towed position.
+            CVector vecPosition;
+            pVehicle->GetPosition ( vecPosition );
+            pVehicle->UpdateStreamPosition ( vecPosition );
+        }
     }
     else
         m_ulIllegalTowBreakTime = 0;
 
     m_pTowedVehicle = pVehicle;
+    return true;
 }
 
 
 bool CClientVehicle::SetWinchType ( eWinchType winchType )
 {
-    if ( GetModel () == 417 ) // Leviathon
+    if ( GetModel () == 417 ) // Leviathan
     {
         if ( m_pVehicle )
         {
@@ -2331,11 +2380,11 @@ bool CClientVehicle::IsInWater ( void )
         if ( pBoundingBox )
         {
             CVector vecMin = pBoundingBox->vecBoundMin;
-            CVector vecPosition, vecTemp;;
+            CVector vecPosition, vecTemp;
             GetPosition ( vecPosition );
             vecMin += vecPosition;
             float fWaterLevel;
-            if ( g_pGame->GetWorld ()->GetWaterLevel ( &vecPosition, &fWaterLevel, true, &vecTemp ) )
+            if ( g_pGame->GetWaterManager ()->GetWaterLevel ( vecPosition, &fWaterLevel, true, &vecTemp ) )
             {
                 if ( vecPosition.fZ <= fWaterLevel )
                 {

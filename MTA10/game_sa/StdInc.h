@@ -8,6 +8,11 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include <algorithm>
+#include <list>
+#include <map>
+#include <vector>
+
 // SDK includes
 #include <game/CGame.h>
 #include <ijsify.h>
@@ -42,6 +47,7 @@
 #include "CWeatherSA.h"
 #include "CTextSA.h"
 #include "CPedSA.h"
+#include "CPedSoundSA.h"
 #include "CAudioSA.h"
 #include "CPlayerInfoSA.h"
 #include "CPopulationSA.h"
@@ -84,4 +90,4 @@
 #include "CObjectSA.h"
 #include "CBuildingSA.h"
 #include "CRestartSA.h"
-
+#include "CWaterManagerSA.h"

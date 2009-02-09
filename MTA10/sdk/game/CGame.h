@@ -45,6 +45,7 @@ typedef void ( InRenderer ) ( void );
 #include "CModelInfo.h"
 #include "CPad.h"
 #include "CPathFind.h"
+#include "CPedModelInfo.h"
 #include "CPickups.h"
 #include "CPlayerInfo.h"
 #include "CPools.h"
@@ -63,6 +64,7 @@ typedef void ( InRenderer ) ( void );
 #include "CText.h"
 #include "CTheCarGenerators.h"
 #include "CVisibilityPlugins.h"
+#include "CWaterManager.h"
 #include "CWeather.h"
 #include "CWeaponInfo.h"
 #include "CWorld.h"
@@ -121,7 +123,8 @@ public:
     virtual CVisibilityPlugins  * GetVisibilityPlugins () = 0;
     virtual CKeyGen             * GetKeyGen () = 0;
     virtual CRopes              * GetRopes () = 0;
-    virtual CFx                * GetFx () = 0;
+    virtual CFx                 * GetFx () = 0;
+    virtual CWaterManager       * GetWaterManager () = 0;
 
     virtual class CEventDamage  * GetEventDamage ( class CEventDamageSAInterface * pInterface ) = 0;
 

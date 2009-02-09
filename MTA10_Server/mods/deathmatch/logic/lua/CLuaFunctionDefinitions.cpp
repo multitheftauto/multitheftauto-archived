@@ -61,7 +61,7 @@ LUALIB_API int luaM_toref (lua_State *L, int i) {
 
 static CBlipManager*                                    m_pBlipManager = NULL;
 static CLuaManager*                                     m_pLuaManager = NULL;
-static CMarkers*                                        m_pMarkerManager = NULL;
+static CMarkerManager*                                  m_pMarkerManager = NULL;
 static CObjectManager*                                  m_pObjectManager = NULL;
 static CPickupManager*                                  m_pPickupManager = NULL;
 static CPlayerManager*                                  m_pPlayerManager = NULL;
@@ -92,7 +92,7 @@ void CLuaFunctionDefinitions::SetLuaManager ( CLuaManager* pLuaManager )
 }
 
 
-void CLuaFunctionDefinitions::SetMarkerManager ( CMarkers* pMarkerManager )
+void CLuaFunctionDefinitions::SetMarkerManager ( CMarkerManager* pMarkerManager )
 {
     m_pMarkerManager = pMarkerManager;
 }
@@ -566,7 +566,7 @@ int CLuaFunctionDefinitions::TriggerClientEvent ( lua_State* luaVM )
 }
 
 
-int CLuaFunctionDefinitions::GetClientName ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetPlayerName ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
@@ -575,24 +575,24 @@ int CLuaFunctionDefinitions::GetClientName ( lua_State* luaVM )
 
         if ( pElement )
         {
-            if ( CStaticFunctionDefinitions::GetClientName ( pElement, szNick ) )
+            if ( CStaticFunctionDefinitions::GetPlayerName ( pElement, szNick ) )
             {
                 lua_pushstring ( luaVM, szNick );
                 return 1;
             }
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "getClientName", "client", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getPlayerName", "client", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "getClientName" );
+        m_pScriptDebugging->LogBadType ( luaVM, "getPlayerName" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
 }
 
 
-int CLuaFunctionDefinitions::GetClientIP ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetPlayerIP ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
@@ -601,31 +601,31 @@ int CLuaFunctionDefinitions::GetClientIP ( lua_State* luaVM )
 
         if ( pElement )
         {
-            if ( CStaticFunctionDefinitions::GetClientIP ( pElement, szIP ) )
+            if ( CStaticFunctionDefinitions::GetPlayerIP ( pElement, szIP ) )
             {
                 lua_pushstring ( luaVM, szIP );
                 return 1;
             }
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "getClientIP", "client", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getPlayerIP", "client", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "getClientIP" );
+        m_pScriptDebugging->LogBadType ( luaVM, "getPlayerIP" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
 }
 
 
-int CLuaFunctionDefinitions::GetClientAccount ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetPlayerAccount ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
         CElement* pElement = lua_toelement ( luaVM, 1 );
         if ( pElement )
         {
-            CAccount* pAccount = CStaticFunctionDefinitions::GetClientAccount ( pElement );
+            CAccount* pAccount = CStaticFunctionDefinitions::GetPlayerAccount ( pElement );
             if ( pAccount )
             {
                 lua_pushaccount ( luaVM, pAccount );
@@ -633,17 +633,17 @@ int CLuaFunctionDefinitions::GetClientAccount ( lua_State* luaVM )
             }
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "getClientAccount", "client", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getPlayerAccount", "client", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "getClientAccount" );
+        m_pScriptDebugging->LogBadType ( luaVM, "getPlayerAccount" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
 }
 
 
-int CLuaFunctionDefinitions::SetClientName ( lua_State* luaVM )
+int CLuaFunctionDefinitions::SetPlayerName ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA &&
          lua_type ( luaVM, 2 ) == LUA_TSTRING )
@@ -652,17 +652,17 @@ int CLuaFunctionDefinitions::SetClientName ( lua_State* luaVM )
         const char* szName = lua_tostring ( luaVM, 2 );
         if ( pElement )
         {
-            if ( CStaticFunctionDefinitions::SetClientName ( pElement, szName ) )
+            if ( CStaticFunctionDefinitions::SetPlayerName ( pElement, szName ) )
             {
                 lua_pushboolean ( luaVM, true );
                 return 1;
             }
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "setClientName", "client", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setPlayerName", "client", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "setClientName" );
+        m_pScriptDebugging->LogBadType ( luaVM, "setPlayerName" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -1159,14 +1159,14 @@ int CLuaFunctionDefinitions::GetPlayerMoney ( lua_State* luaVM )
 }
 
 
-int CLuaFunctionDefinitions::GetPlayerOccupiedVehicle ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetPedOccupiedVehicle ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
-        CPlayer* pPlayer = lua_toplayer ( luaVM, 1 );
-        if ( pPlayer )
+        CPed* pPed = lua_toped ( luaVM, 1 );
+        if ( pPed )
         {
-            CVehicle* pVehicle = CStaticFunctionDefinitions::GetPlayerOccupiedVehicle ( pPlayer );
+            CVehicle* pVehicle = CStaticFunctionDefinitions::GetPedOccupiedVehicle ( pPed );
             if ( pVehicle )
             {
                 lua_pushelement ( luaVM, pVehicle );
@@ -1174,36 +1174,36 @@ int CLuaFunctionDefinitions::GetPlayerOccupiedVehicle ( lua_State* luaVM )
             }
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "getPlayerOccupiedVehicle", "player", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getPedOccupiedVehicle", "ped", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "getPlayerOccupiedVehicle" );
+        m_pScriptDebugging->LogBadType ( luaVM, "getPedOccupiedVehicle" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
 }
 
 
-int CLuaFunctionDefinitions::GetPlayerOccupiedVehicleSeat ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetPedOccupiedVehicleSeat ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
-        CPlayer* pPlayer = lua_toplayer ( luaVM, 1 );
+        CPed* pPed = lua_toped ( luaVM, 1 );
         unsigned int uiSeat = 0;
 
-        if ( pPlayer )
+        if ( pPed )
         {
-            if ( CStaticFunctionDefinitions::GetPlayerOccupiedVehicleSeat ( pPlayer, uiSeat ) )
+            if ( CStaticFunctionDefinitions::GetPedOccupiedVehicleSeat ( pPed, uiSeat ) )
             {
                 lua_pushnumber ( luaVM, uiSeat );
                 return 1;
             }
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "getPlayerOccupiedVehicleSeat", "player", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getPedOccupiedVehicleSeat", "ped", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "getPlayerOccupiedVehicleSeat" );
+        m_pScriptDebugging->LogBadType ( luaVM, "getPedOccupiedVehicleSeat" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -1377,25 +1377,25 @@ int CLuaFunctionDefinitions::IsPlayerMuted ( lua_State* luaVM )
 }
 
 
-int CLuaFunctionDefinitions::IsPlayerInVehicle ( lua_State* luaVM )
+int CLuaFunctionDefinitions::IsPedInVehicle ( lua_State* luaVM )
 {
     if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
-        CPlayer* pPlayer = lua_toplayer ( luaVM, 1 );
+        CPed* pPed = lua_toped ( luaVM, 1 );
         bool bInVehicle;
 
-        if ( pPlayer )
+        if ( pPed )
         {
-            bInVehicle = CStaticFunctionDefinitions::GetPlayerOccupiedVehicle ( pPlayer ) != NULL;
+            bInVehicle = CStaticFunctionDefinitions::GetPedOccupiedVehicle ( pPed ) != NULL;
             
             lua_pushboolean ( luaVM, bInVehicle );
             return 1;
         }
         else
-            m_pScriptDebugging->LogBadPointer ( luaVM, "isPlayerInVehicle", "player", 1 );
+            m_pScriptDebugging->LogBadPointer ( luaVM, "isPedInVehicle", "ped", 1 );
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "isPlayerInVehicle" );
+        m_pScriptDebugging->LogBadType ( luaVM, "isPedInVehicle" );
 
     lua_pushnil ( luaVM );
     return 1;
@@ -2788,6 +2788,42 @@ int CLuaFunctionDefinitions::SetPlayerBlurLevel ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "setPlayerBlurLevel" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::RedirectPlayer ( lua_State* luaVM )
+{
+    int iArgument2 = lua_type ( luaVM, 2 );
+    int iArgument3 = lua_type ( luaVM, 3 );
+    if ( ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA ) &&
+         ( iArgument2 == LUA_TSTRING ) &&
+         ( iArgument3 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) )
+    {
+        CElement* pElement = lua_toelement ( luaVM, 1 );
+
+        const char* szHost = lua_tostring ( luaVM, 2 );
+        unsigned short usPort = static_cast < unsigned short > ( lua_tonumber ( luaVM, 3 ) );
+
+        const char* szPassword = NULL;
+        if ( lua_type ( luaVM, 4 ) == LUA_TSTRING )        
+            szPassword = lua_tostring ( luaVM, 4 );
+
+        if ( pElement )
+        {
+            if ( CStaticFunctionDefinitions::RedirectPlayer ( pElement, szHost, usPort, szPassword ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "redirectPlayer", "element", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "redirectPlayer" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -6626,12 +6662,15 @@ int CLuaFunctionDefinitions::CreateFire ( lua_State* luaVM )
 	CElement* pCreator = NULL;
     if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
          ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) &&
-         ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) &&
-         ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING ) )
+         ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) )
     {
         // Grab the values
         CVector vecPosition = CVector ( float ( lua_tonumber ( luaVM, 1 ) ), float ( lua_tonumber ( luaVM, 2 ) ), float ( lua_tonumber ( luaVM, 3 ) ) );
-        float fSize = ( float ) lua_tonumber ( luaVM, 4 );
+        float fSize = 1.8f;
+		if ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING )
+		{
+			fSize = float ( lua_tonumber ( luaVM, 4 ) );
+		}
 
 		if ( iArgument5 == LUA_TLIGHTUSERDATA )
 		{
@@ -7679,6 +7718,67 @@ int CLuaFunctionDefinitions::CreateColRectangle ( lua_State* luaVM )
         }
     }
     else
+        m_pScriptDebugging->LogBadType ( luaVM, "createColPolygon" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::CreateColPolygon ( lua_State* luaVM )
+{ // Formerly createColSquare
+    // Verify the argument types
+    int iArgument1 = lua_type ( luaVM, 1 );
+    int iArgument2 = lua_type ( luaVM, 2 );
+    if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
+         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) )
+    {
+        // Grab the values
+        CVector vecPosition = CVector ( ( float ) lua_tonumber ( luaVM, 1 ), ( float ) lua_tonumber ( luaVM, 2 ), 0.0f );
+
+		CLuaMain* pLuaMain = g_pGame->GetLuaManager()->GetVirtualMachine ( luaVM );
+		if ( pLuaMain )
+		{
+			CResource* pResource = pLuaMain->GetResource();
+			if ( pResource )
+			{
+				// Create it and return it
+				CColPolygon* pShape = CStaticFunctionDefinitions::CreateColPolygon ( pResource, vecPosition );
+				if ( pShape )
+				{
+                    // Get the points
+                    int iArgument = 3;
+                    int iArgumentX = lua_type ( luaVM, iArgument++ );
+                    int iArgumentY = lua_type ( luaVM, iArgument++ );
+                    while ( iArgumentX != LUA_TNONE && iArgumentY != LUA_TNONE )
+                    {
+                        if ( ( iArgumentX == LUA_TNUMBER || iArgumentX == LUA_TSTRING ) &&
+                             ( iArgumentY == LUA_TNUMBER || iArgumentY == LUA_TSTRING ) )
+                        {
+                            pShape->AddPoint ( CVector2D ( ( float ) lua_tonumber ( luaVM, iArgument - 2 ),
+                                                           ( float ) lua_tonumber ( luaVM, iArgument - 1 ) ) );
+
+                            iArgumentX = lua_type ( luaVM, iArgument++ );
+                            iArgumentY = lua_type ( luaVM, iArgument++ );
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+					CElementGroup * pGroup = pResource->GetElementGroup();
+					if ( pGroup )
+					{
+						pGroup->Add ( pShape );
+					}
+					lua_pushelement ( luaVM, pShape );
+					return 1;
+				}
+			}
+        }
+    }
+    else
         m_pScriptDebugging->LogBadType ( luaVM, "createColRectangle" );
 
     lua_pushboolean ( luaVM, false );
@@ -8338,48 +8438,6 @@ int CLuaFunctionDefinitions::GetDistanceBetweenPoints3D ( lua_State* luaVM )
 }
 
 
-int CLuaFunctionDefinitions::RandInt ( lua_State* luaVM )
-{
-    // Valid types?
-    int iArgument1 = lua_type ( luaVM, 1 );
-    int iArgument2 = lua_type ( luaVM, 2 );
-    if ( ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING ) &&
-         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) )
-    {
-        // Grab the lower and the upper bound
-        int iLowerBound = static_cast < int > ( lua_tonumber ( luaVM, 1 ) );
-        int iUpperBound = static_cast < int > ( lua_tonumber ( luaVM, 2 ) );
-
-        // Upper bound must be bigger than lower bound
-        if ( iUpperBound >= iLowerBound )
-        {
-            // Grab the delta value and multiply it with a randomly generated float
-            int iRandom = GetRandom ( iLowerBound, iUpperBound );
-            
-            // Return it as an integer number
-            lua_pushnumber ( luaVM, static_cast < lua_Number > ( iRandom ) );
-            return 1;
-        }
-        else
-            m_pScriptDebugging->LogWarning ( luaVM, "Upper bound passed to randInt must be bigger or equal to lower bound" );
-    }
-    else
-        m_pScriptDebugging->LogBadType ( luaVM, "randInt" );
-
-    // Return false (failed)
-    lua_pushboolean ( luaVM, false );
-    return 1;
-}
-
-
-int CLuaFunctionDefinitions::RandFloat ( lua_State* luaVM )
-{
-    // Return it as float between 0 and 1
-    lua_pushnumber ( luaVM, static_cast < lua_Number > ( GetRandomDouble () ) );
-    return 1;
-}
-
-
 int CLuaFunctionDefinitions::GetTickCount_ ( lua_State* luaVM )
 {
     lua_pushnumber ( luaVM, GetTime () );
@@ -8976,34 +9034,44 @@ int CLuaFunctionDefinitions::ExecuteSQLQuery ( lua_State* luaVM )
 		CLuaArguments Args;
 		CRegistryResult Result;
         std::string strQuery = std::string ( lua_tostring ( luaVM, 1 ) );
-		unsigned int uiArray;
 
 		Args.ReadArguments ( luaVM, 2 );
 
 		if ( CStaticFunctionDefinitions::ExecuteSQLQuery ( strQuery, &Args, &Result ) ) {
-			if ( Result.nRows > 0 ) {
-				lua_newtable ( luaVM );
-				for ( int i = 0; i < Result.nRows; i++ ) {
-					lua_newtable ( luaVM );										// new table
-					lua_pushnumber ( luaVM, i+1 );								// row index number (starting at 1, not 0)
-					lua_pushvalue ( luaVM, -2 );								// value
-					lua_settable ( luaVM, -4 );									// refer to the top level table
-					for ( int j = 0; j < Result.nColumns; j++ ) {
-						uiArray = (i+1)*Result.nColumns + j;					// (the first row contains the column names and not the values, so skip it)
-						lua_pushnumber ( luaVM, j+1 );							// push the column index
-						if ( Result.pResult[uiArray] != NULL )
-							lua_pushstring ( luaVM, Result.pResult[uiArray] );	// if there's a value, push the column value as string
-						else
-							lua_pushnil ( luaVM );								// if there's no value, push nil
-						lua_settable ( luaVM, -3 );
-					}
-					lua_pop ( luaVM, 1 );										// pop the inner table
+			lua_newtable ( luaVM );
+			for ( int i = 0; i < Result.nRows; i++ ) {
+				lua_newtable ( luaVM );								// new table
+				lua_pushnumber ( luaVM, i+1 );						// row index number (starting at 1, not 0)
+				lua_pushvalue ( luaVM, -2 );						// value
+				lua_settable ( luaVM, -4 );						    // refer to the top level table
+				for ( int j = 0; j < Result.nColumns; j++ )
+                {
+                    CRegistryResultCell& cell = Result.Data[i][j];
+                    if ( cell.nType == SQLITE_NULL )
+                        continue;
+					lua_pushnumber ( luaVM, j + 1 );		        // push the column index
+                    switch ( cell.nType )                           // push the value with the right type
+                    {
+                        case SQLITE_INTEGER:
+                            lua_pushnumber ( luaVM, cell.nVal );
+                            break;
+                        case SQLITE_FLOAT:
+                            lua_pushnumber ( luaVM, cell.fVal );
+                            break;
+                        case SQLITE_BLOB:
+                            lua_pushlstring ( luaVM, (char *)cell.pVal, cell.nLength );
+                            break;
+                        case SQLITE_TEXT:
+                            lua_pushlstring ( luaVM, (char *)cell.pVal, cell.nLength - 1 );
+                            break;
+                        default:
+                            lua_pushnil ( luaVM );
+                    }
+					lua_settable ( luaVM, -3 );
 				}
-				return 1;
-			} else {
-				lua_pushboolean ( luaVM, true );
-				return 1;
+				lua_pop ( luaVM, 1 );							    // pop the inner table
 			}
+			return 1;
 		} else {
 			m_pScriptDebugging->LogError ( luaVM, "Database query failed: %s", CStaticFunctionDefinitions::SQLGetLastError ().c_str () );
 		}
@@ -9024,38 +9092,52 @@ int CLuaFunctionDefinitions::ExecuteSQLSelect ( lua_State* luaVM )
         std::string strTable = std::string ( lua_tostring ( luaVM, 1 ) );
         std::string strColumns = std::string ( lua_tostring ( luaVM, 2 ) );
         std::string strWhere;
-		unsigned int uiLimit = 0, uiArray;
+		unsigned int uiLimit = 0;
 
 		if ( lua_type ( luaVM, 3 ) == LUA_TSTRING )
             strWhere = std::string ( lua_tostring ( luaVM, 3 ) );
 		if ( lua_type ( luaVM, 4 ) == LUA_TNUMBER )
 			uiLimit = static_cast < unsigned int > ( lua_tonumber ( luaVM, 4 ) );
 
-		if ( CStaticFunctionDefinitions::ExecuteSQLSelect ( strTable, strColumns, strWhere, uiLimit, &Result ) ) {
-			if ( Result.nRows > 0 ) {
-				lua_newtable ( luaVM );
-				for ( int i = 0; i < Result.nRows; i++ ) {
-					lua_newtable ( luaVM );										// new table
-					lua_pushnumber ( luaVM, i+1 );								// row index number (starting at 1, not 0)
-					lua_pushvalue ( luaVM, -2 );								// value
-					lua_settable ( luaVM, -4 );									// refer to the top level table
-					for ( int j = 0; j < Result.nColumns; j++ ) {
-						uiArray = (i+1)*Result.nColumns + j;					// (the first row contains the column names and not the values, so skip it)
-						lua_pushnumber ( luaVM, j+1 );							// push the column index
-						if ( Result.pResult[uiArray] != NULL )
-							lua_pushstring ( luaVM, Result.pResult[uiArray] );	// if there's a value, push the column value as string
-						else
-							lua_pushnil ( luaVM );								// if there's no value, push nil
-						lua_settable ( luaVM, -3 );
-					}
-					lua_pop ( luaVM, 1 );										// pop the inner table
+		if ( CStaticFunctionDefinitions::ExecuteSQLSelect ( strTable, strColumns, strWhere, uiLimit, &Result ) )
+        {
+			lua_newtable ( luaVM );
+			for ( int i = 0; i < Result.nRows; i++ ) {
+				lua_newtable ( luaVM );								// new table
+				lua_pushnumber ( luaVM, i+1 );						// row index number (starting at 1, not 0)
+				lua_pushvalue ( luaVM, -2 );						// value
+				lua_settable ( luaVM, -4 );						    // refer to the top level table
+				for ( int j = 0; j < Result.nColumns; j++ )
+                {
+                    CRegistryResultCell& cell = Result.Data[i][j];
+                    if ( cell.nType == SQLITE_NULL )
+                        continue;
+					lua_pushnumber ( luaVM, j + 1 );		        // push the column index
+                    switch ( cell.nType )                           // push the value with the right type
+                    {
+                        case SQLITE_INTEGER:
+                            lua_pushnumber ( luaVM, cell.nVal );
+                            break;
+                        case SQLITE_FLOAT:
+                            lua_pushnumber ( luaVM, cell.fVal );
+                            break;
+                        case SQLITE_BLOB:
+                            lua_pushlstring ( luaVM, (char *)cell.pVal, cell.nLength );
+                            break;
+                        case SQLITE_TEXT:
+                            lua_pushlstring ( luaVM, (char *)cell.pVal, cell.nLength - 1 );
+                            break;
+                        default:
+                            lua_pushnil ( luaVM );
+                    }
+					lua_settable ( luaVM, -3 );
 				}
-				return 1;
-			} else {
-				lua_pushboolean ( luaVM, false );
-				return 1;
+				lua_pop ( luaVM, 1 );							    // pop the inner table
 			}
-		} else {
+			return 1;
+		}
+        else
+        {
 			m_pScriptDebugging->LogError ( luaVM, "Database query failed: %s", CStaticFunctionDefinitions::SQLGetLastError ().c_str () );
 		}
     }
@@ -9563,18 +9645,38 @@ int CLuaFunctionDefinitions::BanPlayer ( lua_State* luaVM )
             CPlayer* pResponsible = NULL;
             const char* szReason = NULL;
 
-            if ( lua_type ( luaVM, 2 ) == LUA_TLIGHTUSERDATA )
+            bool bIP = true;
+            bool bUsername = false;
+            bool bSerial = false;
+
+            if ( lua_type ( luaVM, 2 ) == LUA_TBOOLEAN )
             {
-                pResponsible = lua_toplayer ( luaVM, 2 );
+                bIP = ( lua_toboolean ( luaVM, 2 ) ) ? true : false;
             }
-            if ( lua_type ( luaVM, 3 ) == LUA_TSTRING )
-                szReason = lua_tostring ( luaVM, 3 );
+
+            if ( lua_type ( luaVM, 3 ) == LUA_TBOOLEAN )
+            {
+                bUsername = ( lua_toboolean ( luaVM, 3 ) ) ? true : false;
+            }
+
+            if ( lua_type ( luaVM, 4 ) == LUA_TBOOLEAN )
+            {
+                bSerial = ( lua_toboolean ( luaVM, 4 ) ) ? true : false;
+            }
+
+            if ( lua_type ( luaVM, 5 ) == LUA_TLIGHTUSERDATA )
+            {
+                pResponsible = lua_toplayer ( luaVM, 5 );
+            }
+            if ( lua_type ( luaVM, 6 ) == LUA_TSTRING )
+                szReason = lua_tostring ( luaVM, 6 );
 
             if ( pPlayer )
             {
-                if ( CStaticFunctionDefinitions::BanPlayer ( pPlayer, pResponsible, szReason ) )
+                CBan* pBan = NULL;
+                if ( pBan = CStaticFunctionDefinitions::BanPlayer ( pPlayer, bIP, bUsername, bSerial, pResponsible, szReason ) )
                 {
-                    lua_pushboolean ( luaVM, true );
+                    lua_pushban ( luaVM, pBan );
                     return 1;
                 }
             }
@@ -9590,96 +9692,76 @@ int CLuaFunctionDefinitions::BanPlayer ( lua_State* luaVM )
 }
 
 
-int CLuaFunctionDefinitions::BanIP ( lua_State* luaVM )
+int CLuaFunctionDefinitions::AddBan ( lua_State* luaVM )
 {
-    if ( lua_type ( luaVM, 1 ) == LUA_TSTRING )
+    if ( ( lua_type ( luaVM, 1 ) == LUA_TSTRING ) ||
+         ( lua_type ( luaVM, 2 ) == LUA_TSTRING ) ||
+         ( lua_type ( luaVM, 3 ) == LUA_TSTRING ) )
     {
-        const char* szIP = lua_tostring ( luaVM, 1 );
-        CPlayer* pResponsible = NULL;
-        if ( lua_type ( luaVM, 2 ) == LUA_TLIGHTUSERDATA )
+        const char* szIP = NULL;
+        if ( lua_type ( luaVM, 1 ) == LUA_TSTRING )
         {
-            pResponsible = lua_toplayer ( luaVM, 2 );
+            szIP = lua_tostring ( luaVM, 1 );
         }
 
-        if ( CStaticFunctionDefinitions::BanIP ( szIP, pResponsible ) )
+        const char* szUsername = NULL;
+        if ( lua_type ( luaVM, 2 ) == LUA_TSTRING )
         {
-            lua_pushboolean ( luaVM, true );
+            szUsername = lua_tostring ( luaVM, 2 );
+        }
+
+        const char* szSerial = NULL;
+        if ( lua_type ( luaVM, 3 ) == LUA_TSTRING )
+        {
+            szSerial = lua_tostring ( luaVM, 3 );
+        }
+
+        CPlayer* pResponsible = NULL;
+        if ( lua_type ( luaVM, 4 ) == LUA_TLIGHTUSERDATA )
+        {
+            pResponsible = lua_toplayer ( luaVM, 4 );
+        }
+
+        const char* szReason = NULL;
+        if ( lua_type ( luaVM, 5 ) == LUA_TSTRING )
+        {
+            szReason = lua_tostring ( luaVM, 5 );
+        }
+
+        CBan* pBan = NULL;
+		if ( pBan = CStaticFunctionDefinitions::AddBan ( szIP, szUsername, szSerial, pResponsible, szReason ) )
+        {
+            lua_pushban ( luaVM, pBan );
             return 1;
         }
     }
     else
-        m_pScriptDebugging->LogBadType ( luaVM, "banIP" );
+        m_pScriptDebugging->LogBadType ( luaVM, "addBan" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
 }
 
 
-int CLuaFunctionDefinitions::UnbanIP ( lua_State* luaVM )
+int CLuaFunctionDefinitions::RemoveBan ( lua_State* luaVM )
 {
-    if ( lua_type ( luaVM, 1 ) == LUA_TSTRING )
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
     {
-        const char* szIP = lua_tostring ( luaVM, 1 );
-        CPlayer* pResponsible = NULL;
-        if ( lua_type ( luaVM, 2 ) == LUA_TLIGHTUSERDATA )
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
         {
-            pResponsible = lua_toplayer ( luaVM, 2 );
-        }
+            CPlayer* pResponsible = NULL;
+            if ( lua_type ( luaVM, 2 ) == LUA_TLIGHTUSERDATA )
+            {
+                pResponsible = lua_toplayer ( luaVM, 2 );
+            }
 
-        if ( CStaticFunctionDefinitions::UnbanIP ( szIP, pResponsible ) )
-        {
-            lua_pushboolean ( luaVM, true );
-            return 1;
-        }
-    }
-    else
-        m_pScriptDebugging->LogBadType ( luaVM, "unbanIP" );
-
-    lua_pushboolean ( luaVM, false );
-    return 1;
-}
-
-
-int CLuaFunctionDefinitions::BanSerial ( lua_State* luaVM )
-{
-    if ( lua_type ( luaVM, 1 ) == LUA_TSTRING )
-    {
-        const char* szSerial = lua_tostring ( luaVM, 1 );
-        CPlayer* pResponsible = NULL;
-        if ( lua_type ( luaVM, 2 ) == LUA_TLIGHTUSERDATA )
-        {
-            pResponsible = lua_toplayer ( luaVM, 2 );
-        }
-
-		if ( CStaticFunctionDefinitions::BanSerial ( szSerial, pResponsible ) )
-        {
-            lua_pushboolean ( luaVM, true );
-            return 1;
-        }
-    }
-    else
-        m_pScriptDebugging->LogBadType ( luaVM, "banSerial" );
-
-    lua_pushboolean ( luaVM, false );
-    return 1;
-}
-
-
-int CLuaFunctionDefinitions::UnbanSerial ( lua_State* luaVM )
-{
-    if ( lua_type ( luaVM, 1 ) == LUA_TSTRING )
-    {
-        const char* szSerial = lua_tostring ( luaVM, 1 );
-        CPlayer* pResponsible = NULL;
-        if ( lua_type ( luaVM, 2 ) == LUA_TLIGHTUSERDATA )
-        {
-            pResponsible = lua_toplayer ( luaVM, 2 );
-        }
-
-        if ( CStaticFunctionDefinitions::UnbanSerial ( szSerial, pResponsible ) )
-        {
-            lua_pushboolean ( luaVM, true );
-            return 1;
+            if ( CStaticFunctionDefinitions::RemoveBan ( pBan, pResponsible ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
         }
     }
     else
@@ -9690,41 +9772,187 @@ int CLuaFunctionDefinitions::UnbanSerial ( lua_State* luaVM )
 }
 
 
-int CLuaFunctionDefinitions::GetBansXML ( lua_State* luaVM )
+int CLuaFunctionDefinitions::GetBans ( lua_State* luaVM )
 {
     // Grab its lua
     CLuaMain* pLuaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
     if ( pLuaMain )
     {
-        // Save the ban list before retrieving it
-        g_pGame->GetBanManager ()->SaveBanList ();
+        lua_newtable ( luaVM );
+        
+        CStaticFunctionDefinitions::GetBans ( pLuaMain );
 
-        // Create a ban XML
-	    CXMLFile* pBanFile = g_pServerInterface->GetXML()->CreateXML ( g_pGame->GetBanManager()->GetFilePath () );
-	    if ( pBanFile )
-	    {
-            // Try to parse it
-            if ( pBanFile->Parse () )
-            {
-                // Try to parse it
-		        CXMLNode* pNode = pBanFile->GetRootNode ();
-		        if ( pNode )
-		        {
-                    // Reference it in the LUA VM so that it's for sure deleted
-                    pLuaMain->AddXML ( pBanFile );
-
-                    // Return the node
-			        lua_pushxmlnode ( luaVM, pNode );
-			        return 1;
-		        }
-            }
-
-            // Delete it again
-            g_pServerInterface->GetXML()->DeleteXML ( pBanFile );
-	    }
+        return 1;
     }
 
-    // Failed
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetBanIP ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szIP [32];
+            if ( CStaticFunctionDefinitions::GetBanIP ( pBan, szIP, 31 ) )
+            {
+                lua_pushstring ( luaVM, szIP );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanIP" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetBanSerial ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szSerial [64];
+            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szSerial, 63 ) )
+            {
+                lua_pushstring ( luaVM, szSerial );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanSerial" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetBanUsername ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szUsername [32];
+            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szUsername, 31 ) )
+            {
+                lua_pushstring ( luaVM, szUsername );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanUsername" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetBanNick ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szNick [32];
+            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szNick, 31 ) )
+            {
+                lua_pushstring ( luaVM, szNick );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanNick" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetBanTime ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szTime [32];
+            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szTime, 31 ) )
+            {
+                lua_pushstring ( luaVM, szTime );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanTime" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetBanReason ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szReason [256];
+            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szReason, 255 ) )
+            {
+                lua_pushstring ( luaVM, szReason );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanReason" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetBanAdmin ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            char szAdmin [32];
+            if ( CStaticFunctionDefinitions::GetBanAdmin ( pBan, szAdmin, 255 ) )
+            {
+                lua_pushstring ( luaVM, szAdmin );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getBanAdmin" );
+
     lua_pushboolean ( luaVM, false );
     return 1;
 }
@@ -9850,7 +10078,8 @@ int CLuaFunctionDefinitions::Set ( lua_State* luaVM )
 
 	if ( lua_type ( luaVM, 1 ) == LUA_TSTRING && lua_type ( luaVM, 2 ) > LUA_TNIL ) {
 		CLuaArguments Args;
-		Args.ReadArgument ( luaVM, 2 );
+        for ( int i = 2; i <= lua_gettop ( luaVM ); i++ )
+		    Args.ReadArgument ( luaVM, i );
 
         std::string strSetting = lua_tostring ( luaVM, 1 );
         std::string strResourceName = pResource->GetName ();
@@ -9936,4 +10165,24 @@ int CLuaFunctionDefinitions::Get ( lua_State* luaVM )
 
 	lua_pushboolean ( luaVM, false );
 	return 1;
+}
+
+int CLuaFunctionDefinitions::Md5 ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TSTRING || lua_type ( luaVM, 1 ) == LUA_TNUMBER )
+    {
+        MD5 md5bytes;
+        char szResult[33];
+        CMD5Hasher hasher;
+        hasher.Calculate ( lua_tostring ( luaVM, 1 ), lua_objlen ( luaVM, 1 ), md5bytes );
+		hasher.ConvertToHex ( md5bytes, szResult );
+        lua_pushstring ( luaVM, szResult );
+        return 1;
+    }
+    else
+    {
+        m_pScriptDebugging->LogBadType ( luaVM, "md5" );
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
 }

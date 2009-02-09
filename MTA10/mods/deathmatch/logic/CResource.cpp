@@ -101,6 +101,9 @@ CResource::~CResource ( void )
 	g_pClientGame->GetElementDeleter ()->DeleteRecursive ( m_pResourceGUIEntity );
 	m_pResourceGUIEntity = NULL;
 
+    // Undo all changes to water
+    g_pGame->GetWaterManager ()->UndoChanges ( this );
+
     // TODO: remove them from the core too!!
     // Destroy all the element groups attached directly to this resource
     list < CElementGroup* > ::iterator itere = m_elementGroups.begin ();
@@ -193,6 +196,74 @@ bool CResource::CallExportedFunction ( const char * szFunctionName, CLuaArgument
     return false;
 }
 
+
+//
+// Quick integrity check of png, dff and txd files
+//
+static bool CheckFileForCorruption( string strPath )
+{
+    const char* szExt   = strPath.c_str () + max<long>( 0, strPath.length () - 4 );
+    bool bIsBad         = false;
+
+    if ( stricmp ( szExt, ".PNG" ) == 0 )
+    {
+        // Open the file
+        if ( FILE* pFile = fopen ( strPath.c_str (), "rb" ) )
+        {
+            // This is what the png header should look like
+            unsigned char pGoodHeader [8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+
+             // Load the header
+            unsigned char pBuffer [8] = { 0,0,0,0,0,0,0,0 };
+            fread ( pBuffer, 1, 8, pFile );
+
+            // Check header integrity
+            if ( memcmp ( pBuffer, pGoodHeader, 8 ) )
+                bIsBad = true;
+
+            // Close the file
+            fclose ( pFile );
+        }
+    }
+    else
+    if ( stricmp ( szExt, ".TXD" ) == 0 || stricmp ( szExt, ".DFF" ) == 0 )
+    {
+        // Open the file
+        if ( FILE* pFile = fopen ( strPath.c_str (), "rb" ) )
+        {
+            struct {
+                long id;
+                long size;
+                long ver;
+            } header = {0,0,0};
+
+            // Load the first header
+            fread ( &header, 1, sizeof(header), pFile );
+            long pos = sizeof(header);
+            long validSize = header.size + pos;
+
+            // Step through the sections
+            while ( pos < validSize )
+            {
+                if ( fread ( &header, 1, sizeof(header), pFile ) != sizeof(header) )
+                    break;
+                fseek ( pFile, header.size, SEEK_CUR );
+                pos += header.size + sizeof(header);
+            }
+
+            // Check integrity
+            if ( pos != validSize )
+                bIsBad = true;
+               
+            // Close the file
+            fclose ( pFile );
+        }        
+    }
+
+    return bIsBad;
+}
+
+
 void CResource::Load ( CClientEntity *pRootEntity )
 {
     m_pRootEntity = pRootEntity;
@@ -215,6 +286,13 @@ void CResource::Load ( CClientEntity *pRootEntity )
         {
             // Load the resource file
 		    m_pLuaVM->LoadScriptFromFile ( ( *iter )->GetName () );
+        }
+        else
+        if ( CheckFileForCorruption ( ( *iter )->GetName () ) )
+        {
+            char buffer[256];
+            snprintf ( buffer, 256, "WARNING: File '%s' in resource '%s' is invalid.", (*iter)->GetShortName (), m_szResourceName );
+            g_pCore->ChatEchoColor ( buffer, 255, 0, 0 );
         }
     }
 

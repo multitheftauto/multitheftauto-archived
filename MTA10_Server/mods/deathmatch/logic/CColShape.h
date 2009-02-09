@@ -22,6 +22,7 @@ enum eColShapeType
     COLSHAPE_CUBOID,
     COLSHAPE_SPHERE,
     COLSHAPE_RECTANGLE,
+    COLSHAPE_POLYGON,
     COLSHAPE_TUBE,
 };
 
@@ -40,8 +41,8 @@ public:
     inline bool                 IsEnabled           ( void )                            { return m_bIsEnabled; };
     inline void                 SetEnabled          ( bool bEnabled )                   { m_bIsEnabled = bEnabled; };
 
-    const CVector&              GetPosition         ( void )                            { return m_vecPosition; };
-    void                        SetPosition         ( const CVector& vecPosition )      { m_vecPosition = vecPosition; };
+    virtual const CVector&      GetPosition         ( void )                            { return m_vecPosition; };
+    virtual void                SetPosition         ( const CVector& vecPosition )      { m_vecPosition = vecPosition; };
 
     void                        CallHitCallback     ( CElement& Element );
     void                        CallLeaveCallback   ( CElement& Element );

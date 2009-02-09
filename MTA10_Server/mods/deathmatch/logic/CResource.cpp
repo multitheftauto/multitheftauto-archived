@@ -197,8 +197,8 @@ bool CResource::Load ( void )
         }
 
         // Load the meta.xml file
-        char szMeta[ MAX_PATH ];
-        if ( !GetFilePath ( "meta.xml", szMeta, MAX_PATH ) )
+        string strMeta;
+        if ( !GetFilePath ( "meta.xml", strMeta ) )
         {
             // Unregister the EHS stuff
             g_pGame->GetHTTPD()->UnregisterEHS ( m_strResourceName.c_str () );
@@ -212,7 +212,7 @@ bool CResource::Load ( void )
 
 	    // Load the XML file and parse it
         bool bParsedSuccessfully = false;
-        CXMLFile * metaFile = g_pServerInterface->GetXML ()->CreateXML ( szMeta );
+        CXMLFile * metaFile = g_pServerInterface->GetXML ()->CreateXML ( strMeta.c_str () );
         if ( metaFile )
         {
             bParsedSuccessfully = metaFile->Parse ();
@@ -221,14 +221,17 @@ bool CResource::Load ( void )
 	    // If we parsed it successfully
         if ( bParsedSuccessfully )
         {
-            CXMLNode * root = metaFile->GetRootNode();
+            CXMLNode * root = metaFile->GetRootNode ();
             if ( root )
             {
 			    // Find the settings node and copy it (meta xml is deleted at the end of this function, to preserve memory)
-			    CXMLNode * pNodeSettings = root->FindSubNode("settings",0);
-			    if ( pNodeSettings ) m_pNodeSettings = pNodeSettings->CopyNode ( NULL );
+			    CXMLNode * pNodeSettings = root->FindSubNode ( "settings", 0 );
+			    if ( pNodeSettings )
+                    m_pNodeSettings = pNodeSettings->CopyNode ( NULL );
 
-                CXMLNode * update = root->FindSubNode("update", 0);
+                // disabled for now
+                /*
+                CXMLNode * update = root->FindSubNode ( "update", 0 );
                 if ( update )
                 {
                     CXMLAttributes * attributes = &(update->GetAttributes());
@@ -237,30 +240,29 @@ bool CResource::Load ( void )
                         CXMLAttribute * urlAttr = attributes->Find ( "url" );
                         if ( urlAttr )
                         {
-                            /*
                             char szURL[512];
                             urlAttr->GetValue ( szURL, 511 );
                             szURL[511] = '\0';
 
-                            //g_pGame->GetResourceDownloader()->AddUpdateSite ( szURL ); // disabled for now
-                            */
+                            //g_pGame->GetResourceDownloader()->AddUpdateSite ( szURL );
                         }
                     }
                 }
+                */
 
-			    CXMLNode * info = root->FindSubNode("info",0);
+			    CXMLNode * info = root->FindSubNode ( "info", 0 );
                 if ( info )
                 {
-                    CXMLAttributes * attributes = &(info->GetAttributes());
+                    CXMLAttributes * attributes = & ( info->GetAttributes () );
                     if ( attributes )
                     {
                         for ( unsigned int i = 0; i < attributes->Count(); i++ )
                         {
-                            CXMLAttribute * attribute = attributes->Get(i);
+                            CXMLAttribute * attribute = attributes->Get ( i );
                             m_infoValues.push_back ( new CInfoValue ( attribute->GetName (), attribute->GetValue() ) );
                         }
 
-                        CXMLAttribute * version = attributes->Find("major");
+                        CXMLAttribute * version = attributes->Find ( "major" );
                         if ( version )
                         {
                             m_uiVersionMajor = atoi ( version->GetValue ().c_str () );
@@ -278,7 +280,7 @@ bool CResource::Load ( void )
                             m_uiVersionRevision = atoi ( version->GetValue ().c_str () );
                         }
 
-                        version = attributes->Find("state");
+                        version = attributes->Find ( "state" );
                         if ( version )
                         {
                             const char *szVersion = version->GetValue ().c_str ();
@@ -299,8 +301,7 @@ bool CResource::Load ( void )
                     !ReadIncludedScripts ( root ) ||
                     !ReadIncludedHTML ( root ) ||
 				    !ReadIncludedExports ( root ) ||
-				    !ReadIncludedConfigs ( root ) ||
-					!ReadIncludedSettings () )
+				    !ReadIncludedConfigs ( root ) )
 			    {
 				    delete metaFile;
                     g_pGame->GetHTTPD()->UnregisterEHS ( m_strResourceName.c_str () );
@@ -344,15 +345,21 @@ bool CResource::Load ( void )
     return m_bLoaded;
 }
 
-
-void ReplaceSlashes(char * filename)
+void ReplaceSlashes ( string& strPath )
 {
-    for ( unsigned int i = 0; i < strlen(filename); i++ )
+    ReplaceOccurrencesInString ( strPath, "\\", "/" );
+}
+
+void ReplaceSlashes ( char* szPath )
+{
+    size_t iLen = strlen ( szPath );
+    for ( size_t i = 0; i < iLen; i++ )
     {
-        if ( filename[i] == '\\' )
-            filename[i] = '/';
+        if ( szPath [ i ] == '\\' )
+            szPath [ i ] = '/';
     }
 }
+
 bool CResource::Unload ( void )
 {
     Stop(true); 
@@ -472,51 +479,96 @@ void CResource::SetInfoValue ( const char * szKey, const char * szValue )
 	// If there was no matching key, create a new one and add it to our list
     pValue = new CInfoValue ( szKey, szValue );
     m_infoValues.push_back ( pValue );
+
+    // Save to xml
+    std::string strPath;
+    if ( GetFilePath ( "meta.xml", strPath ) )
+    {
+        // Load the meta file
+        CXMLFile* metaFile = g_pServerInterface->GetXML ()->CreateXML ( strPath.c_str() );
+        if ( metaFile )
+        {
+            // Parse it
+            if ( metaFile->Parse () )
+            {
+                // Grab its rootnode
+                CXMLNode* pRootNode = metaFile->GetRootNode ();
+                if ( pRootNode )
+                {
+                    // Create a new map subnode
+                    CXMLNode* pInfoNode = pRootNode->FindSubNode ( "info" );
+                    if ( pInfoNode )
+                    {
+                        CXMLAttribute* pAttr = pInfoNode->GetAttributes ().Find ( szKey );
+                        if ( pAttr ) pAttr->SetValue ( szValue );
+                        else pInfoNode->GetAttributes ().Create ( szKey )->SetValue ( szValue );
+                        // Success, write and destroy XML
+                    }
+                    else
+                    {
+                        pInfoNode = pInfoNode = pRootNode->CreateSubNode ( "info" );
+                        if ( pInfoNode )
+                        {
+                            pInfoNode->GetAttributes ().Create ( szKey )->SetValue ( szValue );
+                        }
+                    }
+                    metaFile->Write ();
+                }
+            }
+
+            // Destroy it
+            delete metaFile;
+        }
+    }
 }
 
 unsigned long CResource::GenerateCRC ( void )
 {
     // initialize all of the CRC variables
     unsigned long ulCRC = m_ulCRC = 0;
-    char szPath[MAX_PATH] = {'\0'};
+    string strPath;
 
     list < CResourceFile* > ::iterator iterf = m_resourceFiles.begin ();
     for ( ; iterf != m_resourceFiles.end (); iterf++ )
     {
-        if ( GetFilePath ( (*iterf)->GetName(), szPath, MAX_PATH ) )
+        if ( GetFilePath ( (*iterf)->GetName(), strPath ) )
         {
-            ulCRC = CRCGenerator::GetCRCFromFile ( szPath );
+            ulCRC = CRCGenerator::GetCRCFromFile ( strPath.c_str () );
             ( *iterf )->SetLastCRC ( ulCRC );
         }
     }
 
-    if ( GetFilePath ( "meta.xml", szPath, MAX_PATH ) )
+    if ( GetFilePath ( "meta.xml", strPath ) )
     {
-        m_ulCRC = CRCGenerator::GetCRCFromFile ( szPath );   
+        m_ulCRC = CRCGenerator::GetCRCFromFile ( strPath.c_str () );
     }
 
     return m_ulCRC;
 }
 
+
 bool CResource::HasResourceChanged ()
 {
     unsigned long ulCRC = 0;
-    char szPath[MAX_PATH] = {'\0'};
+    string strPath;
+
+    CResourceChecker resourceChecker;
+    resourceChecker.CheckResourceForIssues ( this, m_strResourceZip );
 
     list < CResourceFile* > ::iterator iterf = m_resourceFiles.begin ();
     for ( ; iterf != m_resourceFiles.end (); iterf++ )
     {
-        if ( GetFilePath ( (*iterf)->GetName(), szPath, MAX_PATH ) )
+        if ( GetFilePath ( (*iterf)->GetName(), strPath ) )
         {
-            ulCRC = CRCGenerator::GetCRCFromFile ( szPath );
+            ulCRC = CRCGenerator::GetCRCFromFile ( strPath.c_str () );
             if ( ( *iterf )->GetLastCRC() != ulCRC )
                 return true;
         }
     }
 
-    if ( GetFilePath ( "meta.xml", szPath, MAX_PATH ) )
+    if ( GetFilePath ( "meta.xml", strPath ) )
     {
-        ulCRC = CRCGenerator::GetCRCFromFile ( szPath );   
+        ulCRC = CRCGenerator::GetCRCFromFile ( strPath.c_str () );   
         if ( ulCRC != m_ulCRC )
             return true;
     }
@@ -1133,18 +1185,18 @@ bool CResource::DoesFileExistInZip ( const char * szFilename )
 }
 
 // gets the path of the file specified, may extract it from the zip
-char * CResource::GetFilePath ( const char * szFilename, char * szPath, size_t buffer_size )
+bool CResource::GetFilePath ( const char * szFilename, string& strPath )
 {
     // first, check the resource folder, then check the zip file
-    _snprintf ( szPath, buffer_size, "%s%s", m_strResourceDirectoryPath.c_str (), szFilename );
-    FILE * temp = fopen ( szPath, "r" );
+    strPath = m_strResourceDirectoryPath + szFilename;
+    FILE * temp = fopen ( strPath.c_str (), "r" );
     if ( temp )
     {
         fclose ( temp );
 #ifdef RESOURCE_DEBUG_MESSAGES
         CLogger::LogPrintf("%s is in resource folder\n", szFilename );
 #endif
-        return szPath;
+        return true;
     }
 
     if ( !m_zipfile )
@@ -1153,15 +1205,15 @@ char * CResource::GetFilePath ( const char * szFilename, char * szPath, size_t b
     {
         if ( unzLocateFile ( m_zipfile, szFilename, false ) != UNZ_END_OF_LIST_OF_FILE )
         {
-            _snprintf ( szPath, buffer_size, "%s%s", m_strResourceCachePath.c_str (), szFilename );
-            temp = fopen ( szPath, "r" );
+            strPath = m_strResourceCachePath + szFilename;
+            temp = fopen ( strPath.c_str (), "r" );
             if ( temp )
             {
                 fclose ( temp );
 
                 // we've already got a cached copy of this file, check its still the same
                 unsigned long ulFileInZipCRC = get_current_file_crc ( m_zipfile );
-                unsigned long ulFileOnDiskCRC = CRCGenerator::GetCRCFromFile ( szPath );
+                unsigned long ulFileOnDiskCRC = CRCGenerator::GetCRCFromFile ( strPath.c_str () );
                 
                 if ( ulFileInZipCRC == ulFileOnDiskCRC )
                 {
@@ -1170,7 +1222,7 @@ char * CResource::GetFilePath ( const char * szFilename, char * szPath, size_t b
 #endif
                     unzClose ( m_zipfile );
                     m_zipfile = NULL;
-                    return szPath; // we've already extracted EXACTLY this file before
+                    return true; // we've already extracted EXACTLY this file before
                 }
                 else
                 {
@@ -1190,13 +1242,13 @@ char * CResource::GetFilePath ( const char * szFilename, char * szPath, size_t b
             ExtractFile ( szFilename );
             unzClose ( m_zipfile );
             m_zipfile = NULL;
-            return szPath;
+            return true;
         }
     }
 #ifdef RESOURCE_DEBUG_MESSAGES
     CLogger::LogPrintf("Can't find %s in zip or in folder\n", szFilename );
 #endif
-    return NULL;
+    return false;
 }
 
 
@@ -1255,18 +1307,17 @@ bool CResource::ReadIncludedHTML ( CXMLNode * root )
             if ( src )
             {
 				// If we found it grab the value
-                char szFilename [ MAX_PATH ];
-                char szFullFilename [ MAX_PATH ];
-                strncpy ( szFilename, src->GetValue ().c_str (), MAX_PATH - 1 );
-                ReplaceSlashes ( szFilename );
+                string strFilename = src->GetValue ();
+                string strFullFilename;
+                ReplaceSlashes ( strFilename );
 
 				// Try to find the file
-                if ( GetFilePath ( szFilename, szFullFilename, MAX_PATH ) )
+                if ( IsValidFilePath ( strFilename.c_str () ) && GetFilePath ( strFilename.c_str (), strFullFilename ) )
                 {
 					// This one is supposed to be default, but there's already a default page
                     if ( bFoundDefault && bIsDefault )
                     {
-                        CLogger::LogPrintf ( "Only one html item can be default per resource, ignoring %s in %s\n", szFilename, m_strResourceName.c_str () );
+                        CLogger::LogPrintf ( "Only one html item can be default per resource, ignoring %s in %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                         bIsDefault = false;
                     }
 
@@ -1275,7 +1326,7 @@ bool CResource::ReadIncludedHTML ( CXMLNode * root )
                         bFoundDefault = true;
 
 					// Create a new resource HTML file and add it to the list
-                    CResourceFile * afile = new CResourceHTMLItem ( this, szFilename, szFullFilename, bIsDefault, bIsRaw, bIsRestricted );
+                    CResourceFile * afile = new CResourceHTMLItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes, bIsDefault, bIsRaw, bIsRestricted );
                     m_resourceFiles.push_back ( afile );
 
 					// This is the first HTML file? Remember it
@@ -1285,9 +1336,9 @@ bool CResource::ReadIncludedHTML ( CXMLNode * root )
                 else
                 {
                     char szBuffer[512];
-                    _snprintf ( szBuffer, 511, "Couldn't find html %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    _snprintf ( szBuffer, 511, "Couldn't find html %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     m_strFailureReason = szBuffer;
-                    CLogger::ErrorPrintf ( "Couldn't find html %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    CLogger::ErrorPrintf ( "Couldn't find html %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     return false;
                 }
             }
@@ -1335,26 +1386,25 @@ bool CResource::ReadIncludedConfigs ( CXMLNode * root )
             if ( src )
             {
 				// Grab the filename
-                char szFilename [ MAX_PATH ];
-                char szFullFilename [ MAX_PATH ];
-                strncpy ( szFilename, src->GetValue ().c_str (), MAX_PATH - 1 );
-                ReplaceSlashes ( szFilename );
+                string strFilename = src->GetValue ();
+                string strFullFilename;
+                ReplaceSlashes ( strFilename );
 
 				// Extract / grab the filepath
-                if ( GetFilePath ( szFilename, szFullFilename, MAX_PATH ) )
+                if ( IsValidFilePath ( strFilename.c_str () ) && GetFilePath ( strFilename.c_str (), strFullFilename ) )
                 {
 					// Create it and push it to the list over resource files. Depending on if it's client or server type
                     if ( iType == CResourceScriptItem::RESOURCE_FILE_TYPE_CONFIG )
-                        m_resourceFiles.push_back ( new CResourceConfigItem ( this, szFilename, szFullFilename ) );
+                        m_resourceFiles.push_back ( new CResourceConfigItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes ) );
                     else if ( iType == CResourceScriptItem::RESOURCE_FILE_TYPE_CLIENT_CONFIG )
-                        m_resourceFiles.push_back ( new CResourceClientConfigItem ( this, szFilename, szFullFilename ) );
+                        m_resourceFiles.push_back ( new CResourceClientConfigItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes ) );
                 }
                 else
                 {
                     char szBuffer[512];
-                    _snprintf ( szBuffer, 511, "Couldn't find config %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    _snprintf ( szBuffer, 511, "Couldn't find config %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     m_strFailureReason = szBuffer;
-                    CLogger::ErrorPrintf ( "Couldn't find config %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    CLogger::ErrorPrintf ( "Couldn't find config %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     return false;
                 }
             }
@@ -1385,20 +1435,19 @@ bool CResource::ReadIncludedFiles ( CXMLNode * root )
             if ( src )
             {
 				// Grab the value
-                char szFilename [ MAX_PATH ];
-                char szFullFilename [ MAX_PATH ];
-                strncpy ( szFilename, src->GetValue ().c_str (), MAX_PATH - 1 );
-                ReplaceSlashes ( szFilename );
+                string strFilename = src->GetValue ();
+                string strFullFilename;
+                ReplaceSlashes ( strFilename );
 
 				// Create a new resourcefile item
-                if ( GetFilePath ( szFilename, szFullFilename, MAX_PATH ) && IsValidFilePath ( szFilename ) )
-                    m_resourceFiles.push_back ( new CResourceClientFileItem ( this, szFilename, szFullFilename ) );
+                if ( IsValidFilePath ( strFilename.c_str () ) && GetFilePath ( strFilename.c_str (), strFullFilename ) )
+                    m_resourceFiles.push_back ( new CResourceClientFileItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes ) );
                 else
                 {
                     char szBuffer[512];
-                    _snprintf ( szBuffer, 511, "Couldn't find file %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    _snprintf ( szBuffer, 511, "Couldn't find file %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     m_strFailureReason = szBuffer;
-                    CLogger::ErrorPrintf ( "Couldn't find file %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    CLogger::ErrorPrintf ( "Couldn't find file %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     return false;
                 }
             }
@@ -1545,26 +1594,25 @@ bool CResource::ReadIncludedScripts ( CXMLNode * root )
             if ( src )
             {
 				// Grab the source value from the attribute
-                char szFilename [ MAX_PATH ];
-                char szFullFilename [ MAX_PATH ];
-                strncpy ( szFilename, src->GetValue ().c_str (), MAX_PATH - 1 );
-                ReplaceSlashes ( szFilename );
+                string strFilename = src->GetValue ();
+                string strFullFilename;
+                ReplaceSlashes ( strFilename );
 
 				// Extract / get the filepath of the file
-                if ( GetFilePath ( szFilename, szFullFilename, MAX_PATH ) && IsValidFilePath ( szFilename ) )
+                if ( IsValidFilePath ( strFilename.c_str () ) && GetFilePath ( strFilename.c_str (), strFullFilename ) )
                 {
 					// Create it depending on the type (clietn or server) and add it to the list over resource files
                     if ( iType == CResourceScriptItem::RESOURCE_FILE_TYPE_SCRIPT )
-                        m_resourceFiles.push_back ( new CResourceScriptItem ( this, szFilename, szFullFilename ) );
+                        m_resourceFiles.push_back ( new CResourceScriptItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes ) );
                     else if ( iType == CResourceScriptItem::RESOURCE_FILE_TYPE_CLIENT_SCRIPT )
-                        m_resourceFiles.push_back ( new CResourceClientScriptItem ( this, szFilename, szFullFilename ) );
+                        m_resourceFiles.push_back ( new CResourceClientScriptItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes ) );
                 }
                 else
                 {
                     char szBuffer[512];
-                    _snprintf ( szBuffer, 511, "Couldn't find script %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    _snprintf ( szBuffer, 511, "Couldn't find script %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     m_strFailureReason = szBuffer;
-                    CLogger::ErrorPrintf ( "Couldn't find script %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    CLogger::ErrorPrintf ( "Couldn't find script %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     return false;
                 }
             }
@@ -1606,19 +1654,18 @@ bool CResource::ReadIncludedMaps ( CXMLNode * root )
             if ( src )
             {
 				// Grab the source text from the node
-                char szFilename [ MAX_PATH ];
-                char szFullFilename [ MAX_PATH ];
-                strncpy ( szFilename, src->GetValue ().c_str (), MAX_PATH - 1 );
-                ReplaceSlashes ( szFilename );
+                string strFilename = src->GetValue ();
+                string strFullFilename;
+                ReplaceSlashes ( strFilename );
 				// Grab the file (evt extract it). Make a map item resource and put it into the resourcefiles list
-                if ( GetFilePath ( szFilename, szFullFilename, MAX_PATH ) )
-                    m_resourceFiles.push_back ( new CResourceMapItem ( this, szFilename, szFullFilename, iDimension ) );
+                if ( IsValidFilePath ( strFilename.c_str () ) && GetFilePath ( strFilename.c_str (), strFullFilename ) )
+                    m_resourceFiles.push_back ( new CResourceMapItem ( this, strFilename.c_str (), strFullFilename.c_str (), attributes, iDimension ) );
                 else
                 {
                     char szBuffer[512];
-                    _snprintf ( szBuffer, 511, "Couldn't find map %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    _snprintf ( szBuffer, 511, "Couldn't find map %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     m_strFailureReason = szBuffer;
-                    CLogger::ErrorPrintf ( "Couldn't find map %s for resource %s\n", szFilename, m_strResourceName.c_str () );
+                    CLogger::ErrorPrintf ( "Couldn't find map %s for resource %s\n", strFilename.c_str (), m_strResourceName.c_str () );
                     return false;
                 }
             }
@@ -1631,41 +1678,6 @@ bool CResource::ReadIncludedMaps ( CXMLNode * root )
 
     return true;
 }
-
-bool CResource::ReadIncludedSettings ( void )
-{
-    if ( m_pNodeSettings )
-    {
-	        // Look through its subnodes for settings with a matching name
-        unsigned int uiCount = m_pNodeSettings->GetSubNodeCount ();
-        unsigned int i = 0;
-        std::string strTagName;
-        for ( ; i < uiCount; i++ )
-        {
-            // Grab its tag name
-            CXMLNode* pTemp = m_pNodeSettings->GetSubNode ( i );
-            strTagName = pTemp->GetTagName ();
-
-            // Check that its "setting"
-            if ( stricmp ( strTagName.c_str (), "setting" ) == 0 )
-            {
-                // Grab the name attribute and compare it to the name we look for
-                CXMLAttribute* pName = m_pNodeSettings->GetAttributes ().Find ( "name" );
-			    CXMLAttribute* pValue = m_pNodeSettings->GetAttributes ().Find ( "value" );
-                if ( pName && pValue )
-                { // Taken from the set function in CLuaFunctionDefinitions
-				    CLuaArguments Args;
-                    std::string strJSON;
-				    Args.PushString ( pValue->GetValue ().c_str () );
-                    Args.WriteToJSONString ( strJSON );
-                    g_pGame->GetSettings ()->Set ( m_strResourceName.c_str (), pName->GetValue ().c_str (), strJSON.c_str () );
-                }
-            }
-        }
-    }
-    return true;
-}
-
 
 bool CResource::GetDefaultSetting ( const char* szName, char* szValue, size_t sizeBuffer )
 {
@@ -1735,7 +1747,7 @@ bool CResource::AddMapFile ( const char* szName, const char* szFullFilename, int
                         pMapNode->GetAttributes ().Create ( "dimension" )->SetValue ( iDimension );
 
                         // If we're loaded, add it to the resourcefiles too
-                        m_resourceFiles.push_back ( new CResourceMapItem ( this, szName, szFullFilename, iDimension ) );
+                        m_resourceFiles.push_back ( new CResourceMapItem ( this, szName, szFullFilename, &pMapNode->GetAttributes (), iDimension ) );
 
                         // Success, write and destroy XML
                         metaFile->Write ();
@@ -1788,7 +1800,7 @@ bool CResource::AddConfigFile ( const char* szName, const char* szFullFilepath, 
                             pMapNode->GetAttributes ().Create ( "type" )->SetValue ( "server" );
 
                         // If we're loaded, add it to the resourcefiles too
-                        m_resourceFiles.push_back ( new CResourceConfigItem ( this, szName, szFullFilepath ) );
+                        m_resourceFiles.push_back ( new CResourceConfigItem ( this, szName, szFullFilepath, &pMapNode->GetAttributes () ) );
 
                         // Success, write and destroy XML
                         metaFile->Write ();
@@ -1937,102 +1949,103 @@ bool CResource::ReadIncludedResources ( CXMLNode * root )
     int i = 0;
 
 	// Loop through the included resources list
-    for ( CXMLNode * inc = root->FindSubNode("include", i);
-        inc != NULL; inc = root->FindSubNode("include", ++i ) )
+    for ( CXMLNode * inc = root->FindSubNode ( "include", i );
+        inc != NULL; inc = root->FindSubNode ( "include", ++i ) )
     {
 		// Grab the attributelist from this node
-        CXMLAttributes * attributes = &(inc->GetAttributes());
-        if ( attributes )
+        CXMLAttributes& Attributes = inc->GetAttributes ();
+
+		// Grab the minversion attribute (minimum version the included resource needs to be)
+		SVersion svMinVersion;
+		SVersion svMaxVersion;
+		svMinVersion.m_uiMajor = 0;
+		svMinVersion.m_uiMinor = 0;
+		svMinVersion.m_uiRevision = 0;
+		svMaxVersion.m_uiMajor = 0;
+		svMaxVersion.m_uiMinor = 0;
+		svMaxVersion.m_uiRevision = 0;
+		unsigned int uiMinVersion = 0;
+		unsigned int uiMaxVersion = 0;
+        CXMLAttribute * minversion = Attributes.Find ( "minversion" ); // optional
+        if ( minversion )
         {
-			// Grab the minversion attribute (minimum version the included resource needs to be)
-			SVersion svMinVersion;
-			SVersion svMaxVersion;
-			svMinVersion.m_uiMajor = 0;
-			svMinVersion.m_uiMinor = 0;
-			svMinVersion.m_uiRevision = 0;
-			svMaxVersion.m_uiMajor = 0;
-			svMaxVersion.m_uiMinor = 0;
-			svMaxVersion.m_uiRevision = 0;
-			unsigned int uiMinVersion = 0;
-			unsigned int uiMaxVersion = 0;
-            CXMLAttribute * minversion = attributes->Find("minversion"); //optional
-            if ( minversion )
-            {
-                char szMinversion[MAX_RESOURCE_VERSION_LENGTH];
-                strncpy ( szMinversion, minversion->GetValue ().c_str (), MAX_RESOURCE_VERSION_LENGTH - 1 );
-                uiMinVersion = atoi(szMinversion);
-				char* sz1 = new char;
-				char* sz2 = new char;
-				char* sz3 = new char;
-				if ( strlen ( szMinversion ) > 0 )
-				{
-					sz1 = strtok ( szMinversion, " " );
-					if ( sz1 )
-						svMinVersion.m_uiMajor = atoi ( sz1 );
-				}
-				if ( strlen ( szMinversion ) > ( 1 + strlen ( sz1 ) ) )
-				{
-					sz2 = strtok ( NULL, " " );
-					if ( sz2 )
-						svMinVersion.m_uiMinor = atoi ( sz2 );
-				}
-				if ( strlen ( szMinversion ) > ( 2 + strlen ( sz1 ) + strlen ( sz2 ) ) )
-				{
-					sz3 = strtok ( NULL, " " );
-					if ( sz3 )
-						svMinVersion.m_uiRevision = atoi ( sz3 );
-				}
-            }
+            /* TODO: Convert this code into std::string */
+            std::string strMinversion = minversion->GetValue ();
+            char szMinversion[MAX_RESOURCE_VERSION_LENGTH];
+            strncpy ( szMinversion, strMinversion.c_str (), MAX_RESOURCE_VERSION_LENGTH - 1 );
+            uiMinVersion = atoi(szMinversion);
+			char* sz1 = new char;
+			char* sz2 = new char;
+			char* sz3 = new char;
+			if ( strlen ( szMinversion ) > 0 )
+			{
+				sz1 = strtok ( szMinversion, " " );
+				if ( sz1 )
+					svMinVersion.m_uiMajor = atoi ( sz1 );
+			}
+			if ( strlen ( szMinversion ) > ( 1 + strlen ( sz1 ) ) )
+			{
+				sz2 = strtok ( NULL, " " );
+				if ( sz2 )
+					svMinVersion.m_uiMinor = atoi ( sz2 );
+			}
+			if ( strlen ( szMinversion ) > ( 2 + strlen ( sz1 ) + strlen ( sz2 ) ) )
+			{
+				sz3 = strtok ( NULL, " " );
+				if ( sz3 )
+					svMinVersion.m_uiRevision = atoi ( sz3 );
+			}
+        }
 
-			// Grab the maxversion attribute (maximum version the included resource needs to be)
-            CXMLAttribute * maxversion = attributes->Find("maxversion"); //optional
-            if ( maxversion )
-            {
-				char szMaxversion[MAX_RESOURCE_VERSION_LENGTH];
-                strncpy ( szMaxversion, maxversion->GetValue ().c_str (), MAX_RESOURCE_VERSION_LENGTH - 1 );
+		// Grab the maxversion attribute (maximum version the included resource needs to be)
+        CXMLAttribute * maxversion = Attributes.Find ( "maxversion" ); //optional
+        if ( maxversion )
+        {
+            /* TODO: Convert this code into std::string */
+            std::string strMaxversion = maxversion->GetValue ();
+			char szMaxversion[MAX_RESOURCE_VERSION_LENGTH];
+            strncpy ( szMaxversion, strMaxversion.c_str (), MAX_RESOURCE_VERSION_LENGTH - 1 );
 
-                uiMaxVersion = atoi(szMaxversion);
-				char* sz1 = new char;
-				char* sz2 = new char;
-				char* sz3 = new char;
-				if ( strlen ( szMaxversion ) > 0 )
-				{
-					sz1 = strtok ( szMaxversion, " " );
-					if ( sz1 )
-						svMaxVersion.m_uiMajor = atoi ( sz1 );
-				}
-				if ( strlen ( szMaxversion ) > ( 1 + strlen ( sz1 ) ) )
-				{
-					sz2 = strtok ( NULL, " " );
-					if ( sz2 )
-						svMaxVersion.m_uiMinor = atoi ( sz2 );
-				}
-				if ( strlen ( szMaxversion ) > ( 2 + strlen ( sz1 ) + strlen ( sz2 ) ) )
-				{
-					sz3 = strtok ( NULL, " " );
-					if ( sz3 )
-						svMaxVersion.m_uiRevision = atoi ( sz3 );
-				}
-            }
+            uiMaxVersion = atoi(szMaxversion);
+			char* sz1 = new char;
+			char* sz2 = new char;
+			char* sz3 = new char;
+			if ( strlen ( szMaxversion ) > 0 )
+			{
+				sz1 = strtok ( szMaxversion, " " );
+				if ( sz1 )
+					svMaxVersion.m_uiMajor = atoi ( sz1 );
+			}
+			if ( strlen ( szMaxversion ) > ( 1 + strlen ( sz1 ) ) )
+			{
+				sz2 = strtok ( NULL, " " );
+				if ( sz2 )
+					svMaxVersion.m_uiMinor = atoi ( sz2 );
+			}
+			if ( strlen ( szMaxversion ) > ( 2 + strlen ( sz1 ) + strlen ( sz2 ) ) )
+			{
+				sz3 = strtok ( NULL, " " );
+				if ( sz3 )
+					svMaxVersion.m_uiRevision = atoi ( sz3 );
+			}
+        }
 
-			// Grab the resource attribute
-            CXMLAttribute * src = attributes->Find("resource");
-            if ( src )
-            {
-				// Grab the value and add an included resource
-                std::string strIncludedResource = src->GetValue ();
+		// Grab the resource attribute
+        CXMLAttribute * src = Attributes.Find ( "resource" );
+        if ( src )
+        {
+			// Grab the value and add an included resource
+            std::string strIncludedResource = src->GetValue ();
 
-				// If there's text in the node
-				if ( !strIncludedResource.empty () )
-					//m_includedResources.push_back ( new CIncludedResources ( m_resourceManager, szIncludedResource, uiMinversion, uiMaxversion, this ) );
-					m_includedResources.push_back ( new CIncludedResources ( m_resourceManager, strIncludedResource.c_str (), svMinVersion, svMaxVersion, uiMinVersion, uiMaxVersion, this ) );
-				else
-					CLogger::LogPrintf ( "WARNING: Empty 'resource' attribute from 'include' node of 'meta.xml' for resource '%s', ignoring\n", m_strResourceName.c_str () );
-            }
-            else
-            {
-                CLogger::LogPrintf ( "WARNING: Missing 'resource' attribute from 'include' node of 'meta.xml' for resource '%s', ignoring\n", m_strResourceName.c_str () );
-            }
+			// If there's text in the node
+			if ( !strIncludedResource.empty () )
+				m_includedResources.push_back ( new CIncludedResources ( m_resourceManager, strIncludedResource.c_str (), svMinVersion, svMaxVersion, uiMinVersion, uiMaxVersion, this ) );
+			else
+				CLogger::LogPrintf ( "WARNING: Empty 'resource' attribute from 'include' node of 'meta.xml' for resource '%s', ignoring\n", m_strResourceName.c_str () );
+        }
+        else
+        {
+            CLogger::LogPrintf ( "WARNING: Missing 'resource' attribute from 'include' node of 'meta.xml' for resource '%s', ignoring\n", m_strResourceName.c_str () );
         }
     }
 

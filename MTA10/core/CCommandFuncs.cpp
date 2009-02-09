@@ -127,10 +127,12 @@ void CCommandFuncs::Vid ( const char* szParameters )
                 LONG lLong = GetWindowLong ( hDeviceWindow, GWL_STYLE ) ^ WS_THICKFRAME;
                 lLong ^= WS_MAXIMIZEBOX;
 				lLong ^= WS_MINIMIZEBOX;
+				lLong ^= WS_SYSMENU;
 			    SetWindowLong ( hDeviceWindow, GWL_STYLE, lLong );
 
                 SetWindowLong ( NULL, GWL_STYLE, WS_BORDER | WS_CAPTION );
 			    SetWindowPos ( NULL, HWND_TOP, 0, 0, 0, 0, /* SWP_NOMOVE | SWP_NOSIZE | */ SWP_NOSENDCHANGING  );
+		        SetWindowPos( hDeviceWindow, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE );
 		    }
 
             // Grab viewport settings
@@ -142,9 +144,10 @@ void CCommandFuncs::Vid ( const char* szParameters )
 		    CCore::GetSingleton ().GetGUI ()->SetResolution ( (float) iViewportX, (float) iViewportY );
 		    CCore::GetSingleton ().GetLocalGUI ()->CreateWindows ();
 
-            // Reload console and chat settings (removed in DestroyWindows)
+            // Reload console, serverbrowser and chat settings (removed in DestroyWindows)
             g_pCore->ApplyConsoleSettings ();
-            g_pCore->ApplyChatSettings ();
+            g_pCore->ApplyServerBrowserSettings ();
+            g_pCore->ApplyMenuSettings ();
         }
         else
         {
@@ -159,8 +162,37 @@ void CCommandFuncs::Window ( const char* szParameters )
     // Make sure no mod is loaded
     if ( !CCore::GetSingleton ().GetModManager ()->IsLoaded () )
     {
-        // Run "vid 0"
-        Vid ( "0" );
+        CGameSettings * gameSettings = CCore::GetSingleton ( ).GetGame ( )->GetSettings();
+        unsigned int currentMode = gameSettings->GetCurrentVideoMode();
+
+        if ( currentMode == 0 )
+        {
+            // Maybe not the best way to find out the mode to return to
+
+            VideoMode           vidModeInfo, currentModeInfo;
+            int                 vidMode, numVidModes, currentVidMode;
+
+            gameSettings->GetVideoModeInfo(&currentModeInfo, currentMode);
+
+            numVidModes = gameSettings->GetNumVideoModes();
+            currentVidMode = gameSettings->GetCurrentVideoMode();
+
+            for (vidMode = 0; vidMode < numVidModes; vidMode++)
+            {
+                gameSettings->GetVideoModeInfo(&vidModeInfo, vidMode);
+
+                if ( vidModeInfo.width == currentModeInfo.width &&
+                     vidModeInfo.height == currentModeInfo.height &&
+                     vidModeInfo.depth == currentModeInfo.depth &&
+                     ( vidModeInfo.flags & rwVIDEOMODEEXCLUSIVE ) != ( currentModeInfo.flags & rwVIDEOMODEEXCLUSIVE ) )
+                        gameSettings->SetCurrentVideoMode ( vidMode );
+            }
+        }
+        else
+        {
+            // Run "vid 0"
+            Vid ( "0" );
+        }
     }
     else
     {
@@ -251,7 +283,7 @@ void CCommandFuncs::ConnectionType ( const char *szParameters )
         return;
 
     CCore::GetSingleton ().GetConnectManager ()->SetMTUSize ( usMTUSize );
-    g_pCore->GetConfig ()->usMTUSize = usMTUSize;
+    CVARS_SET ( "mtu_size", usMTUSize );
     CCore::GetSingleton ().GetConsole ()->Printf ( "MTU size was set to %u", usMTUSize );
 }
 
@@ -284,10 +316,12 @@ void CCommandFuncs::Connect ( const char* szParameters )
         char* szNick = strtok ( NULL, " " );
         char* szPass = strtok ( NULL, " " );
 
-        if ( !szNick ) szNick = const_cast < char * > ( g_pCore->GetConfig ()->strNick.c_str () );
+        std::string strNick;
+        if ( !szNick )  CVARS_GET ( "nick", strNick );
+        else            strNick = szNick;
         
         // Got all required arguments?
-        if ( !szHost || !szPort || !szNick )
+        if ( !szHost || !szPort || strNick.empty () )
         {
             CCore::GetSingleton ().GetConsole ()->Print ( "connect: Syntax is 'connect <host> <port> [<nick> <pass>]'" );
             return;
@@ -311,7 +345,7 @@ void CCommandFuncs::Connect ( const char* szParameters )
         }
 
         // Start the connect
-        if ( CCore::GetSingleton ().GetConnectManager ()->Connect ( szHost, usPort, szNick, szPass ) )
+        if ( CCore::GetSingleton ().GetConnectManager ()->Connect ( szHost, usPort, strNick.c_str (), szPass ) )
         {
             CCore::GetSingleton ().GetConsole ()->Printf ( "connect: Connecting to %s:%u...", szHost, usPort );
         }
@@ -330,10 +364,17 @@ void CCommandFuncs::Reconnect ( const char* szParameters )
 {
     CModManager::GetSingleton ().Unload ();
 
-    CMainConfig* pConfig = g_pCore->GetConfig ();
+    std::string strHost, strNick, strPassword;
+    unsigned int uiPort;
+
+    CVARS_GET ( "host",         strHost );
+    CVARS_GET ( "nick",         strNick );
+    CVARS_GET ( "password",     strPassword );
+    CVARS_GET ( "port",         uiPort );
+
     // Restart the connection.
     char szTemp [ 256 ];
-    _snprintf ( szTemp, 256, "%s %u %s %s", pConfig->strHost.c_str (), pConfig->usPort, pConfig->strNick.c_str (), pConfig->strPassword.c_str () );
+    _snprintf ( szTemp, 256, "%s %u %s %s", strHost.c_str (), uiPort, strNick.c_str (), strPassword.c_str () );
     szTemp [ 255 ] = 0;
 
     Connect ( szTemp );
@@ -380,7 +421,6 @@ void CCommandFuncs::HUD ( const char* szParameters )
 
 void CCommandFuncs::SaveConfig ( const char* szParameters )
 {
-    CMainConfig * pConfig = CCore::GetSingleton ().GetConfig ();
-    pConfig->Save ();
-    g_pCore->GetConsole ()->Printf ( "Saved config to '%s'", pConfig->GetFileName () );
+    CCore::GetSingleton ().SaveConfig ();
+    g_pCore->GetConsole ()->Printf ( "Saved configuration file" );
 }

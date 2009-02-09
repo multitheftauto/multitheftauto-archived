@@ -363,6 +363,11 @@ public:
     inline bool                 IsOnFire                ( void )                                        { return m_bIsOnFire; }
     void                        SetOnFire               ( bool bOnFire );
 
+    void                        GetVoice                ( short* psVoiceType, short* psVoiceID );
+    void                        GetVoice                ( const char** pszVoiceType, const char** pszVoice );
+    void                        SetVoice                ( short sVoiceType, short sVoiceID );
+    void                        SetVoice                ( const char* szVoiceType, const char* szVoice );
+
 protected:
     // This constructor is for peds managed by a player. These are unknown to the ped manager.
                                 CClientPed                  ( CClientManager* pManager, unsigned long ulModelID, ElementID ID, bool bIsLocalPlayer );

@@ -74,6 +74,10 @@ void CLocalGUI::CreateWindows ( void )
     m_pConsole = new CConsole ( pGUI );
     m_pConsole->SetVisible ( false );
 
+    // Create community registration window
+    m_CommunityRegistration.CreateWindows ();
+    m_CommunityRegistration.SetVisible ( false );
+
 	// Create the overlayed version labels
 	CVector2D ScreenSize = pGUI->GetResolution ();
 	m_pLabelVersionTag = reinterpret_cast < CGUILabel* > ( pGUI->CreateLabel ( MTA_VERSION_TAG ) );
@@ -161,6 +165,12 @@ void CLocalGUI::DestroyObjects ( void )
 CD3DMGEng* CLocalGUI::GetRenderingLibrary ( void )
 {
     return m_pRendererLibrary;
+}
+
+
+void CLocalGUI::DoPulse ( void )
+{
+    m_CommunityRegistration.DoPulse ();
 }
 
 
@@ -603,7 +613,7 @@ bool CLocalGUI::InputGoesToGUI ( void )
 
     // Here we're supposed to check if things like menues are up, console is up or the chatbox is expecting input
     // If the console is visible OR the chat is expecting input OR the mainmenu is visible
-    return ( IsConsoleVisible () || IsMainMenuVisible () || IsChatBoxInputEnabled () || m_bForceCursorVisible || pGUI->GetGUIInputEnabled () || pGUI->IsTransferBoxVisible () );
+    return ( IsConsoleVisible () || IsMainMenuVisible () || IsChatBoxInputEnabled () || m_bForceCursorVisible || pGUI->GetGUIInputEnabled () );
 }
 
 

@@ -32,6 +32,16 @@ void CSettingsSA::SetFrameLimiterEnabled ( bool bEnabled )
     settings->bFrameLimiter = bEnabled;
 }
 
+bool CSettingsSA::IsWideScreenEnabled ( void )
+{
+    return settings->bUseWideScreen;
+}
+
+void CSettingsSA::SetWideScreenEnabled ( bool bEnabled )
+{
+    settings->bUseWideScreen = bEnabled;
+}
+
 unsigned int CSettingsSA::GetNumVideoModes ( void )
 {
     unsigned int uiReturn = 0;
@@ -74,4 +84,24 @@ void CSettingsSA::SetCurrentVideoMode ( unsigned int modeIndex )
         call    FUNC_SetCurrentVideoMode
         add     esp, 4
     }
+}
+
+unsigned char CSettingsSA::GetRadioVolume ( void )
+{
+    return *(BYTE *)VAR_RadioVolume;
+}
+
+void CSettingsSA::SetRadioVolume ( unsigned char ucVolume )
+{
+    *(BYTE *)VAR_RadioVolume = ucVolume;
+}
+
+unsigned char CSettingsSA::GetSFXVolume ( void )
+{
+    return *(BYTE *)VAR_SfxVolume;
+}
+
+void CSettingsSA::SetSFXVolume ( unsigned char ucVolume )
+{
+    *(BYTE *)VAR_SfxVolume = ucVolume;
 }

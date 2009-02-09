@@ -1,18 +1,17 @@
 !include nsDialogs.nsh
 !include LogicLib.nsh
+!include Sections.nsh
 
 XPStyle on
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 
-;!define INCLUDE_SERVER
-;!define CLIENT_SETUP
 !define TEMP1 $R0
 !define TEMP2 $R1
 !define TEMP3 $R2
+
 Var GTA_DIR
 Var Install_Dir
-; HM NIS Edit Wizard helper defines
 
 ; ###########################################################################################################
 ;!define FILES_ROOT "C:\Build\output"
@@ -45,66 +44,59 @@ Var Install_Dir
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
-
 !include "ReplaceSubStr.nsh"
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "mta.ico"
-!define MUI_UNICON "mta.ico"
+!define MUI_ICON            "mta.ico"
+!define MUI_UNICON          "mta.ico"
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
+
 ; License page
-!insertmacro MUI_PAGE_LICENSE "eula.txt"
+!insertmacro MUI_PAGE_LICENSE                       "eula.txt"
 
-!ifdef CLIENT_SETUP
-;Page custom nsDialogsMtaBetaWelcomePage nsDialogsMtaBetaWelcomePageLeave
-;Page custom nsDialogsLoginAccountPage nsDialogsLoginAccountPageLeave
-!endif
-
-!define MUI_PAGE_CUSTOMFUNCTION_POST ComponentsPagePost
+; Components page
 !insertmacro MUI_PAGE_COMPONENTS
-; Directory page
-!define MUI_DIRECTORYPAGE_VARIABLE $INSTDIR
+
+; Game directory page
+!define MUI_DIRECTORYPAGE_VARIABLE                  $INSTDIR
 !insertmacro MUI_PAGE_DIRECTORY
-!ifdef CLIENT_SETUP
-!define MUI_PAGE_HEADER_TEXT "Grand Theft Auto: San Andreas location"
-!define MUI_PAGE_HEADER_SUBTEXT ""
-!define MUI_DIRECTORYPAGE_TEXT_DESTINATION "Grand Theft Auto: San Andreas folder"
-!define MUI_DIRECTORYPAGE_TEXT_TOP "Please select your Grand Theft Auto: San Andreas folder.$\n$\nYou MUST have Grand Theft Auto: San Andreas 1.0 installed to use MTA:SA, it does not support any other versions.$\n$\nClick Install to begin installing."
-!define MUI_DIRECTORYPAGE_VARIABLE      $GTA_DIR
+!define MUI_PAGE_CUSTOMFUNCTION_PRE                 SkipDirectoryPage
+!define MUI_PAGE_HEADER_TEXT                        "Grand Theft Auto: San Andreas location"
+!define MUI_PAGE_HEADER_SUBTEXT                     ""
+!define MUI_DIRECTORYPAGE_TEXT_DESTINATION          "Grand Theft Auto: San Andreas folder"
+!define MUI_DIRECTORYPAGE_TEXT_TOP                  "Please select your Grand Theft Auto: San Andreas folder.$\n$\nYou MUST have Grand Theft Auto: San Andreas 1.0 installed to use MTA:SA, it does not support any other versions.$\n$\nClick Install to begin installing."
+!define MUI_DIRECTORYPAGE_VARIABLE                  $GTA_DIR
 !insertmacro MUI_PAGE_DIRECTORY
-!endif
+
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
+
 ; Finish page
-!define MUI_FINISHPAGE_RUN ""
-;!define MUI_FINISHPAGE_LINK "Download more maps for your server from the MTA Center"
-;!define MUI_FINISHPAGE_LINK_LOCATION "http://center.mtasa.com"
-;!define MUI_FINISHPAGE_TEXT  "$(MUI_${MUI_PAGE_UNINSTALLER_PREFIX}TEXT_FINISH_INFO_TEXT) Visit http://center.mtasa.com to download more maps for your server!"
-!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
+!define MUI_FINISHPAGE_RUN                          ""
+!define MUI_FINISHPAGE_RUN_FUNCTION                 "LaunchLink"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
 !insertmacro MUI_UNPAGE_INSTFILES
 
 ; Language files
-!insertmacro MUI_LANGUAGE "English"
-
-LangString DESC_Section1 ${LANG_ENGLISH} "The core components required to run Multi Theft Auto."
-LangString DESC_Section2 ${LANG_ENGLISH} "The MTA:SA DM modification, allowing you to play online."
-LangString DESC_Section3 ${LANG_ENGLISH} "The Multi Theft Auto:Editor for MTA:SA DM, allowing you to create and edit maps."
-LangString DESC_SectionGroupMods ${LANG_ENGLISH} "Modifications for Multi Theft Auto. Without at least one of these, you cannot play Multi Theft Auto."
-LangString DESC_SectionGroupServer ${LANG_ENGLISH} "The Multi Theft Auto Server. This allows you to host games from your computer. This requires a fast internet connection."
-LangString DESC_Section4 ${LANG_ENGLISH} "The Multi Theft Auto server. This is a required component."
-LangString DESC_Section5 ${LANG_ENGLISH} "The MTA:SA DM modification for the server."
-LangString DESC_Section6 ${LANG_ENGLISH} "This is an set of required resources for your server."
-LangString DESC_Section7 ${LANG_ENGLISH} "This is an optional set of gamemodes and maps for your server."
-LangString DESC_Section8 ${LANG_ENGLISH} "This is a preview of the new MTA editor. It is incomplete and partially non-functional."
-LangString DESC_Section9 ${LANG_ENGLISH} "This is the SDK for creating binary modules for the MTA server. Only install if you have a good understanding of C++!"
-LangString DESC_SectionGroupDev ${LANG_ENGLISH} "Development code and toolss that aid in the creation of mods for Multi Theft Auto"
-LangString DESC_SectionGroupClient ${LANG_ENGLISH} "The client is the program you run to play on a Multi Theft Auto server"
+!insertmacro MUI_LANGUAGE                           "English"
+LangString DESC_Section1 ${LANG_ENGLISH}            "The core components required to run Multi Theft Auto."
+LangString DESC_Section2 ${LANG_ENGLISH}            "The MTA:SA DM modification, allowing you to play online."
+LangString DESC_Section3 ${LANG_ENGLISH}            "The Multi Theft Auto:Editor for MTA:SA DM, allowing you to create and edit maps."
+LangString DESC_SectionGroupMods ${LANG_ENGLISH}    "Modifications for Multi Theft Auto. Without at least one of these, you cannot play Multi Theft Auto."
+LangString DESC_SectionGroupServer ${LANG_ENGLISH}  "The Multi Theft Auto Server. This allows you to host games from your computer. This requires a fast internet connection."
+LangString DESC_Section4 ${LANG_ENGLISH}            "The Multi Theft Auto server. This is a required component."
+LangString DESC_Section5 ${LANG_ENGLISH}            "The MTA:SA DM modification for the server."
+LangString DESC_Section6 ${LANG_ENGLISH}            "This is an set of required resources for your server."
+LangString DESC_Section7 ${LANG_ENGLISH}            "This is an optional set of gamemodes and maps for your server."
+LangString DESC_Section8 ${LANG_ENGLISH}            "This is a preview of the new MTA editor. It is incomplete and partially non-functional."
+LangString DESC_Section9 ${LANG_ENGLISH}            "This is the SDK for creating binary modules for the MTA server. Only install if you have a good understanding of C++!"
+LangString DESC_SectionGroupDev ${LANG_ENGLISH}     "Development code and toolss that aid in the creation of mods for Multi Theft Auto"
+LangString DESC_SectionGroupClient ${LANG_ENGLISH}  "The client is the program you run to play on a Multi Theft Auto server"
 
 Var Dialog
 Var Label
@@ -538,7 +530,7 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 !ifdef CLIENT_SETUP
-SectionGroup "Client" SECGCLIENT
+SectionGroup /e "Game client" SECGCLIENT
 Section "Core components" SEC01
   SectionIn 1 RO ; section is required
   
@@ -554,11 +546,11 @@ Section "Core components" SEC01
   File "${FILES_ROOT}\GTA San Andreas\mta\game_sa.dll"
   File "${FILES_ROOT}\GTA San Andreas\mta\multiplayer_sa.dll"
   File "${FILES_ROOT}\GTA San Andreas\mta\net.dll"
-  File "${FILES_ROOT}\GTA San Andreas\mta\d3dx9_33.dll"
-  File "${FILES_ROOT}\GTA San Andreas\mta\msvcp71.dll"
-  File "${FILES_ROOT}\GTA San Andreas\mta\msvcr71.dll"
   
   !ifndef LIGHTBUILD
+    File "${FILES_ROOT}\GTA San Andreas\mta\d3dx9_33.dll"
+    File "${FILES_ROOT}\GTA San Andreas\mta\msvcp71.dll"
+    File "${FILES_ROOT}\GTA San Andreas\mta\msvcr71.dll"
     File "${FILES_ROOT}\GTA San Andreas\mta\lua5.1.dll"
     File "${FILES_ROOT}\GTA San Andreas\mta\libcurl.dll"
     File "${FILES_ROOT}\GTA San Andreas\mta\vorbis.ax"
@@ -606,26 +598,22 @@ Section "Core components" SEC01
 
   SetOutPath "$INSTDIR"
   File "${FILES_ROOT}\MTA San Andreas\*" ; NOT RECURSIVE
-;  call MTACenterLogin
 SectionEnd
 
-;SectionGroup /e "MTA Mods" SECGMODS
-Section "Deathmatch Mod" SEC02
+Section "Game module" SEC02
   SectionIn 1 RO
   SetOutPath "$INSTDIR\mods\deathmatch"
   File "${FILES_ROOT}\MTA San Andreas\mods\deathmatch\Client.dll"
   SetOutPath "$INSTDIR\mods\deathmatch\resources"
 SectionEnd
-
-;SectionGroupEnd
 SectionGroupEnd
 !endif
 
 !ifdef INCLUDE_SERVER
 !ifdef CLIENT_SETUP
-SectionGroup /e "MTA Server" SECGSERVER
+SectionGroup /e "Dedicated server" SECGSERVER
 !endif
-Section "Core Server" SEC04
+Section "Core components" SEC04
 SectionIn 1 2 RO ; section is required
     SetOutPath "$INSTDIR\server"
     SetOverwrite on
@@ -639,15 +627,18 @@ SectionIn 1 2 RO ; section is required
 !ifndef LIGHTBUILD
     File "${SERVER_FILES_ROOT}\libcurl.dll"
 !endif
-
 SectionEnd
 
-Section "Deathmatch Mod" SEC05
+Section "Game module" SEC05
 SectionIn 1 2 RO ; section is required
     SetOutPath "$INSTDIR\server\mods\deathmatch"
     
     SetOverwrite on
     File "${SERVER_FILES_ROOT}\mods\deathmatch\deathmatch.dll"
+    File "${SERVER_FILES_ROOT}\mods\deathmatch\lua5.1.dll"
+    File "${SERVER_FILES_ROOT}\mods\deathmatch\pcre3.dll"
+    File "${SERVER_FILES_ROOT}\mods\deathmatch\pthreadVC2.dll"
+    File "${SERVER_FILES_ROOT}\mods\deathmatch\sqlite3.dll"
     
     SetOverwrite off
     File "${SERVER_FILES_ROOT}\mods\deathmatch\accounts.xml"
@@ -657,11 +648,7 @@ SectionIn 1 2 RO ; section is required
     File "${SERVER_FILES_ROOT}\mods\deathmatch\vehiclecolors.conf"
 
     !ifndef LIGHTBUILD
-    File "${SERVER_FILES_ROOT}\mods\deathmatch\lua5.1.dll"
-    File "${SERVER_FILES_ROOT}\mods\deathmatch\pcre3.dll"
-    File "${SERVER_FILES_ROOT}\mods\deathmatch\pthreadVC2.dll"
-    File "${SERVER_FILES_ROOT}\mods\deathmatch\sqlite3.dll"
-    
+   
     !ifdef CLIENT_SETUP
     File "${SERVER_FILES_ROOT}\mods\deathmatch\local.conf"
     !endif
@@ -687,7 +674,7 @@ SectionEnd
 !endif
 
 !ifndef LIGHTBUILD
-Section "Gamemodes and Maps" SEC07
+Section "Resource and maps pack" SEC07
 SectionIn 1 2
   SetOutPath "$INSTDIR\server\mods\deathmatch\resources"
   SetOverwrite ifnewer
@@ -799,11 +786,11 @@ FunctionEnd
 Section Uninstall
   !ifdef CLIENT_SETUP
   ReadRegStr $GTA_DIR HKLM "SOFTWARE\Multi Theft Auto: San Andreas" "GTA:SA Path"
-  IfFileExists "$INSTDIR\mods\map_editor\maps\*.*" ask 0 ;no maps folder, so delete everything
-  IfFileExists "$INSTDIR\mods\map_editor\screenshots\*.*" ask 0 ;no maps folder, so delete everything
-  IfFileExists "$INSTDIR\mods\race\screenshots\*.*" ask deleteall ;no maps folder, so delete everything
+  IfFileExists "$INSTDIR\server\mods\deathmatch\resources\*.*" ask 0 ;no maps folder, so delete everything
+  IfFileExists "$INSTDIR\screenshots\*.*" ask 0 ;no maps folder, so delete everything
+  IfFileExists "$INSTDIR\mods\deathmatch\resources\*.*" ask deleteall ;no maps folder, so delete everything
   ask:
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Would you like to keep your data files (such as resources and screenshots)? If you click no, any maps or screenshots you have created will be lost." IDYES preservemapsfolder
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Would you like to keep your data files (such as resources, screenshots and server configuration)? If you click no, any maps or screenshots you have created will be lost." IDYES preservemapsfolder
 
   deleteall:
   RmDir /r "$INSTDIR\mods"
@@ -837,12 +824,10 @@ Section Uninstall
     
     ; server DM files
     Delete "$INSTDIR\server\mods\deathmatch\deathmatch.dll"
-    !ifndef LIGHTBUILD
-        Delete "$INSTDIR\server\mods\deathmatch\lua5.1.dll"
-        Delete "$INSTDIR\server\mods\deathmatch\pcre3.dll"
-        Delete "$INSTDIR\server\mods\deathmatch\pthreadVC2.dll"
-        Delete "$INSTDIR\server\mods\deathmatch\sqlite3.dll"
-    !endif
+    Delete "$INSTDIR\server\mods\deathmatch\lua5.1.dll"
+    Delete "$INSTDIR\server\mods\deathmatch\pcre3.dll"
+    Delete "$INSTDIR\server\mods\deathmatch\pthreadVC2.dll"
+    Delete "$INSTDIR\server\mods\deathmatch\sqlite3.dll"
 !endif
 
   Delete "$INSTDIR\Multi Theft Auto.exe"
@@ -852,10 +837,9 @@ Section Uninstall
   
   RmDir /r "$GTA_DIR\MTA\cgui"
   RmDir /r "$GTA_DIR\MTA\data"
-  Delete "$GTA_DIR\MTA\data\*.dll"
-  Delete "$GTA_DIR\MTA\data\*.ax"
-  Delete "$GTA_DIR\MTA\data\*.log"
-  Delete "$GTA_DIR\MTA\data\*.txt"
+  Delete "$GTA_DIR\MTA\*.dll"
+  Delete "$GTA_DIR\MTA\*.ax"
+  Delete "$GTA_DIR\MTA\*.txt"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
@@ -866,3 +850,11 @@ Section Uninstall
   RmDir "$INSTDIR" ; fix for #3898
   SetAutoClose true
 SectionEnd
+
+# Function that skips the game directory page if client is not selected
+Function SkipDirectoryPage
+  SectionGetFlags ${SEC01} $R0
+  IntOp $R0 $R0 & ${SF_SELECTED}
+  IntCmp $R0 ${SF_SELECTED} 0 +2
+  Abort
+FunctionEnd

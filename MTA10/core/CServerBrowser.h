@@ -24,7 +24,7 @@ class CServerBrowser;
 #include "CServerList.h"
 #include "CSingleton.h"
 #include "CFavouritesAddByIP.h"
-#include "CServerBrowserLogin.h"
+#include "CCommunityLogin.h"
 #include <ctime>
 
 using namespace std;
@@ -56,6 +56,9 @@ public:
 
     void                SetVisible              ( bool bVisible );
     bool                IsVisible               ( void );
+    
+    void                SetSize                 ( CVector2D& vecSize );
+    CVector2D           GetSize                 ( void );
 
     bool                ConnectToSelectedServer ( void );
 
@@ -63,6 +66,13 @@ public:
 
     CServerList*        GetFavouritesList       ( void ) { return &m_ServersFavourites; };
     CServerList*        GetRecentList           ( void ) { return &m_ServersRecent; };
+
+    bool                LoadServerList          ( CXMLNode* pNode, std::string strTagName, CServerList *pList );
+    bool                SaveServerList          ( CXMLNode* pNode, std::string strTagName, CServerList *pList );
+
+    void                SetServerPassword       ( std::string strHost, std::string strPassword );
+    std::string         GetServerPassword       ( std::string strHost );
+    void                ClearServerPasswords    ( void );
 
 protected:
     bool                OnMouseClick            ( CGUIMouseEventArgs Args );
@@ -79,7 +89,7 @@ protected:
 
     // Classes
     CFavouritesAddByIP  m_pFavouritesAddByIP;
-    CServerBrowserLogin m_pBrowserLogin;
+    CCommunityLogin     m_pCommunityLogin;
   
     // Tab controls
     CGUITab*            m_pTab [ SERVER_BROWSER_TYPE_COUNT ];
@@ -134,6 +144,7 @@ private:
     bool                    OnIncludeOfflineClick           ( CGUIElement* pElement );
     bool                    OnFavouritesByIPClick           ( CGUIElement* pElement );
     bool                    OnFavouritesByIPAddClick        ( CGUIElement* pElement );
+    bool                    OnWindowSize                    ( CGUIElement* pElement );
 
     ServerBrowserType       GetCurrentServerBrowserType     ( void );
 

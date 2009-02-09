@@ -27,7 +27,7 @@ public:
         MODE_CREATE,
     };
 
-                            CScriptFile             ( const char* szFilename, unsigned long ulMaxSize );
+                            CScriptFile             ( CResource* pResource, const char* szFilename, unsigned long ulMaxSize );
                             ~CScriptFile            ( void );
 
     // Functions required by CElement
@@ -45,15 +45,16 @@ public:
     long                    GetPointer              ( void );
     long                    GetSize                 ( void );
 
-    unsigned long           SetPointer              ( unsigned long ulPosition );
+    long                    SetPointer              ( unsigned long ulPosition );
     void                    SetSize                 ( unsigned long ulNewSize );
 
     void                    Flush                   ( void );
-    unsigned long           Read                    ( unsigned long ulSize, char* pData );
-    unsigned long           Write                   ( unsigned long ulSize, const char* pData );
+    long                    Read                    ( unsigned long ulSize, char* pData );
+    long                    Write                   ( unsigned long ulSize, const char* pData );
 
 private:
     FILE*                   m_pFile;
+    CResource*              m_pResource;
     std::string             m_strFilename;
     unsigned long           m_ulMaxSize;
 };

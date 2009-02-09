@@ -25,12 +25,12 @@ CDebugView::CDebugView ( CGUI * pManager, CVector2D & vecPosition ) : CChat ()
 
     CVector2D vecResolution = m_pManager->GetResolution ();
     m_vecScale = CVector2D ( vecResolution.fX / 800.0f, vecResolution.fY / 600.0f );
-    vecPosition.fX *= vecResolution.fX;
-    vecPosition.fY *= vecResolution.fY;
+    vecPosition = vecPosition * vecResolution;
+    m_vecBackgroundPosition = vecPosition;
 
     m_bUseCEGUI = false;
-    m_ulChatLineLife = DEFAULT_CHAT_LINE_LIFE;
-    m_ulChatLineFadeOut = DEFAULT_CHAT_LINE_FADE_OUT;
+    m_ulChatLineLife = 0;
+    m_ulChatLineFadeOut = 0;
     m_bCssStyleText = false;
     m_bCssStyleBackground = false;
     m_szCommand = NULL;
@@ -39,11 +39,10 @@ CDebugView::CDebugView ( CGUI * pManager, CVector2D & vecPosition ) : CChat ()
     m_uiNumLines = 7;
     m_pFont = m_pManager->GetBoldFont ();
     m_pDXFont = g_pCore->GetGraphics ()->GetFont ();
-    m_fWidth = 1.0f;
-    m_vecBackgroundPosition = vecPosition;
-    m_vecBackgroundSize = CVector2D ( ( 576.0f * m_fWidth ) * m_vecScale.fX, ( CChat::GetFontHeight ( m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
+    m_fNativeWidth = DEBUGVIEW_WIDTH;
+    m_bCanChangeWidth = false;
     m_Color = CColor ( 0, 0, 0, 100 );
-    m_TextColor = CColor ( 235, 221, 178, 255 );
+    m_TextColor = DEBUGVIEW_TEXT_COLOR;
     unsigned long ulBackgroundColor = COLOR_ARGB ( m_Color.A, m_Color.R, m_Color.G, m_Color.B );
 
     m_pBackground = m_pManager->CreateStaticImage ();
@@ -64,24 +63,29 @@ CDebugView::CDebugView ( CGUI * pManager, CVector2D & vecPosition ) : CChat ()
     m_szCommand = NULL;   
 
     g_pChat = pChat;
+
+    UpdateGUI ();
 }
 
 
 void CDebugView::Draw ( void )
 {
+    // Are we visible?
+    if ( !m_bVisible )
+        return;
+
     // Make the chat use our data, dirty as you like!
     CChat * pChat = g_pChat;
     g_pChat = this;
+
+    // Force the window on screen
+    CVector2D vecPosition ( 0.23f, 0.985f );
+    CVector2D vecResolution = m_pManager->GetResolution ();
+    float height = m_uiNumLines * GetFontHeight ( 1 ) * m_vecScale.fY;
+    m_vecBackgroundPosition = vecPosition * vecResolution - CVector2D ( 0, height );
+    m_pBackground->SetPosition ( m_vecBackgroundPosition );
+
     CChat::Draw ();
-    g_pChat = pChat;
-}
-
-
-void CDebugView::SetUseCEGUI ( bool bUseCEGUI )
-{
-    CChat * pChat = g_pChat;
-    g_pChat = this;
-    CChat::SetUseCEGUI ( bUseCEGUI );
     g_pChat = pChat;
 }
 

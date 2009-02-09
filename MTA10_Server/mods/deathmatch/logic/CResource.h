@@ -236,7 +236,6 @@ private:
     bool                    ReadIncludedHTML ( CXMLNode * root );
     bool                    ReadIncludedExports ( CXMLNode * root );
 	bool					ReadIncludedFiles ( CXMLNode * root );
-	bool					ReadIncludedSettings ( void );
     bool                    CreateVM ( void );
     bool                    DestroyVM ( void );
     void                    TidyUp ( void );
@@ -344,7 +343,7 @@ public:
     inline void             SetPersistent ( bool bPersistent ) { m_bIsPersistent = bPersistent; }
     bool                    ExtractFile ( const char * szFilename );
     bool                    DoesFileExistInZip ( const char * szFilename );
-    char *                  GetFilePath ( const char * szFilename, char * szPath, size_t buffer_size );
+    bool                    GetFilePath ( const char * szFilename, string& strPath );
     inline const std::string&   GetResourceDirectoryPath () { return m_strResourceDirectoryPath; };
     inline const std::string&   GetResourceCacheDirectoryPath () { return m_strResourceCachePath; };
     bool                    LinkToIncludedResources ( void );

@@ -21,33 +21,27 @@ CChat::CChat ( CGUI* pManager, CVector2D & vecPosition )
     g_pChat = this;
     m_pManager = pManager;  
 
+    // Calculate relative position (assuming a 800x600 native resolution for our defined CCHAT_* values)
     CVector2D vecResolution = m_pManager->GetResolution ();
     m_vecScale = CVector2D ( vecResolution.fX / 800.0f, vecResolution.fY / 600.0f );
-    vecPosition.fX *= vecResolution.fX;
-    vecPosition.fY *= vecResolution.fY;
+    vecPosition = vecPosition * vecResolution;
+    m_vecBackgroundPosition = vecPosition;
 
+    // Initialize variables
+    m_TextColor = CHAT_TEXT_COLOR;
     m_bUseCEGUI = false;
-    m_ulChatLineLife = DEFAULT_CHAT_LINE_LIFE;
-    m_ulChatLineFadeOut = DEFAULT_CHAT_LINE_FADE_OUT;
-    m_bCssStyleText = false;
-    m_bCssStyleBackground = false;
+    m_iCVarsRevision = -1;
     m_szCommand = NULL;
     m_bVisible = false;
     m_bInputVisible = false;
-    m_uiNumLines = 7;
     m_pFont = m_pManager->GetClearFont ();
     m_pDXFont = g_pCore->GetGraphics ()->GetFont ();
-    m_fWidth = 1.0f;    
-    m_vecBackgroundPosition = CVector2D ( vecPosition.fX * m_vecScale.fX, vecPosition.fY * m_vecScale.fY );
-    m_vecBackgroundSize = CVector2D ( ( 320.0f * m_fWidth ) * m_vecScale.fX, ( CChat::GetFontHeight ( m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
-    m_Color = CColor ( 0, 0, 128, 100 );
-    m_TextColor = CColor ( 235, 221, 178, 255 );
-    unsigned long ulBackgroundColor = COLOR_ARGB ( m_Color.A, m_Color.R, m_Color.G, m_Color.B );
+    m_fNativeWidth = CHAT_WIDTH;
+    m_bCanChangeWidth = true;
 
+    // Background area
     m_pBackground = m_pManager->CreateStaticImage ();
     m_pBackgroundTexture = m_pManager->CreateTexture ();
-
-    m_pBackgroundTexture->LoadFromMemory ( &ulBackgroundColor, 1, 1 );
     m_pBackground->LoadFromTexture ( m_pBackgroundTexture );
     m_pBackground->MoveToBack ();
     m_pBackground->SetPosition ( m_vecBackgroundPosition );
@@ -55,30 +49,27 @@ CChat::CChat ( CGUI* pManager, CVector2D & vecPosition )
     m_pBackground->SetEnabled ( false );
     m_pBackground->SetVisible ( false );
 
+    // Input area
     m_pInputLine = new CChatInputLine;
     m_szInputText = NULL;
-    m_vecInputPosition = CVector2D ( m_vecBackgroundPosition.fX, m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY );
-    m_vecInputSize = CVector2D ( m_vecBackgroundSize.fX, ( CChat::GetFontHeight ( m_vecScale.fY ) * 1.25f ) );
-    m_InputColor = CColor ( 0, 0, 191, 110 );
-    unsigned long ulInputColor = COLOR_ARGB ( m_InputColor.A, m_InputColor.R, m_InputColor.G, m_InputColor.B );
-
     m_pInput = m_pManager->CreateStaticImage ();
     m_pInputTexture = m_pManager->CreateTexture ();
-
-    m_pInputTexture->LoadFromMemory ( &ulInputColor, 1, 1 );
     m_pInput->LoadFromTexture ( m_pInputTexture );
     m_pInput->MoveToBack ();
     m_pInput->SetPosition ( m_vecInputPosition );
     m_pInput->SetSize ( m_vecInputSize );
     m_pInput->SetEnabled ( false );
     m_pInput->SetVisible ( false );
-    //m_pInput->SetVisible ( m_bInputVisible );    
-
-    SetInputPrefixColor ( CColor ( 172, 213, 254, 255 ) );
-    SetInputTextColor ( CColor ( 172, 213, 254, 255 ) );
     SetInputPrefix ( "Say: " );
 
+    // Position the GUI
+    UpdateGUI ();
+
+    // Set handlers
     m_pManager->SetCharacterKeyHandler ( GUI_CALLBACK_KEY ( &CChat::CharacterKeyHandler, this ) );
+
+    // Load cvars
+    LoadCVars ();
 }
 
 
@@ -86,23 +77,52 @@ CChat::~CChat ( void )
 {
     Clear ();
     ClearInput ();
-    delete m_pBackground;
-    delete m_pBackgroundTexture;
 
-    if ( m_pInput ) delete m_pInput;
-    if ( m_pInputTexture ) delete m_pInputTexture;
-    if ( m_pInputLine ) delete m_pInputLine;
+    SAFE_DELETE ( m_pBackground );
+    SAFE_DELETE ( m_pBackgroundTexture );
+    SAFE_DELETE ( m_pInput );
+    SAFE_DELETE ( m_pInputTexture );
+    SAFE_DELETE ( m_pInputLine );
+
     if ( m_szInputText ) delete [] m_szInputText;
     if ( m_szCommand ) delete [] m_szCommand;
-
     if ( g_pChat == this ) g_pChat = NULL;
+}
+
+
+void CChat::LoadCVars ( void )
+{
+    unsigned int Font;
+    float fWidth = 1;
+
+    CVARS_GET ( "chat_color",                   m_Color );              if( m_bCanChangeWidth ) SetColor ( m_Color );
+    CVARS_GET ( "chat_input_color",             m_InputColor );         SetInputColor ( m_InputColor );
+    CVARS_GET ( "chat_use_cegui",               m_bUseCEGUI );
+    CVARS_GET ( "chat_lines",                   m_uiNumLines );         SetNumLines ( m_uiNumLines);
+    CVARS_GET ( "chat_text_color",              m_TextColor );
+    CVARS_GET ( "chat_scale",                   m_vecScale );
+    CVARS_GET ( "chat_width",                   fWidth );               if( m_bCanChangeWidth ) m_fNativeWidth = fWidth * CHAT_WIDTH;
+    CVARS_GET ( "chat_css_style_text",          m_bCssStyleText );
+    CVARS_GET ( "chat_css_style_background",    m_bCssStyleBackground );
+    CVARS_GET ( "chat_line_life",               (unsigned int &)m_ulChatLineLife );
+    CVARS_GET ( "chat_line_fade_out",           (unsigned int &)m_ulChatLineFadeOut );
+    CVARS_GET ( "chat_font",                    (unsigned int &)Font ); SetChatFont ( (eChatFont)Font );
+
+    UpdateGUI ();
 }
 
 
 void CChat::Draw ( void )
 {
+    // Are we visible?
     if ( !m_bVisible )
         return;
+
+    // Is it time to update all the chat related cvars?
+    if( m_iCVarsRevision != CClientVariables::GetSingleton ().GetRevision () ) {
+        m_iCVarsRevision = CClientVariables::GetSingleton ().GetRevision ();
+        LoadCVars ();
+    }
 
     float fLineDifference = CChat::GetFontHeight ( g_pChat->m_vecScale.fY );
     CVector2D vecPosition ( m_vecBackgroundPosition.fX + ( 5.0f * g_pChat->m_vecScale.fX ), m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY - ( fLineDifference * 1.25f ) );
@@ -128,7 +148,7 @@ void CChat::Draw ( void )
 
     if ( m_bInputVisible )
     {
-        // ChrML: Hack so chatbox input always works. It might get onfocused..
+        // ChrML: Hack so chatbox input always works. It might get unfocused..
         if ( !m_pBackground->IsActive () )
         {
             m_pBackground->Activate ();
@@ -205,9 +225,9 @@ void CChat::Output ( char* szText, bool bColorCoded )
             m_Lines.push_front ( pLine );
 
             unsigned int uiLines = static_cast < unsigned int > ( m_Lines.size () );
-            if ( uiLines > MAX_LINES )
+            if ( uiLines > CHAT_MAX_LINES )
             {
-                for ( unsigned int i = 0 ; i < ( uiLines - MAX_LINES ) ; i++ )
+                for ( unsigned int i = 0 ; i < ( uiLines - CHAT_MAX_LINES ) ; i++ )
                 {
                     CChatLine* pLastLine = m_Lines.back ();
                     delete pLastLine;
@@ -261,7 +281,7 @@ void CChat::ClearInput ( void )
 
 bool CChat::CharacterKeyHandler ( CGUIKeyEventArgs KeyboardArgs )
 {
-    char szTemp [ CCHAT_BUFFER ] = { 0 };
+    char szTemp [ CHAT_BUFFER ] = { 0 };
     char* szInputText = GetInputText ();
     unsigned int uiInputTextLength = 0;
 
@@ -269,8 +289,8 @@ bool CChat::CharacterKeyHandler ( CGUIKeyEventArgs KeyboardArgs )
     if ( szInputText )
     {
 		uiInputTextLength = strlen ( szInputText );
-		if ( uiInputTextLength > CCHAT_BUFFER )
-			uiInputTextLength = CCHAT_BUFFER - 1;
+		if ( uiInputTextLength > CHAT_BUFFER )
+			uiInputTextLength = CHAT_BUFFER - 1;
 
         strncpy ( szTemp, szInputText, uiInputTextLength );
         szTemp [ 1023 ] = 0;
@@ -312,7 +332,7 @@ bool CChat::CharacterKeyHandler ( CGUIKeyEventArgs KeyboardArgs )
             default:
             {
                 // If we haven't exceeded the maximum number of characters per chat message, append the char to the message and update the input control
-                if ( uiInputTextLength < CCHATBOX_MAXCHATLENGTH )
+                if ( uiInputTextLength < CHAT_MAX_CHAT_LENGTH )
                 {                    
                     if ( KeyboardArgs.codepoint >= 32 && KeyboardArgs.codepoint <= 126 )
                     {
@@ -332,27 +352,15 @@ bool CChat::CharacterKeyHandler ( CGUIKeyEventArgs KeyboardArgs )
 
 void CChat::SetVisible ( bool bVisible )
 {
-    /*if ( m_bCssStyleBackground )
-        m_pBackground->SetVisible ( bVisible && m_bInputVisible );
-    else
-        m_pBackground->SetVisible ( bVisible );*/
-
     m_bVisible = bVisible;
 }
 
 
 void CChat::SetInputVisible ( bool bVisible )
 {    
-    /*m_pInput->SetVisible ( bVisible );    
-
-    if ( m_bCssStyleBackground )
-        m_pBackground->SetVisible ( bVisible && m_bInputVisible );*/    
-
     if ( bVisible )
     {
         ClearInput ();
-        // Jax: fixes not being able to type until
-        //m_pBackground->Activate ();
     }
 
     m_bInputVisible = bVisible;
@@ -361,77 +369,59 @@ void CChat::SetInputVisible ( bool bVisible )
 
 void CChat::SetNumLines ( unsigned int uiNumLines )
 {
-    if ( uiNumLines <= MAX_LINES )
+    if ( uiNumLines <= CHAT_MAX_LINES )
     {
         m_uiNumLines = uiNumLines;
-        m_vecBackgroundSize = CVector2D ( ( 320.0f * m_fWidth ) * g_pChat->m_vecScale.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
-        m_pBackground->SetSize ( m_vecBackgroundSize );
-
-        m_vecInputPosition = CVector2D ( m_vecBackgroundPosition.fX, m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY );
-        m_vecInputSize = CVector2D ( m_vecBackgroundSize.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * 1.25f ) );
-        if ( m_pInput )
-        {
-            m_pInput->SetPosition ( m_vecInputPosition );
-            m_pInput->SetSize ( m_vecInputSize );
-        }
+        UpdateGUI ();
     }
 }
 
 
-void CChat::SetFont ( CGUIFont* pFont )
+void CChat::SetChatFont ( eChatFont Font )
 {
+    CGUIFont* pFont = g_pCore->GetGUI ()->GetDefaultFont ();
+    ID3DXFont* pDXFont = g_pCore->GetGraphics ()->GetFont ();
+    switch ( Font )
+    {
+        case CHAT_FONT_DEFAULT:
+            pFont = g_pCore->GetGUI ()->GetDefaultFont ();
+			pDXFont = g_pCore->GetGraphics ()->GetFont ( FONT_DEFAULT );
+            break;
+        case CHAT_FONT_CLEAR:
+            pFont = g_pCore->GetGUI ()->GetClearFont ();
+			pDXFont = g_pCore->GetGraphics ()->GetFont ( FONT_CLEAR );
+            break;
+        case CHAT_FONT_BOLD:
+            pFont = g_pCore->GetGUI ()->GetBoldFont ();
+            pDXFont = g_pCore->GetGraphics ()->GetFont ( FONT_DEFAULT_BOLD );
+            break;
+        case CHAT_FONT_ARIAL:
+			pDXFont = g_pCore->GetGraphics ()->GetFont ( FONT_ARIAL );
+            break;                
+    }
+
+    // Set fonts
     g_pChat->m_pFont = pFont;
-    if ( g_pChat->m_bUseCEGUI )
-    {
-        m_vecBackgroundSize = CVector2D ( ( 320.0f * m_fWidth ) * g_pChat->m_vecScale.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
-        m_pBackground->SetSize ( m_vecBackgroundSize );
-
-        m_vecInputPosition = CVector2D ( m_vecBackgroundPosition.fX, m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY );
-        m_vecInputSize = CVector2D ( m_vecBackgroundSize.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * 1.25f ) );    
-        if ( m_pInput )
-        {
-            m_pInput->SetPosition ( m_vecInputPosition );
-            m_pInput->SetSize ( m_vecInputSize );
-        }
-    }
+    g_pChat->m_pDXFont = pDXFont;
 }
 
 
-void CChat::SetDXFont ( LPD3DXFONT pFont )
+void CChat::UpdateGUI ( void )
 {
-    g_pChat->m_pDXFont = pFont;
-    if ( !g_pChat->m_bUseCEGUI )
-    {
-        m_vecBackgroundSize = CVector2D ( ( 320.0f * m_fWidth ) * g_pChat->m_vecScale.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
-        m_pBackground->SetSize ( m_vecBackgroundSize );
-
-        m_vecInputPosition = CVector2D ( m_vecBackgroundPosition.fX, m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY );
-        m_vecInputSize = CVector2D ( m_vecBackgroundSize.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * 1.25f ) );    
-        if ( m_pInput )
-        {
-            m_pInput->SetPosition ( m_vecInputPosition );
-            m_pInput->SetSize ( m_vecInputSize );
-        }
-    }
-}
-
-
-void CChat::GetScale ( CVector2D& vecScale )
-{
-    vecScale = g_pChat->m_vecScale;
-}
-
-
-void CChat::SetScale ( CVector2D& vecScale )
-{
-    g_pChat->m_vecScale = vecScale;
-    m_vecBackgroundPosition = CVector2D ( 10.0f * g_pChat->m_vecScale.fX, 10.0f * g_pChat->m_vecScale.fY );
-    m_vecBackgroundSize = CVector2D ( ( 320.0f * m_fWidth ) * g_pChat->m_vecScale.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
-    m_pBackground->SetPosition ( m_vecBackgroundPosition );
+    m_vecBackgroundSize = CVector2D (
+        m_fNativeWidth * g_pChat->m_vecScale.fX,
+        CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * (float(m_uiNumLines) + 0.5f)
+    );
     m_pBackground->SetSize ( m_vecBackgroundSize );
 
-    m_vecInputPosition = CVector2D ( m_vecBackgroundPosition.fX, m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY );
-    m_vecInputSize = CVector2D ( m_vecBackgroundSize.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * 1.25f ) );
+    m_vecInputPosition = CVector2D (
+        m_vecBackgroundPosition.fX,
+        m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY
+    );
+    m_vecInputSize = CVector2D (
+        m_vecBackgroundSize.fX,
+        CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * 1.25f
+    );
     if ( m_pInput )
     {
         m_pInput->SetPosition ( m_vecInputPosition );
@@ -440,53 +430,20 @@ void CChat::SetScale ( CVector2D& vecScale )
 }
 
 
-float CChat::GetWidth ( void )
+void CChat::SetColor ( CColor& Color )
 {
-    return m_fWidth;
-}
-
-
-void CChat::SetWidth ( float fWidth )
-{
-    m_fWidth = fWidth;
-    m_vecBackgroundPosition = CVector2D ( 10.0f * g_pChat->m_vecScale.fX, 10.0f * g_pChat->m_vecScale.fY );
-    m_vecBackgroundSize = CVector2D ( ( 320.0f * m_fWidth ) * g_pChat->m_vecScale.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) ) * ( float ) ( ( float ) m_uiNumLines + 0.5f ) );
-    m_pBackground->SetPosition ( m_vecBackgroundPosition );
-    m_pBackground->SetSize ( m_vecBackgroundSize );
-
-    m_vecInputPosition = CVector2D ( m_vecBackgroundPosition.fX, m_vecBackgroundPosition.fY + m_vecBackgroundSize.fY );
-    m_vecInputSize = CVector2D ( m_vecBackgroundSize.fX, ( CChat::GetFontHeight ( g_pChat->m_vecScale.fY ) * 1.25f ) );
-    if ( m_pInput )
-    {
-        m_pInput->SetPosition ( m_vecInputPosition );
-        m_pInput->SetSize ( m_vecInputSize );
-    }
-}
-
-
-void CChat::SetColor ( CColor& color )
-{
-    m_Color = color;
-    unsigned long ulBackgroundColor = COLOR_ARGB ( m_Color.A, m_Color.R, m_Color.G, m_Color.B );
+    unsigned long ulBackgroundColor = COLOR_ARGB ( Color.A, Color.R, Color.G, Color.B );
 
     m_pBackgroundTexture->LoadFromMemory ( &ulBackgroundColor, 1, 1 );
     m_pBackground->LoadFromTexture ( m_pBackgroundTexture );
 }
 
 
-void CChat::SetInputColor ( CColor& color )
+void CChat::SetInputColor ( CColor& Color )
 {
-    m_InputColor = color;
-    unsigned long ulInputColor = COLOR_ARGB ( m_InputColor.A, m_InputColor.R, m_InputColor.G, m_InputColor.B );
+    unsigned long ulInputColor = COLOR_ARGB ( Color.A, Color.R, Color.G, Color.B );
 
     if ( m_pInputTexture ) m_pInputTexture->LoadFromMemory ( &ulInputColor, 1, 1 );
-    if ( m_pInput ) m_pInput->LoadFromTexture ( m_pInputTexture );
-}
-
-
-void CChat::SetInputColor ( unsigned long& ulColor )
-{
-    if ( m_pInputTexture ) m_pInputTexture->LoadFromMemory ( &ulColor, 1, 1 );
     if ( m_pInput ) m_pInput->LoadFromTexture ( m_pInputTexture );
 }
 
@@ -506,21 +463,6 @@ void CChat::SetInputPrefix ( char* szPrefix )
     if ( m_pInputLine )
     {
         m_pInputLine->m_pPrefix->SetText ( szPrefix );
-    }
-}
-
-
-void CChat::GetInputPrefixColor ( CColor& color )
-{
-    m_pInputLine->m_pPrefix->GetColor ( color );
-}
-
-
-void CChat::SetInputPrefixColor ( CColor& color )
-{
-    if ( m_pInputLine )
-    {
-        m_pInputLine->m_pPrefix->SetColor ( color );
     }
 }
 
@@ -572,20 +514,6 @@ void CChat::SetInputText ( char* szText )
 }
 
 
-void CChat::GetInputTextColor ( CColor& color )
-{
-    if ( m_pInputLine )
-        m_pInputLine->m_pText->GetColor ( color );
-}
-
-
-void CChat::SetInputTextColor ( CColor& color )
-{
-    if ( m_pInputLine )
-        m_pInputLine->m_pText->SetColor ( color );
-}
-
-
 void CChat::SetCommand ( char* szCommand )
 {
     if ( m_szCommand )
@@ -610,39 +538,6 @@ void CChat::SetCommand ( char* szCommand )
             SetInputPrefix ( szTemp );
             delete [] szTemp;
         }
-    }
-}
-
-
-void CChat::SetCssStyleText ( bool bEnabled )
-{
-    m_bCssStyleText = bEnabled;
-}
-
-
-void CChat::SetCssStyleBackground ( bool bEnabled )
-{
-    if ( m_bCssStyleBackground != bEnabled )
-    {        
-        m_bCssStyleBackground = bEnabled;
-
-        /*if ( m_bCssStyleBackground )
-            m_pBackground->SetVisible ( m_bVisible && m_bInputVisible );
-        else
-            m_pBackground->SetVisible ( m_bVisible );*/
-    }
-}
-
-
-void CChat::SetUseCEGUI ( bool bUseCEGUI )
-{
-    if ( bUseCEGUI != g_pChat->m_bUseCEGUI )
-    {
-        // Setup our chat dimensions based on the new font
-        if ( bUseCEGUI ) SetFont ( g_pChat->m_pFont );
-        else SetDXFont ( g_pChat->m_pDXFont );
-
-        g_pChat->m_bUseCEGUI = bUseCEGUI;
     }
 }
 

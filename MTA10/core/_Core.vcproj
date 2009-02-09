@@ -271,6 +271,12 @@
 				RelativePath=".\CCommunity.cpp">
 			</File>
 			<File
+				RelativePath=".\CCommunityLogin.cpp">
+			</File>
+			<File
+				RelativePath=".\CCommunityRegistration.cpp">
+			</File>
+			<File
 				RelativePath=".\CConnectManager.cpp">
 			</File>
 			<File
@@ -340,6 +346,9 @@
 				RelativePath=".\CGUI.cpp">
 			</File>
 			<File
+				RelativePath=".\CJoystickManager.cpp">
+			</File>
+			<File
 				RelativePath=".\CKeyBinds.cpp">
 			</File>
 			<File
@@ -347,9 +356,6 @@
 			</File>
 			<File
 				RelativePath="CLogger.cpp">
-			</File>
-			<File
-				RelativePath=".\CMainConfig.cpp">
 			</File>
 			<File
 				RelativePath=".\CMainMenu.cpp">
@@ -421,9 +427,6 @@
 				RelativePath=".\CServerBrowser.cpp">
 			</File>
 			<File
-				RelativePath=".\CServerBrowserLogin.cpp">
-			</File>
-			<File
 				RelativePath="CServerList.cpp">
 			</File>
 			<File
@@ -440,9 +443,6 @@
 			</File>
 			<File
 				RelativePath=".\CVideoRenderer.cpp">
-			</File>
-			<File
-				RelativePath=".\CXMLConfig.cpp">
 			</File>
 			<File
 				RelativePath=".\StdInc.cpp">
@@ -536,6 +536,12 @@
 				RelativePath=".\CCommunity.h">
 			</File>
 			<File
+				RelativePath=".\CCommunityLogin.h">
+			</File>
+			<File
+				RelativePath=".\CCommunityRegistration.h">
+			</File>
+			<File
 				RelativePath=".\CConnectManager.h">
 			</File>
 			<File
@@ -620,6 +626,9 @@
 				RelativePath=".\CGUI.h">
 			</File>
 			<File
+				RelativePath=".\CJoystickManager.h">
+			</File>
+			<File
 				RelativePath=".\CKeyBinds.h">
 			</File>
 			<File
@@ -689,9 +698,6 @@
 				RelativePath=".\CServerBrowser.h">
 			</File>
 			<File
-				RelativePath=".\CServerBrowserLogin.h">
-			</File>
-			<File
 				RelativePath=".\CServerList.h">
 			</File>
 			<File
@@ -711,9 +717,6 @@
 			</File>
 			<File
 				RelativePath=".\CVideoUtils.h">
-			</File>
-			<File
-				RelativePath=".\CXMLConfig.h">
 			</File>
 			<File
 				RelativePath=".\StdInc.h">

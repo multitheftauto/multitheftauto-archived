@@ -80,7 +80,7 @@ BOOL AC_RestrictAccess( VOID )
 
 template<> CCore * CSingleton< CCore >::m_pSingleton = NULL;
 
-CCore::CCore        ( )
+CCore::CCore ( void )
 {
     // Initialize the global pointer
     g_pCore = this;
@@ -89,11 +89,10 @@ CCore::CCore        ( )
     AC_RestrictAccess ();
     #endif
     
-    // Clear unused pointers
-    m_pConfig = NULL;
-
     // Initialize critical sections
     CCriticalSection::Initialize ();
+
+    m_pConfigFile = NULL;
 
     // NULL the path buffers
     memset ( m_szInstallRoot, 0, MAX_PATH );
@@ -145,12 +144,18 @@ CCore::CCore        ( )
         m_szGTAInstallRoot [ sizeGTAInstallRoot - 1 ] = 0;
     }
 
+    // Parse the command line
+    const char* pszNoValOptions[] =
+    {
+        "window",
+        NULL
+    };
+    ParseCommandLine ( m_CommandLineOptions, m_szCommandLineArgs, pszNoValOptions );
 
     // Create a logger instance.
     m_pLogger                   = new CLogger ( );
 
     // Create interaction objects.
-    m_pClientVariables          = new CClientVariables;
     m_pCommands                 = new CCommands;
     m_pConnectManager           = new CConnectManager;
 
@@ -202,11 +207,9 @@ CCore::CCore        ( )
 
 	// Reset the screenshot flag
 	bScreenShot = false;
-
-    m_ChatFont = CHAT_FONT_CLEAR;             
 }
 
-CCore::~CCore ( )
+CCore::~CCore ( void )
 {
     WriteDebugEvent ( "CCore::~CCore" );
 
@@ -226,35 +229,12 @@ CCore::~CCore ( )
     // Remove input hook
 	CMessageLoopHook::GetSingleton ( ).RemoveHook ( );
 
-    // Make sure the config is deleted before the objects it uses to save    
-    CConsole * pConsole = m_pLocalGUI->GetConsole ();
-    m_pConfig->vecConsolePosition = pConsole->GetPosition ();
-    m_pConfig->vecConsoleSize = pConsole->GetSize ();
-    CChat* pChat = m_pLocalGUI->GetChat ();
-    m_pConfig->ucChatFont = ( unsigned char ) m_ChatFont;
-    m_pConfig->ucChatLines = ( unsigned char ) pChat->GetNumLines ();
-    CColor color;
-    pChat->GetColor ( color );
-    m_pConfig->SetChatColor ( color.R, color.G, color.B, color.A );
-    pChat->GetInputColor ( color );
-    m_pConfig->SetChatInputColor ( color.R, color.G, color.B, color.A );
-    pChat->GetInputPrefixColor ( color );
-    m_pConfig->SetChatInputPrefixColor ( color.R, color.G, color.B, color.A );
-    pChat->GetInputTextColor ( color );
-    m_pConfig->SetChatInputTextColor ( color.R, color.G, color.B, color.A );
-    pChat->GetScale ( m_pConfig->vecChatScale );
-    m_pConfig->fChatWidth = pChat->GetWidth ();
-    m_pConfig->bChatCssStyleText = pChat->GetCssStyleText ();
-    m_pConfig->bChatCssStyleBackground = pChat->GetCssStyleBackground ();
-    m_pConfig->ulChatLineLife = pChat->GetChatLineLife ();
-    m_pConfig->ulChatLineFadeOut = pChat->GetChatLineFadeOut ();
-    m_pConfig->bChatUseCEGUI = pChat->GetUseCEGUI ();
-    delete m_pConfig;
-
-    delete m_pKeyBinds;
+    // Store core variables to cvars
+    CVARS_SET ( "console_pos",                  m_pLocalGUI->GetConsole ()->GetPosition () );
+    CVARS_SET ( "console_size",                 m_pLocalGUI->GetConsole ()->GetSize () );
+	CVARS_SET ( "serverbrowser_size",           m_pLocalGUI->GetMainMenu ()->GetServerBrowser ()->GetSize () );
 
     // Delete interaction objects.
-    delete m_pClientVariables;
     delete m_pCommands;
     delete m_pConnectManager;
     delete m_pDirect3DData;
@@ -277,6 +257,9 @@ CCore::~CCore ( )
     // Delete lazy subsystems
     DestroyGUI ();
     DestroyXML ();
+
+    // Delete keybinds
+    delete m_pKeyBinds;
 
     // Delete the logger
     delete m_pLogger;
@@ -327,6 +310,15 @@ CMultiplayer* CCore::GetMultiplayer ( void )
     return m_pMultiplayer;
 }
 
+CXMLNode* CCore::GetConfig ( void )
+{
+    if ( !m_pConfigFile )
+        return NULL;
+    CXMLNode* pRoot = m_pConfigFile->GetRootNode ();
+    if ( !pRoot )
+        pRoot = m_pConfigFile->CreateRootNode ( CONFIG_ROOT );
+    return pRoot;
+}
 
 CGUI* CCore::GetGUI ( void )
 {
@@ -337,13 +329,6 @@ CGUI* CCore::GetGUI ( void )
 CNet* CCore::GetNetwork ( void )
 {
     return m_pNet;
-}
-
-
-CMainConfig* CCore::GetConfig ( void )
-{
-    assert ( m_pConfig );
-    return m_pConfig;
 }
 
 
@@ -364,17 +349,16 @@ CVideoManager* CCore::GetVMR9Manager ( void )
 	return m_pVMR9Manager;
 }
 
-
-char* CCore::GetDebugFileName ( char* szBuffer, size_t bufferSize )
+void CCore::SaveConfig ( void )
 {
-    assert ( m_pConfig );
-
-    if ( szBuffer )
+    if ( m_pConfigFile )
     {
-        strncpy ( szBuffer, m_pConfig->strDebugFileName.c_str (), bufferSize );
-        szBuffer[bufferSize-1] = '\0';
+        CXMLNode* pBindsNode = GetConfig ()->FindSubNode ( CONFIG_NODE_KEYBINDS );
+        if ( !pBindsNode )
+            pBindsNode = GetConfig ()->CreateSubNode ( CONFIG_NODE_KEYBINDS );
+        m_pKeyBinds->SaveToXML ( pBindsNode );
+        m_pConfigFile->Write ();
     }
-    return szBuffer;
 }
 
 void CCore::ChatEcho ( const char* szText, bool bColorCoded )
@@ -451,6 +435,7 @@ void CCore::DebugEchoColor ( const char* szText, unsigned char R, unsigned char 
     m_pLocalGUI->EchoDebug ( szText );
 }
 
+
 void CCore::DebugPrintfColor ( const char* szFormat, unsigned char R, unsigned char G, unsigned char B, ... )
 {
     // Set the color
@@ -468,6 +453,7 @@ void CCore::DebugPrintfColor ( const char* szFormat, unsigned char R, unsigned c
     }
 }
 
+
 void CCore::DebugClear ( void )
 {
     CDebugView * pDebugView = m_pLocalGUI->GetDebugView ();
@@ -476,6 +462,7 @@ void CCore::DebugClear ( void )
         pDebugView->Clear();
     }
 }
+
 
 void CCore::ChatEchoColor ( const char* szText, unsigned char R, unsigned char G, unsigned char B, bool bColorCoded )
 {
@@ -552,24 +539,12 @@ bool CCore::IsChatVisible ( void )
     return false;
 }
 
+
 void CCore::TakeScreenShot ( void )
 {
 	bScreenShot = true;
 }
 
-void CCore::SetScreenShotPath ( const char *szPath )
-{
-	CScreenShot::SetPath ( szPath );
-}
-
-void CCore::SetChatInputBackgroundColor ( DWORD dwColor )
-{
-    if ( m_pLocalGUI )
-    {
-        //m_pLocalGUI->GetChatBox ()->SetInputBackgroundColor ( dwColor );
-        m_pLocalGUI->GetChat ()->SetInputColor ( dwColor );
-    }
-}
 
 void CCore::EnableChatInput ( char* szCommand, DWORD dwColor )
 {
@@ -636,180 +611,40 @@ bool CCore::IsCursorForcedVisible ( void )
     return false;
 }
 
-
-void CCore::SetChatColor ( unsigned char R, unsigned char G, unsigned char B, unsigned char A )
-{
-    m_pLocalGUI->GetChat ()->SetColor ( CColor ( R, G, B, A ) );
-}
-
-
-void CCore::SetChatInputColor ( unsigned char R, unsigned char G, unsigned char B, unsigned char A )
-{
-    m_pLocalGUI->GetChat ()->SetInputColor ( CColor ( R, G, B, A ) );
-}
-
-
-void CCore::SetChatInputPrefixColor ( unsigned char R, unsigned char G, unsigned char B, unsigned char A )
-{
-    m_pLocalGUI->GetChat ()->SetInputPrefixColor ( CColor ( R, G, B, A ) );
-}
-
-
-void CCore::SetChatInputTextColor ( unsigned char R, unsigned char G, unsigned char B, unsigned char A )
-{
-    m_pLocalGUI->GetChat ()->SetInputTextColor ( CColor ( R, G, B, A ) );
-}
-
-
-void CCore::SetChatLines ( unsigned int uiLines )
-{
-    if ( uiLines > 30 )
-        uiLines = 30;
-
-    m_pLocalGUI->GetChat ()->SetNumLines ( uiLines );
-}
-
-
-void CCore::SetChatFont ( eChatFont font )
-{
-    if ( font != m_ChatFont )
-    {
-        CGUIFont* pFont = m_pGUI->GetDefaultFont ();
-        ID3DXFont* pDXFont = m_pGraphics->GetFont ();
-        switch ( font )
-        {
-            case CHAT_FONT_DEFAULT:
-                pFont = m_pGUI->GetDefaultFont ();
-				pDXFont = m_pGraphics->GetFont ( FONT_DEFAULT );
-                break;
-            case CHAT_FONT_CLEAR:
-                pFont = m_pGUI->GetClearFont ();
-				pDXFont = m_pGraphics->GetFont ( FONT_CLEAR );
-                break;
-            case CHAT_FONT_BOLD:
-                pFont = m_pGUI->GetBoldFont ();
-                pDXFont = m_pGraphics->GetFont ( FONT_DEFAULT_BOLD );
-                break;
-            case CHAT_FONT_ARIAL:
-				pDXFont = m_pGraphics->GetFont ( FONT_ARIAL );
-                break;                
-        }
-        m_pLocalGUI->GetChat ()->SetFont ( pFont );
-        m_pLocalGUI->GetChat ()->SetDXFont ( pDXFont );        
-
-        m_ChatFont = font;
-    }
-}
-
-
-void CCore::SetChatScale ( CVector2D& vecScale )
-{
-    if ( vecScale.fX < 0.5f )
-        vecScale.fX = 0.5f;
-    else if ( vecScale.fX > 2.0f )
-        vecScale.fX = 2.0f;
-    if ( vecScale.fY < 0.5f )
-        vecScale.fY = 0.5f;
-    else if ( vecScale.fY > 2.0f )
-        vecScale.fY = 2.0f;
-
-    m_pLocalGUI->GetChat ()->SetScale ( vecScale );
-}
-
-
-void CCore::SetChatWidth ( float fWidth )
-{
-    if ( fWidth < 0.5f )
-        fWidth = 0.5f;
-    else if ( fWidth > 2.0f )
-        fWidth = 2.0f;
-
-    m_pLocalGUI->GetChat ()->SetWidth ( fWidth );
-}
-
-
-void CCore::SetChatCssStyleText ( bool bEnabled )
-{
-    m_pLocalGUI->GetChat ()->SetCssStyleText ( bEnabled );
-}
-
-
-void CCore::SetChatCssStyleBackground ( bool bEnabled )
-{
-    m_pLocalGUI->GetChat ()->SetCssStyleBackground ( bEnabled );
-}
-
-
-void CCore::SetChatLineLife ( unsigned long ulTime )
-{
-    m_pLocalGUI->GetChat ()->SetChatLineLife ( ulTime );
-}
-
-
-void CCore::SetChatLineFadeOut ( unsigned long ulTime )
-{
-    m_pLocalGUI->GetChat ()->SetChatLineFadeOut ( ulTime );
-}
-
-
-void CCore::SetChatUseCEGUI ( bool bUseCEGUI )
-{
-    m_pLocalGUI->GetChat ()->SetUseCEGUI ( bUseCEGUI );
-    m_pLocalGUI->GetDebugView ()->SetUseCEGUI ( bUseCEGUI );
-	m_bUseCEGUI = bUseCEGUI;
-}
-
-
 void CCore::ApplyConsoleSettings ( void )
 {
-    assert ( m_pConfig );
-
+    CVector2D vec;
     CConsole * pConsole = m_pLocalGUI->GetConsole ();
-    pConsole->SetPosition ( m_pConfig->vecConsolePosition );
-    pConsole->SetSize ( m_pConfig->vecConsoleSize );
+
+    CVARS_GET ( "console_pos", vec );
+    pConsole->SetPosition ( vec );
+    CVARS_GET ( "console_size", vec );
+    pConsole->SetSize ( vec );
 }
 
-
-void CCore::ApplyChatSettings ( void )
+void CCore::ApplyServerBrowserSettings ( void )
 {
-    assert ( m_pConfig );
+    CVector2D vec;
 
-    SetChatFont ( (eChatFont) m_pConfig->ucChatFont );
-    SetChatLines ( m_pConfig->ucChatLines );
-    unsigned char R, G, B, A;
-    m_pConfig->GetChatColor ( R, G, B, A );
-    SetChatColor ( R, G, B, A );
-    m_pConfig->GetChatInputColor ( R, G, B, A );
-    SetChatInputColor ( R, G, B, A );
-    m_pConfig->GetChatInputPrefixColor ( R, G, B, A );
-    SetChatInputPrefixColor ( R, G, B, A );
-    m_pConfig->GetChatInputTextColor ( R, G, B, A );
-    SetChatInputTextColor ( R, G, B, A );
-    SetChatScale ( m_pConfig->vecChatScale );
-    SetChatWidth ( m_pConfig->fChatWidth );
-    SetChatCssStyleText ( m_pConfig->bChatCssStyleText );
-    SetChatCssStyleBackground ( m_pConfig->bChatCssStyleBackground );
-    SetChatLineLife ( m_pConfig->ulChatLineLife );
-    SetChatLineFadeOut ( m_pConfig->ulChatLineFadeOut );
-    SetChatUseCEGUI ( m_pConfig->bChatUseCEGUI );
+    CVARS_GET ( "serverbrowser_size", vec );
+    m_pLocalGUI->GetMainMenu ()->GetServerBrowser ()->SetSize ( vec );
 }
 
 
 void CCore::ApplyGameSettings ( void )
 {
-    assert ( m_pConfig );
-
+    bool bval;
     CControllerConfigManager * pController = m_pGame->GetControllerConfigManager ();
-    pController->SetMouseInverted ( m_pConfig->bInvertMouse );
-    pController->SetFlyWithMouse ( m_pConfig->bFlyWithMouse );
+
+    CVARS_GET ( "invert_mouse",     bval ); pController->SetMouseInverted ( bval );
+    CVARS_GET ( "fly_with_mouse",   bval ); pController->SetFlyWithMouse ( bval );
+    CVARS_GET ( "classic_controls", bval ); bval ? pController->SetInputType ( NULL ) : pController->SetInputType ( 1 );
 }
 
-
-bool CCore::IsUsingCEGUIForText ( void )
+void CCore::ApplyMenuSettings ( void )
 {
-	return m_bUseCEGUI;
+    m_pLocalGUI->GetMainMenu ()->LoadMenuOptions ();
 }
-
 
 void CCore::SetConnected ( bool bConnected )
 {
@@ -823,16 +658,24 @@ bool CCore::IsConnected ( void )
 }
 
 
+bool CCore::Reconnect ( const char* szHost, unsigned short usPort, const char* szPassword )
+{
+    return m_pConnectManager->Reconnect ( szHost, usPort, szPassword );
+}
+
+
 void CCore::SetOfflineMod ( bool bOffline )
 {
     m_bIsOfflineMod = bOffline;
 }
+
 
 char * CCore::GetModInstallRoot ( char * szModName, char * szBuffer, size_t bufferSize )
 {
     _snprintf( szBuffer, bufferSize, "%s\\mods\\%s", GetInstallRoot(), szModName );
     return szBuffer;
 }
+
 
 const char* CCore::GetInstallRoot ( )
 {
@@ -844,6 +687,7 @@ const char* CCore::GetGTAInstallRoot ( void )
 {
     return m_szGTAInstallRoot;
 }
+
 
 void CCore::ForceCursorVisible ( bool bVisible )
 {
@@ -975,6 +819,7 @@ void CCore::CreateGame ( )
     }
 }
 
+
 void CCore::CreateMultiplayer ( )
 {
     // Check to see if our game has been created.
@@ -988,7 +833,7 @@ void CCore::CreateMultiplayer ( )
     typedef CMultiplayer* (*pfnMultiplayerInitializer) ( CGame * );
     pfnMultiplayerInitializer pfnMultiplayerInit;
 
-    // Load approrpiate compilation-specific library.
+    // Load appropriate compilation-specific library.
 #ifdef MTA_DEBUG
     m_MultiplayerModule.LoadModule ( "mta/multiplayer_sa_d.dll" );
 # else
@@ -1056,9 +901,9 @@ void CCore::InitGUI ( IUnknown* pDevice )
 	SetCurrentDirectory ( szCurDir );
 
 	// and set the screenshot path to this default library (screenshots shouldnt really be made outside mods)
-	char szScreenShotPath[MAX_PATH] = {0};
-    _snprintf( szScreenShotPath, MAX_PATH - 1, "%s\\screenshots", GetInstallRoot() );
-	SetScreenShotPath ( szScreenShotPath );
+    std::string strScreenShotPath = GetInstallRoot () + std::string ( "\\screenshots" );
+    CVARS_SET ( "screenshot_path", strScreenShotPath );
+    CScreenShot::SetPath ( strScreenShotPath.c_str() );
 }
 
 
@@ -1102,6 +947,7 @@ void CCore::DestroyGUI ( )
 	}
 	m_GUIModule.UnloadModule ();
 }
+
 
 void CCore::CreateNetwork ( )
 {
@@ -1185,8 +1031,20 @@ void CCore::CreateXML ( )
 
 	SetCurrentDirectory ( szCurDir );
 
+    
+    // Load config XML file
+    m_pConfigFile = m_pXML->CreateXML ( MTA_CONFIG_PATH );
+    if ( !m_pConfigFile ) {
+        assert ( false );
+        return;
+    }
+    m_pConfigFile->Parse ();
+
+    // Load the keybinds (loads defaults if the subnode doesn't exist)
+    GetKeyBinds ()->LoadFromXML ( GetConfig ()->FindSubNode ( CONFIG_NODE_KEYBINDS ) );
+
     // Load XML-dependant subsystems
-    m_pConfig = new CMainConfig ( "mta\\coreconfig.xml" );
+    m_ClientVariables.Load ( );
 }
 
 
@@ -1204,6 +1062,7 @@ void CCore::DestroyGame ( )
 
 }
 
+
 void CCore::DestroyMultiplayer ( )
 {
 	WriteDebugEvent ( "CCore::DestroyMultiplayer" );
@@ -1216,9 +1075,16 @@ void CCore::DestroyMultiplayer ( )
 	m_MultiplayerModule.UnloadModule();
 }
 
+
 void CCore::DestroyXML ( )
 {
 	WriteDebugEvent ( "CCore::DestroyXML" );
+
+    // Save and unload configuration
+    if ( m_pConfigFile ) {
+        SaveConfig ();
+        delete m_pConfigFile;
+    }
 
 	if ( m_pXML )
 	{
@@ -1227,6 +1093,7 @@ void CCore::DestroyXML ( )
 
 	m_XMLModule.UnloadModule();
 }
+
 
 void CCore::DestroyNetwork ( )
 {
@@ -1240,13 +1107,17 @@ void CCore::DestroyNetwork ( )
 	m_NetModule.UnloadModule();
 }
 
+
 void CCore::DoPreFramePulse ( )
 {
     m_pKeyBinds->DoPreFramePulse ();
 
     // Notify the mod manager
     m_pModManager->DoPulsePreFrame ();  
+
+    m_pLocalGUI->DoPulse ();
 }
+
 
 void CCore::DoPostFramePulse ( )
 {
@@ -1262,19 +1133,18 @@ void CCore::DoPostFramePulse ( )
     static bool bFirstPulse = true;
     if ( bFirstPulse )
     {
-        assert ( m_pConfig );
-
         bFirstPulse = false;
 
-        m_pConfig->Load ();
+        // Apply all settings
         ApplyConsoleSettings ();
-        ApplyChatSettings ();
+		ApplyServerBrowserSettings ();
         ApplyGameSettings ();
-
-		m_pLocalGUI->GetMainMenu ()->LoadMenuOptions ();
+        ApplyMenuSettings ();
 
         m_pGUI->SetMouseClickHandler ( GUI_CALLBACK_MOUSE ( &CCore::OnMouseClick, this ) );
 		m_pGUI->SetMouseDoubleClickHandler ( GUI_CALLBACK_MOUSE ( &CCore::OnMouseDoubleClick, this ) );
+
+        m_Community.Initialize ();
     }
 
     // This is the first frame in the menu?
@@ -1288,17 +1158,14 @@ void CCore::DoPostFramePulse ( )
             {
                 m_bFirstFrame = false;
 
-                // Parse commandline (TODO: Pretty hacky... Need to manage this more nicely in r2)
-                char szCommandLine [512];
-                strncpy ( szCommandLine, GetCommandLine (), 512 );
-
-                // Does it begin with mta://?
-                if ( strnicmp ( szCommandLine, "mtasa://", 8 ) == 0 )
+                // Parse the command line
+                // Does it begin with mtasa://?
+                if ( m_szCommandLineArgs && strnicmp ( m_szCommandLineArgs, "mtasa://", 8 ) == 0 )
                 {
                     char szArguments [256];
                     szArguments [255] = 0;
 
-                    GetConnectCommandFromURI(szCommandLine, szArguments, sizeof(szArguments));
+                    GetConnectCommandFromURI(m_szCommandLineArgs, szArguments, sizeof(szArguments));
                     // Run the connect command
                     if ( strlen( szArguments ) > 0 && !m_pCommands->Execute ( szArguments ) )
                     {
@@ -1306,32 +1173,24 @@ void CCore::DoPostFramePulse ( )
                     }
                 }
                 else
-                {   
-                    char* szKey = strtok ( szCommandLine, " " );
-                    if ( szKey )
+                {
+                    // We want to load a mod?
+                    const char* szOptionValue;
+                    if ( szOptionValue = GetCommandLineOption( "l" ) )
                     {
-                        // We want to load a mod?
-                        if ( strcmp ( szKey, "-l" ) == 0 )
+                        // Try to load the mod
+                        if ( !m_pModManager->Load ( szOptionValue, m_szCommandLineArgs ) )
                         {
-                            char* szMod = strtok ( NULL, " " );
-                            char* szArguments = strtok ( NULL, "\0" );
-                            
-                            // Try to load the mod
-                            if ( !m_pModManager->Load ( szMod, szArguments ) )
-                            {
-                                char szTemp [128];
-                                _snprintf ( szTemp, 128, "Error running mod specified in command line ('%s')", szMod );
-                                ShowMessageBox ( "Error", szTemp, MB_BUTTON_OK | MB_ICON_ERROR );
-                            }
+                            char szTemp [128];
+                            _snprintf ( szTemp, 128, "Error running mod specified in command line ('%s')", szOptionValue );
+                            ShowMessageBox ( "Error", szTemp, MB_BUTTON_OK | MB_ICON_ERROR );
                         }
-                        // We want to connect to a server?
-                        else if ( strcmp ( szKey, "-c" ) == 0 )
-                        {
-                            char* szArguments = strtok ( NULL, "\0" );
-                            
-                            CCommandFuncs::Connect ( szArguments );
-                        }
-                    }                                                    
+                    }
+                    // We want to connect to a server?
+                    else if ( szOptionValue = GetCommandLineOption ( "c" ) )
+                    {
+                        CCommandFuncs::Connect ( szOptionValue );
+                    }
                 }
             }
         }
@@ -1341,6 +1200,7 @@ void CCore::DoPostFramePulse ( )
         }
     }
 
+    GetJoystickManager ()->DoPulse ();      // Note: This may indirectly call CMessageLoopHook::ProcessMessage
     m_pKeyBinds->DoPostFramePulse ();
 
     // Notify the mod manager and the connect manager
@@ -1374,7 +1234,7 @@ void CCore::RegisterCommands ( )
 
     m_pCommands->Add ( "vid",				"changes the video settings (id)",	CCommandFuncs::Vid );
 
-    m_pCommands->Add ( "window",            "enter windowed mode",	            CCommandFuncs::Window );
+    m_pCommands->Add ( "window",            "enter/leave windowed mode",	    CCommandFuncs::Window );
 
     m_pCommands->Add ( "load",				"loads a mod (name args)",			CCommandFuncs::Load );
     m_pCommands->Add ( "unload",			"unloads a mod (name)",				CCommandFuncs::Unload );
@@ -1393,19 +1253,12 @@ void CCore::RegisterCommands ( )
 #endif
 }
 
-void CCore::SaveNick ( const char* szNick )
-{
-    assert ( m_pConfig );
-
-    m_pConfig->strNick = const_cast < char* > ( szNick );
-
-    CLocalGUI::GetSingleton ().GetMainMenu()->GetSettingsWindow()->LoadData ();
-}
 
 bool CCore::GetResetNeeded ( )
 {
 	return m_bResetNeeded;
 }
+
 
 void CCore::SetRenderDevice ( IUnknown* pDevice )
 {
@@ -1436,6 +1289,7 @@ void CCore::SwitchRenderWindow ( HWND hWnd, HWND hWndInput )
 	SetWindowLong ( hDeviceWindow, GWL_STYLE, WS_VISIBLE | WS_CHILD );
 }
 
+
 bool CCore::IsValidNick ( const char* szNick )
 {
     // Too long or too short?
@@ -1459,6 +1313,7 @@ bool CCore::IsValidNick ( const char* szNick )
 
     return false;
 }
+
 
 #ifndef MTA_DEBUG
 CResManager * CCore::GetResManager ( void )
@@ -1511,6 +1366,91 @@ bool CCore::OnMouseDoubleClick ( CGUIMouseEventArgs Args )
 	return bHandled;
 }
 
+void CCore::ParseCommandLine ( std::map < std::string, std::string > & options, const char*& szArgs, const char** pszNoValOptions )
+{
+    std::set < std::string > noValOptions;
+    if ( pszNoValOptions )
+    {
+        while ( *pszNoValOptions )
+        {
+            noValOptions.insert ( *pszNoValOptions );
+            pszNoValOptions++;
+        }
+    }
+
+    const char* szCmdLine = GetCommandLine ();
+    char szCmdLineCopy[512];
+    strncpy ( szCmdLineCopy, szCmdLine, sizeof(szCmdLineCopy) );
+    
+    char* pCmdLineEnd = szCmdLineCopy + strlen ( szCmdLineCopy );
+    char* pStart = szCmdLineCopy;
+    char* pEnd = pStart;
+    bool bInQuoted = false;
+    std::string strKey;
+    szArgs = NULL;
+
+    while ( pEnd != pCmdLineEnd )
+    {
+        pEnd = strchr ( pEnd + 1, ' ' );
+        if ( !pEnd )
+            pEnd = pCmdLineEnd;
+        if ( bInQuoted && *(pEnd - 1) == '"' )
+            bInQuoted = false;
+        else if ( *pStart == '"' )
+            bInQuoted = true;
+
+        if ( !bInQuoted )
+        {
+            *pEnd = 0;
+            if ( strKey.empty () )
+            {
+                if ( *pStart == '-' )
+                {
+                    strKey = pStart + 1;
+                    if ( noValOptions.find ( strKey ) != noValOptions.end () )
+                    {
+                        options [ strKey ] = "";
+                        strKey.clear ();
+                    }
+                }
+                else
+                {
+                    szArgs = pStart - szCmdLineCopy + szCmdLine;
+                    break;
+                }
+            }
+            else
+            {
+                if ( *pStart == '-' )
+                {
+                    options [ strKey ] = "";
+                    strKey = pStart + 1;
+                }
+                else
+                {
+                    if ( *pStart == '"' )
+                        pStart++;
+                    if ( *(pEnd - 1) == '"' )
+                        *(pEnd - 1) = 0;
+                    options [ strKey ] = pStart;
+                    strKey.clear ();
+                }
+            }
+            pStart = pEnd;
+            while ( pStart != pCmdLineEnd && *(++pStart) == ' ' );
+            pEnd = pStart;
+        }
+    }
+}
+
+const char* CCore::GetCommandLineOption ( const char* szOption )
+{
+    std::map < std::string, std::string >::iterator it = m_CommandLineOptions.find ( szOption );
+    if ( it != m_CommandLineOptions.end () )
+        return it->second.c_str ();
+    else
+        return NULL;
+}
 
 const char* CCore::GetConnectCommandFromURI ( const char* szURI, char* szDest, size_t destLength )
 {
@@ -1634,23 +1574,23 @@ const char* CCore::GetConnectCommandFromURI ( const char* szURI, char* szDest, s
     }
 
     // Grab the nickname
-    const char* szNick;
+    std::string strNick;
     if ( strlen ( szNickname ) > 0 )
     {
-        szNick = szNickname;
+        strNick = szNickname;
     }
     else
     {
-        szNick = m_pConfig->strNick.c_str ();
+        CVARS_GET ( "nick", strNick );
     }
 
     // Generate a string with the arguments to send to the mod IF we got a host
     if ( strlen ( szHost ) > 0 )
     {
         if ( strlen ( szPassword ) > 0 )
-            _snprintf ( szDest, destLength - 1, "connect %s %u %s %s", szHost, usPort, szNick, szPassword );
+            _snprintf ( szDest, destLength - 1, "connect %s %u %s %s", szHost, usPort, strNick.c_str (), szPassword );
         else
-            _snprintf ( szDest, destLength - 1, "connect %s %u %s", szHost, usPort, szNick );
+            _snprintf ( szDest, destLength - 1, "connect %s %u %s", szHost, usPort, strNick.c_str () );
     }
     else
     {

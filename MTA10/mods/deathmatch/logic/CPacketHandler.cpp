@@ -989,7 +989,7 @@ void CPacketHandler::Packet_PlayerChangeNick ( NetBitStreamInterface& bitStream 
      */
     if ( pPlayer->IsLocalPlayer () )
     {
-        g_pCore->SaveNick ( szNewNick );
+        g_pCore->GetCVars ()->Set ( "nick", std::string ( szNewNick ) );
     }
 
     /*
@@ -1171,10 +1171,10 @@ void CPacketHandler::Packet_DebugEcho ( NetBitStreamInterface& bitStream )
         g_pCore->DebugEchoColor ( szMessage, ucRed, ucGreen, ucBlue );
 
         // Output it to the file if need be
-        char szFileName[MAX_PATH+1];
-        g_pCore->GetDebugFileName ( szFileName, MAX_PATH );
+        std::string strFileName;
+        g_pCore->GetCVars ()->Get ( "debugfile", strFileName );
 
-        if ( szFileName [ 0 ] != 0 )
+        if ( !strFileName.empty () )
         {
             // get the date/time now
             struct tm *today;
@@ -1186,7 +1186,7 @@ void CPacketHandler::Packet_DebugEcho ( NetBitStreamInterface& bitStream )
             date[29] = '\0';
 
             // open the file for append access
-            FILE * pFile = fopen ( szFileName, "a" );
+            FILE * pFile = fopen ( strFileName.c_str (), "a" );
             if ( pFile )
             {
                 // write out the data
@@ -1719,6 +1719,9 @@ void CPacketHandler::Packet_VehicleTrailer ( NetBitStreamInterface& bitStream )
         {
             if ( bAttached )
             {
+                #ifdef MTA_DEBUG
+                    g_pCore->GetConsole ()->Printf ( "Packet_VehicleTrailer: attaching trailer %d to vehicle %d", TrailerID, ID );
+                #endif
                 pVehicle->SetTowedVehicle ( pTrailer );
 
                 // Call the onClientTrailerAttach
@@ -1728,6 +1731,9 @@ void CPacketHandler::Packet_VehicleTrailer ( NetBitStreamInterface& bitStream )
             }
             else
             {
+                #ifdef MTA_DEBUG
+                    g_pCore->GetConsole ()->Printf ( "Packet_VehicleTrailer: detaching trailer %d from vehicle %d", TrailerID, ID );
+                #endif
                 pVehicle->SetTowedVehicle ( NULL );
 
                 // Call the onClientTrailerDetach
@@ -1735,6 +1741,15 @@ void CPacketHandler::Packet_VehicleTrailer ( NetBitStreamInterface& bitStream )
                 Arguments.PushElement ( pVehicle );
                 pTrailer->CallEvent ( "onClientTrailerDetach", Arguments, true );
             }
+        }
+        else
+        {
+            #ifdef MTA_DEBUG
+                if ( !pVehicle )
+                    g_pCore->GetConsole ()->Printf ( "Packet_VehicleTrailer: vehicle (id %d) not found", ID );
+                if ( !pTrailer )
+                    g_pCore->GetConsole ()->Printf ( "Packet_VehicleTrailer: trailer (id %d) not found", TrailerID );
+            #endif
         }
     }
 }
@@ -1794,6 +1809,12 @@ void CPacketHandler::Packet_MapInfo ( NetBitStreamInterface& bitStream )
     // Set the time
     g_pGame->GetClock ()->Set ( ucClockHour, ucClockMinute );
 
+    // Read and set minute duration
+    unsigned long ulMinuteDuration;
+    bitStream.Read ( ulMinuteDuration );
+
+    g_pClientGame->SetMinuteDuration ( ulMinuteDuration );
+
     // Flags
     unsigned char ucFlags;
     bitStream.Read ( ucFlags );
@@ -1820,14 +1841,17 @@ void CPacketHandler::Packet_MapInfo ( NetBitStreamInterface& bitStream )
 	short sFPSLimit = 36;
 	bitStream.Read ( sFPSLimit );
 
-	if ( g_pCore->GetConfig()->GetFPSLimit() > sFPSLimit )
+    unsigned int iVal;
+    g_pCore->GetCVars ()->Get ( "fps_limit", iVal );
+
+	if ( iVal > sFPSLimit )
     {
 		// For some reason it needs that kind of hacky precision
 		g_pGame->SetFramelimiter ( (unsigned long) ( (float)sFPSLimit * 1.333f ) );
     }
 	else
     {
-		g_pGame->SetFramelimiter ( (unsigned long) ( (float)g_pCore->GetConfig()->GetFPSLimit() * 1.3f ) );
+		g_pGame->SetFramelimiter ( (unsigned long) ( (float)iVal * 1.3f ) );
     }
 
 
@@ -1938,17 +1962,35 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
     // Heavy variables
     CVector vecPosition;
     CVector vecRotation;
+#ifdef MTA_DEBUG
     g_pCore->GetConsole()->Printf ( "Packet_EntityAdd" );
+#endif
     // HACK: store new entities and link up anything depending on other entities after
     list < SEntityDependantStuff* > newEntitiesStuff;
 
     ElementID NumEntities = 0;
-    if ( !bitStream.Read ( NumEntities ) || NumEntities == 0 )
+    if ( !bitStream.Read ( NumEntities ) )
+    {
+#ifdef MTA_DEBUG
+        g_pCore->GetConsole ()->Printf ( "!! Could not read NumEntities" );
+#endif
         return;
-    g_pCore->GetConsole()->Printf ( "1" );
+    }
+    
+    if ( NumEntities == 0 )
+    {
+#ifdef MTA_DEBUG
+        g_pCore->GetConsole ()->Printf ( "!! NumEntities == 0" );
+#endif
+        return;
+    }
+
+#ifdef MTA_DEBUG
+    g_pCore->GetConsole()->Printf ( "Going to add %d entities", NumEntities );
+#endif
+
     for ( ElementID EntityIndex = 0 ; EntityIndex < NumEntities ; EntityIndex++ )
     {
-        g_pCore->GetConsole()->Printf ( "2" );
         // Read out the entity type id and the entity id
         ElementID EntityID;
         unsigned char ucEntityTypeID;
@@ -1971,7 +2013,6 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                                                    bitStream.Read ( vecAttachedRotation.fY ) &&
                                                    bitStream.Read ( vecAttachedRotation.fZ )) ) )
         {
-            g_pCore->GetConsole()->Printf ( "3" );
 			/*
 #ifdef MTA_DEBUG
             char* names [ 17 ] = { "dummy", "player", "vehicle", "object", "marker", "blip",
@@ -2104,7 +2145,6 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                 case CClientGame::OBJECT:
                 {
                     unsigned short usObjectID;
-                    g_pCore->GetConsole()->Printf ( "4" );
                     // Read out the position and the rotation
                     if ( bitStream.Read ( vecPosition.fX ) &&
                          bitStream.Read ( vecPosition.fY ) &&
@@ -2114,7 +2154,6 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                          bitStream.Read ( vecRotation.fZ ) &&
                          bitStream.Read ( usObjectID ) )
                     {
-                        g_pCore->GetConsole()->Printf ( "5" );
                         // Valid object id?
                         if ( !CClientObjectManager::IsValidModel ( usObjectID ) )
                         {
@@ -2766,6 +2805,20 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                             pEntity = pShape = pTube;
                             break;
                         }
+                        case COLSHAPE_POLYGON:
+                        {
+                            unsigned int uiPoints;
+                            CVector2D vecPoint;
+                            bitStream.Read ( uiPoints );
+                            CClientColPolygon* pPolygon = new CClientColPolygon ( g_pClientGame->m_pManager, EntityID, vecPosition );
+                            for ( unsigned int i = 0; i < uiPoints; i++ )
+                            {
+                                bitStream.Read ( vecPoint.fX );
+                                bitStream.Read ( vecPoint.fY );
+                                pPolygon->AddPoint ( vecPoint );
+                            }
+                            pEntity = pShape = pPolygon ;
+                        }
                         default:
                         {
                             RaiseProtocolError ( 54 );
@@ -3096,7 +3149,6 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
         CClientEntity* pTempEntity = pEntityStuff->pEntity;
         ElementID TempParent = pEntityStuff->Parent;
         ElementID TempAttachedToID = pEntityStuff->AttachedToID;
-        CCustomData* pCustomData = pEntityStuff->pCustomData;
 
         if ( TempParent != INVALID_ELEMENT_ID )
         {
@@ -3448,6 +3500,8 @@ void CPacketHandler::Packet_FireSync ( NetBitStreamInterface& bitStream )
         }
 
         // TODO: Ping compensate
+
+		g_pGame->GetFireManager ()->StartFire ( vecPosition, fSize );
     }
 }
 
@@ -3749,7 +3803,7 @@ void CPacketHandler::Packet_ResourceStart ( NetBitStreamInterface& bitStream )
         // Resource Chunk Size
         unsigned char ucChunkSize;
         // Resource Chunk Data
-        char* szChunkData;
+        char* szChunkData = NULL;
         // Resource Chunk Sub Type
         unsigned char ucChunkSubType;
         // Resource Chunk CRC

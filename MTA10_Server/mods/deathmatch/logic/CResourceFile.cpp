@@ -19,7 +19,7 @@
 
 #include "StdInc.h"
 
-CResourceFile::CResourceFile ( CResource * resource, const char* szShortName, const char* szResourceFileName ) 
+CResourceFile::CResourceFile ( CResource * resource, const char* szShortName, const char* szResourceFileName, CXMLAttributes * xmlAttributes ) 
 { 
     m_szResourceFileName = new char [ strlen ( szResourceFileName ) + 1 ];
     strcpy ( m_szResourceFileName, szResourceFileName ); 
@@ -55,6 +55,11 @@ CResourceFile::CResourceFile ( CResource * resource, const char* szShortName, co
     m_resource = resource;
     m_pVM = NULL;
     m_ulCRC = 0;
+
+    // Create a map of the attributes for later use
+    if ( xmlAttributes )
+	    for ( list < CXMLAttribute * > ::iterator iter = xmlAttributes->ListBegin () ; iter != xmlAttributes->ListEnd () ; iter++ )
+            m_attributeMap[ ( *iter )->GetName () ] = ( *iter )->GetValue ();
 }
 
 CResourceFile::~CResourceFile ( void )
