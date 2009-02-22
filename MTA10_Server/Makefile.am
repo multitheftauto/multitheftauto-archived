@@ -1,2 +1,2 @@
-SUBDIRS = sdk core mods
+SUBDIRS = sdk core mods launcher
 

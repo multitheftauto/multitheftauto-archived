@@ -16,12 +16,13 @@ class CAccessControlListGroup;
 #ifndef __CACCESSCONTROLLISTGROUP_H
 #define __CACCESSCONTROLLISTGROUP_H
 
+//#include <google/sparse_hash_map>
 #include "../Config.h"
 #include "Utils.h"
 #include <xml/CXMLNode.h>
 #include <list>
 
-#include <google/sparse_hash_map>
+
 
 using namespace std;
 

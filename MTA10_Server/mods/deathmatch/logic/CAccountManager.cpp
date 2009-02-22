@@ -339,7 +339,7 @@ bool CAccountManager::Save ( CXMLNode* pParent )
                             pAttribute->SetValue ( szSerial );
                     }
 
-                    list < CAccountData * > ::iterator iterData = NULL;
+                    list < CAccountData * > ::iterator iterData;
                     // Do we have any data to save?
                     if ( (*iter)->DataCount () > 0 )
                     {

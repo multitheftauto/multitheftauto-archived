@@ -71,12 +71,18 @@ AC_C_BIGENDIAN([AC_DEFINE(USING_BIG_ENDIAN)],[AC_DEFINE(USING_LITTLE_ENDIAN)],[]
 # Check for zlib
 AC_CHECK_LIB(z, deflate,, AC_MSG_ERROR([can't find zlib]))
 
+# Check for curses
+AC_CHECK_LIB(curses, stdscr,, AC_MSG_ERROR([can't find curses]))
+
 # Define compile/library flags.
 AC_SUBST(AM_CXXFLAGS, "$AM_CXXFLAGS $INCLUDES -DLINUX $PCRE_CFLAGS -Wall -DTIXML_USE_STL")
 AC_SUBST(AM_LDFLAGS, "$AM_LDFLAGS")
 
 # Checks for header files.
 AC_CHECK_HEADERS(fcntl.h limits.h strings.h syslog.h unistd.h [sys/param.h] stdarg.h)
+
+# Check for google sparsehash
+AC_CHECK_HEADERS(google/sparse_hash_map)
 
 # Check for libraries
 AC_CHECK_FUNCS(strndup strerror vsnprintf vasprintf open vsyslog strncasecmp)
@@ -115,6 +121,7 @@ AC_CONFIG_FILES([
 	MTA10_Server/core/Makefile
 	MTA10_Server/mods/Makefile
 	MTA10_Server/mods/deathmatch/Makefile
+	MTA10_Server/launcher/Makefile
 ])
 
 AC_OUTPUT

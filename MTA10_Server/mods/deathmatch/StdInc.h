@@ -17,6 +17,9 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <sstream>
+
+#include <google/sparse_hash_map>
 
 // SDK includes
 #include "Platform.h"

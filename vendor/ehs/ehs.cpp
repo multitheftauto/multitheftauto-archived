@@ -1234,7 +1234,7 @@ EHS::RegisterEHS ( EHS * ipoEHS, ///< new sibling
 
 
 EHS::UnregisterEHSResult
-EHS::UnregisterEHS ( char * ipsRegisterPath ///< remove object at this path
+EHS::UnregisterEHS ( const char * ipsRegisterPath ///< remove object at this path
 	)
 {
 
