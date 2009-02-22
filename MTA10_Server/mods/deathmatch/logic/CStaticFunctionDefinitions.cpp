@@ -1548,7 +1548,7 @@ bool CStaticFunctionDefinitions::GetPlayerTotalAmmo ( CPlayer* pPlayer, unsigned
 }
 
 
-bool CStaticFunctionDefinitions::SetPlayerAmmo ( CElement* pElement, unsigned char ucSlot, unsigned short usAmmo )
+bool CStaticFunctionDefinitions::SetPlayerAmmo ( CElement* pElement, unsigned char ucSlot, unsigned short usAmmo, unsigned short usAmmoInClip )
 {
     assert ( pElement );
     CPlayer* pPlayer = NULL;
@@ -1558,13 +1558,15 @@ bool CStaticFunctionDefinitions::SetPlayerAmmo ( CElement* pElement, unsigned ch
         return false;
     unsigned char ucWeaponID = pPlayer->GetWeapon ( ucSlot )->ucType;
     
-	RUN_CHILDREN SetWeaponAmmo ( *iter, ucWeaponID, usAmmo );
+	RUN_CHILDREN SetWeaponAmmo ( *iter, ucWeaponID, usAmmo, usAmmoInClip );
 
     if ( pPlayer->IsSpawned () )
     {
         CBitStream BitStream;
         BitStream.pBitStream->Write ( ucWeaponID );
         BitStream.pBitStream->Write ( usAmmo );
+        BitStream.pBitStream->Write ( usAmmoInClip );
+
         pPlayer->Send ( CLuaPacket ( SET_WEAPON_AMMO, *BitStream.pBitStream ) );
 
         return true;
@@ -3263,10 +3265,10 @@ bool CStaticFunctionDefinitions::TakeWeaponAmmo ( CElement* pElement, unsigned c
 }
 
 
-bool CStaticFunctionDefinitions::SetWeaponAmmo ( CElement* pElement, unsigned char ucWeaponID, unsigned short usAmmo )
+bool CStaticFunctionDefinitions::SetWeaponAmmo ( CElement* pElement, unsigned char ucWeaponID, unsigned short usAmmo, unsigned short usAmmoInClip )
 {
     assert ( pElement );
-	RUN_CHILDREN SetWeaponAmmo ( *iter, ucWeaponID, usAmmo );
+	RUN_CHILDREN SetWeaponAmmo ( *iter, ucWeaponID, usAmmo, usAmmoInClip );
 
 	if ( IS_PED ( pElement ) )
     {
@@ -3277,6 +3279,8 @@ bool CStaticFunctionDefinitions::SetWeaponAmmo ( CElement* pElement, unsigned ch
             BitStream.pBitStream->Write ( pPed->GetID () );
 		    BitStream.pBitStream->Write ( ucWeaponID );
             BitStream.pBitStream->Write ( usAmmo );
+            BitStream.pBitStream->Write ( usAmmoInClip );
+
             m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_WEAPON_AMMO, *BitStream.pBitStream ) );
 
 		    return true;
@@ -3287,7 +3291,7 @@ bool CStaticFunctionDefinitions::SetWeaponAmmo ( CElement* pElement, unsigned ch
 }
 
 
-CVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource* pResource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, char* szRegPlate )
+CVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource* pResource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, char* szRegPlate, bool bDirection )
 {
     if ( CVehicleManager::IsValidModel ( usModel ) )
     {
@@ -3588,6 +3592,14 @@ bool CStaticFunctionDefinitions::GetVehicleEngineState ( CVehicle * pVehicle, bo
     return true;
 }
 
+
+bool CStaticFunctionDefinitions::IsTrainDerailed ( CVehicle* pVehicle, bool& bDerailed )
+{
+    assert ( pVehicle );
+
+    bDerailed = pVehicle->IsDerailed ();
+    return true;
+}
 
 bool CStaticFunctionDefinitions::FixVehicle ( CElement* pElement )
 {
@@ -4485,6 +4497,25 @@ bool CStaticFunctionDefinitions::SetVehicleFrozen ( CVehicle* pVehicle, bool bFr
         BitStream.pBitStream->Write ( ( unsigned char ) 1 );
 
     m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_VEHICLE_FROZEN, *BitStream.pBitStream ) );
+
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainDerailed ( CVehicle* pVehicle, bool bDerailed )
+{
+    assert ( pVehicle );
+
+    pVehicle->SetDerailed ( bDerailed );
+
+    CBitStream BitStream;
+    BitStream.pBitStream->Write ( pVehicle->GetID () );
+    if ( bDerailed )
+        BitStream.pBitStream->Write ( ( unsigned char ) 0 );
+    else
+        BitStream.pBitStream->Write ( ( unsigned char ) 1 );
+
+    m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_TRAIN_DERAILED, *BitStream.pBitStream ) );
 
     return true;
 }
@@ -5916,36 +5947,10 @@ CColCircle* CStaticFunctionDefinitions::CreateColCircle ( CResource* pResource, 
     //CColCircle * pColShape = new CColCircle ( m_pColManager, m_pMapManager->GetRootElement (), vecPosition, fRadius );
 	CColCircle * pColShape = new CColCircle ( m_pColManager, pResource->GetDynamicElementRoot(), vecPosition, fRadius );
     
-    // Run collision detection on some elements
-    list < CPlayer * > ::const_iterator iterPlayers = m_pPlayerManager->IterBegin ();
-    for ( ; iterPlayers != m_pPlayerManager->IterEnd () ; iterPlayers++ )
-    {
-        CPlayer * pPlayer = *iterPlayers;
-        m_pColManager->DoHitDetection ( pPlayer->GetLastPosition (), pPlayer->GetPosition (), 0.0f, pPlayer, pColShape );
-    }
-    list < CVehicle * > ::const_iterator iterVehicles = m_pVehicleManager->IterBegin ();
-    for ( ; iterVehicles != m_pVehicleManager->IterEnd () ; iterVehicles++ )
-    {
-        CVehicle * pVehicle = *iterVehicles;
-        m_pColManager->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle, pColShape );
-    }
-/*
-    list < CElement * > ::const_iterator iter = m_pElementManager->IterBegin ();
-    for ( ; iter != m_pElementManager->IterEnd () ; iter++ )
-    {
-        if ( IS_COLSHAPE ( *iter ) ||
-             IS_FILE ( *iter ) ||
-             IS_HANDLING ( *iter ) ||
-             IS_RADAR_AREA ( *iter ) ||
-             IS_CONSOLE ( *iter ) ||
-             IS_TEAM ( *iter ) )
-        {
-            continue;
-        }
-        m_pGame->GetR
-        m_pColManager->DoHitDetection ( (*iter)->GetPosition (), (*iter)->GetPosition (), 0.0f, *iter, pColShape );
-    }
-*/
+    // Run collision detection
+    CElement* pRoot = m_pMapManager->GetRootElement ();
+    m_pColManager->DoHitDetection ( pRoot->GetLastPosition (), pRoot->GetPosition (), 0.0f, pRoot, pColShape, true );
+
 	if ( pResource->HasStarted() )
 	{
 		CEntityAddPacket Packet;
@@ -5962,19 +5967,9 @@ CColCuboid* CStaticFunctionDefinitions::CreateColCuboid ( CResource* pResource, 
     //CColCuboid * pColShape = new CColCuboid ( m_pColManager, m_pMapManager->GetRootElement (), vecPosition, vecSize );
 	CColCuboid * pColShape = new CColCuboid ( m_pColManager, pResource->GetDynamicElementRoot(), vecPosition, vecSize );
     
-    // Run collision detection on some elements
-    list < CPlayer * > ::const_iterator iterPlayers = m_pPlayerManager->IterBegin ();
-    for ( ; iterPlayers != m_pPlayerManager->IterEnd () ; iterPlayers++ )
-    {
-        CPlayer * pPlayer = *iterPlayers;
-        m_pColManager->DoHitDetection ( pPlayer->GetLastPosition (), pPlayer->GetPosition (), 0.0f, pPlayer, pColShape );
-    }
-    list < CVehicle * > ::const_iterator iterVehicles = m_pVehicleManager->IterBegin ();
-    for ( ; iterVehicles != m_pVehicleManager->IterEnd () ; iterVehicles++ )
-    {
-        CVehicle * pVehicle = *iterVehicles;
-        m_pColManager->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle, pColShape );
-    }
+    // Run collision detection
+    CElement* pRoot = m_pMapManager->GetRootElement ();
+    m_pColManager->DoHitDetection ( pRoot->GetLastPosition (), pRoot->GetPosition (), 0.0f, pRoot, pColShape, true );
 
 	if ( pResource->HasStarted() )
 	{
@@ -5992,19 +5987,9 @@ CColSphere* CStaticFunctionDefinitions::CreateColSphere ( CResource* pResource, 
     //CColSphere * pColShape = new CColSphere ( m_pColManager, m_pMapManager->GetRootElement (), vecPosition, fRadius );
 	CColSphere * pColShape = new CColSphere ( m_pColManager, pResource->GetDynamicElementRoot(), vecPosition, fRadius );
     
-    // Run collision detection on some elements
-    list < CPlayer * > ::const_iterator iterPlayers = m_pPlayerManager->IterBegin ();
-    for ( ; iterPlayers != m_pPlayerManager->IterEnd () ; iterPlayers++ )
-    {
-        CPlayer * pPlayer = *iterPlayers;
-        m_pColManager->DoHitDetection ( pPlayer->GetLastPosition (), pPlayer->GetPosition (), 0.0f, pPlayer, pColShape );
-    }
-    list < CVehicle * > ::const_iterator iterVehicles = m_pVehicleManager->IterBegin ();
-    for ( ; iterVehicles != m_pVehicleManager->IterEnd () ; iterVehicles++ )
-    {
-        CVehicle * pVehicle = *iterVehicles;
-        m_pColManager->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle, pColShape );
-    }
+    // Run collision detection
+    CElement* pRoot = m_pMapManager->GetRootElement ();
+    m_pColManager->DoHitDetection ( pRoot->GetLastPosition (), pRoot->GetPosition (), 0.0f, pRoot, pColShape, true );
 
 	if ( pResource->HasStarted() )
 	{
@@ -6022,19 +6007,9 @@ CColRectangle* CStaticFunctionDefinitions::CreateColRectangle ( CResource* pReso
 	//CColRectangle * pColShape = new CColRectangle ( m_pColManager, m_pMapManager->GetRootElement(), vecPosition, vecSize );
     CColRectangle * pColShape = new CColRectangle ( m_pColManager, pResource->GetDynamicElementRoot(), vecPosition, vecSize );
     
-    // Run collision detection on some elements
-    list < CPlayer * > ::const_iterator iterPlayers = m_pPlayerManager->IterBegin ();
-    for ( ; iterPlayers != m_pPlayerManager->IterEnd () ; iterPlayers++ )
-    {
-        CPlayer * pPlayer = *iterPlayers;
-        m_pColManager->DoHitDetection ( pPlayer->GetLastPosition (), pPlayer->GetPosition (), 0.0f, pPlayer, pColShape );
-    }
-    list < CVehicle * > ::const_iterator iterVehicles = m_pVehicleManager->IterBegin ();
-    for ( ; iterVehicles != m_pVehicleManager->IterEnd () ; iterVehicles++ )
-    {
-        CVehicle * pVehicle = *iterVehicles;
-        m_pColManager->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle, pColShape );
-    }
+    // Run collision detection
+    CElement* pRoot = m_pMapManager->GetRootElement ();
+    m_pColManager->DoHitDetection ( pRoot->GetLastPosition (), pRoot->GetPosition (), 0.0f, pRoot, pColShape, true );
 
 	if ( pResource->HasStarted() )
 	{
@@ -6051,19 +6026,9 @@ CColPolygon* CStaticFunctionDefinitions::CreateColPolygon ( CResource* pResource
 {
     CColPolygon * pColShape = new CColPolygon ( m_pColManager, pResource->GetDynamicElementRoot(), vecPosition );
     
-    // Run collision detection on some elements
-    list < CPlayer * > ::const_iterator iterPlayers = m_pPlayerManager->IterBegin ();
-    for ( ; iterPlayers != m_pPlayerManager->IterEnd () ; iterPlayers++ )
-    {
-        CPlayer * pPlayer = *iterPlayers;
-        m_pColManager->DoHitDetection ( pPlayer->GetLastPosition (), pPlayer->GetPosition (), 0.0f, pPlayer, pColShape );
-    }
-    list < CVehicle * > ::const_iterator iterVehicles = m_pVehicleManager->IterBegin ();
-    for ( ; iterVehicles != m_pVehicleManager->IterEnd () ; iterVehicles++ )
-    {
-        CVehicle * pVehicle = *iterVehicles;
-        m_pColManager->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle, pColShape );
-    }
+    // Run collision detection
+    CElement* pRoot = m_pMapManager->GetRootElement ();
+    m_pColManager->DoHitDetection ( pRoot->GetLastPosition (), pRoot->GetPosition (), 0.0f, pRoot, pColShape, true );
 
 	if ( pResource->HasStarted() )
 	{
@@ -6081,19 +6046,9 @@ CColTube* CStaticFunctionDefinitions::CreateColTube ( CResource* pResource, cons
     //CColTube * pColShape = new CColTube ( m_pColManager, m_pMapManager->GetRootElement (), vecPosition, fRadius, fHeight );
 	CColTube * pColShape = new CColTube ( m_pColManager, pResource->GetDynamicElementRoot(), vecPosition, fRadius, fHeight );
     
-    // Run collision detection on some elements
-    list < CPlayer * > ::const_iterator iterPlayers = m_pPlayerManager->IterBegin ();
-    for ( ; iterPlayers != m_pPlayerManager->IterEnd () ; iterPlayers++ )
-    {
-        CPlayer * pPlayer = *iterPlayers;
-        m_pColManager->DoHitDetection ( pPlayer->GetLastPosition (), pPlayer->GetPosition (), 0.0f, pPlayer, pColShape );
-    }
-    list < CVehicle * > ::const_iterator iterVehicles = m_pVehicleManager->IterBegin ();
-    for ( ; iterVehicles != m_pVehicleManager->IterEnd () ; iterVehicles++ )
-    {
-        CVehicle * pVehicle = *iterVehicles;
-        m_pColManager->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle, pColShape );
-    }
+    // Run collision detection
+    CElement* pRoot = m_pMapManager->GetRootElement ();
+    m_pColManager->DoHitDetection ( pRoot->GetLastPosition (), pRoot->GetPosition (), 0.0f, pRoot, pColShape, true );
 
 	if ( pResource->HasStarted() )
 	{
@@ -6939,7 +6894,7 @@ bool CStaticFunctionDefinitions::KickPlayer ( CPlayer* pPlayer, CPlayer* pRespon
 }
 
 
-CBan* CStaticFunctionDefinitions::BanPlayer ( CPlayer* pPlayer, bool bIP, bool bUsername, bool bSerial, CPlayer* pResponsible, const char* szReason )
+CBan* CStaticFunctionDefinitions::BanPlayer ( CPlayer* pPlayer, bool bIP, bool bUsername, bool bSerial, CPlayer* pResponsible, const char* szReason, time_t tUnban )
 {
     assert ( pPlayer );
 
@@ -6966,10 +6921,10 @@ CBan* CStaticFunctionDefinitions::BanPlayer ( CPlayer* pPlayer, bool bIP, bool b
 
     // Ban the player
     if ( bIP )
-        pBan = m_pBanManager->AddBan ( pPlayer, pResponsible, ( szReason ) ? szReason : "Unknown" );
+        pBan = m_pBanManager->AddBan ( pPlayer, pResponsible, ( szReason ) ? szReason : "Unknown", tUnban );
     // Can not ban by username or serial if serial verification is not enabled
     else if ( m_pMainConfig->GetSerialVerificationEnabled () && ( bUsername || bSerial ) )
-        pBan = m_pBanManager->AddBan ( pResponsible, ( szReason ) ? szReason : "Unknown" );
+        pBan = m_pBanManager->AddBan ( pResponsible, ( szReason ) ? szReason : "Unknown", tUnban );
 
     if ( pBan )
     {
@@ -7002,16 +6957,16 @@ CBan* CStaticFunctionDefinitions::BanPlayer ( CPlayer* pPlayer, bool bIP, bool b
 }
 
 
-CBan* CStaticFunctionDefinitions::AddBan ( const char* szIP, const char* szUsername, const char* szSerial, CPlayer* pResponsible, const char* szReason )
+CBan* CStaticFunctionDefinitions::AddBan ( const char* szIP, const char* szUsername, const char* szSerial, CPlayer* pResponsible, const char* szReason, time_t tUnban )
 {
     CBan* pBan = NULL;
 
     // Got an IP?
     if ( szIP )
-        pBan = m_pBanManager->AddBan ( szIP, pResponsible, szReason );
+        pBan = m_pBanManager->AddBan ( szIP, pResponsible, szReason, tUnban );
     // If not IP provided make sure a username or serial are there
     else if ( szUsername || szSerial )
-        pBan = m_pBanManager->AddBan ( pResponsible, szReason );
+        pBan = m_pBanManager->AddBan ( pResponsible, szReason, tUnban );
 
     if ( pBan )
     {
@@ -7162,14 +7117,17 @@ bool CStaticFunctionDefinitions::GetBanNick ( CBan* pBan, char* szNick, size_t s
 }
 
 
-bool CStaticFunctionDefinitions::GetBanTime ( CBan* pBan, char* szTime, size_t size )
+bool CStaticFunctionDefinitions::GetBanTime ( CBan* pBan, time_t& time )
 {
-    if ( !pBan->GetTimeOfBan ().empty () )
-    {
-        _snprintf ( szTime, size, pBan->GetTimeOfBan ().c_str() );
-        return true;
-    }
-    return false;
+    time = pBan->GetTimeOfBan ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetUnbanTime ( CBan* pBan, time_t& time )
+{
+    time = pBan->GetTimeOfUnban ();
+    return true;
 }
 
 
@@ -7204,10 +7162,10 @@ bool CStaticFunctionDefinitions::IsCursorShowing ( CPlayer* pPlayer, bool& bShow
 }
 
 
-bool CStaticFunctionDefinitions::ShowCursor ( CElement* pElement, CLuaMain* pLuaMain, bool bShow )
+bool CStaticFunctionDefinitions::ShowCursor ( CElement* pElement, CLuaMain* pLuaMain, bool bShow, bool bToggleControls )
 {
     assert ( pElement );
-    RUN_CHILDREN ShowCursor ( *iter, pLuaMain, bShow );
+    RUN_CHILDREN ShowCursor ( *iter, pLuaMain, bShow, bToggleControls );
 
     if ( IS_PLAYER ( pElement ) )
     {
@@ -7224,6 +7182,7 @@ bool CStaticFunctionDefinitions::ShowCursor ( CElement* pElement, CLuaMain* pLua
             CBitStream BitStream;
             BitStream.pBitStream->Write ( static_cast < unsigned char > ( ( bShow ) ? 1 : 0 ) );
             BitStream.pBitStream->Write ( static_cast < unsigned short > ( pResource->GetID () ) );
+            BitStream.pBitStream->Write ( static_cast < unsigned char > ( ( bToggleControls ) ? 1 : 0 ) );
             pPlayer->Send ( CLuaPacket ( SHOW_CURSOR, *BitStream.pBitStream ) );
 
             return true;

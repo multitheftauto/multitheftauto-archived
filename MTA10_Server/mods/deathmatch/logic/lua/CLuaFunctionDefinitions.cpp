@@ -1059,10 +1059,16 @@ int CLuaFunctionDefinitions::SetPlayerAmmo ( lua_State* luaVM )
             int iArgument2 = lua_type ( luaVM, 3 );
             if ( iArgument2 == LUA_TSTRING || iArgument2 == LUA_TNUMBER )
             ucSlot = static_cast < unsigned char > ( lua_tonumber ( luaVM, 3 ) );
+            int iArgument4 = lua_type ( luaVM, 4 );
+            unsigned short usAmmoInClip = NULL;
+            if ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING )
+            {
+                usAmmoInClip = static_cast < unsigned short > ( lua_tonumber ( luaVM, 4 ) );
+            }
 
             if ( pPlayer )
             {
-                if ( CStaticFunctionDefinitions::SetPlayerAmmo ( pPlayer, ucSlot, usAmmo ) )
+                if ( CStaticFunctionDefinitions::SetPlayerAmmo ( pPlayer, ucSlot, usAmmo, usAmmoInClip ) )
                 {
                     lua_pushboolean ( luaVM, true );
                     return 1;
@@ -3119,6 +3125,7 @@ int CLuaFunctionDefinitions::SetWeaponAmmo ( lua_State* luaVM )
     int iArgument1 = lua_type ( luaVM, 1 );
     int iArgument2 = lua_type ( luaVM, 2 );
     int iArgument3 = lua_type ( luaVM, 3 );
+    int iArgument4 = lua_type ( luaVM, 4 );
     if ( ( iArgument1 == LUA_TLIGHTUSERDATA ) &&
          ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) &&
          ( iArgument3 == LUA_TNUMBER || iArgument3 == LUA_TSTRING ) )
@@ -3126,9 +3133,14 @@ int CLuaFunctionDefinitions::SetWeaponAmmo ( lua_State* luaVM )
         CElement* pElement = lua_toelement ( luaVM, 1 );
         unsigned char ucWeaponID = static_cast < unsigned char > ( lua_tonumber ( luaVM, 2 ) );
         unsigned short usAmmo = static_cast < unsigned short > ( lua_tonumber ( luaVM, 3 ) );
+        unsigned short usAmmoInClip = NULL;
+        if ( iArgument4 == LUA_TNUMBER || iArgument4 == LUA_TSTRING )
+        {
+            usAmmoInClip = static_cast < unsigned short > ( lua_tonumber ( luaVM, 4 ) );
+        }
         if ( pElement )
         {
-            if ( CStaticFunctionDefinitions::SetWeaponAmmo ( pElement, ucWeaponID, usAmmo ) )
+            if ( CStaticFunctionDefinitions::SetWeaponAmmo ( pElement, ucWeaponID, usAmmo, usAmmoInClip ) )
             {
                 lua_pushboolean ( luaVM, true );
                 return 1;
@@ -3213,6 +3225,10 @@ int CLuaFunctionDefinitions::CreateVehicle ( lua_State* luaVM )
             }
         }
 
+        bool bDirection = false;
+        if ( lua_type ( luaVM, 9 ) == LUA_TBOOLEAN )
+            bDirection = ( lua_toboolean ( luaVM, 9 ) ) ? true : false;
+
 		CLuaMain * pLuaMain = g_pGame->GetLuaManager()->GetVirtualMachine ( luaVM );
 		if ( pLuaMain )
 		{
@@ -3220,7 +3236,7 @@ int CLuaFunctionDefinitions::CreateVehicle ( lua_State* luaVM )
 			if ( pResource )
 			{
 				// Create the vehicle and return its handle
-				CVehicle* pVehicle = CStaticFunctionDefinitions::CreateVehicle ( pResource, usModel, vecPosition, vecRotation, const_cast < char* > ( szRegPlate ) );
+				CVehicle* pVehicle = CStaticFunctionDefinitions::CreateVehicle ( pResource, usModel, vecPosition, vecRotation, const_cast < char* > ( szRegPlate ), bDirection );
 				if ( pVehicle )
 				{
                     CElementGroup * pGroup = pResource->GetElementGroup();
@@ -4192,6 +4208,31 @@ int CLuaFunctionDefinitions::GetVehicleEngineState ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "getVehicleEngineState" );
+    
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::IsTrainDerailed ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            bool bDerailed;
+            if ( CStaticFunctionDefinitions::IsTrainDerailed ( pVehicle, bDerailed ) )
+            {
+                lua_pushboolean ( luaVM, bDerailed );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "isTrainDerailed", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "isTrainDerailed" );
     
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -5185,6 +5226,35 @@ int CLuaFunctionDefinitions::SetVehicleFrozen ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "setVehicleFrozen" );
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetTrainDerailed ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            if ( lua_type ( luaVM, 2 ) == LUA_TBOOLEAN )
+            {
+                if ( CStaticFunctionDefinitions::SetTrainDerailed ( pVehicle, lua_toboolean ( luaVM, 2 ) ? true:false ) )
+                {
+                        lua_pushboolean ( luaVM, true );
+                }
+                return 1;
+                    
+            }
+            else
+                m_pScriptDebugging->LogBadType ( luaVM, "setTrainDerailed" );
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setTrainDerailed", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setTrainDerailed" );
     lua_pushboolean ( luaVM, false );
     return 1;
 }
@@ -8440,7 +8510,8 @@ int CLuaFunctionDefinitions::GetDistanceBetweenPoints3D ( lua_State* luaVM )
 
 int CLuaFunctionDefinitions::GetTickCount_ ( lua_State* luaVM )
 {
-    lua_pushnumber ( luaVM, GetTime () );
+    double dTime = ( double ) ( (long long)time ( NULL ) * 1000 + ( GetTime () % 1000 ) );
+    lua_pushnumber ( luaVM, dTime );
     return 1;
 }
 
@@ -8449,6 +8520,10 @@ int CLuaFunctionDefinitions::GetCTime ( lua_State* luaVM )
 {
     time_t timer;
     time ( &timer );
+    if ( lua_type ( luaVM, 1 ) == LUA_TNUMBER || lua_type ( luaVM, 1 ) == LUA_TSTRING )
+    {
+        timer = ( time_t ) lua_tonumber ( luaVM, 1 );
+    }
     tm * time = localtime ( &timer );
 
     CLuaArguments ret;
@@ -9671,10 +9746,17 @@ int CLuaFunctionDefinitions::BanPlayer ( lua_State* luaVM )
             if ( lua_type ( luaVM, 6 ) == LUA_TSTRING )
                 szReason = lua_tostring ( luaVM, 6 );
 
+            time_t tUnban = 0;
+            if ( lua_type ( luaVM, 7 ) == LUA_TNUMBER || lua_type ( luaVM, 7 ) == LUA_TSTRING )
+            {
+                tUnban = ( time_t ) atoi ( lua_tostring ( luaVM, 7 ) );
+                if ( tUnban > 0 ) tUnban += time ( NULL );
+            }
+
             if ( pPlayer )
             {
                 CBan* pBan = NULL;
-                if ( pBan = CStaticFunctionDefinitions::BanPlayer ( pPlayer, bIP, bUsername, bSerial, pResponsible, szReason ) )
+                if ( pBan = CStaticFunctionDefinitions::BanPlayer ( pPlayer, bIP, bUsername, bSerial, pResponsible, szReason, tUnban ) )
                 {
                     lua_pushban ( luaVM, pBan );
                     return 1;
@@ -9728,8 +9810,15 @@ int CLuaFunctionDefinitions::AddBan ( lua_State* luaVM )
             szReason = lua_tostring ( luaVM, 5 );
         }
 
+        time_t tUnban = 0;
+        if ( lua_type ( luaVM, 6 ) == LUA_TNUMBER || lua_type ( luaVM, 6 ) == LUA_TSTRING )
+        {
+            tUnban = ( time_t ) atoi ( lua_tostring ( luaVM, 6 ) );
+            if ( tUnban > 0 ) tUnban += time ( NULL );
+        }
+
         CBan* pBan = NULL;
-		if ( pBan = CStaticFunctionDefinitions::AddBan ( szIP, szUsername, szSerial, pResponsible, szReason ) )
+		if ( pBan = CStaticFunctionDefinitions::AddBan ( szIP, szUsername, szSerial, pResponsible, szReason, tUnban ) )
         {
             lua_pushban ( luaVM, pBan );
             return 1;
@@ -9847,7 +9936,7 @@ int	CLuaFunctionDefinitions::GetBanUsername ( lua_State* luaVM )
         if ( pBan )
         {
             char szUsername [32];
-            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szUsername, 31 ) )
+            if ( CStaticFunctionDefinitions::GetBanUsername ( pBan, szUsername, 31 ) )
             {
                 lua_pushstring ( luaVM, szUsername );
                 return 1;
@@ -9871,7 +9960,7 @@ int	CLuaFunctionDefinitions::GetBanNick ( lua_State* luaVM )
         if ( pBan )
         {
             char szNick [32];
-            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szNick, 31 ) )
+            if ( CStaticFunctionDefinitions::GetBanNick ( pBan, szNick, 31 ) )
             {
                 lua_pushstring ( luaVM, szNick );
                 return 1;
@@ -9894,16 +9983,40 @@ int	CLuaFunctionDefinitions::GetBanTime ( lua_State* luaVM )
 
         if ( pBan )
         {
-            char szTime [32];
-            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szTime, 31 ) )
+            time_t tTime;
+            if ( CStaticFunctionDefinitions::GetBanTime ( pBan, tTime ) )
             {
-                lua_pushstring ( luaVM, szTime );
+                lua_pushnumber ( luaVM, ( double ) tTime );
                 return 1;
             }
         }
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "getBanTime" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int	CLuaFunctionDefinitions::GetUnbanTime ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CBan* pBan = lua_toban ( luaVM, 1 );
+
+        if ( pBan )
+        {
+            time_t tTime;
+            if ( CStaticFunctionDefinitions::GetUnbanTime ( pBan, tTime ) )
+            {
+                lua_pushnumber ( luaVM, ( double ) tTime );
+                return 1;
+            }
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getUnbanTime" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -9919,7 +10032,7 @@ int	CLuaFunctionDefinitions::GetBanReason ( lua_State* luaVM )
         if ( pBan )
         {
             char szReason [256];
-            if ( CStaticFunctionDefinitions::GetBanSerial ( pBan, szReason, 255 ) )
+            if ( CStaticFunctionDefinitions::GetBanReason ( pBan, szReason, 255 ) )
             {
                 lua_pushstring ( luaVM, szReason );
                 return 1;
@@ -9996,8 +10109,11 @@ int CLuaFunctionDefinitions::ShowCursor ( lua_State* luaVM )
            
             if ( pElement )
             {
-                if ( CStaticFunctionDefinitions::ShowCursor ( pElement, pLuaMain, bShow ) )
-                {
+                bool bToggleControls = true;
+                if ( lua_type ( luaVM, 3 ) == LUA_TBOOLEAN )
+                    bToggleControls = ( lua_toboolean ( luaVM, 3 ) ) ? true:false;
+                if ( CStaticFunctionDefinitions::ShowCursor ( pElement, pLuaMain, bShow, bToggleControls ) )
+                {                  
                     lua_pushboolean ( luaVM, true );
                     return 1;
                 }

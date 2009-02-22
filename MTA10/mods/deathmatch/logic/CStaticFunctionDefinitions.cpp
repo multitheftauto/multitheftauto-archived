@@ -1844,7 +1844,14 @@ bool CStaticFunctionDefinitions::GetHelicopterRotorSpeed ( CClientVehicle& Vehic
 }
 
 
-CClientVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate )
+bool CStaticFunctionDefinitions::IsTrainDerailed ( CClientVehicle& Vehicle, bool& bDerailed )
+{
+    bDerailed = Vehicle.IsTrainDerailed ();
+	return true;
+}
+
+
+CClientVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate, bool bDirection )
 {
     if ( CClientVehicleManager::IsValidModel ( usModel ) )
     {      
@@ -1857,6 +1864,9 @@ CClientVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource& Resource,
             pVehicle->SetRotationDegrees ( vecRotation );
             if ( szRegPlate )
                 pVehicle->SetRegPlate ( const_cast < char * > ( szRegPlate ) );            
+
+            if ( pVehicle->GetVehicleType () == CLIENTVEHICLE_TRAIN )
+                pVehicle->SetTrainDirection ( ( bDirection ) ? 1 : 0 );
 
             return pVehicle;
         }
@@ -2385,6 +2395,13 @@ bool CStaticFunctionDefinitions::SetHelicopterRotorSpeed ( CClientVehicle& Vehic
 	}
 
     return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainDerailed ( CClientVehicle& Vehicle, bool bDerailed )
+{
+	Vehicle.SetTrainDerailed ( bDerailed );
+    return true;
 }
 
 
@@ -4208,12 +4225,20 @@ bool CStaticFunctionDefinitions::TestLineAgainstWater ( CVector& vecStart, CVect
 }
 
 
-bool CStaticFunctionDefinitions::CreateWater ( CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4, bool bShallow, void* pChangeSource )
+CClientWater* CStaticFunctionDefinitions::CreateWater ( CResource& resource, CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4, bool bShallow )
 {
+    CClientWater* pWater;
     if ( pV4 )
-        return g_pGame->GetWaterManager ()->CreateQuad ( *pV1, *pV2, *pV3, *pV4, bShallow, pChangeSource ) != NULL;
+        pWater = new CClientWater ( INVALID_ELEMENT_ID, *pV1, *pV2, *pV3, *pV4, bShallow );
     else
-        return g_pGame->GetWaterManager ()->CreateTriangle ( *pV1, *pV2, *pV3, bShallow, pChangeSource ) != NULL;
+        pWater = new CClientWater ( INVALID_ELEMENT_ID, *pV1, *pV2, *pV3, bShallow );
+    if ( !pWater->Valid () ) {
+        delete pWater;
+        return NULL;
+    }
+
+    pWater->SetParent ( resource.GetResourceDynamicEntity () );
+    return pWater;
 }
 
 
@@ -4223,9 +4248,46 @@ bool CStaticFunctionDefinitions::GetWaterLevel ( CVector& vecPosition, float& fW
 }
 
 
-bool CStaticFunctionDefinitions::SetWaterLevel ( CVector& vecPosition, float fLevel, void* pChangeSource )
+bool CStaticFunctionDefinitions::GetWaterLevel ( CClientWater* pWater, float& fLevel )
 {
-    return g_pGame->GetWaterManager ()->SetWaterLevel ( vecPosition, fLevel, pChangeSource );
+    CVector vecPosition;
+    pWater->GetPosition ( vecPosition );
+    fLevel = vecPosition.fZ;
+    return true;
+}
+
+bool CStaticFunctionDefinitions::GetWaterVertexPosition ( CClientWater* pWater, int iVertexIndex, CVector& vecPosition )
+{
+    return pWater->GetVertexPosition ( iVertexIndex - 1, vecPosition );
+}
+
+
+bool CStaticFunctionDefinitions::SetWaterLevel ( CVector* pvecPosition, float fLevel, void* pChangeSource )
+{
+    return g_pGame->GetWaterManager ()->SetWaterLevel ( pvecPosition, fLevel, pChangeSource );
+}
+
+
+bool CStaticFunctionDefinitions::SetWaterLevel ( CClientWater* pWater, float fLevel, void* pChangeSource )
+{
+    if ( pWater )
+    {
+        CVector vecPosition;
+        pWater->GetPosition ( vecPosition );
+        vecPosition.fZ = fLevel;
+        pWater->SetPosition ( vecPosition );
+        return true;
+    }
+    else
+    {
+        return g_pGame->GetWaterManager ()->SetWaterLevel ( (CVector *)NULL, fLevel, pChangeSource );
+    }
+}
+
+
+bool CStaticFunctionDefinitions::SetWaterVertexPosition ( CClientWater* pWater, int iVertexIndex, CVector& vecPosition )
+{
+    return pWater->SetVertexPosition ( iVertexIndex - 1, vecPosition );
 }
 
 
@@ -4307,7 +4369,7 @@ bool CStaticFunctionDefinitions::GetMinuteDuration ( unsigned long& ulDelay )
 
 bool CStaticFunctionDefinitions::GetWaveHeight ( float& fHeight )
 {
-    fHeight = g_pMultiplayer->GetWaveLevel ();
+    fHeight = g_pGame->GetWaterManager ()->GetWaveLevel ();
     return true;
 }
 
@@ -4361,6 +4423,11 @@ bool CStaticFunctionDefinitions::GetGarageBoundingBox ( unsigned char ucGarageID
     }
 
     return false;
+}
+
+bool CStaticFunctionDefinitions::IsWorldSpecialPropertyEnabled ( const char* szPropName )
+{
+    return g_pGame->IsCheatEnabled ( szPropName );
 }
 
 bool CStaticFunctionDefinitions::SetSkyGradient ( unsigned char ucTopRed, unsigned char ucTopGreen, unsigned char ucTopBlue, unsigned char ucBottomRed, unsigned char ucBottomGreen, unsigned char ucBottomBlue )
@@ -4458,7 +4525,7 @@ bool CStaticFunctionDefinitions::SetWaveHeight ( float fHeight )
 {
     if ( fHeight >= -1.0f && fHeight <= 100.0f )
     {
-        g_pMultiplayer->SetWaveLevel ( fHeight );
+        g_pGame->GetWaterManager ()->SetWaveLevel ( fHeight );
         
         return true;
     }
@@ -4477,6 +4544,12 @@ bool CStaticFunctionDefinitions::SetGarageOpen ( unsigned char ucGarageID, bool 
     }
 
     return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetWorldSpecialPropertyEnabled ( const char* szPropName, bool bEnabled )
+{
+    return g_pGame->SetCheatEnabled ( szPropName, bEnabled );
 }
 
 
@@ -4824,9 +4897,9 @@ bool CStaticFunctionDefinitions::GetWeaponIDFromName ( const char* szName, unsig
 }
 
 
-bool CStaticFunctionDefinitions::GetTickCount_ ( unsigned long& ulCount )
+bool CStaticFunctionDefinitions::GetTickCount_ ( double& dCount )
 {
-    ulCount = CClientTime::GetTime ();
+    dCount = ( double ) ( (long long)time ( NULL ) * 1000 + ( CClientTime::GetTime () % 1000 ) );
     return true;
 }
 

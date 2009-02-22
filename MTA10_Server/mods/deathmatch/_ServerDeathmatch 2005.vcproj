@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Server - Deathmatch"
 	ProjectGUID="{DC99F9D4-7C17-4A36-9F21-CEE075E42292}"
 	RootNamespace="_ServerDeathmatch 2005"
@@ -48,7 +48,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="2"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
@@ -230,6 +230,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -256,11 +257,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories=".;./logic;../../dependencies;../../dependencies/pthreads/include;../../dependencies/pcre/include;../../dependencies/pme;../../../Shared/publicsdk/include;../../dependencies/sqlite;logic/common;../../dependencies/zlib;../../dependencies/json;../../sdk;../../../Shared/sdk"
 				PreprocessorDefinitions="WIN32;MTA_RELEASE;RACE_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
+				BufferSecurityCheck="true"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdInc.h"
@@ -284,8 +287,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ASEQuerySDK.lib lua5.1.lib wsock32.lib sqlite3.lib zlib.lib ehs.lib pthreadVC2.lib pme.lib pcre.lib json.lib"
-				OutputFile="..\..\..\output\server\mods\deathmatch\deathmatch.dll"
+				AdditionalDependencies="ASEQuerySDK.lib lua5.1.lib wsock32.lib sqlite3.lib zlib.lib ehs_2005.lib pthreadVC2.lib pme_2005.lib pcre.lib json.lib"
+				OutputFile="../../../output/server/mods/deathmatch/deathmatch.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../dependencies/zlib;logic/lib;../../dependencies;../../../Shared/publicsdk/lib;../../dependencies/bullet-2.64/lib"

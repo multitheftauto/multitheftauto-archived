@@ -38,7 +38,6 @@ bool g_bBoundsChecker = true;
 double dHack;
 #define DEFAULT_GRAVITY 0.008f
 #define DEFAULT_GAME_SPEED 1.0f
-#define DEFAULT_WAVE_LEVEL 1.0f
 #define DEFAULT_BLUR_LEVEL 36
 #define DEFAULT_MINUTE_DURATION 1000
 
@@ -283,9 +282,8 @@ CClientGame::~CClientGame ( void )
 
     // Reset CGUI's global events
     g_pCore->GetGUI ()->SetKeyDownHandler           ( );
-    // Jax: LEAVE COMMENTED! this gets reset to CCore::OnMouseClick / CCore::OnMouseDoubleClick on unload-request (before here)
-    //g_pCore->GetGUI ()->SetMouseClickHandler        ( );
-    //g_pCore->GetGUI ()->SetMouseDoubleClickHandler  ( );
+    g_pCore->GetGUI ()->SetMouseClickHandler        ( );
+    g_pCore->GetGUI ()->SetMouseDoubleClickHandler  ( );
     g_pCore->GetGUI ()->SetMouseMoveHandler         ( );
     g_pCore->GetGUI ()->SetMouseEnterHandler        ( );
     g_pCore->GetGUI ()->SetMouseLeaveHandler        ( );
@@ -3740,11 +3738,11 @@ void CClientGame::ResetMapInfo ( void )
     // Sky-gradient
     g_pMultiplayer->ResetSky ();
 
-    // Wave-level
-    g_pMultiplayer->SetWaveLevel ( DEFAULT_WAVE_LEVEL );
-
-    // Water areas
+    // Water
     g_pGame->GetWaterManager ()->Reset ();
+
+    // Cheats
+    g_pGame->ResetCheats ();
 
     // Players
     m_pPlayerManager->ResetAll ();
@@ -3837,11 +3835,11 @@ bool CClientGame::OnMouseClick ( CGUIMouseEventArgs Args )
     char* szState = NULL;
     switch ( Args.button )
     {
-    case CGUIMouse::LeftButton: szButton = "left"; szState = "down";
+    case CGUIMouse::LeftButton: szButton = "left"; szState = "up";
         break;
-    case CGUIMouse::MiddleButton: szButton = "middle"; szState = "down";
+    case CGUIMouse::MiddleButton: szButton = "middle"; szState = "up";
         break;
-    case CGUIMouse::RightButton: szButton = "right"; szState = "down";
+    case CGUIMouse::RightButton: szButton = "right"; szState = "up";
         break;
     }
 
@@ -3855,11 +3853,6 @@ bool CClientGame::OnMouseClick ( CGUIMouseEventArgs Args )
         Arguments.PushString ( szState );
         Arguments.PushNumber ( Args.position.fX );
         Arguments.PushNumber ( Args.position.fY );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( true );
 
         CClientGUIElement * pGUIElement = CGUI_GET_CCLIENTGUIELEMENT ( Args.pWindow );
         if ( GetGUIManager ()->Exists ( pGUIElement ) )
@@ -3880,11 +3873,11 @@ bool CClientGame::OnMouseDoubleClick ( CGUIMouseEventArgs Args )
     char* szState = NULL;
     switch ( Args.button )
     {
-    case CGUIMouse::LeftButton: szButton = "left"; szState = "down";
+    case CGUIMouse::LeftButton: szButton = "left"; szState = "up";
         break;
-    case CGUIMouse::MiddleButton: szButton = "middle"; szState = "down";
+    case CGUIMouse::MiddleButton: szButton = "middle"; szState = "up";
         break;
-    case CGUIMouse::RightButton: szButton = "right"; szState = "down";
+    case CGUIMouse::RightButton: szButton = "right"; szState = "up";
         break;
     }
 
@@ -3898,11 +3891,6 @@ bool CClientGame::OnMouseDoubleClick ( CGUIMouseEventArgs Args )
         Arguments.PushString ( szState );
         Arguments.PushNumber ( Args.position.fX );
         Arguments.PushNumber ( Args.position.fY );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( false );
-        Arguments.PushBoolean ( true );
 
         CClientGUIElement * pGUIElement = CGUI_GET_CCLIENTGUIELEMENT ( Args.pWindow );
         if ( GetGUIManager ()->Exists ( pGUIElement ) )

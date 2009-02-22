@@ -22,20 +22,8 @@ class CStaticFunctionDefinitions;
 #ifndef __CSTATICFUNCTIONDEFINITIONS_H
 #define __CSTATICFUNCTIONDEFINITIONS_H
 
-#include "CEvents.h"
-#include "CClientGame.h"
-#include "../../shared_logic/CClientManager.h"
-
 #include <gui/CGUI.h>
 #include <gui/CGUIElement.h>
-
-#include "../../shared_logic/CClientColCircle.h"
-#include "../../shared_logic/CClientColCuboid.h"
-#include "../../shared_logic/CClientColSphere.h"
-#include "../../shared_logic/CClientColRectangle.h"
-#include "../../shared_logic/CClientColPolygon.h"
-#include "../../shared_logic/CClientColTube.h"
-#include "../../shared_logic/CClientDummy.h"
 
 class CStaticFunctionDefinitions
 {
@@ -157,7 +145,7 @@ public:
 
 
     // Vehicle get funcs
-    static CClientVehicle*              CreateVehicle                       ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate = NULL );
+    static CClientVehicle*              CreateVehicle                       ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate = NULL, bool bDirection = false );
     static bool                         GetVehicleModelFromName             ( const char* szName, unsigned short& usModel );
     static bool					        GetVehicleUpgradeSlotName			( unsigned char ucSlot, char* szName, unsigned short len );
 	static bool					        GetVehicleUpgradeSlotName			( unsigned short usUpgrade, char* szName, unsigned short len );
@@ -166,6 +154,7 @@ public:
     static bool                         GetVehicleNameFromModel             ( unsigned short usModel, char* szName, unsigned short len );
 	static bool							GetHelicopterRotorSpeed				( CClientVehicle& Vehicle, float& fSpeed );
     static bool                         GetVehicleEngineState               ( CClientVehicle& Vehicle, bool & bState );
+    static bool                         IsTrainDerailed                     ( CClientVehicle& Vehicle, bool & bDerailed );
 
     // Vehicle set functions
     static bool                         FixVehicle                          ( CClientEntity& Entity );
@@ -195,6 +184,7 @@ public:
     static bool                         SetVehicleFrozen                    ( CClientEntity& Entity, bool bFrozen );
     static bool                         SetVehicleAdjustableProperty        ( CClientEntity& Entity, unsigned short usAdjustableProperty );
 	static bool							SetHelicopterRotorSpeed				( CClientVehicle& Vehicle, float fSpeed );
+	static bool							SetTrainDerailed				    ( CClientVehicle& Vehicle, bool bDerailed );
 
     // Object get funcs
     static CClientObject*               CreateObject                        ( CResource& Resource, unsigned short usModelID, const CVector& vecPosition, const CVector& vecRotation );
@@ -359,9 +349,13 @@ public:
     static bool                         ProcessLineOfSight                  ( CVector& vecStart, CVector& vecEnd, bool& bCollision, CColPoint** pColPoint, CClientEntity** pColEntity, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, bool bShootThroughStuff = false, CEntity* pIgnoredEntity = NULL );
     static bool                         IsLineOfSightClear                  ( CVector& vecStart, CVector& vecEnd, bool& bIsClear, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, CEntity* pIgnoredEntity = NULL );
     static bool                         TestLineAgainstWater                ( CVector& vecStart, CVector& vecEnd, CVector& vecCollision );
-    static bool                         CreateWater                         ( CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4, bool bShallow, void* pChangeSource );
-    static bool                         GetWaterLevel                       ( CVector& vecPosition, float& fWaterLevel, bool bCheckWaves, CVector& vecUnknown );
-    static bool                         SetWaterLevel                       ( CVector& vecPosition, float fLevel, void* pChangeSource = NULL );
+    static CClientWater*                CreateWater                         ( CResource& resource, CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4, bool bShallow );
+    static bool                         GetWaterLevel                       ( CVector& vecPosition, float& fLevel, bool bCheckWaves, CVector& vecUnknown );
+    static bool                         GetWaterLevel                       ( CClientWater* pWater, float& fLevel );
+    static bool                         GetWaterVertexPosition              ( CClientWater* pWater, int iVertexIndex, CVector& vecPosition );
+    static bool                         SetWaterLevel                       ( CVector* pvecPosition, float fLevel, void* pChangeSource = NULL );
+    static bool                         SetWaterLevel                       ( CClientWater* pWater, float fLevel, void* pChangeSource = NULL );
+    static bool                         SetWaterVertexPosition              ( CClientWater* pWater, int iVertexIndex, CVector& vecPosition );
     static bool                         GetWorldFromScreenPosition          ( CVector& vecScreen, CVector& vecWorld );
     static bool                         GetScreenFromWorldPosition          ( CVector& vecWorld, CVector& vecScreen );
     static bool                         GetWeather                          ( unsigned char& ucWeather, unsigned char& ucWeatherBlendingTo );
@@ -374,6 +368,7 @@ public:
     static bool                         GetGaragePosition                   ( unsigned char ucGarageID, CVector& vecPosition );
     static bool                         GetGarageSize                       ( unsigned char ucGarageID, float& fHeight, float& fWidth, float& fDepth );
     static bool                         GetGarageBoundingBox                ( unsigned char ucGarageID, float& fLeft, float& fRight, float& fFront, float& fBack );
+    static bool                         IsWorldSpecialPropertyEnabled       ( const char* szPropName );
 
     static bool                         SetTime                             ( unsigned char ucHour, unsigned char ucMin );
     static bool                         SetSkyGradient                      ( unsigned char ucTopRed, unsigned char ucTopGreen, unsigned char ucTopBlue, unsigned char ucBottomRed, unsigned char ucBottomGreen, unsigned char ucBottomBlue );
@@ -385,6 +380,7 @@ public:
     static bool                         SetWaveHeight                       ( float fHeight );
 	static bool							SetMinuteDuration					( unsigned long ulDelay );
     static bool                         SetGarageOpen                       ( unsigned char ucGarageID, bool bIsOpen );
+    static bool                         SetWorldSpecialPropertyEnabled      ( const char* szPropName, bool bEnabled );
 
     // Input functions
     static bool                         BindKey                             ( const char* szKey, const char* szHitState, CLuaMain* pLuaMain, int iLuaFunction, CLuaArguments& Arguments );
@@ -415,7 +411,7 @@ public:
     static bool                         GetWeaponIDFromName                 ( const char* szName, unsigned char& ucID );
 
     // Util funcs
-    static bool                         GetTickCount_                       ( unsigned long& ulCount );
+    static bool                         GetTickCount_                       ( double& dCount );
 
     // Map funcs
     static bool                         IsPlayerMapForced                   ( bool & bForced );

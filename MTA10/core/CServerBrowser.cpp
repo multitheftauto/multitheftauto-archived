@@ -520,7 +520,6 @@ void CServerBrowser::CompleteConnect ( void )
 bool CServerBrowser::ConnectToSelectedServer ( void )
 {
     ServerBrowserType Type = GetCurrentServerBrowserType ();
-    g_pCore->GetConsole()->Printf ( "Test: %d", m_pServerList [ Type ]->GetSelectedCount () );
     m_pServerPlayerList [ Type ]->Clear ();
 
     char buf[32];
@@ -538,7 +537,8 @@ bool CServerBrowser::ConnectToSelectedServer ( void )
         for ( i = i_b; i != i_e; i++ ) {
             CServerListItem * pServer = *i;
             std::string strEndpoint = pServer->strHost + ":" + itoa ( pServer->usGamePort, buf, 10 );
-            if ( strSelectedEndpoint.compare ( strEndpoint ) == 0 ) {
+            if ( strSelectedEndpoint.compare ( strEndpoint ) == 0 )
+            {
                 if ( ( pServer->bSerials ) && ( !g_pCore->GetCommunity()->IsLoggedIn() ) )
                 {
                     m_pCommunityLogin.SetVisible ( true );

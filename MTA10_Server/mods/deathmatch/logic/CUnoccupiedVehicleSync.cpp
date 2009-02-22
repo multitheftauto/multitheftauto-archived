@@ -124,7 +124,7 @@ void CUnoccupiedVehicleSync::FindSyncer ( CVehicle* pVehicle )
 {
     // This vehicle got any passengers?
     CPed* pPassenger = pVehicle->GetFirstOccupant ();
-    if ( pPassenger && IS_PLAYER ( pPassenger ) )
+    if ( pPassenger && IS_PLAYER ( pPassenger ) && !pPassenger->IsBeingDeleted() )
     {
         // Tell him to start syncing it
         StartSync ( static_cast < CPlayer * > ( pPassenger ), pVehicle );
@@ -176,7 +176,7 @@ CPlayer* CUnoccupiedVehicleSync::FindPlayerCloseToVehicle ( CVehicle* pVehicle, 
     {
         pPlayer = *iter;
         // Is he joined?
-        if ( pPlayer->IsJoined () )
+        if ( pPlayer->IsJoined () && !pPlayer->IsBeingDeleted() )
         {
             // He's near enough?
             if ( IsPointNearPoint3D ( vecVehiclePosition, pPlayer->GetPosition (), fMaxDistance ) )
@@ -344,6 +344,9 @@ void CUnoccupiedVehicleSync::Packet_UnoccupiedVehicleSync ( CUnoccupiedVehicleSy
                         }
                         // Turn the engine on if it's on
                         pVehicle->SetEngineOn ( ( pData->ucFlags & 0x40 ) ? true : false );
+
+                        // Derailed state
+                        pVehicle->SetDerailed ( ( pData->ucFlags & 0x80 ) ? true : false );
 
 					    // Run colpoint checks on vehicle
 					    g_pGame->GetColManager()->DoHitDetection ( pVehicle->GetLastPosition (), pVehicle->GetPosition (), 0.0f, pVehicle );  

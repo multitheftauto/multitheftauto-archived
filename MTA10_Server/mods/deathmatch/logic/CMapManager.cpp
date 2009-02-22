@@ -286,22 +286,23 @@ void CMapManager::SendMapInformation ( CPlayer& Player )
             BitStream.pBitStream->Write ( pObject->GetID () );
             BitStream.pBitStream->Write ( pObject->GetMoveTimeLeft () );
 
+
             CVector vecTemp = pObject->GetPosition ();
             BitStream.pBitStream->Write ( vecTemp.fX );
             BitStream.pBitStream->Write ( vecTemp.fY );
             BitStream.pBitStream->Write ( vecTemp.fZ );
 
-            vecTemp = pObject->GetRotation ();
-            BitStream.pBitStream->Write ( vecTemp.fX );
-            BitStream.pBitStream->Write ( vecTemp.fY );
-            BitStream.pBitStream->Write ( vecTemp.fZ );
+            CVector vecRotation = pObject->GetRotation ();
+            BitStream.pBitStream->Write ( vecRotation.fX );
+            BitStream.pBitStream->Write ( vecRotation.fY );
+            BitStream.pBitStream->Write ( vecRotation.fZ );
 
             vecTemp = pObject->m_moveData.vecStopPosition;
             BitStream.pBitStream->Write ( vecTemp.fX );
             BitStream.pBitStream->Write ( vecTemp.fY );
             BitStream.pBitStream->Write ( vecTemp.fZ );
 
-            vecTemp = pObject->m_moveData.vecStopRotation;
+            vecTemp = pObject->m_moveData.vecStopRotation - vecRotation;
             BitStream.pBitStream->Write ( vecTemp.fX );
             BitStream.pBitStream->Write ( vecTemp.fY );
             BitStream.pBitStream->Write ( vecTemp.fZ );

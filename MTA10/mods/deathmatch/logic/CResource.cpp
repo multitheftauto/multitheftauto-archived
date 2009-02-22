@@ -267,6 +267,17 @@ static bool CheckFileForCorruption( string strPath )
 void CResource::Load ( CClientEntity *pRootEntity )
 {
     m_pRootEntity = pRootEntity;
+    if ( m_pRootEntity )
+    {
+		// Set the GUI parent to the resource root entity
+        m_pResourceCOLRoot->SetParent ( m_pResourceEntity );
+        m_pResourceDFFEntity->SetParent ( m_pResourceEntity );
+		m_pResourceGUIEntity->SetParent ( m_pResourceEntity );
+        m_pResourceTXDRoot->SetParent ( m_pResourceEntity );
+    }
+
+    CLogger::LogPrintf ( "> Starting resource '%s'", m_szResourceName );
+
 	char szBuffer [ MAX_PATH ] = { 0 };
     list < CResourceConfigItem* >::iterator iterc = m_ConfigFiles.begin ();
     for ( ; iterc != m_ConfigFiles.end (); iterc++ )
@@ -299,17 +310,9 @@ void CResource::Load ( CClientEntity *pRootEntity )
 	// Set active flag
 	m_bActive = true;
 
-    CLogger::LogPrintf ( "> Starting resource '%s'", m_szResourceName );
-
 	// Did we get a resource root entity?
 	if ( m_pResourceEntity )
 	{
-		// Set the GUI parent to the resource root entity
-        m_pResourceCOLRoot->SetParent ( m_pResourceEntity );
-        m_pResourceDFFEntity->SetParent ( m_pResourceEntity );
-		m_pResourceGUIEntity->SetParent ( m_pResourceEntity );
-        m_pResourceTXDRoot->SetParent ( m_pResourceEntity );
-
 		// Call the Lua "onClientResourceStart" event
 		CLuaArguments Arguments;
 		Arguments.PushUserData ( this );
@@ -328,7 +331,7 @@ void CResource::DeleteClientChildren ( void )
 }
 
 
-void CResource::ShowCursor ( bool bShow )
+void CResource::ShowCursor ( bool bShow, bool bToggleControls )
 {
     // Different cursor showing state than earlier?
     if ( bShow != m_bShowingCursor )
@@ -350,7 +353,7 @@ void CResource::ShowCursor ( bool bShow )
         m_bShowingCursor = bShow;
 
         // Show cursor if more than 0 resources wanting the cursor on
-        g_pCore->ForceCursorVisible ( m_iShowingCursor > 0 );
+        g_pCore->ForceCursorVisible ( m_iShowingCursor > 0, bToggleControls );
         g_pClientGame->SetCursorEventsEnabled ( m_iShowingCursor > 0 );
     }
 }

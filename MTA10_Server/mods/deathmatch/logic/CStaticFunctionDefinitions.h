@@ -153,7 +153,7 @@ public:
 
     // Player set functions
     static bool                 SetPlayerMoney                      ( CElement* pElement, long lMoney );
-    static bool                 SetPlayerAmmo                       ( CElement* pElement, unsigned char ucSlot, unsigned short usAmmo );
+    static bool                 SetPlayerAmmo                       ( CElement* pElement, unsigned char ucSlot, unsigned short usAmmo, unsigned short usAmmoInClip );
 	static bool                 GivePlayerMoney                     ( CElement* pElement, long lMoney );
     static bool                 TakePlayerMoney                     ( CElement* pElement, long lMoney );
     static bool                 ShowPlayerHudComponent              ( CElement* pElement, unsigned char ucComponent, bool bShow );
@@ -229,10 +229,10 @@ public:
     static bool                 TakeAllWeapons                      ( CElement* pElement );
 	static bool					GiveWeaponAmmo						( CElement* pElement, unsigned char ucWeaponID, unsigned short usAmmo );
     static bool                 TakeWeaponAmmo                      ( CElement* pElement, unsigned char ucWeaponID, unsigned short usAmmo );
-    static bool                 SetWeaponAmmo                       ( CElement* pElement, unsigned char ucWeaponID, unsigned short usAmmo );
+    static bool                 SetWeaponAmmo                       ( CElement* pElement, unsigned char ucWeaponID, unsigned short usAmmo, unsigned short usAmmoInClip );
 
     // Vehicle create/destroy functions
-    static CVehicle*            CreateVehicle                       ( CResource* pResource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, char* szRegPlate = NULL );
+    static CVehicle*            CreateVehicle                       ( CResource* pResource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, char* szRegPlate = NULL, bool bDirection = false );
 
     // Vehicle get functions
     static bool                 GetVehicleColor                     ( CVehicle* pVehicle, unsigned char& ucColor1, unsigned char& ucColor2, unsigned char& ucColor3, unsigned char& ucColor4 );
@@ -263,6 +263,7 @@ public:
     static bool                 IsVehicleFrozen                     ( CVehicle* pVehicle, bool& bFrozen );
     static bool                 IsVehicleOnGround                   ( CVehicle* pVehicle, bool& bOnGround );
     static bool                 GetVehicleEngineState               ( CVehicle* pVehicle, bool& bState );
+    static bool                 IsTrainDerailed                     ( CVehicle* pVehicle, bool& bDerailed );
 
     // Vehicle set functions
     static bool                 FixVehicle                          ( CElement* pElement );
@@ -298,6 +299,7 @@ public:
     static bool                 SetVehiclePaintjob                  ( CElement* pElement, unsigned char ucPaintjob );
     static bool                 SetVehicleFuelTankExplodable        ( CElement* pElement, bool bExplodable );
     static bool                 SetVehicleFrozen                    ( CVehicle* pVehicle, bool bFrozen );
+    static bool                 SetTrainDerailed                    ( CVehicle* pVehicle, bool bDerailed );
 
     // Marker create/destroy functions
     static CMarker*             CreateMarker                        ( CResource* pResource, const CVector& vecPosition, const char* szType, float fSize, unsigned char ucRed, unsigned char ucGreen, unsigned char ucBlue, unsigned char ucAlpha, CElement* pVisibleTo );
@@ -500,9 +502,9 @@ public:
 
     // Admin funcs
     static bool                 KickPlayer                          ( CPlayer* pPlayer, CPlayer* pResponsible = NULL, const char* szReason = NULL );
-    static CBan*                BanPlayer                           ( CPlayer* pPlayer, bool bIP, bool bUsername, bool bSerial, CPlayer* pResponsible = NULL, const char* szReason = NULL );
+    static CBan*                BanPlayer                           ( CPlayer* pPlayer, bool bIP, bool bUsername, bool bSerial, CPlayer* pResponsible = NULL, const char* szReason = NULL, time_t tUnban = 0 );
 
-    static CBan*                AddBan                              ( const char* szIP, const char* szUsername, const char* szSerial, CPlayer* pResponsible, const char* szReason );
+    static CBan*                AddBan                              ( const char* szIP, const char* szUsername, const char* szSerial, CPlayer* pResponsible, const char* szReason, time_t tUnban );
     static bool                 RemoveBan                           ( CBan* pBan, CPlayer* pResponsible = NULL );
 
     static bool					GetBans							    ( CLuaMain* pLuaMain );
@@ -511,14 +513,17 @@ public:
     static bool					GetBanSerial						( CBan* pBan, char* szSerial, size_t size );
     static bool					GetBanUsername						( CBan* pBan, char* szUsername, size_t size );
     static bool					GetBanNick							( CBan* pBan, char* szNick, size_t size );
-    static bool					GetBanTime							( CBan* pBan, char* szTime, size_t size );
     static bool					GetBanReason						( CBan* pBan, char* szReason, size_t size );
     static bool                 GetBanAdmin                         ( CBan* pBan, char* szAdmin, size_t size );
+
+    static bool					GetBanTime							( CBan* pBan, time_t& time );
+    static bool					GetUnbanTime						( CBan* pBan, time_t& time );
+
     // Cursor get funcs
     static bool                 IsCursorShowing                     ( CPlayer* pPlayer, bool& bShowing );
 
     // Cursor set funcs
-    static bool                 ShowCursor                          ( CElement* pElement, CLuaMain* pLuaMain, bool bShow );
+    static bool                 ShowCursor                          ( CElement* pElement, CLuaMain* pLuaMain, bool bShow, bool bToggleControls );
 
 	// Chat funcs
 	static bool                 ShowChat							( CElement* pElement, bool bShow );

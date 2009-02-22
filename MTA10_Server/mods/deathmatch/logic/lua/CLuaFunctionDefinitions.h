@@ -203,6 +203,7 @@ public:
     static int      IsVehicleFrozen                     ( lua_State* luaVM );
     static int      IsVehicleOnGround                   ( lua_State* luaVM );
     static int      GetVehicleEngineState               ( lua_State* luaVM );
+    static int      IsTrainDerailed                     ( lua_State* luaVM );
 
     // Vehicle set functions
     static int      FixVehicle                          ( lua_State* luaVM );
@@ -238,6 +239,7 @@ public:
     static int      SetVehiclePaintjob                  ( lua_State* luaVM );
     static int      SetVehicleFuelTankExplodable        ( lua_State* luaVM );
     static int      SetVehicleFrozen                    ( lua_State* luaVM );
+    static int      SetTrainDerailed                    ( lua_State* luaVM );
 
     // Marker create/destroy functions
     static int      CreateMarker                        ( lua_State* luaVM );
@@ -456,6 +458,7 @@ public:
     static int		GetBanUsername						( lua_State* luaVM );
     static int		GetBanNick							( lua_State* luaVM );
     static int		GetBanTime							( lua_State* luaVM );
+    static int		GetUnbanTime						( lua_State* luaVM );
     static int		GetBanReason						( lua_State* luaVM );
     static int		GetBanAdmin						    ( lua_State* luaVM );
 

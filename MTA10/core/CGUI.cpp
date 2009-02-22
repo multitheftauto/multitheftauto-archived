@@ -34,6 +34,9 @@ CLocalGUI::CLocalGUI ( void )
 
 	m_bVisibleWindows = false;
 	m_iVisibleWindows = 0;
+
+	m_pModMouseClickHandler = NULL;
+	m_pModMouseDoubleClickHandler = NULL;
 }
 
 
@@ -66,6 +69,18 @@ void CLocalGUI::CreateWindows ( void )
     m_pDebugView = new CDebugView ( pGUI, CVector2D ( 0.23f, 0.785f ) );
     m_pDebugView->SetVisible ( false );
 
+	// Create the overlayed version labels
+	CVector2D ScreenSize = pGUI->GetResolution ();
+	m_pLabelVersionTag = reinterpret_cast < CGUILabel* > ( pGUI->CreateLabel ( MTA_VERSION_TAG ) );
+	m_pLabelVersionTag->SetSize ( CVector2D ( 150, 18 ) );
+	m_pLabelVersionTag->SetHorizontalAlign ( CGUI_ALIGN_HORIZONTALCENTER );
+	m_pLabelVersionTag->SetPosition ( CVector2D ( ScreenSize.fX - 150, ScreenSize.fY - 15 ) );
+	m_pLabelVersionTag->SetAlpha ( 0.5f );
+	m_pLabelVersionTag->SetTextColor ( 255, 255, 255 );
+	m_pLabelVersionTag->SetZOrderingEnabled ( false );
+    m_pLabelVersionTag->MoveToBack ();
+    m_pLabelVersionTag->SetVisible ( false );
+
     // Create mainmenu
     m_pMainMenu = new CMainMenu ( pGUI );
     m_pMainMenu->SetVisible ( false );
@@ -77,18 +92,6 @@ void CLocalGUI::CreateWindows ( void )
     // Create community registration window
     m_CommunityRegistration.CreateWindows ();
     m_CommunityRegistration.SetVisible ( false );
-
-	// Create the overlayed version labels
-	CVector2D ScreenSize = pGUI->GetResolution ();
-	m_pLabelVersionTag = reinterpret_cast < CGUILabel* > ( pGUI->CreateLabel ( MTA_VERSION_TAG ) );
-	m_pLabelVersionTag->SetSize ( CVector2D ( 150, 18 ) );
-	m_pLabelVersionTag->SetHorizontalAlign ( CGUI_ALIGN_HORIZONTALCENTER );
-	m_pLabelVersionTag->SetPosition ( CVector2D ( ScreenSize.fX - 150, ScreenSize.fY - 15 ) );
-	m_pLabelVersionTag->SetAlpha ( 0.5f );
-	m_pLabelVersionTag->SetTextColor ( 255, 255, 255 );
-	m_pLabelVersionTag->SetZOrderingEnabled ( false );
-	m_pLabelVersionTag->BringToFront ();
-    m_pLabelVersionTag->SetVisible ( false );
 
 	// Return the old current dir.
     SetCurrentDirectory ( szCurDir );
@@ -370,7 +373,55 @@ void CLocalGUI::SetMainMenuVisible ( bool bVisible )
 {
     if ( m_pMainMenu )
     {
+        // This code installs the original CCore mouseclick handlers when the ingame menu
+        // is shown, and restores the mod mouseclick handlers when the menu is hidden again.
+        // This is needed to prevent a crash when double clicking a server in the server browser
+        // while already ingame: the mod module gets unloaded while its doubleclick handler is
+        // still running.
         m_pMainMenu->SetVisible ( bVisible );
+        CGUI* pGUI = CCore::GetSingleton ().GetGUI ();
+        if ( bVisible )
+        {
+            if ( m_pModMouseClickHandler )
+            {
+                delete m_pModMouseClickHandler;
+                m_pModMouseClickHandler = NULL;
+            }
+            if ( pGUI->GetMouseClickHandler () )
+                m_pModMouseClickHandler = new GUI_CALLBACK_MOUSE ( *pGUI->GetMouseClickHandler () );
+            if ( m_pModMouseDoubleClickHandler )
+            {
+                delete m_pModMouseDoubleClickHandler;
+                m_pModMouseDoubleClickHandler = NULL;
+            }
+            if ( pGUI->GetMouseDoubleClickHandler () )
+                m_pModMouseDoubleClickHandler = new GUI_CALLBACK_MOUSE ( *pGUI->GetMouseDoubleClickHandler () );
+            pGUI->SetMouseClickHandler ( GUI_CALLBACK_MOUSE ( CCore::OnMouseClick, CCore::GetSingletonPtr () ) );
+            pGUI->SetMouseDoubleClickHandler ( GUI_CALLBACK_MOUSE ( CCore::OnMouseDoubleClick, CCore::GetSingletonPtr () ) );
+        }
+        else
+        {
+            if ( m_pModMouseClickHandler )
+            {
+                pGUI->SetMouseClickHandler ( *m_pModMouseClickHandler );
+                delete m_pModMouseClickHandler;
+                m_pModMouseClickHandler = NULL;
+            }
+            else
+            {
+                pGUI->SetMouseClickHandler ();
+            }
+            if ( m_pModMouseDoubleClickHandler )
+            {
+                pGUI->SetMouseDoubleClickHandler ( *m_pModMouseDoubleClickHandler );
+                delete m_pModMouseDoubleClickHandler;
+                m_pModMouseDoubleClickHandler = NULL;
+            }
+            else
+            {
+                pGUI->SetMouseDoubleClickHandler ();
+            }
+        }
     }
     else
     {

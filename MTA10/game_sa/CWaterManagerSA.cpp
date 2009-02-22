@@ -61,98 +61,6 @@ DWORD CWaterManagerSA::m_ZonePolyXrefs[] = {
 CWaterManagerSA* g_pWaterManager = NULL;
 
 // -----------------------------------------------------
-// Vertices
-
-WORD CWaterVertexSA::GetID ()
-{
-    if ( !m_pInterface )
-        return ~0;
-    return (WORD)(m_pInterface - g_pWaterManager->m_VertexPool);
-}
-
-void CWaterVertexSA::GetPosition ( CVector& vec )
-{
-    vec.fX = (float)m_pInterface->m_sX;
-    vec.fY = (float)m_pInterface->m_sY;
-    vec.fZ = m_pInterface->m_fZ;
-}
-
-void CWaterVertexSA::SetPosition ( CVector& vec, void* pChangeSource )
-{
-    if ( pChangeSource )
-        g_pWaterManager->AddChange ( pChangeSource, this, new CWaterChangeVertexMove ( this ) );
-    m_pInterface->m_sX = ((short)vec.fX) & ~1;
-    m_pInterface->m_sY = ((short)vec.fY) & ~1;
-    m_pInterface->m_fZ = vec.fZ;
-}
-
-// -----------------------------------------------------
-// Polygons
-
-void CWaterQuadSA::SetInterface ( CWaterPolySAInterface* pInterface )
-{
-    m_pInterface = pInterface;
-    m_wID = (WORD)(pInterface - g_pWaterManager->m_QuadPool);
-}
-
-void CWaterTriangleSA::SetInterface ( CWaterPolySAInterface* pInterface )
-{
-    m_pInterface = pInterface;
-    m_wID = (WORD)(pInterface - g_pWaterManager->m_TrianglePool);
-}
-
-CWaterVertex* CWaterPolySA::GetVertex ( int index )
-{
-    if ( index < 0 || index >= GetNumVertices () )
-        return NULL;
-
-    return &g_pWaterManager->m_Vertices [
-        GetType () == WATER_POLY_QUAD ? ((CWaterQuadSA *)this)->GetInterface ()->m_wVertexIDs[index]
-                                  : ((CWaterTriangleSA *)this)->GetInterface ()->m_wVertexIDs[index]
-    ];
-}
-
-bool CWaterPolySA::ContainsPoint ( float fX, float fY )
-{
-    bool bInside = false;
-    int numVertices = GetNumVertices ();
-    WORD* pwVertexIDs =
-        GetType () == WATER_POLY_QUAD ? ((CWaterQuadSA *)this)->GetInterface ()->m_wVertexIDs
-                                  : ((CWaterTriangleSA *)this)->GetInterface ()->m_wVertexIDs;
-    
-    CWaterVertexSA* pFrom;
-    CWaterVertexSA* pTo;
-    CVector vecFrom;
-    CVector vecTo;
-    int next[4];
-    if ( GetType () == WATER_POLY_QUAD )
-    {
-        next[0] = 1;
-        next[1] = 3;
-        next[2] = 0;
-        next[3] = 2;
-    }
-    else
-    {
-        next[0] = 1;
-        next[1] = 2;
-        next[2] = 0;
-    }
-    for ( int i = 0; i < numVertices; i++ )
-    {
-        pFrom = &g_pWaterManager->m_Vertices [ pwVertexIDs[i] ];
-        pTo   = &g_pWaterManager->m_Vertices [ pwVertexIDs[next[i]] ];
-        pFrom->GetPosition ( vecFrom );
-        pTo->GetPosition ( vecTo );
-        
-        if ( (vecFrom.fY > fY) != (vecTo.fY > fY) &&
-             fX < vecFrom.fX + (vecTo.fX - vecFrom.fX) * (fY - vecFrom.fX) / (vecTo.fY - vecFrom.fY) )
-           bInside = !bInside;
-    }
-    return bInside;
-}
-
-// -----------------------------------------------------
 // Water zone iterator (iterates over polys in a zone)
 
 CWaterZoneSA::iterator::iterator ()
@@ -284,8 +192,8 @@ CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly ( EWaterPolyType type, WORD wI
             return NULL;
         
         WORD wOffset = *(WORD *)VAR_NumWaterZonePolys;
-        g_pWaterManager->m_ZonePolyPool [ wOffset ].m_wValue = m_pInterface->m_wValue;
-        g_pWaterManager->m_ZonePolyPool [ wOffset + 1 ].m_wValue = MAKE_POLYENTRY ( type, wID );
+        g_pWaterManager->m_ZonePolyPool [ wOffset ].m_wValue = MAKE_POLYENTRY ( type, wID );
+        g_pWaterManager->m_ZonePolyPool [ wOffset + 1 ].m_wValue = m_pInterface->m_wValue;
         g_pWaterManager->m_ZonePolyPool [ wOffset + 2 ].m_wValue = 0;
         m_pInterface->m_wValue = MAKE_POLYENTRY ( WATER_POLY_LIST, wOffset );
 
@@ -296,28 +204,27 @@ CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly ( EWaterPolyType type, WORD wI
     {
         if ( *(DWORD *)VAR_NumWaterZonePolys + 1 > NUM_NewWaterZonePolys )
             return NULL;
-
-        iterator it = end ();
-        CWaterPolyEntrySAInterface* pZoneEnd = (CWaterPolyEntrySAInterface *)it;
+        
+        CWaterPolyEntrySAInterface* pZoneStart = (CWaterPolyEntrySAInterface *)begin ();
         CWaterPolyEntrySAInterface* pEntry = &g_pWaterManager->m_ZonePolyPool [ *(DWORD *)VAR_NumWaterZonePolys ];
-        while ( pEntry > pZoneEnd )
+        while ( pEntry > pZoneStart )
         {
             pEntry->m_wValue = (pEntry - 1)->m_wValue;
             pEntry--;
         }
-        pZoneEnd->m_wValue = MAKE_POLYENTRY ( type, wID );
+        pZoneStart->m_wValue = MAKE_POLYENTRY ( type, wID );
 
-        WORD wZoneEndOffset = pZoneEnd - g_pWaterManager->m_ZonePolyPool;
+        WORD wZoneStartOffset = pZoneStart - g_pWaterManager->m_ZonePolyPool;
         CWaterPolyEntrySAInterface* pZoneInterface = (CWaterPolyEntrySAInterface *)ARRAY_WaterZones;
         for ( ; pZoneInterface != &((CWaterPolyEntrySAInterface *)ARRAY_WaterZones) [ NUM_WaterZones ]; pZoneInterface++ )
         {
             if ( POLYENTRY_TYPE ( pZoneInterface ) == WATER_POLY_LIST &&
-                 POLYENTRY_ID ( pZoneInterface ) > wZoneEndOffset )
+                 POLYENTRY_ID ( pZoneInterface ) > wZoneStartOffset )
                 pZoneInterface->m_wValue++;
         }
 
         (*(DWORD *)VAR_NumWaterZonePolys)++;
-        return pZoneEnd;
+        return pZoneStart;
     }
 }
 
@@ -412,11 +319,6 @@ void CWaterChangeVertexMove::Undo ( void* pChangedObject )
     ((CWaterVertexSA *)pChangedObject)->SetPosition ( m_vecOriginalPosition );
 }
 
-void CWaterChangePolyCreate::Undo ( void* pChangedObject )
-{
-    g_pWaterManager->DeletePoly ( (CWaterPoly *)pChangedObject );
-}
-
 // -----------------------------------------------------
 // Manager
 
@@ -455,17 +357,80 @@ void CWaterManagerSA::RelocatePools ()
     }
 }
 
+DWORD dwHook6E9E23continue = 0x6E9E29;
 void __declspec(naked) Hook6E9E23 ()
 {
     __asm
     {
-        
+check:
+        mov eax, dword ptr [edi]
+        test eax, eax
+        jnz cont
+        add edi, 0xA        ; sizeof(CWaterQuadSAInterface)
+        jmp check
+cont:
+        movsx eax, word ptr [edi]
+        lea ebx, [eax+4*eax]
+        jmp dwHook6E9E23continue
+    }
+}
+
+DWORD dwHook6EFCD7continue = 0x6EFCDD;
+DWORD dwHook6EFCD7skip = 0x6EFE5E;
+void __declspec(naked) Hook6EFCD7 ()
+{
+    __asm
+    {
+        mov eax, dword ptr [esi-4]
+        test eax, eax
+        jz check
+        jmp dwHook6EFCD7skip
+check:
+        add esi, 0xA        ; sizeof(CWaterQuadSAInterface)
+        mov eax, dword ptr [esi-4]
+        test eax, eax
+        jz check
+        jmp dwHook6EFCD7continue
+    }
+}
+
+DWORD dwHook6EFBD8continue = 0x6EFBDE;
+void __declspec(naked) Hook6EFBD8 ()
+{
+    __asm
+    {
+check:
+        mov eax, 0x6EFC27
+        mov eax, dword ptr [eax]
+        mov eax, dword ptr [eax+8*esi]
+        test eax, eax
+        jnz cont
+        inc esi
+        jmp check
+cont:
+        jmp dwHook6EFBD8continue
     }
 }
 
 void CWaterManagerSA::InstallHooks ()
 {
+    HookInstall ( 0x6E9E23, (DWORD)Hook6E9E23, 6 );
+    
+    *(DWORD *)0x6EFCD9 = (DWORD)Hook6EFCD7 - 0x6EFCDD;
 
+    *(DWORD *)0x6EFBC7 = 0x05EBED33;
+    *(DWORD *)0x6EFBCB = 0x90909090;
+    *(BYTE *)0x6EFBCF = 0x46;
+    *(DWORD *)0x6EFBDA = (DWORD)Hook6EFBD8 - 0x6EFBDE;
+    *(BYTE *)0x6EFBFB = 0x17;
+    *(BYTE *)0x6EFC02 = 0x13;
+    *(BYTE *)0x6EFC04 = 0x57;
+    *(BYTE *)0x6EFC07 = 0x53;
+    *(BYTE *)0x6EFC0A = 0x57;
+    *(BYTE *)0x6EFC10 = 0x53;
+    *(BYTE *)0x6EFCB2 = 0x45;
+    *(BYTE *)0x6EFCB4 = 0xE8;
+    *(BYTE *)0x6EFCB7 = 0x14;
 }
 
 CWaterZoneSA* CWaterManagerSA::GetZoneContaining ( float fX, float fY )
@@ -543,7 +508,7 @@ CWaterPoly* CWaterManagerSA::GetPolyAtPoint ( CVector& vecPosition )
     return NULL;
 }
 
-CWaterPoly* CWaterManagerSA::CreateQuad ( CVector& vecBL, CVector& vecBR, CVector& vecTL, CVector& vecTR, bool bShallow, void* pChangeSource )
+CWaterPoly* CWaterManagerSA::CreateQuad ( CVector& vecBL, CVector& vecBR, CVector& vecTL, CVector& vecTR, bool bShallow )
 {
     if ( vecTL.fX >= vecTR.fX || vecBL.fX >= vecBR.fX ||
          vecTL.fY <= vecBL.fY || vecTR.fY <= vecBR.fY ||
@@ -590,13 +555,10 @@ CWaterPoly* CWaterManagerSA::CreateQuad ( CVector& vecBL, CVector& vecBR, CVecto
     CWaterQuadSA* pPoly = &g_pWaterManager->m_Quads [ wID ];
     pPoly->SetInterface ( pInterface );
 
-    if ( pChangeSource )
-        g_pWaterManager->AddChange ( pChangeSource, pPoly, new CWaterChangePolyCreate () );
-
     return pPoly;
 }
 
-CWaterPoly* CWaterManagerSA::CreateTriangle ( CVector& vec1, CVector& vec2, CVector& vec3, bool bShallow, void* pChangeSource )
+CWaterPoly* CWaterManagerSA::CreateTriangle ( CVector& vec1, CVector& vec2, CVector& vec3, bool bShallow )
 {
     if ( vec1.fX >= vec2.fX || vec1.fY == vec3.fY || vec2.fY == vec3.fY ||
          (vec1.fY < vec3.fY) != (vec2.fY < vec3.fY) ||
@@ -640,9 +602,6 @@ CWaterPoly* CWaterManagerSA::CreateTriangle ( CVector& vec1, CVector& vec2, CVec
     CWaterTriangleSA* pPoly = &g_pWaterManager->m_Triangles [ wID ];
     pPoly->SetInterface ( pInterface );
 
-    if ( pChangeSource )
-        g_pWaterManager->AddChange ( pChangeSource, pPoly, new CWaterChangePolyCreate () );
-
     return pPoly;
 }
 
@@ -676,12 +635,33 @@ bool CWaterManagerSA::GetWaterLevel ( CVector& vecPosition, float* pfLevel, bool
         ( vecPosition.fX, vecPosition.fY, vecPosition.fZ, pfLevel, bCheckWaves, pvecUnknown );
 }
 
-bool CWaterManagerSA::SetWaterLevel ( CVector& vecPosition, float fLevel, void* pChangeSource )
+bool CWaterManagerSA::SetWaterLevel ( CVector* pvecPosition, float fLevel, void* pChangeSource )
 {
-    CWaterPoly* pPoly = GetPolyAtPoint ( vecPosition );
-    if ( !pPoly )
-        return false;
+    if ( pvecPosition )
+    {
+        // Specific water poly
+        CWaterPoly* pPoly = GetPolyAtPoint ( *pvecPosition );
+        if ( !pPoly )
+            return false;
 
+        return SetWaterLevel ( pPoly, fLevel, pChangeSource );
+    }
+    else
+    {
+        // All water polys
+        CVector vecVertexPos;
+        for ( DWORD i = 0; i < *(DWORD *)VAR_NumWaterVertices; i++ )
+        {
+            m_Vertices [ i ].GetPosition ( vecVertexPos );
+            vecVertexPos.fZ = fLevel;
+            m_Vertices [ i ].SetPosition ( vecVertexPos, pChangeSource );
+        }
+    }
+    return true;
+}
+
+bool CWaterManagerSA::SetWaterLevel ( CWaterPoly* pPoly, float fLevel, void* pChangeSource )
+{
     CVector vecVertexPos;
     for ( int i = 0; i < pPoly->GetNumVertices (); i++ )
     {
@@ -690,6 +670,47 @@ bool CWaterManagerSA::SetWaterLevel ( CVector& vecPosition, float fLevel, void* 
         pPoly->GetVertex ( i )->SetPosition ( vecVertexPos, pChangeSource );
     }
     return true;
+}
+
+float CWaterManagerSA::GetWaveLevel ()
+{
+    return *(float *)0xC812E8;
+}
+
+void CWaterManagerSA::SetWaveLevel ( float fWaveLevel )
+{
+    if ( fWaveLevel >= 0.0f )
+    {
+        // DISABLE the game reseting the wave level
+        *(BYTE *)0x72C665 = 0xDD;
+        *(BYTE *)0x72C666 = 0xD8;
+        memset( (void*)0x72C667, 0x90, 4 );
+        memset( (void*)0x72C659, 0x90, 10 );
+
+        *(float *)0xC812E8 = fWaveLevel;
+    }
+    else
+    {
+        *(BYTE *)0x72C665 = 0xD9;
+        *(BYTE *)0x72C666 = 0x1D;
+        *(BYTE *)0x72C667 = 0xE8;
+        *(BYTE *)0x72C668 = 0x12;
+        *(BYTE *)0x72C669 = 0xC8;
+        *(BYTE *)0x72C66A = 0x00;
+
+        *(BYTE *)0x72C659 = 0xC7;
+        *(BYTE *)0x72C65A = 0x05;
+        *(BYTE *)0x72C65B = 0xE8;
+        *(BYTE *)0x72C65C = 0x12;
+        *(BYTE *)0x72C65D = 0xC8;
+        *(BYTE *)0x72C65E = 0x00;
+        *(BYTE *)0x72C65F = 0x00;
+        *(BYTE *)0x72C660 = 0x00;
+        *(BYTE *)0x72C661 = 0x80;
+        *(BYTE *)0x72C662 = 0x3F;
+
+        *(float *)0xC812E8 = 0.6f;
+    }
 }
 
 bool CWaterManagerSA::TestLineAgainstWater ( CVector& vecStart, CVector& vecEnd, CVector* vecCollision )
@@ -717,8 +738,7 @@ void CWaterManagerSA::AddChange ( void *pChangeSource, void* pChangedObject, CWa
     }
     else
     {
-        delete changeIt->second;
-        changeIt->second = pChange;
+        delete pChange;
     }
 }
 
@@ -749,6 +769,13 @@ void CWaterManagerSA::UndoChanges ( void* pChangeSource )
     }
 }
 
+void CWaterManagerSA::RebuildIndex ()
+{
+    memset ( (void *)ARRAY_WaterZones, 0, NUM_WaterZones * sizeof ( CWaterPolyEntrySAInterface ) );
+    *(DWORD *)VAR_NumWaterZonePolys = 0;
+    ((BuildWaterIndex_t)FUNC_BuildWaterIndex) ();
+}
+
 void CWaterManagerSA::Reset ()
 {
     UndoChanges ();
@@ -773,4 +800,6 @@ void CWaterManagerSA::Reset ()
     m_Triangles.resize ( NUM_DefWaterTriangles );
     for ( i = 0; i < NUM_DefWaterTriangles; i++ )
         m_Triangles [ i ].SetInterface ( &m_TrianglePool [ i ] );
+
+    SetWaveLevel ( DEFAULT_WAVE_LEVEL );
 }

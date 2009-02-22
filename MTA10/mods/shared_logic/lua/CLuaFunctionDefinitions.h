@@ -257,6 +257,7 @@ public:
     LUA_DECLARE ( GetVehicleAdjustableProperty );
 	LUA_DECLARE ( GetHelicopterRotorSpeed );
     LUA_DECLARE ( GetVehicleEngineState );
+    LUA_DECLARE ( IsTrainDerailed );
 
     // Vehicle set functions
     LUA_DECLARE ( FixVehicle );
@@ -293,6 +294,7 @@ public:
     LUA_DECLARE ( SetVehicleFrozen );
     LUA_DECLARE ( SetVehicleAdjustableProperty );
 	LUA_DECLARE ( SetHelicopterRotorSpeed );
+    LUA_DECLARE ( SetTrainDerailed );
 
     // Object create funcs
     LUA_DECLARE ( CreateObject );
@@ -533,7 +535,7 @@ public:
     LUA_DECLARE ( TestLineAgainstWater );
     LUA_DECLARE ( CreateWater );
     LUA_DECLARE ( GetWaterLevel );
-    LUA_DECLARE ( SetWaterLevel );
+    LUA_DECLARE ( GetWaterVertexPosition );
     LUA_DECLARE ( GetWorldFromScreenPosition );
     LUA_DECLARE ( GetScreenFromWorldPosition  );
     LUA_DECLARE ( GetWeather );
@@ -546,6 +548,7 @@ public:
     LUA_DECLARE ( GetGaragePosition );
     LUA_DECLARE ( GetGarageSize );
     LUA_DECLARE ( GetGarageBoundingBox );
+    LUA_DECLARE ( IsWorldSpecialPropertyEnabled );
 
     LUA_DECLARE ( SetTime );
     LUA_DECLARE ( SetSkyGradient );
@@ -555,8 +558,11 @@ public:
     LUA_DECLARE ( SetGravity );
     LUA_DECLARE ( SetGameSpeed );
 	LUA_DECLARE ( SetMinuteDuration );
+    LUA_DECLARE ( SetWaterLevel );
+    LUA_DECLARE ( SetWaterVertexPosition );
     LUA_DECLARE ( SetWaveHeight );
     LUA_DECLARE ( SetGarageOpen );
+    LUA_DECLARE ( SetWorldSpecialPropertyEnabled );
 
     // Input functions
     LUA_DECLARE ( BindKey );

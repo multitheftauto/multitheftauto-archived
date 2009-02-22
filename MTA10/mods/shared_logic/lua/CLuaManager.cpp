@@ -447,6 +447,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "getVehicleAdjustableProperty", CLuaFunctionDefinitions::GetVehicleAdjustableProperty );
 	CLuaCFunctions::AddFunction ( "getHelicopterRotorSpeed", CLuaFunctionDefinitions::GetHelicopterRotorSpeed );
     CLuaCFunctions::AddFunction ( "getVehicleEngineState", CLuaFunctionDefinitions::GetVehicleEngineState );
+    CLuaCFunctions::AddFunction ( "isTrainDerailed", CLuaFunctionDefinitions::IsTrainDerailed );
 
 
     // Vehicle set funcs
@@ -476,6 +477,8 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setVehicleFrozen", CLuaFunctionDefinitions::SetVehicleFrozen );
     CLuaCFunctions::AddFunction ( "setVehicleAdjustableProperty", CLuaFunctionDefinitions::SetVehicleAdjustableProperty );
 	CLuaCFunctions::AddFunction ( "setHelicopterRotorSpeed", CLuaFunctionDefinitions::SetHelicopterRotorSpeed );
+    CLuaCFunctions::AddFunction ( "setTrainDerailed", CLuaFunctionDefinitions::SetTrainDerailed );
+
 
     // Object create/destroy funcs
     CLuaCFunctions::AddFunction ( "createObject", CLuaFunctionDefinitions::CreateObject );
@@ -727,6 +730,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "isLineOfSightClear", CLuaFunctionDefinitions::IsLineOfSightClear );
     CLuaCFunctions::AddFunction ( "testLineAgainstWater", CLuaFunctionDefinitions::TestLineAgainstWater );
     CLuaCFunctions::AddFunction ( "getWaterLevel", CLuaFunctionDefinitions::GetWaterLevel );
+    CLuaCFunctions::AddFunction ( "getWaterVertexPosition", CLuaFunctionDefinitions::GetWaterVertexPosition );
     CLuaCFunctions::AddFunction ( "getWorldFromScreenPosition", CLuaFunctionDefinitions::GetWorldFromScreenPosition );
     CLuaCFunctions::AddFunction ( "getScreenFromWorldPosition", CLuaFunctionDefinitions::GetScreenFromWorldPosition );
     CLuaCFunctions::AddFunction ( "getWeather", CLuaFunctionDefinitions::GetWeather );
@@ -739,11 +743,13 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "getGaragePosition", CLuaFunctionDefinitions::GetGaragePosition );
     CLuaCFunctions::AddFunction ( "getGarageSize", CLuaFunctionDefinitions::GetGarageSize );
     CLuaCFunctions::AddFunction ( "getGarageBoundingBox", CLuaFunctionDefinitions::GetGarageBoundingBox );
+    CLuaCFunctions::AddFunction ( "isWorldSpecialPropertyEnabled", CLuaFunctionDefinitions::IsWorldSpecialPropertyEnabled );
 
     // World set funcs
     CLuaCFunctions::AddFunction ( "setTime", CLuaFunctionDefinitions::SetTime );
     CLuaCFunctions::AddFunction ( "createWater", CLuaFunctionDefinitions::CreateWater );
     CLuaCFunctions::AddFunction ( "setWaterLevel", CLuaFunctionDefinitions::SetWaterLevel );
+    CLuaCFunctions::AddFunction ( "setWaterVertexPosition", CLuaFunctionDefinitions::SetWaterVertexPosition );
     CLuaCFunctions::AddFunction ( "setSkyGradient", CLuaFunctionDefinitions::SetSkyGradient );
     CLuaCFunctions::AddFunction ( "resetSkyGradient", CLuaFunctionDefinitions::ResetSkyGradient );
     CLuaCFunctions::AddFunction ( "setWeather", CLuaFunctionDefinitions::SetWeather );
@@ -753,6 +759,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setWaveHeight", CLuaFunctionDefinitions::SetWaveHeight );
 	CLuaCFunctions::AddFunction ( "setMinuteDuration", CLuaFunctionDefinitions::SetMinuteDuration );
     CLuaCFunctions::AddFunction ( "setGarageOpen", CLuaFunctionDefinitions::SetGarageOpen );
+    CLuaCFunctions::AddFunction ( "setWorldSpecialPropertyEnabled", CLuaFunctionDefinitions::SetWorldSpecialPropertyEnabled );
 
     // Input functions
     CLuaCFunctions::AddFunction ( "bindKey", CLuaFunctionDefinitions::BindKey );
