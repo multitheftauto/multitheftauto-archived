@@ -81,9 +81,6 @@ AC_SUBST(AM_LDFLAGS, "$AM_LDFLAGS")
 # Checks for header files.
 AC_CHECK_HEADERS(fcntl.h limits.h strings.h syslog.h unistd.h [sys/param.h] stdarg.h)
 
-# Check for google sparsehash
-AC_CHECK_HEADERS(google/sparse_hash_map)
-
 # Check for libraries
 AC_CHECK_FUNCS(strndup strerror vsnprintf vasprintf open vsyslog strncasecmp)
 
@@ -91,6 +88,11 @@ AC_CHECK_FUNCS(strndup strerror vsnprintf vasprintf open vsyslog strncasecmp)
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
+
+AC_LANG(C++)
+
+# Check for google sparsehash
+AC_CHECK_HEADERS([google/sparse_hash_map],,AC_MSG_ERROR([can't find google sparse_hash_map]))
 
 # Checks for library functions.
 
