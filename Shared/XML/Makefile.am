@@ -1,10 +1,10 @@
 INCLUDES += -I$(srcdir)/../sdk/
 INCLUDES += -I$(srcdir)/../../vendor/tinyxml/
 
-noinst_LIBRARIES = \
-	libxml.a
+lib_LTLIBRARIES = \
+	libxml.la
 
-libxml_a_SOURCES = \
+libxml_la_SOURCES = \
 	CXMLArray.cpp \
 	CXMLArray.h \
 	CXMLAttributeImpl.cpp \
@@ -21,3 +21,4 @@ libxml_a_SOURCES = \
 	StdInc.h \
 	XML.cpp
 
+libxml_la_LDFLAGS = -L../../vendor/tinyxml -ltinyxml

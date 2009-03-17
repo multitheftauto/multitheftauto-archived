@@ -13,5 +13,5 @@ mta_server_SOURCES = \
 	Main.cpp
 
 
-mta_server_LDADD = -ldl -lz
+mta_server_LDADD = -ldl -lz -lcurl
 	

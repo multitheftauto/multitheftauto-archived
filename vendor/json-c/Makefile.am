@@ -1,12 +1,12 @@
 AM_CFLAGS = -Wall -std=gnu99 -D_GNU_SOURCE -D_REENTRANT
 
-lib_LTLIBRARIES = libjson.la
+lib_LTLIBRARIES = libjson-c.la
 
 #pkgconfigdir = $(libdir)/pkgconfig
 #pkgconfig_DATA = json.pc
 
-libjsonincludedir = $(includedir)/json
-libjsoninclude_HEADERS = \
+libjson_cincludedir = $(includedir)/json
+libjson_cinclude_HEADERS = \
         json.h \
 	bits.h \
 	debug.h \
@@ -16,9 +16,9 @@ libjsoninclude_HEADERS = \
 	json_object.h \
 	json_tokener.h
 
-libjson_la_LDFLAGS = -version-info 0:1:0
+libjson_c_la_LDFLAGS = -version-info 0:1:0
 
-libjson_la_SOURCES = \
+libjson_c_la_SOURCES = \
 	arraylist.c \
 	debug.c \
 	json_object.c \

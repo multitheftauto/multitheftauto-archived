@@ -18,6 +18,10 @@ libdeathmatch_la_SOURCES = \
 	utils/CTCPImpl.cpp \
 	utils/CHTTPResponse.cpp \
 	utils/zip/crc32.cpp \
+	utils/zip/ioapi.c \
+	utils/zip/mztools.c \
+	utils/zip/unzip.c \
+	utils/zip/zip.c \
 	utils/CHTTPRequest.cpp \
 	utils/CTCPClientSocketImpl.cpp \
 	logic/CLogger.cpp \
@@ -202,4 +206,23 @@ libdeathmatch_la_SOURCES = \
 	logic/packets/CPacket.cpp \
 	logic/packets/CLuaPacket.cpp \
 	StdInc.cpp
+
+libdeathmatch_la_LIBADD = \
+	-lplatform \
+	-lsqlite3 \
+	-lehs \
+	-lpme \
+	-llua \
+	-ljson-c
+
+libdeathmatch_la_LDFLAGS = \
+	-Wl,-export-dynamic \
+	../../../libs/ASEQuerySDK.o \
+	-L../../sdk/ \
+	-L../../../vendor/json-c/ \
+	-L../../../vendor/ehs/ \ 
+	-L../../../vendor/pme/ \
+	-L../../../libs/ \
+	-L../../../libs/lua \
+	-L/usr/lib
 
