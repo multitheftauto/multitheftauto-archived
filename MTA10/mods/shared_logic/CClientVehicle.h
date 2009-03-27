@@ -167,11 +167,12 @@ public:
     void                        SetEngineOn             ( bool bEngineOn );
 
     bool                        CanBeDamaged            ( void );
-    void                        SetCanBeDamaged         ( bool bCanBeDamaged );
+    void                        CalcAndUpdateCanBeDamagedFlag     ( void );
     void                        SetScriptCanBeDamaged   ( bool bCanBeDamaged );
+    void                        SetSyncUnoccupiedDamage ( bool bCanBeDamaged );
 
     bool                        GetTyresCanBurst        ( void );
-    void                        SetTyresCanBurst        ( bool bTyresCanBurst );
+    void                        CalcAndUpdateTyresCanBurstFlag    ( void );
 
     float                       GetGasPedal             ( void );
 
@@ -244,16 +245,21 @@ public:
     void                        SetFrozen               ( bool bFrozen );
     void                        SetScriptFrozen         ( bool bFrozen )                    { m_bScriptFrozen = bFrozen; };
 
-    CClientVehicle*             GetPreviousTrainCarriage    ( void );
+    CClientVehicle*             GetPreviousTrainCarriage( void );
     CClientVehicle*             GetNextTrainCarriage    ( void );
-    void                        SetPreviousTrainCarriage    ( CClientVehicle* pPrevious );
+    void                        SetPreviousTrainCarriage( CClientVehicle* pPrevious );
     void                        SetNextTrainCarriage    ( CClientVehicle* pNext );
 
-    void                        SetTrainDerailed        ( bool bDerailed );
-    bool                        IsTrainDerailed         ( void );
+    bool                        IsDerailed              ( void );
+    void                        SetDerailed             ( bool bDerailed );
+    bool                        IsDerailable            ( void );
+    void                        SetDerailable           ( bool bDerailable );
 
-    void                        SetTrainDirection       ( int iDirection )                  { m_iTrainDirection = iDirection; };
-    int                         GetTrainDirection       ( void )                            { return m_iTrainDirection; };
+    bool                        GetTrainDirection       ( void );
+    void                        SetTrainDirection       ( bool bDirection );
+
+    float                       GetTrainSpeed           ( void );
+    void                        SetTrainSpeed           ( float fSpeed );
 
     inline unsigned char        GetOverrideLights       ( void )                            { return m_ucOverrideLights; }
     void                        SetOverrideLights       ( unsigned char ucOverrideLights );
@@ -332,6 +338,13 @@ public:
     void                        Create                  ( void );
     void                        Destroy                 ( void );
 
+    inline void                 AddProjectile           ( CClientProjectile * pProjectile )         { m_Projectiles.push_back ( pProjectile ); }
+    inline void                 RemoveProjectile        ( CClientProjectile * pProjectile )         { m_Projectiles.remove ( pProjectile ); }
+    std::list < CClientProjectile* > ::iterator ProjectilesBegin ( void )                               { return m_Projectiles.begin (); }
+    std::list < CClientProjectile* > ::iterator ProjectilesEnd   ( void )                               { return m_Projectiles.end (); }
+
+    void                        RemoveAllProjectiles    ( void );
+
 protected:
     void                        StreamIn                ( bool bInstantly );
     void                        StreamOut               ( void );
@@ -353,10 +366,10 @@ protected:
     unsigned char               m_ucMaxPassengers;
     bool                        m_bIsVirtualized;
     CVehicle*                   m_pVehicle;
-    CClientPed*         m_pDriver;
-    CClientPed*         m_pPassengers [8];
-    CClientPed*         m_pOccupyingDriver;
-    CClientPed*         m_pOccupyingPassengers [8];
+    CClientPed*                 m_pDriver;
+    CClientPed*                 m_pPassengers [8];
+    CClientPed*                 m_pOccupyingDriver;
+    CClientPed*                 m_pOccupyingPassengers [8];
 	RpClump*					m_pClump;
 	short						m_usRemoveTimer;
 
@@ -391,6 +404,7 @@ protected:
     bool                        m_bCanBeTargettedByHeatSeekingMissiles;
     bool                        m_bCanBeDamaged;
     bool                        m_bScriptCanBeDamaged;
+    bool                        m_bSyncUnoccupiedDamage;
     bool                        m_bTyresCanBurst;
     unsigned char               m_ucDoorStates [MAX_DOORS];
     unsigned char               m_ucWheelStates [MAX_WHEELS];
@@ -423,7 +437,9 @@ protected:
     bool                        m_bIsOnGround;
 
     bool                        m_bIsDerailed;
-    int                         m_iTrainDirection;
+    bool                        m_bIsDerailable;
+    bool                        m_bTrainDirection;
+    float                       m_fTrainSpeed;
 
     bool                        m_bInterpolationEnabled;
     double                      m_dResetInterpolationTime;
@@ -438,6 +454,8 @@ protected:
 
     bool                        m_bBlown;
     bool                        m_bHasDamageModel;
+
+    std::list < CClientProjectile* > m_Projectiles;
 
 public:
     CClientPlayer *             m_pLastSyncer;

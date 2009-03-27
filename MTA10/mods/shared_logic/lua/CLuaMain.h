@@ -28,7 +28,6 @@ class CLuaMain;
 #define MAX_SCRIPTNAME_LENGTH 64
 
 #include <list>
-using namespace std;
 
 class CSFXSynth;
 
@@ -42,7 +41,7 @@ public:
     };
 
 public:
-                                    CLuaMain                ( class CLuaManager* pLuaManager/*,
+                                    CLuaMain                ( class CLuaManager* pLuaManager, CResource* pResourceOwner /*,
                                                               CObjectManager* pObjectManager,
                                                               CPlayerManager* pPlayerManager,
                                                               CVehicleManager* pVehicleManager,
@@ -86,19 +85,12 @@ public:
     void                            ResetInstructionCount   ( void );
 
     inline class CResource*         GetResource             ( void )                        { return m_pResource; }
-    inline void                     SetResource             ( class CResource* pResource )
-    {
-        m_pResource = pResource;
-        UpdateGlobals ();
-    }
 
     CXMLFile *                      CreateXML               ( const char* szFilename );
     void                            DestroyXML              ( CXMLFile* pFile );
     void                            DestroyXML              ( CXMLNode* pRootNode );
     void                            SaveXML                 ( CXMLNode * pRootNode );
     bool                            XMLExists               ( CXMLFile* pFile );
-
-    void                            UpdateGlobals           ( void );
 
 private:
     void                            InitVM                  ( void );
@@ -118,7 +110,7 @@ private:
 
     class CResource*                m_pResource;
 
-    list < CXMLFile* >              m_XMLFiles;
+    std::list < CXMLFile* >         m_XMLFiles;
 
 	// Sound classes
 	CSFXSynth*						m_pSFXSynth;

@@ -16,7 +16,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 static int DummyPreCall ( lua_CFunction f, lua_State* L )
 {
@@ -70,10 +72,10 @@ void CLuaManager::StopScriptsOwnedBy ( int iOwner )
     }
 }
 
-CLuaMain * CLuaManager::CreateVirtualMachine ( void )
+CLuaMain * CLuaManager::CreateVirtualMachine ( CResource* pResourceOwner )
 {
     // Create it and add it to the list over VM's
-    CLuaMain * vm = new CLuaMain ( this );
+    CLuaMain * vm = new CLuaMain ( this, pResourceOwner );
     m_virtualMachines.push_back ( vm );
     return vm;
 }
@@ -335,6 +337,10 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setSoundMaxDistance", CLuaFunctionDefinitions::SetSoundMaxDistance );
     CLuaCFunctions::AddFunction ( "getSoundMaxDistance", CLuaFunctionDefinitions::GetSoundMaxDistance );
 
+    // Radio funcs
+    CLuaCFunctions::AddFunction ( "setRadioChannel", CLuaFunctionDefinitions::SetRadioChannel );
+    CLuaCFunctions::AddFunction ( "getRadioChannel", CLuaFunctionDefinitions::GetRadioChannel );
+
     // Player get funcs
     CLuaCFunctions::AddFunction ( "getLocalPlayer", CLuaFunctionDefinitions::GetLocalPlayer );
     CLuaCFunctions::AddFunction ( "getPlayerName", CLuaFunctionDefinitions::GetPlayerName );
@@ -448,6 +454,9 @@ void CLuaManager::LoadCFunctions ( void )
 	CLuaCFunctions::AddFunction ( "getHelicopterRotorSpeed", CLuaFunctionDefinitions::GetHelicopterRotorSpeed );
     CLuaCFunctions::AddFunction ( "getVehicleEngineState", CLuaFunctionDefinitions::GetVehicleEngineState );
     CLuaCFunctions::AddFunction ( "isTrainDerailed", CLuaFunctionDefinitions::IsTrainDerailed );
+    CLuaCFunctions::AddFunction ( "isTrainDerailable", CLuaFunctionDefinitions::IsTrainDerailable );
+    CLuaCFunctions::AddFunction ( "getTrainDirection", CLuaFunctionDefinitions::GetTrainDirection );
+    CLuaCFunctions::AddFunction ( "getTrainSpeed", CLuaFunctionDefinitions::GetTrainSpeed );
 
 
     // Vehicle set funcs
@@ -478,6 +487,9 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setVehicleAdjustableProperty", CLuaFunctionDefinitions::SetVehicleAdjustableProperty );
 	CLuaCFunctions::AddFunction ( "setHelicopterRotorSpeed", CLuaFunctionDefinitions::SetHelicopterRotorSpeed );
     CLuaCFunctions::AddFunction ( "setTrainDerailed", CLuaFunctionDefinitions::SetTrainDerailed );
+    CLuaCFunctions::AddFunction ( "setTrainDerailable", CLuaFunctionDefinitions::SetTrainDerailable );
+    CLuaCFunctions::AddFunction ( "setTrainDirection", CLuaFunctionDefinitions::SetTrainDirection );
+    CLuaCFunctions::AddFunction ( "setTrainSpeed", CLuaFunctionDefinitions::SetTrainSpeed );
 
 
     // Object create/destroy funcs
@@ -625,7 +637,9 @@ void CLuaManager::LoadCFunctions ( void )
 	CLuaCFunctions::AddFunction ( "guiCreateStaticImage", CLuaFunctionDefinitions::GUICreateStaticImage );
 
 	CLuaCFunctions::AddFunction ( "guiStaticImageLoadImage", CLuaFunctionDefinitions::GUIStaticImageLoadImage );
-	CLuaCFunctions::AddFunction ( "guiDeleteTab", CLuaFunctionDefinitions::GUIDeleteTab );
+    CLuaCFunctions::AddFunction ( "guiGetSelectedTab", CLuaFunctionDefinitions::GUIGetSelectedTab );
+    CLuaCFunctions::AddFunction ( "guiSetSelectedTab", CLuaFunctionDefinitions::GUISetSelectedTab );
+    CLuaCFunctions::AddFunction ( "guiDeleteTab", CLuaFunctionDefinitions::GUIDeleteTab );
 
 	CLuaCFunctions::AddFunction ( "guiGridListSetSortingEnabled", CLuaFunctionDefinitions::GUIGridListSetSortingEnabled );
 	CLuaCFunctions::AddFunction ( "guiGridListAddColumn", CLuaFunctionDefinitions::GUIGridListAddColumn );
@@ -644,6 +658,8 @@ void CLuaManager::LoadCFunctions ( void )
 	CLuaCFunctions::AddFunction ( "guiGridListGetItemData", CLuaFunctionDefinitions::GUIGridListGetItemData );
 	CLuaCFunctions::AddFunction ( "guiGridListSetSelectionMode", CLuaFunctionDefinitions::GUIGridListSetSelectionMode );
 	CLuaCFunctions::AddFunction ( "guiGridListGetSelectedItem", CLuaFunctionDefinitions::GUIGridListGetSelectedItem );
+	CLuaCFunctions::AddFunction ( "guiGridListGetSelectedItems", CLuaFunctionDefinitions::GUIGridListGetSelectedItems );
+	CLuaCFunctions::AddFunction ( "guiGridListGetSelectedCount", CLuaFunctionDefinitions::GUIGridListGetSelectedCount );
     CLuaCFunctions::AddFunction ( "guiGridListSetSelectedItem", CLuaFunctionDefinitions::GUIGridListSetSelectedItem );
 
 	CLuaCFunctions::AddFunction ( "guiScrollPaneSetScrollBars", CLuaFunctionDefinitions::GUIScrollPaneSetScrollBars );
@@ -817,6 +833,7 @@ void CLuaManager::LoadCFunctions ( void )
     // Weapon funcs
     CLuaCFunctions::AddFunction ( "getWeaponNameFromID", CLuaFunctionDefinitions::GetWeaponNameFromID );
     CLuaCFunctions::AddFunction ( "getWeaponIDFromName", CLuaFunctionDefinitions::GetWeaponIDFromName );
+    CLuaCFunctions::AddFunction ( "getSlotFromWeapon", CLuaFunctionDefinitions::GetSlotFromWeapon );
 
     // Command funcs
     CLuaCFunctions::AddFunction ( "addCommandHandler", CLuaFunctionDefinitions::AddCommandHandler );
@@ -842,6 +859,9 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "setVoiceInputEnabled", CLuaFunctionDefinitions::SetVoiceInputEnabled );
     CLuaCFunctions::AddFunction ( "setMuteAllEnabled", CLuaFunctionDefinitions::SetVoiceMuteAllEnabled );
 #endif
+
+    // Version functions
+    CLuaCFunctions::AddFunction ( "getVersion", CLuaFunctionDefinitions::GetVersion );
 
     // Luadef definitions
     CLuaFileDefs::LoadFunctions ();

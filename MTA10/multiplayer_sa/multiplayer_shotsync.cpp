@@ -24,6 +24,8 @@
 
 extern CMultiplayerSA* pMultiplayer;
 
+using std::list;
+
 list<CShotSyncData*>        ShotSyncData;
 CShotSyncData               LocalShotSyncData;
 
@@ -34,7 +36,7 @@ CPedSAInterface * pPedInterfaceTemp;
 CPed * pPedTemp;
 CPed * pLocalPedTemp;
 CVector * vecOrigin;
-CEntitySAInterface * pProjetileOwner = 0;
+CEntitySAInterface * pProjectileOwner = 0;
 eWeaponType projectileWeaponType =WEAPONTYPE_UNARMED;
 CVector * projectileOrigin = NULL;
 float projectileForce = 0.0f;
@@ -111,7 +113,7 @@ CShotSyncData * GetLocalPedShotSyncData ( )
 
 bool IsLocalPlayer ( CPed * pPed )
 {
-    CPed * pLocalPed = m_pools->GetPed ( 1 );
+    CPed * pLocalPed = m_pools->GetPedFromRef ( (DWORD)1 );
     return ( pPed == pLocalPed );
 }
 
@@ -184,10 +186,6 @@ VOID WriteTargetDataForPed ( CPedSAInterface * pPed, DWORD vecTargetPos, CVector
                 *(DWORD *)vecTargetPos = dwPointerToVector;
                 if ( data->m_shotSyncData.m_bUseOrigin )
                     *origin = data->m_shotSyncData.m_vecShotOrigin;
-				
-				char buf[1024] = {0};
-				_snprintf(buf,1023,"WriteTargetDataForPed, target(%.3f,%.3f,%.3f)", data->m_shotSyncData.m_vecShotTarget.fX,data->m_shotSyncData.m_vecShotTarget.fY,data->m_shotSyncData.m_vecShotTarget.fZ);
-				OutputDebugString(buf);
             }
         }
     }
@@ -789,26 +787,40 @@ bool ProcessProjectileAdd ()
 {
     if ( m_pProjectileStopHandler )
     {
-        CPoolsSA * pPools = (CPoolsSA*)pGameInterface->GetPools();
+        CPools * pPools = pGameInterface->GetPools ();
         CEntity * pOwner = NULL;
-        if ( pProjetileOwner )
+        if ( pProjectileOwner )
         {
-            if ( pProjetileOwner->nType == ENTITY_TYPE_VEHICLE )
-                pOwner = pPools->GetVehicle ( (CVehicleSAInterface *)pProjetileOwner );
-            else if ( pProjetileOwner->nType == ENTITY_TYPE_PED )
-                pOwner = pPools->GetPed ( (DWORD *)pProjetileOwner );
-            else if ( pProjetileOwner->nType == ENTITY_TYPE_OBJECT )
-                pOwner = NULL; //pPools->GetObject ( (DWORD *)event->inflictor );
+            switch ( pProjectileOwner->nType )
+            {
+                case ENTITY_TYPE_VEHICLE:
+                    pOwner = pPools->GetVehicle ( (DWORD *)pProjectileOwner );
+                    break;
+                case ENTITY_TYPE_PED:
+                    pOwner = pPools->GetPed ( (DWORD *)pProjectileOwner );
+                    break;
+                case ENTITY_TYPE_OBJECT:
+                    //pPools->GetObject ( (DWORD *)event->inflictor );
+                default:
+                    pOwner = NULL;
+            }
         }
     
         if ( projectileTargetEntityInterface )
         {
-            if ( projectileTargetEntityInterface->nType == ENTITY_TYPE_VEHICLE )
-                projectileTargetEntity = pPools->GetVehicle ( (CVehicleSAInterface *)projectileTargetEntityInterface );
-            else if ( projectileTargetEntityInterface->nType == ENTITY_TYPE_PED )
-                projectileTargetEntity = pPools->GetPed ( (DWORD *)projectileTargetEntityInterface );
-            else if ( projectileTargetEntityInterface->nType == ENTITY_TYPE_OBJECT )
-                projectileTargetEntity = NULL; //pPools->GetObject ( (DWORD *)event->inflictor );
+            switch ( projectileTargetEntityInterface->nType )
+            {
+                case ENTITY_TYPE_VEHICLE:
+                    projectileTargetEntity = pPools->GetVehicle ( (DWORD *)projectileTargetEntityInterface );
+                    break;
+                case ENTITY_TYPE_PED:
+                    projectileTargetEntity = pPools->GetPed ( (DWORD *)projectileTargetEntityInterface );
+                    break;
+                case ENTITY_TYPE_OBJECT:
+                    //pPools->GetObject ( (DWORD *)event->inflictor );
+                default:
+                    projectileTargetEntity = NULL;
+            }
         }
         return m_pProjectileStopHandler ( pOwner, projectileWeaponType, projectileOrigin, projectileForce, projectileTarget, projectileTargetEntity );
     }
@@ -821,14 +833,21 @@ void ProcessProjectile ( )
     {
         CPoolsSA * pPools = (CPoolsSA*)pGameInterface->GetPools();
         CEntity * pOwner = NULL;
-        if ( pProjetileOwner )
+        if ( pProjectileOwner )
         {
-            if ( pProjetileOwner->nType == ENTITY_TYPE_VEHICLE )
-                pOwner = pPools->GetVehicle ( (CVehicleSAInterface *)pProjetileOwner );
-            else if ( pProjetileOwner->nType == ENTITY_TYPE_PED )
-                pOwner = pPools->GetPed ( (DWORD *)pProjetileOwner );
-            else if ( pProjetileOwner->nType == ENTITY_TYPE_OBJECT )
-                pOwner = NULL; //pPools->GetObject ( (DWORD *)event->inflictor );
+            switch ( pProjectileOwner->nType )
+            {
+                case ENTITY_TYPE_VEHICLE:
+                    pOwner = pPools->GetVehicle ( (DWORD *)pProjectileOwner );
+                    break;
+                case ENTITY_TYPE_PED:
+                    pOwner = pPools->GetPed ( (DWORD *)pProjectileOwner );
+                    break;
+                case ENTITY_TYPE_OBJECT:
+                    //pPools->GetObject ( (DWORD *)event->inflictor );
+                default:
+                    pOwner = NULL;
+            }
         }
 
         CProjectileInfo * projectileInfo = pGameInterface->GetProjectileInfo()->GetProjectileInfo(dwProjectileInfoIndex);
@@ -846,7 +865,7 @@ void _declspec(naked) HOOK_CProjectileInfo__AddProjectile()
     _asm
     {
         mov     edx, [esp+4]
-        mov     pProjetileOwner, edx
+        mov     pProjectileOwner, edx
 
         mov     edx, [esp+8]
         mov     projectileWeaponType, edx

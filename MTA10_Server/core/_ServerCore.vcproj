@@ -22,12 +22,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk"
+				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk;../../vendor/sparsehash/current/src;../../vendor/sparsehash/current/src/windows"
 				PreprocessorDefinitions="WIN32;_DEBUG;MTA_DEBUG;MTA_SERVER"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/Core.pch"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="StdInc.h"
+				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
@@ -40,7 +41,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="wsock32.lib Imagehlp.lib"
 				OutputFile="..\output\core_d.dll"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="../dependencies"
 				IgnoreDefaultLibraryNames=""
@@ -86,19 +87,17 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk"
+				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk;../../vendor/sparsehash/current/src;../../vendor/sparsehash/current/src/windows"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;MTA_RELEASE;MTA_SERVER"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="FALSE"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile=".\Release/Core.pch"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="StdInc.h"
+				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
@@ -150,97 +149,29 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Beta|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk"
-				PreprocessorDefinitions="WIN32;MTA_BETA;MTA_SERVER"
-				StringPooling="TRUE"
-				RuntimeLibrary="4"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/Core.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="3"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="xml/lib/mxml.lib wsock32.lib Imagehlp.lib"
-				OutputFile="..\output\core.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../dependencies"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="C:/Symbols/Beta_ServerCore.pdb"
-				GenerateMapFile="TRUE"
-				MapFileName="C:/Symbols/Beta_ServerCore.map"
-				MapExports="TRUE"
-				MapLines="TRUE"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/Core.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
 			Name="Nightly|Win32"
 			OutputDirectory="..\..\obj\server\core"
 			IntermediateDirectory="..\..\obj\server\core"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			CharacterSet="2"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk"
+				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="../dependencies/mxml/include;../sdk;../../Shared/sdk;../../vendor/sparsehash/current/src;../../vendor/sparsehash/current/src/windows"
 				PreprocessorDefinitions="WIN32_LEAN_AND_MEAN;WIN32;MTA_RELEASE;MTA_SERVER"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/Core.pch"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="StdInc.h"
+				PrecompiledHeaderFile="$(IntDir)/$(TargetName).pch"
 				AssemblerListingLocation=""
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
@@ -322,6 +253,27 @@
 			<File
 				RelativePath=".\Server.cpp">
 			</File>
+			<File
+				RelativePath=".\StdInc.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Nightly|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+			</File>
 			<Filter
 				Name="sockets"
 				Filter="">
@@ -366,30 +318,12 @@
 			<File
 				RelativePath=".\ErrorCodes.h">
 			</File>
+			<File
+				RelativePath=".\StdInc.h">
+			</File>
 			<Filter
 				Name="server"
 				Filter="">
-				<File
-					RelativePath=".\server\CModManager.h">
-				</File>
-				<File
-					RelativePath=".\server\CServerBase.h">
-				</File>
-				<File
-					RelativePath=".\server\CServerInterface.h">
-				</File>
-				<File
-					RelativePath=".\server\CTCP.h">
-				</File>
-				<File
-					RelativePath=".\server\CTCPClientSocket.h">
-				</File>
-				<File
-					RelativePath=".\server\CTCPServerSocket.h">
-				</File>
-				<File
-					RelativePath=".\server\CTCPSocket.h">
-				</File>
 				<File
 					RelativePath=".\server\CXML.h">
 				</File>
@@ -427,6 +361,63 @@
 				<File
 					RelativePath=".\sockets\CTCPServerSocketImplManager.h">
 				</File>
+			</Filter>
+			<Filter
+				Name="sdk"
+				Filter="">
+				<File
+					RelativePath="..\sdk\Platform.h">
+				</File>
+				<Filter
+					Name="core"
+					Filter="">
+					<File
+						RelativePath="..\sdk\core\CModManager.h">
+					</File>
+					<File
+						RelativePath="..\sdk\core\CServerBase.h">
+					</File>
+					<File
+						RelativePath="..\sdk\core\CServerInterface.h">
+					</File>
+					<File
+						RelativePath="..\sdk\core\CTCP.h">
+					</File>
+					<File
+						RelativePath="..\sdk\core\CTCPClientSocket.h">
+					</File>
+					<File
+						RelativePath="..\sdk\core\CTCPServerSocket.h">
+					</File>
+					<File
+						RelativePath="..\sdk\core\CTCPSocket.h">
+					</File>
+				</Filter>
+				<Filter
+					Name="net"
+					Filter="">
+					<File
+						RelativePath="..\sdk\net\CLanBroadcastInterface.h">
+					</File>
+					<File
+						RelativePath="..\sdk\net\CNetHTTPDownloadManagerInterface.h">
+					</File>
+					<File
+						RelativePath="..\sdk\net\CNetServer.h">
+					</File>
+					<File
+						RelativePath="..\sdk\net\ns_bitstream.h">
+					</File>
+					<File
+						RelativePath="..\sdk\net\ns_common.h">
+					</File>
+					<File
+						RelativePath="..\sdk\net\ns_packetenums.h">
+					</File>
+					<File
+						RelativePath="..\sdk\net\ns_playerid.h">
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 	</Files>

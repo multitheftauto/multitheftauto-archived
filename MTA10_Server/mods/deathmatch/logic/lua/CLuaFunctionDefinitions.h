@@ -204,6 +204,9 @@ public:
     static int      IsVehicleOnGround                   ( lua_State* luaVM );
     static int      GetVehicleEngineState               ( lua_State* luaVM );
     static int      IsTrainDerailed                     ( lua_State* luaVM );
+    static int      IsTrainDerailable                   ( lua_State* luaVM );
+    static int      GetTrainDirection                   ( lua_State* luaVM );
+    static int      GetTrainSpeed                       ( lua_State* luaVM );
 
     // Vehicle set functions
     static int      FixVehicle                          ( lua_State* luaVM );
@@ -240,6 +243,9 @@ public:
     static int      SetVehicleFuelTankExplodable        ( lua_State* luaVM );
     static int      SetVehicleFrozen                    ( lua_State* luaVM );
     static int      SetTrainDerailed                    ( lua_State* luaVM );
+    static int      SetTrainDerailable                  ( lua_State* luaVM );
+    static int      SetTrainDirection                   ( lua_State* luaVM );
+    static int      SetTrainSpeed                       ( lua_State* luaVM );
 
     // Marker create/destroy functions
     static int      CreateMarker                        ( lua_State* luaVM );
@@ -332,6 +338,14 @@ public:
     static int      ToggleControl                       ( lua_State* luaVM );
     static int      ToggleAllControls                   ( lua_State* luaVM ); 
 
+    // Shape create funcs
+    static int      CreateColCircle                     ( lua_State* luaVM );
+    static int      CreateColCuboid                     ( lua_State* luaVM );
+    static int      CreateColSphere                     ( lua_State* luaVM );
+    static int      CreateColRectangle                  ( lua_State* luaVM );
+    static int      CreateColPolygon                    ( lua_State* luaVM );
+    static int      CreateColTube                       ( lua_State* luaVM );
+
     // Team get funcs
     static int      CreateTeam                          ( lua_State* luaVM );    
     static int      GetTeamFromName                     ( lua_State* luaVM );
@@ -345,15 +359,12 @@ public:
     static int      SetPlayerTeam                       ( lua_State* luaVM );
     static int      SetTeamName                         ( lua_State* luaVM );
     static int      SetTeamColor                        ( lua_State* luaVM );       
-    static int      SetTeamFriendlyFire                 ( lua_State* luaVM ); 
+    static int      SetTeamFriendlyFire                 ( lua_State* luaVM );
 
-    // Shape create funcs
-    static int      CreateColCircle                     ( lua_State* luaVM );
-    static int      CreateColCuboid                     ( lua_State* luaVM );
-    static int      CreateColSphere                     ( lua_State* luaVM );
-    static int      CreateColRectangle                  ( lua_State* luaVM );
-    static int      CreateColPolygon                    ( lua_State* luaVM );
-    static int      CreateColTube                       ( lua_State* luaVM );
+    // Water funcs
+    static int      CreateWater                         ( lua_State* luaVM );
+    static int      GetWaterVertexPosition              ( lua_State* luaVM );
+    static int      SetWaterVertexPosition              ( lua_State* luaVM );
 
     // Weapon funcs
     static int      GetWeaponNameFromID                 ( lua_State* luaVM );
@@ -429,7 +440,7 @@ public:
 	static int		GetAccount							( lua_State* luaVM );
     static int      GetAccounts                         ( lua_State* luaVM );
     static int      GetAccountName                      ( lua_State* luaVM );
-    static int      GetAccountClient                    ( lua_State* luaVM );
+    static int      GetAccountPlayer                    ( lua_State* luaVM );
     static int      IsGuestAccount                      ( lua_State* luaVM );
     static int      GetAccountData                      ( lua_State* luaVM );
 
@@ -480,6 +491,8 @@ public:
 	static int		Set									( lua_State* luaVM );
 
     static int      Md5                                 ( lua_State* luaVM );
+
+    static int      GetVersion                          ( lua_State* luaVM );
 };
 
 #endif

@@ -19,6 +19,8 @@
 
 #include "StdInc.h"
 
+using std::list;
+
 static CLuaManager*                                 m_pLuaManager;
 static CEvents*                                     m_pEvents;
 static CCoreInterface*                              m_pCore;
@@ -823,13 +825,22 @@ bool CStaticFunctionDefinitions::SetElementVelocity ( CClientEntity& Entity, con
 }
 
 
-bool CStaticFunctionDefinitions::SetElementParent ( CClientEntity& Entity, CClientEntity& Parent )
+bool CStaticFunctionDefinitions::SetElementParent ( CClientEntity& Entity, CClientEntity& Parent, CLuaMain* pLuaMain )
 {
-    // Only allow this for non-gui elements atm
-    if ( Entity.GetType () != CCLIENTGUI )
+    if ( &Entity != &Parent && !Entity.IsMyChild ( &Parent, true ) )
     {
-        // Make sure the new parent isn't the element and isn't a child of the entity
-        if ( &Entity != &Parent && !Entity.IsMyChild ( &Parent, true ) )
+        if ( Entity.GetType () == CCLIENTGUI )
+        {
+            if ( Parent.GetType () == CCLIENTGUI ||
+                 &Parent == pLuaMain->GetResource()->GetResourceGUIEntity() )
+            {
+                CClientGUIElement& GUIElement = static_cast < CClientGUIElement& > ( Entity );
+
+	            GUIElement.SetParent ( &Parent );
+                return true;
+            }
+        }
+        else
         {
 			CClientEntity* pTemp = &Parent;
 			CClientEntity* pRoot = m_pRootEntity;
@@ -935,8 +946,8 @@ bool CStaticFunctionDefinitions::AttachElements ( CClientEntity& Entity, CClient
             {
                 ConvertDegreesToRadians ( vecRotation );
 
-                Entity.AttachTo ( &AttachedToEntity );
                 Entity.SetAttachedOffsets ( vecPosition, vecRotation );
+                Entity.AttachTo ( &AttachedToEntity );
 
                 return true;
             }
@@ -1081,6 +1092,19 @@ bool CStaticFunctionDefinitions::SetElementModel ( CClientEntity& Entity, unsign
         }
         default: return false;
     }
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetRadioChannel ( unsigned char& ucChannel )
+{
+    return m_pPlayerManager->GetLocalPlayer ()->SetCurrentRadioChannel ( ucChannel );
+}
+
+
+bool CStaticFunctionDefinitions::GetRadioChannel ( unsigned char& ucChannel )
+{
+    ucChannel = m_pPlayerManager->GetLocalPlayer ()->GetCurrentRadioChannel ();
     return true;
 }
 
@@ -1846,12 +1870,44 @@ bool CStaticFunctionDefinitions::GetHelicopterRotorSpeed ( CClientVehicle& Vehic
 
 bool CStaticFunctionDefinitions::IsTrainDerailed ( CClientVehicle& Vehicle, bool& bDerailed )
 {
-    bDerailed = Vehicle.IsTrainDerailed ();
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+    bDerailed = Vehicle.IsDerailed ();
+	return true;
+}
+
+bool CStaticFunctionDefinitions::IsTrainDerailable ( CClientVehicle& Vehicle, bool& bIsDerailable )
+{
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+    bIsDerailable = Vehicle.IsDerailable ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetTrainDirection ( CClientVehicle& Vehicle, bool& bDirection )
+{
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+    bDirection = Vehicle.GetTrainDirection ();
 	return true;
 }
 
 
-CClientVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate, bool bDirection )
+bool CStaticFunctionDefinitions::GetTrainSpeed ( CClientVehicle& Vehicle, float& fSpeed )
+{
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+    fSpeed = Vehicle.GetTrainSpeed ();
+	return true;
+}
+
+
+CClientVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate )
 {
     if ( CClientVehicleManager::IsValidModel ( usModel ) )
     {      
@@ -1863,10 +1919,7 @@ CClientVehicle* CStaticFunctionDefinitions::CreateVehicle ( CResource& Resource,
 
             pVehicle->SetRotationDegrees ( vecRotation );
             if ( szRegPlate )
-                pVehicle->SetRegPlate ( const_cast < char * > ( szRegPlate ) );            
-
-            if ( pVehicle->GetVehicleType () == CLIENTVEHICLE_TRAIN )
-                pVehicle->SetTrainDirection ( ( bDirection ) ? 1 : 0 );
+                pVehicle->SetRegPlate ( const_cast < char * > ( szRegPlate ) );
 
             return pVehicle;
         }
@@ -2400,7 +2453,40 @@ bool CStaticFunctionDefinitions::SetHelicopterRotorSpeed ( CClientVehicle& Vehic
 
 bool CStaticFunctionDefinitions::SetTrainDerailed ( CClientVehicle& Vehicle, bool bDerailed )
 {
-	Vehicle.SetTrainDerailed ( bDerailed );
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+	Vehicle.SetDerailed ( bDerailed );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainDerailable ( CClientVehicle& Vehicle, bool bDerailable )
+{
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+	Vehicle.SetDerailable ( bDerailable );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainDirection ( CClientVehicle& Vehicle, bool bDirection )
+{
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+	Vehicle.SetTrainDirection ( bDirection );
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainSpeed ( CClientVehicle& Vehicle, float fSpeed )
+{
+    if ( Vehicle.GetVehicleType () != CLIENTVEHICLE_TRAIN )
+        return false;
+
+	Vehicle.SetTrainSpeed ( fSpeed );
     return true;
 }
 
@@ -3130,28 +3216,9 @@ bool CStaticFunctionDefinitions::SetCameraMatrix ( CVector & vecPosition, CVecto
 {
     CNetAPI* pNetAPI = m_pClientGame->GetNetAPI ();
 
-    bool bNotifyServer = false;
     if ( !m_pCamera->IsInFixedMode () )        
     {
         m_pCamera->ToggleCameraFixedMode ( true );
-        bNotifyServer = true;
-    }
-
-    if ( !bNotifyServer && pNetAPI->IsCameraSyncNeeded ( false ) ) bNotifyServer = true;
-
-    if ( bNotifyServer )
-    {
-        // Tell the server we're in fixed mode
-        NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream ();
-        if ( pBitStream )
-        {
-            // Write our data
-            pNetAPI->WriteCameraSync ( *pBitStream );
-
-            // Send the packet and destroy it (timestamped)
-            g_pNet->SendPacket ( PACKET_ID_CAMERA_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME, true );
-            g_pNet->DeallocateNetBitStream ( pBitStream );
-        }
     }
 
     // Put the camera there
@@ -3188,18 +3255,6 @@ bool CStaticFunctionDefinitions::SetCameraTarget ( CClientEntity * pEntity )
             break;
         }
         default: return false;
-    }
-
-    // Tell the server we're NOT in fixed mode
-    NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream ();
-    if ( pBitStream )
-    {
-        // Write our data
-        m_pClientGame->GetNetAPI ()->WriteCameraSync ( *pBitStream );
-
-        // Send the packet and destroy it (timestamped)
-        g_pNet->SendPacket ( PACKET_ID_CAMERA_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME, true );
-        g_pNet->DeallocateNetBitStream ( pBitStream );
     }
 
     return true;
@@ -3320,17 +3375,14 @@ CClientGUIElement* CStaticFunctionDefinitions::GUICreateStaticImage ( CLuaMain& 
 	// Check for a valid (and sane) file path
 	if ( szFile && IsValidFilePath ( szFile ) )
     {
-		// Get the correct directory
-		char szPath[MAX_PATH] = {0};
-       
+		// Get the correct directory       
         if ( !pResource )
             pResource = LuaMain.GetResource ();
 
-		snprintf ( szPath, MAX_PATH, "%s\\resources\\%s\\", m_pClientGame->GetModRoot (), pResource->GetName () );
-		szPath[MAX_PATH-1] = '\0';
+		SString strPath ( "%s\\resources\\%s\\", m_pClientGame->GetModRoot (), pResource->GetName () );
 
 		// Load the image
-		if ( !static_cast < CGUIStaticImage* > ( pElement ) -> LoadFromFile ( szFile, szPath ) ) {
+		if ( !static_cast < CGUIStaticImage* > ( pElement ) -> LoadFromFile ( szFile, strPath ) ) {
 			// If this fails, there's no reason to keep the widget (we don't have any IE-style "not found" icons yet)
 			// So delete it and reset the pointer, so we return NULL
 			delete pGUIElement;
@@ -3535,6 +3587,10 @@ CClientGUIElement* CStaticFunctionDefinitions::GUICreateTabPanel ( CLuaMain& Lua
 	CClientGUIElement *pGUIElement = new CClientGUIElement ( m_pManager, &LuaMain, pElement );
 	pGUIElement->SetParent ( pParent ? pParent : LuaMain.GetResource()->GetResourceGUIEntity()  );
 
+	// set events
+	pGUIElement->SetEvents ( "onClientGUITabSwitched" );
+	static_cast < CGUITabPanel* > ( pElement ) -> SetSelectionHandler ( pGUIElement->GetCallback1 () );
+
 	return pGUIElement;
 }
 
@@ -3563,6 +3619,42 @@ CClientGUIElement* CStaticFunctionDefinitions::GUICreateTab ( CLuaMain& LuaMain,
 	pGUIElement->SetParent ( pParent ? pParent : LuaMain.GetResource()->GetResourceGUIEntity()  );
 
 	return pGUIElement;
+}
+
+
+CClientGUIElement* CStaticFunctionDefinitions::GUIGetSelectedTab ( CClientEntity& Element )
+{
+    if ( IS_GUI ( &Element ) )
+    {
+        CClientGUIElement& GUIPanel = static_cast < CClientGUIElement& > ( Element );
+        if ( IS_CGUIELEMENT_TABPANEL ( &GUIPanel ) )
+        {
+            CGUITab* pTab = static_cast < CGUITabPanel* > ( GUIPanel.GetCGUIElement () )->GetSelectedTab ();
+            if ( pTab )
+            {
+                return m_pGUIManager->Get ( static_cast < CGUIElement* > ( pTab ) );
+            }
+        }
+    }
+
+    return NULL;
+}
+
+
+bool CStaticFunctionDefinitions::GUISetSelectedTab ( CClientEntity& Element, CClientEntity& Tab )
+{
+    if ( IS_GUI ( &Element ) && IS_GUI ( &Tab ) )
+    {
+        CClientGUIElement& GUIPanel = static_cast < CClientGUIElement& > ( Element );
+        CClientGUIElement& GUITab = static_cast < CClientGUIElement& > ( Tab );
+        if ( IS_CGUIELEMENT_TABPANEL ( &GUIPanel ) && IS_CGUIELEMENT_TAB ( &GUITab ) )
+        {
+            static_cast < CGUITabPanel* > ( GUIPanel.GetCGUIElement () )->SetSelectedTab ( static_cast < CGUITab* > ( GUITab.GetCGUIElement () ) );
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
@@ -4229,9 +4321,9 @@ CClientWater* CStaticFunctionDefinitions::CreateWater ( CResource& resource, CVe
 {
     CClientWater* pWater;
     if ( pV4 )
-        pWater = new CClientWater ( INVALID_ELEMENT_ID, *pV1, *pV2, *pV3, *pV4, bShallow );
+        pWater = new CClientWater ( g_pClientGame->GetManager (), INVALID_ELEMENT_ID, *pV1, *pV2, *pV3, *pV4, bShallow );
     else
-        pWater = new CClientWater ( INVALID_ELEMENT_ID, *pV1, *pV2, *pV3, bShallow );
+        pWater = new CClientWater ( g_pClientGame->GetManager (), INVALID_ELEMENT_ID, *pV1, *pV2, *pV3, bShallow );
     if ( !pWater->Valid () ) {
         delete pWater;
         return NULL;
@@ -4601,6 +4693,47 @@ bool CStaticFunctionDefinitions::BindKey ( const char* szKey, const char* szHitS
     return bSuccess;
 }
 
+bool CStaticFunctionDefinitions::BindKey ( const char* szKey, const char* szHitState, const char* szCommandName, const char* szArguments, const char* szResource )
+{
+    assert ( szKey );
+    assert ( szHitState );
+
+    bool bSuccess = false;
+
+    CKeyBindsInterface* pKeyBinds = g_pCore->GetKeyBinds ();
+    bool bKey = pKeyBinds->IsKey ( szKey );
+    if ( bKey )
+    {
+        bool bHitState = true;
+        //Check if its binded already (dont rebind)
+        if  ( pKeyBinds->CommandExists ( NULL, szCommandName, true, bHitState, szArguments ) )
+        {
+            pKeyBinds->SetCommandActive ( szCommandName, bHitState, szArguments, szResource, true, true );
+            return true;
+        }
+        if ( ( !stricmp ( szHitState, "down" ) || !stricmp ( szHitState, "both" ) ) &&
+             pKeyBinds->AddCommand ( szKey, szCommandName, szArguments, bHitState, szResource ) )
+        {
+            pKeyBinds->SetCommandActive ( szCommandName, bHitState, szArguments, szResource, true, true );
+            bSuccess = true;
+        }
+        bHitState = false;
+        if  ( pKeyBinds->CommandExists ( NULL, szCommandName, true, bHitState, szArguments ) )
+        {
+            pKeyBinds->SetCommandActive ( szCommandName, bHitState, szArguments, szResource, true, true );
+            return true;
+        }
+        if ( ( !stricmp ( szHitState, "up" ) || !stricmp ( szHitState, "both" ) ) &&
+             pKeyBinds->AddCommand ( szKey, szCommandName, szArguments, bHitState, szResource ) )
+        {
+            pKeyBinds->SetCommandActive ( szCommandName, bHitState, szArguments, szResource, true, true  );
+            bSuccess = true;
+        }
+    }
+    return bSuccess;
+}
+
+
 
 bool CStaticFunctionDefinitions::UnbindKey ( const char* szKey, CLuaMain* pLuaMain, const char* szHitState, int iLuaFunction )
 {
@@ -4645,6 +4778,43 @@ bool CStaticFunctionDefinitions::UnbindKey ( const char* szKey, CLuaMain* pLuaMa
     return false;
 }
 
+bool CStaticFunctionDefinitions::UnbindKey ( const char* szKey, const char* szHitState, const char* szCommandName, const char* szResource )
+{
+    assert ( szKey );
+    assert ( szHitState );
+
+    bool bSuccess = false;
+
+    CKeyBindsInterface* pKeyBinds = g_pCore->GetKeyBinds ();
+    bool bKey = pKeyBinds->IsKey ( szKey );
+    if ( bKey )
+    {
+        bool bCheckHitState = false, bHitState = true;
+        if ( szHitState )
+        {
+            if ( stricmp ( szHitState, "down" ) == 0 )
+            {
+                bCheckHitState = true, bHitState = true;
+            }
+            else if ( stricmp ( szHitState, "up" ) == 0 )
+            {
+                bCheckHitState = true, bHitState = false;
+            }
+        }
+        if ( ( !stricmp ( szHitState, "down" ) || !stricmp ( szHitState, "both" ) ) &&
+             pKeyBinds->SetCommandActive ( szCommandName, bHitState, NULL, szResource, false, true  ) )
+        {
+            bSuccess = true;
+        }
+        bHitState = false;
+        if ( ( !stricmp ( szHitState, "up" ) || !stricmp ( szHitState, "both" ) ) &&
+             pKeyBinds->SetCommandActive ( szCommandName, bHitState, NULL, szResource, false, true  ) )
+        {
+            bSuccess = true;
+        }
+    }
+    return bSuccess;
+}
 
 bool CStaticFunctionDefinitions::GetKeyState ( const char* szKey, bool& bState )
 {
@@ -4899,7 +5069,7 @@ bool CStaticFunctionDefinitions::GetWeaponIDFromName ( const char* szName, unsig
 
 bool CStaticFunctionDefinitions::GetTickCount_ ( double& dCount )
 {
-    dCount = ( double ) ( (long long)time ( NULL ) * 1000 + ( CClientTime::GetTime () % 1000 ) );
+    dCount = CClientTime::GetGameSeconds () * 1000.0;
     return true;
 }
 
@@ -5168,3 +5338,29 @@ bool CStaticFunctionDefinitions::SetVoiceMuteAllEnabled ( bool bEnabled )
 	return true;
 }
 #endif
+
+/** Version functions **/
+unsigned long CStaticFunctionDefinitions::GetVersion ()
+{
+    return MTA_DM_VERSION;
+}
+
+const char* CStaticFunctionDefinitions::GetVersionString ()
+{
+    return MTA_DM_VERSIONSTRING;
+}
+
+const char* CStaticFunctionDefinitions::GetVersionName ()
+{
+    return MTA_DM_FULL_STRING;
+}
+
+unsigned long CStaticFunctionDefinitions::GetNetcodeVersion ()
+{
+    return MTA_DM_NETCODE_VERSION;
+}
+
+const char* CStaticFunctionDefinitions::GetOperatingSystemName ()
+{
+    return MTA_OS_STRING;
+}

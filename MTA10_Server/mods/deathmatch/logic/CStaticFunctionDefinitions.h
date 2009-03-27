@@ -24,35 +24,6 @@ class CStaticFunctionDefinitions;
 #ifndef __CSTATICFUNCTIONDEFINITIONS_H
 #define __CSTATICFUNCTIONDEFINITIONS_H
 
-class CGame;
-struct CRegistryResult;
-class CElement;
-class CColCircle;
-class CColCuboid;
-class CColSphere;
-class CColRectangle;
-class CColTube;
-class CColShape;
-class CLuaArguments;
-class CLuaMain;
-class CMarker;
-class CPlayer;
-class CBlip;
-class CObject;
-class CPickup;
-class CRadarArea;
-class CResource;
-class CTeam;
-class CVector;
-class CVehicle;
-class CAccount;
-class CVector2D;
-class CXMLNode;
-class CLuaArgument;
-class CDummy;
-class CPed;
-class CClient;
-
 #ifndef NULL
 #define NULL 0
 #endif
@@ -264,6 +235,9 @@ public:
     static bool                 IsVehicleOnGround                   ( CVehicle* pVehicle, bool& bOnGround );
     static bool                 GetVehicleEngineState               ( CVehicle* pVehicle, bool& bState );
     static bool                 IsTrainDerailed                     ( CVehicle* pVehicle, bool& bDerailed );
+    static bool                 IsTrainDerailable                   ( CVehicle* pVehicle, bool& bDerailable );
+    static bool                 GetTrainDirection                   ( CVehicle* pVehicle, bool& bDirection );
+    static bool                 GetTrainSpeed                       ( CVehicle* pVehicle, float& fSpeed );
 
     // Vehicle set functions
     static bool                 FixVehicle                          ( CElement* pElement );
@@ -300,6 +274,9 @@ public:
     static bool                 SetVehicleFuelTankExplodable        ( CElement* pElement, bool bExplodable );
     static bool                 SetVehicleFrozen                    ( CVehicle* pVehicle, bool bFrozen );
     static bool                 SetTrainDerailed                    ( CVehicle* pVehicle, bool bDerailed );
+    static bool                 SetTrainDerailable                  ( CVehicle* pVehicle, bool bDerailable );
+    static bool                 SetTrainDirection                   ( CVehicle* pVehicle, bool bDireciton );
+    static bool                 SetTrainSpeed                       ( CVehicle* pVehicle, float fSpeed );
 
     // Marker create/destroy functions
     static CMarker*             CreateMarker                        ( CResource* pResource, const CVector& vecPosition, const char* szType, float fSize, unsigned char ucRed, unsigned char ucGreen, unsigned char ucBlue, unsigned char ucAlpha, CElement* pVisibleTo );
@@ -431,6 +408,11 @@ public:
     static bool                 SetPlayerTeam                       ( CPlayer* pPlayer, CTeam* pTeam );
     static bool                 SetTeamFriendlyFire                 ( CTeam* pTeam, bool bFriendlyFire );
 
+    // Water get funcs
+    static CWater*              CreateWater                         ( CResource* pResource, CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4 );
+    static bool                 GetWaterVertexPosition              ( CWater* pWater, int iVertexIndex, CVector& vecPosition );
+    static bool                 SetWaterVertexPosition              ( CWater* pWater, int iVertexIndex, CVector& vecPosition );
+
 	// Standard server functions
     static unsigned char        GetMaxPlayers                       ( void );
     static bool                 OutputChatBox                       ( const char* szText, CElement* pElement, unsigned char ucRed, unsigned char ucGreen, unsigned char ucBlue, bool bColorCoded );
@@ -485,7 +467,7 @@ public:
     // Account get funcs
     static CAccount*            GetAccount                          ( const char* szName, const char* szPassword );
     static bool                 GetAccounts                         ( CLuaMain* pLuaMain );
-    static CClient*             GetAccountClient                    ( CAccount* pAccount );
+    static CClient*             GetAccountPlayer                    ( CAccount* pAccount );
     static bool                 IsGuestAccount                      ( CAccount* pAccount, bool& bGuest );
     static CLuaArgument*        GetAccountData                      ( CAccount* pAccount, char* szKey );
     
@@ -536,6 +518,13 @@ public:
     static CXMLNode*            AddResourceMap                      ( CResource* pResource, const char* szMapName, int iDimension, CLuaMain* pLUA );
     static CXMLNode*            AddResourceConfig                   ( CResource* pResource, const char* szConfigName, int iType, CLuaMain* pLUA );
     static bool                 RemoveResourceFile                  ( CResource* pResource, const char* szFilename );
+
+    // Version funcs
+    static unsigned long        GetVersion                          ( );
+    static const char*          GetVersionString                    ( );
+    static const char*          GetVersionName                      ( );
+    static unsigned long        GetNetcodeVersion                   ( );
+    static const char*          GetOperatingSystemName              ( );
 };
 
 #endif

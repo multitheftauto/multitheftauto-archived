@@ -42,6 +42,7 @@ static CRegistry*                                   m_pRegistry;
 static CAccountManager*                             m_pAccountManager;
 static CBanManager*                                 m_pBanManager;
 static CPedManager*                                 m_pPedManager;
+static CWaterManager*                               m_pWaterManager;
 
 // Used to run a function on all the children of the elements too
 #define RUN_CHILDREN list<CElement*>::const_iterator iter=pElement->IterBegin();for(;iter!=pElement->IterEnd();iter++)
@@ -68,6 +69,7 @@ CStaticFunctionDefinitions::CStaticFunctionDefinitions ( CGame * pGame )
     m_pAccountManager = pGame->GetAccountManager ();
     m_pBanManager = pGame->GetBanManager ();
     m_pPedManager = pGame->GetPedManager ();
+    m_pWaterManager = pGame->GetWaterManager ();
 }
 
 
@@ -1166,8 +1168,8 @@ bool CStaticFunctionDefinitions::AttachElements ( CElement* pElement, CElement* 
             if ( pElement->IsAttachToable () && pAttachedToElement->IsAttachable () )
             {
                 ConvertDegreesToRadians ( vecRotation );
-                pElement->AttachTo ( pAttachedToElement );
                 pElement->SetAttachedOffsets ( vecPosition, vecRotation );
+                pElement->AttachTo ( pAttachedToElement );
 
                 CBitStream BitStream;
                 BitStream.pBitStream->Write ( pElement->GetID () );
@@ -3601,6 +3603,33 @@ bool CStaticFunctionDefinitions::IsTrainDerailed ( CVehicle* pVehicle, bool& bDe
     return true;
 }
 
+bool CStaticFunctionDefinitions::IsTrainDerailable ( CVehicle* pVehicle, bool& bDerailable )
+{
+    assert ( pVehicle );
+
+    bDerailable = pVehicle->IsDerailable ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetTrainDirection ( CVehicle* pVehicle, bool& bDirection )
+{
+    assert ( pVehicle );
+
+    bDirection = pVehicle->GetTrainDirection ();
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::GetTrainSpeed ( CVehicle* pVehicle, float& fSpeed )
+{
+    assert ( pVehicle );
+
+    const CVector& vecVelocity = pVehicle->GetVelocity ();
+    fSpeed = vecVelocity.Length ();
+    return true;
+}
+
 bool CStaticFunctionDefinitions::FixVehicle ( CElement* pElement )
 {
     assert ( pElement );
@@ -4510,12 +4539,60 @@ bool CStaticFunctionDefinitions::SetTrainDerailed ( CVehicle* pVehicle, bool bDe
 
     CBitStream BitStream;
     BitStream.pBitStream->Write ( pVehicle->GetID () );
-    if ( bDerailed )
-        BitStream.pBitStream->Write ( ( unsigned char ) 0 );
-    else
-        BitStream.pBitStream->Write ( ( unsigned char ) 1 );
+    BitStream.pBitStream->Write ( ( unsigned char ) ( bDerailed ? 1 : 0 ) );
 
     m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_TRAIN_DERAILED, *BitStream.pBitStream ) );
+
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainDerailable ( CVehicle* pVehicle, bool bDerailable )
+{
+    assert ( pVehicle );
+
+    pVehicle->SetDerailable ( bDerailable );
+
+    CBitStream BitStream;
+    BitStream.pBitStream->Write ( pVehicle->GetID () );
+    BitStream.pBitStream->Write ( ( unsigned char ) ( bDerailable ? 1 : 0 ) );
+
+    m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_TRAIN_DERAILABLE, *BitStream.pBitStream ) );
+
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainDirection ( CVehicle* pVehicle, bool bDirection )
+{
+    assert ( pVehicle );
+
+    pVehicle->SetTrainDirection ( bDirection );
+
+    CBitStream BitStream;
+    BitStream.pBitStream->Write ( pVehicle->GetID () );
+    BitStream.pBitStream->Write ( ( unsigned char ) ( bDirection ? 1 : 0 ) );
+
+    m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_TRAIN_DIRECTION, *BitStream.pBitStream ) );
+
+    return true;
+}
+
+
+bool CStaticFunctionDefinitions::SetTrainSpeed ( CVehicle* pVehicle, float fSpeed )
+{
+    assert ( pVehicle );
+
+    CVector vecVelocity = pVehicle->GetVelocity ();
+    vecVelocity.Normalize ();
+    vecVelocity *= fSpeed;
+    pVehicle->SetVelocity ( vecVelocity );
+
+    CBitStream BitStream;
+    BitStream.pBitStream->Write ( pVehicle->GetID () );
+    BitStream.pBitStream->Write ( fSpeed );
+
+    m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_TRAIN_SPEED, *BitStream.pBitStream ) );
 
     return true;
 }
@@ -5942,6 +6019,80 @@ bool CStaticFunctionDefinitions::SetTeamFriendlyFire ( CTeam* pTeam, bool bFrien
 }
 
 
+CWater* CStaticFunctionDefinitions::CreateWater ( CResource* pResource, CVector* pV1, CVector* pV2, CVector* pV3, CVector* pV4 )
+{
+    if ( !pV1 || !pV2 || !pV3 )
+        return NULL;
+
+    CWater* pWater = m_pWaterManager->Create ( pV4 ? CWater::QUAD : CWater::TRIANGLE,
+        pResource->GetDynamicElementRoot () );
+    
+    if ( pWater )
+    {
+        pWater->SetVertex ( 0, *pV1 );
+        pWater->SetVertex ( 1, *pV2 );
+        pWater->SetVertex ( 2, *pV3 );
+        if ( pWater->GetWaterType () == CWater::QUAD )
+            pWater->SetVertex ( 3, *pV4 );
+
+        if ( !pWater->Valid () )
+        {
+            delete pWater;
+            return NULL;
+        }
+
+		if ( pResource->HasStarted() )
+		{
+			CEntityAddPacket Packet;
+			Packet.Add ( pWater );
+			m_pPlayerManager->BroadcastOnlyJoined ( Packet );
+		}
+
+        return pWater;
+    }
+
+    return NULL;
+}
+
+
+bool CStaticFunctionDefinitions::GetWaterVertexPosition ( CWater* pWater, int iVertexIndex, CVector& vecPosition )
+{
+    iVertexIndex--;
+    if ( !pWater || iVertexIndex < 0 || iVertexIndex >= pWater->GetNumVertices () )
+        return false;
+
+    return pWater->GetVertex ( iVertexIndex, vecPosition );
+}
+
+
+bool CStaticFunctionDefinitions::SetWaterVertexPosition ( CWater* pWater, int iVertexIndex, CVector& vecPosition )
+{
+    iVertexIndex--;
+    if ( !pWater || iVertexIndex < 0 || iVertexIndex >= pWater->GetNumVertices () )
+        return false;
+
+    CVector vecOriginalPosition;
+    pWater->GetVertex ( iVertexIndex, vecOriginalPosition );
+    pWater->SetVertex ( iVertexIndex, vecPosition );
+    if ( pWater->Valid () )
+    {
+        CBitStream BitStream;
+        BitStream.pBitStream->Write ( pWater->GetID () );
+        BitStream.pBitStream->Write ( (unsigned char) iVertexIndex );
+        BitStream.pBitStream->Write ( (short) vecPosition.fX );
+        BitStream.pBitStream->Write ( (short) vecPosition.fY );
+        BitStream.pBitStream->Write ( vecPosition.fZ );
+        m_pPlayerManager->BroadcastOnlyJoined ( CLuaPacket ( SET_WATER_VERTEX_POSITION, *BitStream.pBitStream ) );
+        return true;
+    }
+    else
+    {
+        pWater->SetVertex ( iVertexIndex, vecOriginalPosition );
+        return false;
+    }
+}
+
+
 CColCircle* CStaticFunctionDefinitions::CreateColCircle ( CResource* pResource, const CVector& vecPosition, float fRadius )
 {
     //CColCircle * pColShape = new CColCircle ( m_pColManager, m_pMapManager->GetRootElement (), vecPosition, fRadius );
@@ -6681,7 +6832,7 @@ bool CStaticFunctionDefinitions::ExecuteSQLUpdate ( std::string strTable, std::s
 }
 
 
-CClient* CStaticFunctionDefinitions::GetAccountClient ( CAccount* pAccount )
+CClient* CStaticFunctionDefinitions::GetAccountPlayer ( CAccount* pAccount )
 {
     assert ( pAccount );
 
@@ -7456,4 +7607,31 @@ bool CStaticFunctionDefinitions::RemoveResourceFile ( CResource* pResource, cons
 
     // Failed
     return false;
+}
+
+
+/** Version functions **/
+unsigned long CStaticFunctionDefinitions::GetVersion ()
+{
+    return MTA_DM_VERSION;
+}
+
+const char* CStaticFunctionDefinitions::GetVersionString ()
+{
+    return MTA_DM_VERSIONSTRING;
+}
+
+const char* CStaticFunctionDefinitions::GetVersionName ()
+{
+    return MTA_DM_FULL_STRING;
+}
+
+unsigned long CStaticFunctionDefinitions::GetNetcodeVersion ()
+{
+    return MTA_DM_NETCODE_VERSION;
+}
+
+const char* CStaticFunctionDefinitions::GetOperatingSystemName ()
+{
+    return MTA_OS_STRING;
 }

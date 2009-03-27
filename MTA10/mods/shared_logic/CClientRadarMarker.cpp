@@ -15,7 +15,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using SharedUtil::CalcMTASAPath;
 
 CClientRadarMarker::CClientRadarMarker ( CClientManager* pManager, ElementID ID, short sOrdering, float fVisibleDistance ) : CClientEntity ( ID )
 {
@@ -201,10 +203,8 @@ void CClientRadarMarker::SetSprite ( unsigned long ulSprite )
 			m_pMapMarkerImage = NULL;
 		}
 
-	    char szSprite[256] = { '\0' };
-	    _snprintf ( szSprite, 256, "MTA\\cgui\\images\\radarset\\%02u.png", ulSprite );
-	    szSprite[255] = '\0';
-        m_pMapMarkerImage = g_pCore->GetGraphics()->LoadTexture ( szSprite );
+	    SString strSprite ( "MTA\\cgui\\images\\radarset\\%02u.png", ulSprite );
+        m_pMapMarkerImage = g_pCore->GetGraphics()->LoadTexture ( CalcMTASAPath ( strSprite ) );
 	}
 }
 

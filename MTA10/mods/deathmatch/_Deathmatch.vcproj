@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\..\Shared\publicsdk\include;..\..\Voice;.\;..\shared_logic;../../../Shared/XML/interface;../../dependencies;../../dependencies/lua/include;../../dependencies/zlib;../../sdk/;../../../Shared/sdk"
+				AdditionalIncludeDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\..\Shared\publicsdk\include;..\..\Voice;.\;..\shared_logic;../../../Shared/XML/interface;../../dependencies;../../dependencies/lua/include;../../dependencies/zlib;../../sdk/;../../../Shared/sdk;../../../vendor/sparsehash/current/src;../../../vendor/sparsehash/current/src/windows"
 				PreprocessorDefinitions="WIN32;_DEBUG;MTA_DEBUG;COMPILE_FOR_SA;MTA_SCRIPT_LOGGING"
 				MinimalRebuild="FALSE"
 				BasicRuntimeChecks="3"
@@ -44,8 +44,9 @@
 				ShowProgress="0"
 				OutputFile="C:\Program Files\MTA San Andreas\mods\deathmatch\Client_d.dll"
 				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\core\xml\lib;logic\xml\lib;..\..\dependencies\zlib;..\..\..\Shared\publicsdk\lib"
-				IgnoreDefaultLibraryNames=""
+				IgnoreDefaultLibraryNames="LIBCMT"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="C:\Program Files\MTA San Andreas\mods\deathmatch\Client_d.pdb"
 				SubSystem="2"
@@ -83,16 +84,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
-				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\..\Shared\publicsdk\include;..\..\Voice;.\;..\shared_logic;../../../Shared/XML/interface;../../dependencies;../../dependencies/lua/include;../../dependencies/zlib;../../sdk/;../../../Shared/sdk"
-				PreprocessorDefinitions="WIN32;MTA_RELEASE;MTARACE_EXPORTS;COMPILE_FOR_SA;SERIALS"
+				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\..\Shared\publicsdk\include;..\..\Voice;.\;..\shared_logic;../../../Shared/XML/interface;../../dependencies;../../dependencies/lua/include;../../dependencies/zlib;../../sdk/;../../../Shared/sdk;../../../vendor/sparsehash/current/src;../../../vendor/sparsehash/current/src/windows"
+				PreprocessorDefinitions="WIN32;MTA_RELEASE;COMPILE_FOR_SA;MTA_SCRIPT_LOGGING"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="FALSE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="StdInc.h"
@@ -108,9 +107,10 @@
 				AdditionalDependencies="libv2.lib lua5.1s.lib irrKlang.lib Psapi.lib Winmm.lib kernel32.lib wsock32.lib zlib.lib"
 				OutputFile="C:\Program Files\MTA San Andreas\mods\deathmatch\Client.dll"
 				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\core\xml\lib;logic\xml\lib;..\..\dependencies\zlib;..\..\..\Shared\publicsdk\lib"
 				IgnoreAllDefaultLibraries="FALSE"
-				IgnoreDefaultLibraryNames="LIBC.lib"
+				IgnoreDefaultLibraryNames="LIBCMT"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="C:/Symbols/Release_Deathmatch.pdb"
 				GenerateMapFile="TRUE"
@@ -154,16 +154,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
-				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\..\Shared\publicsdk\include;..\..\Voice;.\;..\shared_logic;../../../Shared/XML/interface;../../dependencies;../../dependencies/lua/include;../../dependencies/zlib;../../sdk/;../../../Shared/sdk"
-				PreprocessorDefinitions="WIN32;MTA_RELEASE;MTARACE_EXPORTS;COMPILE_FOR_SA;MTA_ENABLE_PACKETRECORD;MTA_SCRIPT_LOGGING"
+				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\..\Shared\publicsdk\include;..\..\Voice;.\;..\shared_logic;../../../Shared/XML/interface;../../dependencies;../../dependencies/lua/include;../../dependencies/zlib;../../sdk/;../../../Shared/sdk;../../../vendor/sparsehash/current/src;../../../vendor/sparsehash/current/src/windows"
+				PreprocessorDefinitions="WIN32;MTA_RELEASE;COMPILE_FOR_SA;MTA_SCRIPT_LOGGING"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
-				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="FALSE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="StdInc.h"
@@ -178,10 +176,11 @@
 				AdditionalOptions="/FIXED:NO"
 				AdditionalDependencies="libv2.lib lua5.1s.lib irrKlang.lib Psapi.lib Winmm.lib kernel32.lib wsock32.lib zlib.lib"
 				OutputFile="..\..\..\output\MTA San Andreas\mods\deathmatch\client.dll"
-				LinkIncremental="2"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dependencies\libv2;..\..\dependencies\irrklang;..\..\core\xml\lib;logic\xml\lib;..\..\dependencies\zlib;..\..\..\Shared\publicsdk\lib"
 				IgnoreAllDefaultLibraries="FALSE"
-				IgnoreDefaultLibraryNames=""
+				IgnoreDefaultLibraryNames="LIBCMT"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="C:/Symbols/Release_Deathmatch.pdb"
 				GenerateMapFile="TRUE"
@@ -445,6 +444,9 @@
 						RelativePath=".\logic\rpc\CVehicleRPCs.cpp">
 					</File>
 					<File
+						RelativePath=".\logic\rpc\CWaterRPCs.cpp">
+					</File>
+					<File
 						RelativePath=".\logic\rpc\CWeaponRPCs.cpp">
 					</File>
 					<File
@@ -676,6 +678,9 @@
 				</File>
 				<File
 					RelativePath="..\shared_logic\CClientWater.cpp">
+				</File>
+				<File
+					RelativePath="..\shared_logic\CClientWaterManager.cpp">
 				</File>
 				<File
 					RelativePath="..\shared_logic\CConfig.cpp">
@@ -1003,6 +1008,9 @@
 						RelativePath=".\logic\rpc\CVehicleRPCs.h">
 					</File>
 					<File
+						RelativePath=".\logic\rpc\CWaterRPCs.h">
+					</File>
+					<File
 						RelativePath=".\logic\rpc\CWeaponRPCs.h">
 					</File>
 					<File
@@ -1249,6 +1257,9 @@
 				</File>
 				<File
 					RelativePath="..\shared_logic\CClientWater.h">
+				</File>
+				<File
+					RelativePath="..\shared_logic\CClientWaterManager.h">
 				</File>
 				<File
 					RelativePath="..\shared_logic\CConfig.h">

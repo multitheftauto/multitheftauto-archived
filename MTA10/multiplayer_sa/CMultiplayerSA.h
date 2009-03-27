@@ -57,6 +57,7 @@ public:
     void                        SetFireHandler ( FireHandler * pFireHandler );
     void                        SetBreakTowLinkHandler ( BreakTowLinkHandler * pBreakTowLinkHandler );
     void                        SetProcessCamHandler ( ProcessCamHandler* pProcessCamHandler );
+    void                        SetGameProcessHandler ( GameProcessHandler* pProcessHandler );
 
     void                        AllowMouseMovement ( bool bAllow );
     void                        DoSoundHacksOnLostFocus ( bool bLostFocus );
@@ -132,12 +133,16 @@ private:
     static unsigned long        HOOKPOS_Trailer_BreakTowLink;
     static unsigned long        HOOKPOS_CRadar__DrawRadarGangOverlay;
     static unsigned long        HOOKPOS_CTaskComplexJump__CreateSubTask;
+    static unsigned long        HOOKPOS_CTrain_ProcessControl_Derail;
+    static unsigned long        HOOKPOS_CVehicle_Render;
+    static unsigned long        HOOKPOS_CObject_Render;
 
     static unsigned long        FUNC_CStreaming_Update;
     static unsigned long        FUNC_CAudioEngine__DisplayRadioStationName;
     static unsigned long        FUNC_CHud_Draw;
 
     static unsigned long        ADDR_CursorHiding;
+    static unsigned long        ADDR_GotFocus;
 
     static unsigned long        FUNC_CPlayerInfoBase;
 };

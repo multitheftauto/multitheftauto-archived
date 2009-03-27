@@ -196,7 +196,7 @@ float           GetRandomFloat              ( void );
 
 unsigned int    HashString                  ( const char* szString );
 
-void            GetDataUnit                 ( unsigned int uiInput, char* szOutput );
+SString         GetDataUnit                 ( unsigned int uiInput );
 
 unsigned int    HexToInt                    ( const char* szHex );
 bool            XMLColorToInt               ( const char* szColor, unsigned long& ulColor );
@@ -205,7 +205,10 @@ bool            XMLColorToInt               ( const char* szColor, unsigned char
 // Utility network functions
 void            LongToDottedIP              ( unsigned long ulIP, char* szDottedIP );
 
+bool            BitStreamReadUsString       ( class NetBitStreamInterface& bitStream, SString& strOut );
+
 void            MakeSureDirExists           ( const char* szPath );
+
 
 // for debug
 #ifdef MTA_DEBUG

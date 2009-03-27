@@ -10,9 +10,12 @@
 *
 *****************************************************************************/
 
+#include "StdInc.h"
 #ifdef WIN32
 #include "CThreadCommandQueue.h"
 #include "CModManagerImpl.h"
+
+using std::string;
 
 void CThreadCommandQueue::Add ( const char* szCommand )
 {

@@ -13,6 +13,8 @@
 
 #include "StdInc.h"
 
+using namespace std;
+
 CHTTPClient::CHTTPClient ( void )
 {
 	m_usPort = 0;
@@ -117,16 +119,15 @@ void CHTTPClient::OnConnect ( void* pSocketPtr, void* pClassPtr )
         pClass->m_strStatus = "connected to server";
 
         // Throw a HTTP request together
-		char szBuffer [2048];
+		SString strBuffer;
 		if ( pClass->m_usPort != 80 ) // when port isn't 80, the host: part should specify it (otherwise it MUST not)
-			snprintf ( szBuffer, 2047, "GET %s HTTP/1.0\r\nHost: %s:%d\r\nUser-Agent: MTASA_10\r\n\r\n", pClass->m_szPath, pClass->m_szHost, pClass->m_usPort );
+			strBuffer.Format ( "GET %s HTTP/1.0\r\nHost: %s:%d\r\nUser-Agent: MTASA_10\r\n\r\n", pClass->m_szPath, pClass->m_szHost, pClass->m_usPort );
 		else
-			snprintf ( szBuffer, 2047, "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: MTASA_10\r\n\r\n", pClass->m_szPath, pClass->m_szHost );
-		szBuffer [2047] = 0;
-		size_t sizeRequest = strlen ( szBuffer );
+            strBuffer.Format ( "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: MTASA_10\r\n\r\n", pClass->m_szPath, pClass->m_szHost );
+		size_t sizeRequest = strBuffer.length ();
 
 		// Write it to the TCP stream
-		pSocket->WriteBuffer ( szBuffer, sizeRequest );
+		pSocket->WriteBuffer ( strBuffer, sizeRequest );
 
 		OnRead ( pSocketPtr, pClassPtr );
 	}

@@ -11,7 +11,7 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
 
 CClient* g_pClient = NULL;
 

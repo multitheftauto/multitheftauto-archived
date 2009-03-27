@@ -421,6 +421,12 @@ BOOL CModelInfoSA::IsLoaded ( )
 		mov		bReturn, eax
 		pop		eax
 	}
+
+	// #4010 tracking
+	BYTE bReturnArray = *(BYTE *)(ARRAY_ModelLoaded + ((m_dwModelID + m_dwModelID * 4)*4));
+    if ( bReturnArray > 1 )
+        OutputDebugString ( SString( "CModelInfoSA::IsLoaded problem with model ID %d. ARRAY_ModelLoaded code:%d", m_dwModelID, bReturnArray ) );
+
     m_pInterface = ( bReturn ) ? m_pInterface = ppModelInfo [ m_dwModelID ] : NULL;
 	return bReturn;
 }
@@ -687,6 +693,10 @@ void CModelInfoSA::SetColModel ( CColModel* pColModel )
 	        DWORD pOldColModelInterface = (DWORD) m_pOriginalColModel;
 	        *((BYTE *)( pPool [m_dwModelID ] + 0x13 )) |= 8;
 	        *((BYTE *)( pColModelInterface + 40 )) = *((BYTE *)( pOldColModelInterface + 40 ));
+
+			// Extra flags (3064) -- needs to be tested
+			m_pInterface->bDoWeOwnTheColModel = false;
+			m_pInterface->bCollisionWasStreamedWithModel = false;
 
             // Call SetColModel
             DWORD dwFunc = FUNC_SetColModel;

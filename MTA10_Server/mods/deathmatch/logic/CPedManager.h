@@ -15,10 +15,6 @@ class CPedManager;
 #ifndef __CPedManager_H
 #define __CPedManager_H
 
-#include "lua/CLuaMain.h"
-#include <list>
-using namespace std;
-
 class CPedManager
 {
     friend class CPed;

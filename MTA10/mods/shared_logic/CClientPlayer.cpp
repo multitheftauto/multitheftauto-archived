@@ -30,7 +30,6 @@ CClientPlayer::CClientPlayer ( CClientManager* pManager, ElementID ID, bool bIsL
 
     m_szNick [ 0 ] = '\0';
 
-    m_ucAdminLevel = 0;
     m_usLatency = 0;
 
     m_uiPlayerSyncCount = 0;
@@ -40,7 +39,6 @@ CClientPlayer::CClientPlayer ( CClientManager* pManager, ElementID ID, bool bIsL
     m_ulLastPuresyncTime = 0;
     m_bHasConnectionTrouble = false;    
 
-    m_ulTimeStamp  = 0;
     m_bForce = false;
     m_bDoExtrapolatingAim = false;
 
@@ -86,6 +84,10 @@ CClientPlayer::CClientPlayer ( CClientManager* pManager, ElementID ID, bool bIsL
 
     // Add us to the player list
     m_pManager->GetPlayerManager ()->AddToList ( this );
+
+#ifdef MTA_DEBUG
+    m_bShowingWepdata = false;
+#endif
 }
 
 

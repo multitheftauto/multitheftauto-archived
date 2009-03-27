@@ -154,6 +154,9 @@ bool CEntityAddPacket::Write ( NetServerBitStreamInterface& BitStream ) const
                     // Object id
                     BitStream.Write ( pObject->GetModel () );
 
+                    // Alpha
+                    BitStream.Write ( pObject->GetAlpha() );
+
                     break;
                 }
 
@@ -286,7 +289,7 @@ bool CEntityAddPacket::Write ( NetServerBitStreamInterface& BitStream ) const
                     const char* cszRegPlate = pVehicle->GetRegPlate ();
                     BitStream.Write ( cszRegPlate, 8 );
 
-                    //
+                    // Light override
                     BitStream.Write ( pVehicle->GetOverrideLights () );
 
                     // Grab various vehicle flags
@@ -299,20 +302,24 @@ bool CEntityAddPacket::Write ( NetServerBitStreamInterface& BitStream ) const
                     bool bDamageProof = pVehicle->IsDamageProof ();
                     bool bFrozen = pVehicle->GetFrozen ();
                     bool bDerailed = pVehicle->IsDerailed ();
+                    bool bIsDerailable = pVehicle->IsDerailable ();
+                    bool bTrainDirection = pVehicle->GetTrainDirection ();
 
                     // Put them in a byte
                     unsigned short usFlags = 0;
-                    if ( bIsLandingGearDown ) usFlags |= 0x1;
-                    if ( bSireneActive ) usFlags |= 0x2;
-                    if ( bFuelTankExplodable ) usFlags |= 0x4;
-                    if ( bIsEngineOn ) usFlags |= 0x8;
-                    if ( bIsLocked ) usFlags |= 0x10;
-                    if ( bAreDoorsUndamageable ) usFlags |= 0x20;
-                    if ( bDamageProof ) usFlags |= 0x40;
-                    if ( bFrozen ) usFlags |= 0x80;
-                    if ( bDerailed ) usFlags |= 0x100;
+                    if ( bIsLandingGearDown )   usFlags |= 0x0001;
+                    if ( bSireneActive )        usFlags |= 0x0002;
+                    if ( bFuelTankExplodable )  usFlags |= 0x0004;
+                    if ( bIsEngineOn )          usFlags |= 0x0008;
+                    if ( bIsLocked )            usFlags |= 0x0010;
+                    if ( bAreDoorsUndamageable )usFlags |= 0x0020;
+                    if ( bDamageProof )         usFlags |= 0x0040;
+                    if ( bFrozen )              usFlags |= 0x0080;
+                    if ( bDerailed )            usFlags |= 0x0100;
+                    if ( bIsDerailable )        usFlags |= 0x0200;
+                    if ( bTrainDirection )      usFlags |= 0x0400;
 
-                    // Write the flagbyte
+                    // Write the flags
                     BitStream.Write ( usFlags );
 
                     // Write alpha
@@ -827,6 +834,22 @@ bool CEntityAddPacket::Write ( NetServerBitStreamInterface& BitStream ) const
                     }
 
                     // Done
+                    break;
+                }
+
+                case CElement::WATER:
+                {
+                    CWater* pWater = static_cast < CWater* > ( pElement );
+                    BYTE ucNumVertices = pWater->GetNumVertices ();
+                    BitStream.Write ( ucNumVertices );
+                    CVector vecVertex;
+                    for ( int i = 0; i < ucNumVertices; i++ )
+                    {
+                        pWater->GetVertex ( i, vecVertex );
+                        BitStream.Write ( (short)vecVertex.fX );
+                        BitStream.Write ( (short)vecVertex.fY );
+                        BitStream.Write ( vecVertex.fZ );
+                    }
                     break;
                 }
 

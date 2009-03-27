@@ -14,6 +14,8 @@
 #include <game/CGame.h>
 #include <shellapi.h>
 
+using SharedUtil::CalcMTASAPath;
+
 typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType,
 									CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
 									CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
@@ -29,26 +31,12 @@ CModManager::CModManager ( void )
     m_hClientDLL = NULL;
     m_pClientBase = NULL;
     m_bUnloadRequested = false;
-    m_szRequestedMod = NULL;
-    m_szRequestedModArguments = NULL;
 
     // Default mod name defaults to "default"
-    m_szDefaultModName = new char [ strlen ( "default" ) + 1 ];
-    strcpy ( m_szDefaultModName, "default" );
-
-    // Grab path to MTA installation folder
-    char szModsRoot[MAX_PATH + 10] = {'\0'};
-    memset ( szModsRoot, 0, MAX_PATH + 10 );
-    _snprintf ( szModsRoot, MAX_PATH, "%s\\mods", CCore::GetSingleton().GetInstallRoot() );
-    size_t sizeModsRoot = strlen ( szModsRoot );
-    if ( szModsRoot [sizeModsRoot - 1] != '/' &&
-         szModsRoot [sizeModsRoot - 1] != '\\' )
-    {
-        szModsRoot [sizeModsRoot] = '\\';
-    }
+    m_strDefaultModName = "default";
 
     // Load the modlist from the folders in "mta/mods"
-    InitializeModList ( szModsRoot );
+    InitializeModList ( CalcMTASAPath( "mods\\" ) );
 
     // Set up our exception handler
     #ifndef MTA_DEBUG
@@ -64,21 +52,6 @@ CModManager::~CModManager ( void )
     // Free up the modlist
     FreeModList ();
 
-    // Free our strings
-    if ( m_szDefaultModName )
-    {
-        delete [] m_szDefaultModName;
-    }
-
-    if ( m_szRequestedMod )
-    {
-        delete [] m_szRequestedMod;
-    }
-
-    if ( m_szRequestedModArguments )
-    {
-        delete [] m_szRequestedModArguments;
-    }
 }
 
 
@@ -94,22 +67,17 @@ void CModManager::RequestLoad ( const char* szModName, const char* szArguments )
     if ( szModName )
     {
         // Store it
-        m_szRequestedMod = new char [ strlen ( szModName ) + 1 ];
-        strcpy ( m_szRequestedMod, szModName );
+        m_strRequestedMod = szModName;
 
         // Arguments?
-        if ( szArguments )
-        {
-            m_szRequestedModArguments = new char [ strlen ( szArguments ) + 1 ];
-            strcpy ( m_szRequestedModArguments, szArguments );
-        }
+        m_strRequestedModArguments = szArguments ? szArguments : "";
     }
 }
 
 
 void CModManager::RequestLoadDefault ( const char* szArguments )
 {
-    RequestLoad ( m_szDefaultModName, szArguments );
+    RequestLoad ( m_strDefaultModName.c_str (), szArguments );
 }
 
 
@@ -123,18 +91,10 @@ void CModManager::RequestUnload ( void )
 void CModManager::ClearRequest ( void )
 {
     // Free the old mod name
-    if ( m_szRequestedMod )
-    {
-        delete [] m_szRequestedMod;
-        m_szRequestedMod = NULL;
-    }
+    m_strRequestedMod = "";
 
     // Free the old mod arguments
-    if ( m_szRequestedModArguments )
-    {
-        delete [] m_szRequestedModArguments;
-        m_szRequestedModArguments = NULL;
-    }
+    m_strRequestedModArguments = "";
 
     // No unload requested now
     m_bUnloadRequested = false;
@@ -150,7 +110,7 @@ bool CModManager::IsLoaded ( void )
 CClientBase* CModManager::Load ( const char* szName, const char* szArguments )
 {
     char szOriginalDirectory[255] = {'\0'};
-    char szMTADirectory[255] = {'\0'};
+    SString strMTADirectory;
 
     // Make sure we haven't already loaded a mod
     Unload ();
@@ -165,8 +125,8 @@ CClientBase* CModManager::Load ( const char* szName, const char* szArguments )
 
     // Change the current directory
     GetCurrentDirectory ( 255, szOriginalDirectory );
-    _snprintf ( szMTADirectory, 255, "%s\\mta", szOriginalDirectory );
-    SetCurrentDirectory ( szMTADirectory );
+    strMTADirectory = CalcMTASAPath ( "mta" );
+    SetCurrentDirectory ( strMTADirectory );
     
     // Load the library
     m_hClientDLL = LoadLibrary ( pMod->szClientDLLPath );
@@ -267,6 +227,11 @@ void CModManager::Unload ( void )
         CCore::GetSingleton ().SetConnected ( false );
         CLocalGUI::GetSingleton ().GetMainMenu ()->SetIsIngame ( false );
         CLocalGUI::GetSingleton ().GetMainMenu ()->SetVisible ( true, false );
+
+        if ( XfireIsLoaded () )
+        {
+            XfireSetCustomGameData ( 0, NULL, NULL ); 
+        }
     }
 }
 
@@ -289,9 +254,9 @@ void CModManager::DoPulsePostFrame ( void )
         Unload ();
 
         // Load a new mod?
-        if ( m_szRequestedMod )
+        if ( m_strRequestedMod != "" )
         {
-            Load ( m_szRequestedMod, m_szRequestedModArguments );
+            Load ( m_strRequestedMod, m_strRequestedModArguments );
         }
 
         // Clear the request
@@ -311,9 +276,9 @@ void CModManager::DoPulsePostFrame ( void )
         Unload ();
 
         // Load a new mod?
-        if ( m_szRequestedMod )
+        if ( m_strRequestedMod != "" )
         {
-            Load ( m_szRequestedMod, m_szRequestedModArguments );
+            Load ( m_strRequestedMod, m_strRequestedModArguments );
         }
 
         // Clear the request
@@ -352,9 +317,7 @@ void CModManager::RefreshMods ( void )
 {
     // Clear the list, and load it again
     Clear ();
-    char szModsRoot[MAX_PATH] = {'\0'};
-    _snprintf ( szModsRoot, MAX_PATH, "%s\\mods", CCore::GetSingleton().GetInstallRoot() );
-    InitializeModList ( szModsRoot );
+    InitializeModList ( CalcMTASAPath( "mods\\" ) );
 }
 
 
@@ -418,7 +381,7 @@ long WINAPI CModManager::HandleExceptionGlobal ( _EXCEPTION_POINTERS* pException
 void CModManager::DumpCoreLog ( CExceptionInformation* pExceptionInformation )
 {
     // Write a log with the generic exception information
-    FILE* pFile = fopen ( "mta\\core.log", "a+" );
+    FILE* pFile = fopen ( CalcMTASAPath ( "mta\\core.log" ), "a+" );
     if ( pFile )
     {
         // Header
@@ -506,7 +469,7 @@ void CModManager::DumpMiniDump ( _EXCEPTION_POINTERS* pException )
 		if ( pDump )
 		{
 			// Create the file
-			HANDLE hFile = CreateFile ( "mta\\core.dmp", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+			HANDLE hFile = CreateFile ( CalcMTASAPath ( "mta\\core.dmp" ), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
             if ( hFile != INVALID_HANDLE_VALUE )
             {
                 // Create an exception information struct
@@ -527,18 +490,17 @@ void CModManager::DumpMiniDump ( _EXCEPTION_POINTERS* pException )
                 GetLocalTime ( &SystemTime );
 
                 // Create the dump directory
-                CreateDirectory ( "mta\\dumps", 0 );
+                CreateDirectory ( CalcMTASAPath ( "mta\\dumps" ), 0 );
 
                 // Add a log entry.
-                char szFilename [256];
-                sprintf ( szFilename, "mta\\dumps\\client_%02d%02d%04d_%02d%02d.dmp", SystemTime.wMonth,
+                SString strFilename ( "mta\\dumps\\client_%02d%02d%04d_%02d%02d.dmp", SystemTime.wMonth,
                                                                                       SystemTime.wDay,
                                                                                       SystemTime.wYear,
                                                                                       SystemTime.wHour,
                                                                                       SystemTime.wMinute );
 
                 // Copy the file
-                CopyFile ( "mta\\core.dmp", szFilename, false );
+                CopyFile ( CalcMTASAPath ( "mta\\core.dmp" ), CalcMTASAPath ( strFilename ), false );
 			}
 		}
 
@@ -549,9 +511,10 @@ void CModManager::DumpMiniDump ( _EXCEPTION_POINTERS* pException )
 
 void CModManager::RunErrorTool ( CExceptionInformation* pExceptionInformation )
 {
+// MTA Error Reporter is not currently used
+#if 0 
     // Populate arguments for the error reporter
-    char szBuffer [512];
-    _snprintf ( szBuffer, 512, "0x%08X", pExceptionInformation->GetOffset () );
+    SString strBuffer = SString::Printf ( "0x%08X", pExceptionInformation->GetOffset () );
     
     // Grab the GTA install path
     HKEY hkey = NULL;
@@ -582,12 +545,13 @@ void CModManager::RunErrorTool ( CExceptionInformation* pExceptionInformation )
         strcat ( szGTASARoot, "\\MTA Error Reporter.exe" );
 
         // Launch the error reporter
-        ShellExecute ( 0, "open", szGTASARoot, szBuffer, szMTASARoot, 1 );
+        ShellExecute ( 0, "open", szGTASARoot, strBuffer, szMTASARoot, 1 );
     }
     else
     {
-        ShellExecute ( 0, "open", "MTA Error Reporter.exe", szBuffer, "mta", 1 );
+        ShellExecute ( 0, "open", "MTA Error Reporter.exe", strBuffer, "mta", 1 );
     }
+#endif
 }
 
 
@@ -598,19 +562,14 @@ void CModManager::InitializeModList ( const char* szModFolderPath )
     HANDLE hFind;
 
     // Allocate a string with length of path + 5 letters to store searchpath plus "\*.*"
-    size_t sizeWildchars = strlen ( szModFolderPath ) + 10;
-    char* szPathWildchars = new char [ sizeWildchars ];
-    _snprintf ( szPathWildchars, sizeWildchars, "%s*.*", szModFolderPath );
+    SString strPathWildchars ( "%s*.*", szModFolderPath );
 
     // Set the working directory to the MTA folder
     CFilePathTranslator pFilePathTranslator;
     pFilePathTranslator.SetCurrentWorkingDirectory ( "mta" );
 
     // Create a search
-    hFind = FindFirstFile ( szPathWildchars, &FindData );
-
-    // Free the searchstring
-    delete [] szPathWildchars;
+    hFind = FindFirstFile ( strPathWildchars, &FindData );
 
     // If we found a first file ...
     if ( hFind != INVALID_HANDLE_VALUE )
@@ -651,21 +610,17 @@ void CModManager::VerifyAndAddEntry ( const char* szModFolderPath, const char* s
          ( stricmp ( szName, "race" ) != 0 ) )
     {
         // Put together a modpath string and a MTA-relative path to Client(_d).dll
-        char* szModPath = new char [ strlen ( szModFolderPath) + strlen ( szName ) + 64 ];
-        sprintf ( szModPath, "%s%s", szModFolderPath, szName );
-        
-        char* szClientDLL = new char [ strlen ( szModPath ) + 32 ];
-        sprintf ( szClientDLL, "%s\\%s", szModPath, CMODMANAGER_CLIENTDLL );
+        SString strClientDLL ( "%s%s\\%s", szModFolderPath, szName, CMODMANAGER_CLIENTDLL );
 
         // Attempt to load the primary client DLL
-        HMODULE hDLL = LoadLibrary ( szClientDLL );
+        HMODULE hDLL = LoadLibrary ( strClientDLL );
         if (hDLL != 0)
         {
             // Check if InitClient symbol exists
             if ( GetProcAddress ( hDLL, "InitClient" ) != NULL )
             {
                 // Add it to the list
-                AddEntry ( szName, szClientDLL );
+                AddEntry ( szName, strClientDLL );
             }
             else
             {
@@ -679,10 +634,6 @@ void CModManager::VerifyAndAddEntry ( const char* szModFolderPath, const char* s
         {
             CLogger::GetSingleton ().ErrorPrintf ( "Invalid mod DLL: %s (reason: %d)", szName, GetLastError() );
         }
-
-		// Free the strings
-        delete [] szClientDLL;
-        delete [] szModPath;
     }
 }
 

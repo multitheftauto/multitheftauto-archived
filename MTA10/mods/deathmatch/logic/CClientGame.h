@@ -110,6 +110,7 @@ public:
         COLSHAPE,
         SCRIPTFILE,
         HANDLING,
+        WATER,
         UNKNOWN,
     };
 
@@ -186,9 +187,11 @@ public:
     bool                                StartLocalGame                  ( const char* szConfig, const char* szPassword = NULL );
     void                                SetupLocalGame                  ( const char* szConfig );
     //bool                                StartGame                       ( void );
+    inline bool                         IsLocalGame                     ( ) const { return m_bLocalPlay; }
 
     void                                DoPulsePreFrame                 ( void );
     void                                DoPulsePostFrame                ( void );
+    void                                DoPulses                        ( void );
 
     void                                HandleException                 ( CExceptionInformation* pExceptionInformation );
     static void                         HandleRadioNext                 ( CControlFunctionBind* );
@@ -250,7 +253,12 @@ public:
     inline void                         ShowSyncingInfo                 ( bool bShow )  { m_bShowSyncingInfo = bShow; };
     #endif
 
+#ifdef MTA_WEPSYNCDBG
+    void                                ShowWepdata                     ( const char* szNick );
+#endif
+
     #ifdef MTA_DEBUG
+    void                                ShowWepdata                     ( const char* szNick );
     void								ShowTasks                       ( const char* szNick );
     void                                ShowPlayer                      ( const char* szNick );
     void                                SetMimic                        ( unsigned int uiMimicCount );
@@ -295,7 +303,7 @@ public:
 
     void                                AddBuiltInEvents                ( void );
 
-	inline const char*					GetModRoot						( void )						{ return m_szModRoot; };
+	inline const char*					GetModRoot						( void )						{ return m_strModRoot; };
 
     void                                SetGameSpeed                    ( float fSpeed );
 	void								SetMinuteDuration				( unsigned long ulDelay );
@@ -358,7 +366,13 @@ private:
     void                                DrawPlayerDetails               ( CClientPlayer* pPlayer );
     void                                UpdateMimics                    ( void );
     void                                DoPaintballs                    ( void );
+    void                                DrawWeaponsyncData              ( CClientPlayer* pPlayer );
     #endif
+
+    #ifdef MTA_WEPSYNCDBG
+    void                                DrawWeaponsyncData              ( CClientPlayer* pPlayer );
+    #endif
+
 
 	void								DownloadFiles					( void );
 
@@ -375,19 +389,22 @@ private:
     static void                         StaticDrawRadarAreasHandler     ( void );
     static void                         StaticProjectileInitiateHandler ( CClientProjectile * pProjectile );
     static void                         StaticRender3DStuffHandler      ( void );
+    static void                         StaticGameProcessHandler        ( void );
+
     bool                                DamageHandler                   ( CPed* pDamagePed, CEventDamage * pEvent );
     void                                FireHandler                     ( CFire* pFire );
     bool                                BreakTowLinkHandler             ( CVehicle* pTowedVehicle );
     void                                DrawRadarAreasHandler           ( void );
     void                                ProjectileInitiateHandler       ( CClientProjectile * pProjectile );
     void                                Render3DStuffHandler            ( void );
+    void                                GameProcessHandler              ( void );
 
     static bool                         StaticProcessMessage            ( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
     bool                                ProcessMessage                  ( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
     static void                         PreWeaponFire                   ( CPlayerPed* pPlayerPed );
     static void                         PostWeaponFire                  ( void );
-    static bool                         StaticProcessPacket             ( unsigned char ucPacketID, NetBitStreamInterface& bitStream, unsigned long ulTimeStamp );
+    static bool                         StaticProcessPacket             ( unsigned char ucPacketID, NetBitStreamInterface& bitStream );
 
 public:
     void                                SendExplosionSync               ( const CVector& vecPosition, eExplosionType Type, CClientEntity * pOrigin = NULL );
@@ -461,7 +478,7 @@ private:
 
     // Map statuses
     char                                m_szCurrentMapName [MAX_MAPNAME_LENGTH + 1];
-    char                                m_szModRoot [MAX_PATH];
+    SString                             m_strModRoot;
 
     CBlendedWeather*                    m_pBlendedWeather;
     bool                                m_bShowNametags;
@@ -518,7 +535,7 @@ private:
 
     eHTTPDownloadType                   m_ucHTTPDownloadType;
     unsigned short                      m_usHTTPDownloadPort;
-    char                                m_szHTTPDownloadURL [MAX_HTTP_DOWNLOAD_URL + 1];
+    SString                             m_strHTTPDownloadURL;
 
     #if defined (MTA_DEBUG) || defined (MTA_BETA)
     bool                                m_bShowSyncingInfo;
@@ -527,7 +544,7 @@ private:
     #ifdef MTA_DEBUG
 	CClientPlayer*                      m_pShowPlayerTasks;
     CClientPlayer*                      m_pShowPlayer;
-    list < CClientPlayer* >             m_Mimics;
+    std::list < CClientPlayer* >        m_Mimics;
     bool                                m_bMimicLag;
     unsigned long                       m_ulLastMimicLag;
 	CVector								m_vecLastMimicPos;

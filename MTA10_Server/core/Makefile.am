@@ -5,6 +5,7 @@ lib_LTLIBRARIES = \
 	libcore.la
 
 libcore_la_SOURCES = \
+	StdInc.cpp \
 	CCrashHandlerAPI.cpp \
 	CCrashHandlerAPI.h \
 	CCrashHandler.cpp \

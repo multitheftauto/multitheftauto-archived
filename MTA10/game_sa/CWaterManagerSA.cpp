@@ -12,6 +12,8 @@
 
 #include "StdInc.h"
 
+using namespace std;
+
 #define POLYENTRY_TYPE(entry) ( (entry)->m_wValue >> 14 )
 #define POLYENTRY_ID(entry) ( (entry)->m_wValue & 0x3FFF )
 #define MAKE_POLYENTRY(type, id) (WORD)( ((type) << 14) | (id) )
@@ -480,7 +482,7 @@ void CWaterManagerSA::GetZonesContaining ( CVector& v1, CVector& v2, CVector& v3
 CWaterVertex* CWaterManagerSA::CreateVertex ( CVector& vecPosition )
 {
     WORD wID = ( (CreateWaterVertex_t) FUNC_CreateWaterVertex )( ((short)vecPosition.fX) & ~1, ((short)vecPosition.fY) & ~1, vecPosition.fZ, 0.2f, 0.1f, 0 );
-    if ( wID + 1 > m_Vertices.size () )
+    if ( wID + 1 > static_cast < WORD > ( m_Vertices.size () ) )
     {
         m_Vertices.resize ( wID + 1 );
         m_Vertices [ wID ].SetInterface ( &m_VertexPool [ wID ] );
@@ -773,7 +775,7 @@ void CWaterManagerSA::RebuildIndex ()
 {
     memset ( (void *)ARRAY_WaterZones, 0, NUM_WaterZones * sizeof ( CWaterPolyEntrySAInterface ) );
     *(DWORD *)VAR_NumWaterZonePolys = 0;
-    ((BuildWaterIndex_t)FUNC_BuildWaterIndex) ();
+    ( (BuildWaterIndex_t) FUNC_BuildWaterIndex ) ();
 }
 
 void CWaterManagerSA::Reset ()
@@ -790,15 +792,15 @@ void CWaterManagerSA::Reset ()
         m_Zones [ i ].SetInterface ( &((CWaterPolyEntrySAInterface *)ARRAY_WaterZones) [ i ] );
 
     m_Vertices.resize ( NUM_DefWaterVertices );
-    for ( i = 0; i < NUM_DefWaterVertices; i++ )
+    for ( DWORD i = 0; i < NUM_DefWaterVertices; i++ )
         m_Vertices [ i ].SetInterface ( &m_VertexPool [ i ] );
 
     m_Quads.resize ( NUM_DefWaterQuads );
-    for ( i = 0; i < NUM_DefWaterQuads; i++ )
+    for ( DWORD i = 0; i < NUM_DefWaterQuads; i++ )
         m_Quads [ i ].SetInterface ( &m_QuadPool [ i ] );
 
     m_Triangles.resize ( NUM_DefWaterTriangles );
-    for ( i = 0; i < NUM_DefWaterTriangles; i++ )
+    for ( DWORD i = 0; i < NUM_DefWaterTriangles; i++ )
         m_Triangles [ i ].SetInterface ( &m_TrianglePool [ i ] );
 
     SetWaveLevel ( DEFAULT_WAVE_LEVEL );

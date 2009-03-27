@@ -15,7 +15,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using namespace std;
 
 #ifndef VERIFY_ENTITY
 #define VERIFY_ENTITY(entity) (CStaticFunctionDefinitions::GetRootElement()->IsMyChild(entity,true)&&!entity->IsBeingDeleted())
@@ -316,6 +318,15 @@ CLuaArgument* CLuaArguments::PushElement ( CClientEntity* pElement )
 CLuaArgument* CLuaArguments::PushArgument ( CLuaArgument& Argument )
 {
     CLuaArgument* pArgument = new CLuaArgument ( Argument );
+    m_Arguments.push_back ( pArgument );
+    return pArgument;
+}
+
+
+CLuaArgument* CLuaArguments::PushTable ( CLuaArguments * table )
+{
+    CLuaArgument* pArgument = new CLuaArgument (  );
+    pArgument->Read(table);
     m_Arguments.push_back ( pArgument );
     return pArgument;
 }

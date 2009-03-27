@@ -12,6 +12,8 @@
 
 #include "StdInc.h"
 
+using std::list;
+
 CXMLNodeImpl::CXMLNodeImpl ( CXMLFileImpl* pFile, CXMLNodeImpl* pParent, TiXmlElement& Node ) :
     m_pNode ( &Node ),
     m_Attributes ( Node )
@@ -321,7 +323,7 @@ void CXMLNodeImpl::SetTagContentf ( const char* szFormat, ... )
     char szBuffer [1024];
     va_list va;
     va_start ( va, szFormat );
-    vsprintf ( szBuffer, szFormat, va );
+    _VSNPRINTF ( szBuffer, 1024, szFormat, va );
     va_end ( va );
     SetTagContent ( szBuffer );
 }

@@ -177,21 +177,14 @@ bool CVehiclePuresyncPacket::Read ( NetServerBitStreamInterface& BitStream )
 
                             pTowedByVehicle->SetTowedVehicle ( pTrailer );
 
-                            // Tell everyone to attach the new one
-                            CVehicleTrailerPacket AttachPacket ( pTowedByVehicle, pTrailer, true );
-                            g_pGame->GetPlayerManager ()->BroadcastOnlyJoined ( AttachPacket );
-
                             // Execute the attach trailer script function
                             CLuaArguments Arguments;
                             Arguments.PushElement ( pTowedByVehicle );
                             bool bContinue = pTrailer->CallEvent ( "onTrailerAttach", Arguments );
 
-                            if ( !bContinue )
-                            {
-                                // Detach them
-                                CVehicleTrailerPacket DetachPacket ( pTowedByVehicle, pTrailer, false );
-                                g_pGame->GetPlayerManager ()->BroadcastOnlyJoined ( DetachPacket );
-                            }
+                            // Attach or detach trailers depending on the event outcome
+                            CVehicleTrailerPacket TrailerPacket ( pTowedByVehicle, pTrailer, bContinue );
+                            g_pGame->GetPlayerManager ()->BroadcastOnlyJoined ( TrailerPacket );
                         }
                     }
                     else
@@ -285,10 +278,6 @@ bool CVehiclePuresyncPacket::Read ( NetServerBitStreamInterface& BitStream )
             unsigned char ucCurrentWeapon = pSourcePlayer->GetWeaponType ();
             if ( ucCurrentWeapon != 0 )
             {
-                // Read out the weapon state
-                BitStream.Read ( ucTemp );
-                pSourcePlayer->SetCurrentWeaponState ( ucTemp );
-
                 // Read out the ammo state
                 unsigned short usAmmoInClip;
                 BitStream.Read ( usAmmoInClip );
@@ -426,8 +415,7 @@ bool CVehiclePuresyncPacket::Write ( NetServerBitStreamInterface& BitStream ) co
             BitStream.Write ( ucWeaponType );
             if ( ucWeaponType != 0 )
             {
-                // Write the weapon state and ammo in clip
-                BitStream.Write ( pSourcePlayer->GetCurrentWeaponState () );
+                // Write the ammo in clip
                 BitStream.Write ( pSourcePlayer->GetWeaponAmmoInClip () );
 
                 // Write the aim directions

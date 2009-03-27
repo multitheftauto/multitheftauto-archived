@@ -14,16 +14,18 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 class CCore;
 
 // TODO: Make this independant of g_pClientGame. Just moved it here to get it out of the 
 //       horribly big CClientGame file.
-bool CPacketHandler::ProcessPacket ( unsigned char ucPacketID, NetBitStreamInterface& bitStream, unsigned long ulTimeStamp )
+bool CPacketHandler::ProcessPacket ( unsigned char ucPacketID, NetBitStreamInterface& bitStream )
 {
     // Can the net api handle it?
-    if ( g_pClientGame->m_pNetAPI->ProcessPacket ( ucPacketID, bitStream, ulTimeStamp ) )
+    if ( g_pClientGame->m_pNetAPI->ProcessPacket ( ucPacketID, bitStream ) )
     {
         return true;
     }
@@ -343,8 +345,7 @@ void CPacketHandler::Packet_ServerJoined ( NetBitStreamInterface& bitStream )
             bitStream.Read ( g_pClientGame->m_usHTTPDownloadPort );
             // TODO: Set m_szHTTPDownloadURL to the appropriate path based off of server ip / port
             unsigned long ulHTTPDownloadPort = g_pClientGame->m_usHTTPDownloadPort;
-            snprintf ( g_pClientGame->m_szHTTPDownloadURL, MAX_HTTP_DOWNLOAD_URL, "http://%s:%d", g_pNet->GetConnectedServer(), ulHTTPDownloadPort );
-            g_pClientGame->m_szHTTPDownloadURL[MAX_HTTP_DOWNLOAD_URL] = '\0';
+            g_pClientGame->m_strHTTPDownloadURL = SString ( "http://%s:%d", g_pNet->GetConnectedServer(), ulHTTPDownloadPort );
 
             // We are downloading from the internal HTTP Server, therefore disable multiple downloads
             g_pCore->GetNetwork ()->GetHTTPDownloadManager ()->SetSingleDownloadOption ( true );
@@ -352,15 +353,7 @@ void CPacketHandler::Packet_ServerJoined ( NetBitStreamInterface& bitStream )
         }
         case HTTP_DOWNLOAD_ENABLED_URL:
         {
-            unsigned short usHTTPDownloadURL;
-            bitStream.Read ( usHTTPDownloadURL );
-
-            if ( usHTTPDownloadURL > 0 && usHTTPDownloadURL <= MAX_HTTP_DOWNLOAD_URL )
-            {
-                bitStream.Read ( g_pClientGame->m_szHTTPDownloadURL, usHTTPDownloadURL );
-            }
-
-            g_pClientGame->m_szHTTPDownloadURL[usHTTPDownloadURL] = '\0';
+            BitStreamReadUsString( bitStream, g_pClientGame->m_strHTTPDownloadURL );
 
             // We are downloading from a URL, therefore allow multiple downloads
             g_pCore->GetNetwork ()->GetHTTPDownloadManager ()->SetSingleDownloadOption ( false );
@@ -1378,6 +1371,9 @@ void CPacketHandler::Packet_Vehicle_InOut ( NetBitStreamInterface& bitStream )
                         // Remember that this player is working on entering a vehicle
                         pPlayer->SetVehicleInOutState ( VEHICLE_INOUT_GETTING_IN );
 
+                        pVehicle->CalcAndUpdateCanBeDamagedFlag ();
+                        pVehicle->CalcAndUpdateTyresCanBurstFlag ();
+
                         // Call the onClientVehicleStartEnter event
                         CLuaArguments Arguments;
                         Arguments.PushElement ( pPlayer );     // player
@@ -1890,6 +1886,7 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
     // CVector              (12)    - position
     // CVector              (12)    - rotation
     // unsigned short       (2)     - object model id
+    // unsigned char        (1)     - alpha
 
     // Pickups:
     // CVector              (12)    - position
@@ -1962,32 +1959,15 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
     // Heavy variables
     CVector vecPosition;
     CVector vecRotation;
-#ifdef MTA_DEBUG
-    g_pCore->GetConsole()->Printf ( "Packet_EntityAdd" );
-#endif
+
     // HACK: store new entities and link up anything depending on other entities after
     list < SEntityDependantStuff* > newEntitiesStuff;
 
     ElementID NumEntities = 0;
-    if ( !bitStream.Read ( NumEntities ) )
+    if ( !bitStream.Read ( NumEntities ) || NumEntities == 0 )
     {
-#ifdef MTA_DEBUG
-        g_pCore->GetConsole ()->Printf ( "!! Could not read NumEntities" );
-#endif
         return;
     }
-    
-    if ( NumEntities == 0 )
-    {
-#ifdef MTA_DEBUG
-        g_pCore->GetConsole ()->Printf ( "!! NumEntities == 0" );
-#endif
-        return;
-    }
-
-#ifdef MTA_DEBUG
-    g_pCore->GetConsole()->Printf ( "Going to add %d entities", NumEntities );
-#endif
 
     for ( ElementID EntityIndex = 0 ; EntityIndex < NumEntities ; EntityIndex++ )
     {
@@ -2145,14 +2125,17 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                 case CClientGame::OBJECT:
                 {
                     unsigned short usObjectID;
-                    // Read out the position and the rotation
+                    unsigned char ucAlpha;
+
+                    // Read out the position, rotation, object ID and alpha value
                     if ( bitStream.Read ( vecPosition.fX ) &&
                          bitStream.Read ( vecPosition.fY ) &&
                          bitStream.Read ( vecPosition.fZ ) &&
                          bitStream.Read ( vecRotation.fX ) &&
                          bitStream.Read ( vecRotation.fY ) &&
                          bitStream.Read ( vecRotation.fZ ) &&
-                         bitStream.Read ( usObjectID ) )
+                         bitStream.Read ( usObjectID ) &&
+                         bitStream.Read ( ucAlpha ) )
                     {
                         // Valid object id?
                         if ( !CClientObjectManager::IsValidModel ( usObjectID ) )
@@ -2166,6 +2149,7 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                         if ( pObject )
                         {
                             pObject->SetOrientation ( vecPosition, vecRotation );
+                            pObject->SetAlpha ( ucAlpha );
                         }
                         else
                         {
@@ -2377,6 +2361,7 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                     bitStream.Read ( szRegPlate, 8 );
                     pVehicle->SetRegPlate ( szRegPlate );
 
+                    // Read the light override
                     unsigned char ucOverrideLights;
                     bitStream.Read ( ucOverrideLights );
                     pVehicle->SetOverrideLights ( ucOverrideLights );
@@ -2386,15 +2371,17 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                     bitStream.Read ( usFlags );
 
                     // Extract the flag bools
-                    bool bLandingGearDown = ( usFlags & 0x01 ) ? true:false;
-                    bool bSirenesActive = ( usFlags & 0x02 ) ? true:false;
-                    bool bPetrolTankWeak = ( usFlags & 0x04 ) ? true:false;
-                    bool bEngineOn = ( usFlags & 0x08 ) ? true:false;
-                    bool bLocked = ( usFlags & 0x10 ) ? true:false;
-                    bool bDoorsUndamageable = ( usFlags & 0x20 ) ? true:false;
-                    bool bDamageProof = ( usFlags & 0x40 ) ? true:false;
-                    bool bFrozen = ( usFlags & 0x80 ) ? true:false;
-                    bool bDerailed = ( usFlags & 0x100 ) ? true:false;
+                    bool bLandingGearDown   = ( usFlags & 0x0001 ) ? true : false;
+                    bool bSirenesActive     = ( usFlags & 0x0002 ) ? true : false;
+                    bool bPetrolTankWeak    = ( usFlags & 0x0004 ) ? true : false;
+                    bool bEngineOn          = ( usFlags & 0x0008 ) ? true : false;
+                    bool bLocked            = ( usFlags & 0x0010 ) ? true : false;
+                    bool bDoorsUndamageable = ( usFlags & 0x0020 ) ? true : false;
+                    bool bDamageProof       = ( usFlags & 0x0040 ) ? true : false;
+                    bool bFrozen            = ( usFlags & 0x0080 ) ? true : false;
+                    bool bDerailed          = ( usFlags & 0x0100 ) ? true : false;
+                    bool bIsDerailable      = ( usFlags & 0x0200 ) ? true : false;
+                    bool bTrainDirection    = ( usFlags & 0x0400 ) ? true : false;
 
                     // If the vehicle has a landing gear, set landing gear state
                     if ( CClientVehicleManager::HasLandingGears ( usModel ) )
@@ -2402,7 +2389,7 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                         pVehicle->SetLandingGearDown ( bLandingGearDown );
                     }
 
-                    // If the vehicle has sirenes, set the sirene state
+                    // If the vehicle has sirens, set the siren state
                     if ( CClientVehicleManager::HasSirens ( usModel ) )
                     {
                         pVehicle->SetSirenOrAlarmActive ( bSirenesActive );
@@ -2415,7 +2402,12 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                     pVehicle->SetDoorsUndamageable ( bDoorsUndamageable );
                     pVehicle->SetScriptCanBeDamaged ( !bDamageProof );
                     pVehicle->SetFrozen ( bFrozen );
-                    pVehicle->SetTrainDerailed ( bDerailed );
+                    if ( CClientVehicleManager::IsTrainModel ( usModel ) )
+                    {
+                        pVehicle->SetDerailed ( bDerailed );
+                        pVehicle->SetDerailable ( bIsDerailable );
+                        pVehicle->SetTrainDirection ( bTrainDirection );
+                    }
 
                     // Read out and set alpha
                     unsigned char ucAlpha = 255;
@@ -3111,6 +3103,41 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                     break;
                 }
 
+                case CClientGame::WATER:
+                {
+                    BYTE ucNumVertices;
+                    short sX;
+                    short sY;
+                    bitStream.Read ( ucNumVertices );
+                    assert ( ucNumVertices == 3 || ucNumVertices == 4 );
+
+                    CVector vecVertices[4];
+                    for ( int i = 0; i < ucNumVertices; i++ )
+                    {
+                        bitStream.Read ( sX );
+                        bitStream.Read ( sY );
+                        bitStream.Read ( vecVertices[i].fZ );
+                        vecVertices[i].fX = sX;
+                        vecVertices[i].fY = sY;
+                    }
+                    CClientWater* pWater = NULL;
+                    if ( ucNumVertices == 3 )
+                    {
+                        pWater = new CClientWater ( g_pClientGame->GetManager (), EntityID, vecVertices[0], vecVertices[1], vecVertices[2] );
+                    }
+                    else
+                    {
+                        pWater = new CClientWater ( g_pClientGame->GetManager (), EntityID, vecVertices[0], vecVertices[1], vecVertices[2], vecVertices[3] );
+                    }
+                    if ( !pWater->Valid () )
+                    {
+                        delete pWater;
+                        pWater = NULL;
+                    }
+                    pEntity = pWater;
+                    break;
+                }
+
                 default:
                 {
                     assert ( 0 );
@@ -3607,7 +3634,7 @@ void CPacketHandler::Packet_ProjectileSync ( NetBitStreamInterface& bitStream )
                 if ( pProjectile )
                 {
                     pProjectile->Initiate ( &vecOrigin, pvecRotation, pvecVelocity, 0 );
-                }              
+                }
             }
         }
     }
@@ -3783,22 +3810,15 @@ void CPacketHandler::Packet_ResourceStart ( NetBitStreamInterface& bitStream )
     bitStream.Read ( ResourceEntityID );
 	bitStream.Read ( ResourceDynamicEntityID );
 
-    CResource* pResource = g_pClientGame->m_pResourceManager->Add ( usResourceID, szResourceName );
+    // Get the resource entity
+    CClientEntity* pResourceEntity = CElementIDs::GetElement ( ResourceEntityID );
+
+	// Get the resource dynamic entity
+	CClientEntity* pResourceDynamicEntity = CElementIDs::GetElement ( ResourceDynamicEntityID );
+
+    CResource* pResource = g_pClientGame->m_pResourceManager->Add ( usResourceID, szResourceName, pResourceEntity, pResourceDynamicEntity );
     if ( pResource )
     {
-		// set the resource entity
-        CClientEntity* pResourceEntity = CElementIDs::GetElement ( ResourceEntityID );
-        if ( pResourceEntity )
-        {
-            pResource->SetResourceEntity ( pResourceEntity );
-        }
-
-		// set the resource dynamic entity
-		CClientEntity* pResourceDynamicEntity = CElementIDs::GetElement ( ResourceDynamicEntityID );
-		if ( pResourceDynamicEntity )
-		{
-			pResource->SetResourceDynamicEntity ( pResourceDynamicEntity );
-		}
 
         // Resource Chunk Type (F = Resource File, E = Exported Function)
         unsigned char ucChunkType;
@@ -3883,18 +3903,14 @@ void CPacketHandler::Packet_ResourceStart ( NetBitStreamInterface& bitStream )
                                     MakeSureDirExists ( szTempName );
                                 }
 
-                                // Initialize a variable to hold the entire HTTP Download URL with the File Name
-                                char szHTTPDownloadURLFull [MAX_HTTP_DOWNLOAD_URL_WITH_FILE + 1];
-                                memset ( szHTTPDownloadURLFull, 0, sizeof ( szHTTPDownloadURLFull ) );
-
                                 // Combine the HTTP Download URL, the Resource Name and the Resource File
-                                _snprintf ( szHTTPDownloadURLFull, MAX_HTTP_DOWNLOAD_URL_WITH_FILE, "%s/%s/%s", g_pClientGame->m_szHTTPDownloadURL, pResource->GetName (), pDownloadableResource->GetShortName () );
+                                SString strHTTPDownloadURLFull ( "%s/%s/%s", g_pClientGame->m_strHTTPDownloadURL.c_str (), pResource->GetName (), pDownloadableResource->GetShortName () );
 
                                 // Delete the file that already exists
                                 unlink ( pDownloadableResource->GetName () );
 
                                 // Queue the file to be downloaded
-                                pHTTP->QueueFile ( szHTTPDownloadURLFull, pDownloadableResource->GetName (), dChunkDataSize, NULL, NULL, NULL );
+                                pHTTP->QueueFile ( strHTTPDownloadURLFull, pDownloadableResource->GetName (), dChunkDataSize, NULL, NULL, NULL, g_pClientGame->IsLocalGame () );
 
                                 // If the file was successfully queued, increment the resources to be downloaded
                                 usResourcesToBeDownloaded++;

@@ -17,7 +17,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 #define MAX_STRING_LENGTH 2048
 
@@ -629,8 +631,7 @@ int CLuaFunctionDefinitions::EngineLoadCOL ( lua_State* luaVM )
 	        if ( szFile && IsValidFilePath ( szFile ) )
             {
                 // Generate the full path to the file
-		        char szPath [MAX_PATH+1] = {0};
-		        snprintf ( szPath, MAX_PATH, "%s/resources/%s/%s", m_pClientGame->GetModRoot (), pLuaMain->GetResource ()->GetName (), szFile );
+		        SString strPath ( "%s/resources/%s/%s", m_pClientGame->GetModRoot (), pLuaMain->GetResource ()->GetName (), szFile );
 
                 // Grab the resource root entity
                 CClientEntity* pRoot = pResource->GetResourceCOLModelRoot ();
@@ -639,7 +640,7 @@ int CLuaFunctionDefinitions::EngineLoadCOL ( lua_State* luaVM )
                 CClientColModel* pCol = new CClientColModel ( m_pManager, INVALID_ELEMENT_ID );
 
                 // Attempt loading the file
-                if ( pCol->LoadCol ( szPath ) )
+                if ( pCol->LoadCol ( strPath ) )
                 {
                     // Success. Make it a child of the resource collision root
                     pCol->SetParent ( pRoot );
@@ -686,8 +687,7 @@ int CLuaFunctionDefinitions::EngineLoadDFF ( lua_State* luaVM )
                 if ( usModelID == 0 || CClientDFFManager::IsReplacableModel ( usModelID ) )
                 {
                     // Grab the path to resource root
-		            char szPath[MAX_PATH+1] = {0};
-		            snprintf ( szPath, MAX_PATH, "%s/resources/%s/%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
+		            SString strPath ( "%s/resources/%s/%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
 
                     // Grab the resource root entity
                     CClientEntity* pRoot = pResource->GetResourceDFFRoot ();
@@ -696,7 +696,7 @@ int CLuaFunctionDefinitions::EngineLoadDFF ( lua_State* luaVM )
                     CClientDFF* pDFF = new CClientDFF ( m_pManager, INVALID_ELEMENT_ID );
 
                     // Try to load the DFF file
-                    if ( pDFF->LoadDFF ( szPath, usModelID ) )
+                    if ( pDFF->LoadDFF ( strPath, usModelID ) )
                     {
                         // Success loading the file. Set parent to DFF root
                         pDFF->SetParent ( pRoot );
@@ -742,8 +742,7 @@ int CLuaFunctionDefinitions::EngineLoadTXD ( lua_State* luaVM )
 	        if ( szFile && IsValidFilePath ( szFile ) )
             {
                 // Grab the path to resource root
-		        char szPath[MAX_PATH+1] = {0};
-		        snprintf ( szPath, MAX_PATH, "%s/resources/%s/%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
+		        SString strPath ( "%s/resources/%s/%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
 
                 // Grab the resource root entity
                 CClientEntity* pRoot = pResource->GetResourceTXDRoot ();
@@ -752,7 +751,7 @@ int CLuaFunctionDefinitions::EngineLoadTXD ( lua_State* luaVM )
                 CClientTXD* pTXD = new CClientTXD ( m_pManager, INVALID_ELEMENT_ID );
 
                 // Try to load the TXD file
-                if ( pTXD->LoadTXD ( szPath ) )
+                if ( pTXD->LoadTXD ( strPath ) )
                 {
                     // Success loading the file. Set parent to TXD root
                     pTXD->SetParent ( pRoot );
@@ -1370,12 +1369,9 @@ int CLuaFunctionDefinitions::dxDrawImage ( lua_State* luaVM )
 	    if ( pResource && szFile && IsValidFilePath ( szFile ) )
         {
 		    // Get the correct directory
-		    char szPath[MAX_PATH] = {0};
+		    SString strPath ( "%s\\resources\\%s\\%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
 
-		    snprintf ( szPath, MAX_PATH, "%s\\resources\\%s\\%s", m_pClientGame->GetModRoot (), pResource->GetName (), szFile );
-		    szPath[MAX_PATH-1] = '\0';
-
-            if ( g_pCore->GetGraphics ()->DrawTextureQueued ( fX, fY, fWidth, fHeight, szPath, fRotation, fRotCenOffX, fRotCenOffY, ulColor, bPostGUI ) )
+            if ( g_pCore->GetGraphics ()->DrawTextureQueued ( fX, fY, fWidth, fHeight, strPath, fRotation, fRotCenOffX, fRotCenOffY, ulColor, bPostGUI ) )
             {
                 // Success
                 lua_pushboolean ( luaVM, true );
@@ -3098,8 +3094,10 @@ int CLuaFunctionDefinitions::SetElementParent ( lua_State* luaVM )
             CClientEntity* pParent = lua_toelement ( luaVM, 2 );
             if ( pParent )
             {
+                CLuaMain* pLuaMain = m_pLuaManager->GetVirtualMachine ( luaVM );
+
                 // Change the parent
-                if ( CStaticFunctionDefinitions::SetElementParent ( *pEntity, *pParent ) )
+                if ( CStaticFunctionDefinitions::SetElementParent ( *pEntity, *pParent, pLuaMain ) )
                 {
                     lua_pushboolean ( luaVM, true );
                     return 1;
@@ -3518,6 +3516,40 @@ int CLuaFunctionDefinitions::SetElementStreamable ( lua_State* luaVM )
         m_pScriptDebugging->LogBadType ( luaVM, "setElementStreamable" );
 
     // We failed
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetRadioChannel ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TNUMBER ||
+         lua_type ( luaVM, 1 ) == LUA_TSTRING )
+    {
+        unsigned char ucChannel = ( unsigned char ) lua_tonumber ( luaVM, 1 );
+        if ( CStaticFunctionDefinitions::SetRadioChannel ( ucChannel ) )
+        {
+            lua_pushboolean ( luaVM, true );
+            return 1;
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setRadioChannel" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetRadioChannel ( lua_State* luaVM )
+{
+    unsigned char ucChannel = 0;
+    if ( CStaticFunctionDefinitions::GetRadioChannel ( ucChannel ) )
+    {
+        lua_pushnumber ( luaVM, ucChannel );
+        return 1;
+    }
+
     lua_pushboolean ( luaVM, false );
     return 1;
 }
@@ -6369,6 +6401,79 @@ int CLuaFunctionDefinitions::IsTrainDerailed ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::IsTrainDerailable ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CClientVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            bool bIsDerailable;
+            if ( CStaticFunctionDefinitions::IsTrainDerailable ( *pVehicle, bIsDerailable ) )
+            {
+                lua_pushboolean ( luaVM, bIsDerailable );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "isTrainDerailable", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "isTrainDerailable" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+int CLuaFunctionDefinitions::GetTrainDirection ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CClientVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            bool bDirection;
+            if ( CStaticFunctionDefinitions::GetTrainDirection ( *pVehicle, bDirection ) )
+            {
+                lua_pushboolean ( luaVM, bDirection );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getTrainDirection", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getTrainDirection" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GetTrainSpeed ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA )
+    {
+        CClientVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            float fSpeed;
+            if ( CStaticFunctionDefinitions::GetTrainSpeed ( *pVehicle, fSpeed ) )
+            {
+                lua_pushnumber ( luaVM, fSpeed );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "getTrainSpeed", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getTrainSpeed" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 int CLuaFunctionDefinitions::GetVehicleEngineState ( lua_State* luaVM )
 {
@@ -7311,6 +7416,83 @@ int CLuaFunctionDefinitions::SetTrainDerailed ( lua_State* luaVM )
     }
     else
         m_pScriptDebugging->LogBadType ( luaVM, "setTrainDerailed" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+int CLuaFunctionDefinitions::SetTrainDerailable ( lua_State* luaVM )
+{
+    if ( ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA ) &&
+         ( lua_type ( luaVM, 2 ) == LUA_TBOOLEAN ) )
+    {
+        CClientVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            bool bDerailable = ( lua_toboolean ( luaVM, 2 ) ? true : false );
+            if ( CStaticFunctionDefinitions::SetTrainDerailable ( *pVehicle, bDerailable ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setTrainDerailable", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setTrainDerailable" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+int CLuaFunctionDefinitions::SetTrainDirection ( lua_State* luaVM )
+{
+    if ( ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA ) &&
+         ( lua_type ( luaVM, 2 ) == LUA_TBOOLEAN ) )
+    {
+        CClientVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            bool bDirection = lua_toboolean ( luaVM, 2 ) ? true : false;
+            if ( CStaticFunctionDefinitions::SetTrainDirection ( *pVehicle, bDirection ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setTrainDirection", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setTrainDirection" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::SetTrainSpeed ( lua_State* luaVM )
+{
+    int iArgument2 = lua_type ( luaVM, 2 );
+    if ( ( lua_type ( luaVM, 1 ) == LUA_TLIGHTUSERDATA ) &&
+         ( iArgument2 == LUA_TNUMBER || iArgument2 == LUA_TSTRING ) )
+    {
+        CClientVehicle* pVehicle = lua_tovehicle ( luaVM, 1 );
+        if ( pVehicle )
+        {
+            float fSpeed = static_cast < float > ( lua_tonumber ( luaVM, 2 ) );
+            if ( CStaticFunctionDefinitions::SetTrainSpeed ( *pVehicle, fSpeed ) )
+            {
+                lua_pushboolean ( luaVM, true );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "setTrainSpeed", "vehicle", 1 );
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setTrainSpeed" );
 
     lua_pushboolean ( luaVM, false );
     return 1;
@@ -9631,14 +9813,13 @@ int CLuaFunctionDefinitions::GUIStaticImageLoadImage ( lua_State* luaVM )
 		    if ( IsValidFilePath ( szFile ) ) {
 
 			    // get the correct directory
-			    char szPath[MAX_PATH+1] = {0};
-			    snprintf ( szPath, MAX_PATH, "%s/resources/%s/", m_pClientGame->GetModRoot (), pLuaMain->GetResource ()->GetName () );
+			    SString strPath ( "%s/resources/%s/", m_pClientGame->GetModRoot (), pLuaMain->GetResource ()->GetName () );
 
 			    // and attempt to load the image
 			    CClientEntity* pEntity = lua_toelement ( luaVM, 1 );
                 if ( pEntity )
                 {
-			        bRet = CStaticFunctionDefinitions::GUIStaticImageLoadImage ( *pEntity, szFile, szPath );
+			        bRet = CStaticFunctionDefinitions::GUIStaticImageLoadImage ( *pEntity, szFile, strPath );
                 }
                 else
                     m_pScriptDebugging->LogBadPointer ( luaVM, "guiStaticImageLoadImage", "gui-element", 1 );
@@ -9681,6 +9862,64 @@ int CLuaFunctionDefinitions::GUICreateTab ( lua_State* luaVM )
 	lua_pushboolean ( luaVM, false );
     return 1;
 }
+
+
+int CLuaFunctionDefinitions::GUIGetSelectedTab ( lua_State* luaVM )
+{
+	if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+	{
+		CClientEntity* pPanel = lua_toelement ( luaVM, 1 );
+		if ( pPanel )
+        {
+            CClientGUIElement* pTab = NULL;
+            if ( pTab = CStaticFunctionDefinitions::GUIGetSelectedTab ( *pPanel ) )
+            {
+		        lua_pushelement ( luaVM, pTab );
+		        return 1;
+            }
+            else
+            {
+                lua_pushnil ( luaVM );
+                return 1;
+            }
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "guiGetSelectedTab", "gui-element", 1 );
+	}
+
+	lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GUISetSelectedTab ( lua_State* luaVM )
+{
+	if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
+         lua_istype ( luaVM, 2, LUA_TLIGHTUSERDATA ) )
+	{
+		CClientEntity* pPanel = lua_toelement ( luaVM, 1 );
+        CClientEntity* pTab = lua_toelement ( luaVM, 2 );
+		if ( pPanel )
+        {
+            if ( pTab )
+            {
+                if ( CStaticFunctionDefinitions::GUISetSelectedTab ( *pPanel, *pTab ) )
+                {
+		            lua_pushboolean ( luaVM, true );
+		            return 1;
+                }
+            }
+            else
+                m_pScriptDebugging->LogBadPointer ( luaVM, "guiSetSelectedTab", "gui-element", 2 );
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "guiSetSelectedTab", "gui-element", 1 );
+	}
+
+	lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 
 int CLuaFunctionDefinitions::GUIDeleteTab ( lua_State* luaVM )
@@ -10688,6 +10927,65 @@ int CLuaFunctionDefinitions::GUIGridListGetSelectedItem ( lua_State* luaVM )
 }
 
 
+int CLuaFunctionDefinitions::GUIGridListGetSelectedItems ( lua_State* luaVM )
+{
+	if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+	{
+		CClientGUIElement *pGUIElement = lua_toguielement ( luaVM, 1 );
+        if ( pGUIElement && IS_CGUIELEMENT_GRIDLIST ( pGUIElement ) )
+        {
+            CGUIGridList* pList = static_cast < CGUIGridList* > ( pGUIElement->GetCGUIElement () );
+            CGUIListItem* pItem = NULL;
+
+            CLuaArguments list;
+            for ( int i = 1; i < pList->GetSelectedCount(); i++ )
+            {
+                pItem = pList->GetNextSelectedItem ( pItem );
+                if ( !pItem ) break;
+
+                CLuaArguments item;
+                item.PushString ( "column" );
+                item.PushNumber ( pList->GetItemColumnIndex ( pItem ) );
+                item.PushString ( "row" );
+                item.PushNumber ( pList->GetItemRowIndex ( pItem ) );
+                list.PushTable ( &item );
+            }
+
+            list.PushAsTable ( luaVM );
+
+		    return 1;
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "guiGridListGetSelectedItems", "gui-element", 1 );
+	}
+
+	// error: bad arguments
+	lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
+int CLuaFunctionDefinitions::GUIGridListGetSelectedCount ( lua_State* luaVM )
+{
+	if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) )
+	{
+		CClientGUIElement *pGUIElement = lua_toguielement ( luaVM, 1 );
+        if ( pGUIElement && IS_CGUIELEMENT_GRIDLIST ( pGUIElement ) )
+        {
+            int iCount = static_cast < CGUIGridList* > ( pGUIElement->GetCGUIElement () ) -> GetSelectedCount ();
+            
+		    lua_pushnumber ( luaVM, iCount );
+		    return 1;
+        }
+        else
+            m_pScriptDebugging->LogBadPointer ( luaVM, "guiGridListGetSelectedCount", "gui-element", 1 );
+	}
+
+	lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
+
 int CLuaFunctionDefinitions::GUIGridListSetSelectedItem ( lua_State* luaVM )
 {
 	if ( lua_istype ( luaVM, 1, LUA_TLIGHTUSERDATA ) &&
@@ -11338,12 +11636,10 @@ int CLuaFunctionDefinitions::GetTok ( lua_State* luaVM )
         char* strText = new char [ strlen ( szText ) + 1 ];
         strcpy ( strText, szText );
 
-        char szDelimiter [32];
-        snprintf ( szDelimiter, 31, "%c", iDelimiter );
-        szDelimiter [31] = 0;
+        SString strDelimiter ( "%c", iDelimiter );
 
         unsigned int uiCount = 1;
-        char* szToken = strtok ( strText, szDelimiter );
+        char* szToken = strtok ( strText, strDelimiter );
 
         // We're looking for the first part?
         if ( iToken != 1 )
@@ -11352,7 +11648,7 @@ int CLuaFunctionDefinitions::GetTok ( lua_State* luaVM )
             do
             {
                 uiCount++;
-                szToken = strtok ( NULL, szDelimiter );
+                szToken = strtok ( NULL, strDelimiter );
             }
             while ( uiCount != iToken );
         }
@@ -11394,12 +11690,10 @@ int CLuaFunctionDefinitions::Split ( lua_State* luaVM )
     char* strText = new char [ strlen ( szText ) + 1 ];
     strcpy ( strText, szText );
 
-    char szDelimiter [32];
-    szDelimiter [31] = 0;
-    snprintf ( szDelimiter, 31, "%c", iDelimiter );
+    SString strDelimiter ( "%c", iDelimiter );
 
     unsigned int uiCount = 0;
-    char* szToken = strtok ( strText, szDelimiter );
+    char* szToken = strtok ( strText, strDelimiter );
 
 	// Create a new table
 	lua_newtable ( luaVM );
@@ -11410,7 +11704,7 @@ int CLuaFunctionDefinitions::Split ( lua_State* luaVM )
 	lua_settable ( luaVM, -3 );
 
     // strtok until we're out of tokens
-	while ( szToken = strtok ( NULL, szDelimiter ) )
+	while ( szToken = strtok ( NULL, strDelimiter ) )
 	{
 		// Add the token to the table
 		lua_pushnumber ( luaVM, ++uiCount );
@@ -12964,29 +13258,44 @@ int CLuaFunctionDefinitions::BindKey ( lua_State* luaVM )
     if ( pLuaMain )
     {
         if ( lua_type ( luaVM, 1 ) == LUA_TSTRING &&
-             lua_type ( luaVM, 2 ) == LUA_TSTRING &&
-             lua_type ( luaVM, 3 ) == LUA_TFUNCTION ) 
+             lua_type ( luaVM, 2 ) == LUA_TSTRING )
         {
             const char* szKey = lua_tostring ( luaVM, 1 );
-            const char* szHitState = lua_tostring ( luaVM, 2 );  
-            // Jax: grab our arguments first, luaM_toref pops the stack!
-            CLuaArguments Arguments;
-		    Arguments.ReadArguments ( luaVM, 4 );
-			int iLuaFunction = luaM_toref ( luaVM, 3 );            
-                      
-			if ( VERIFY_FUNCTION ( iLuaFunction ) )
+            const char* szHitState = lua_tostring ( luaVM, 2 );
+            if ( lua_type ( luaVM, 3 ) == LUA_TFUNCTION )
+            { 
+                // Jax: grab our arguments first, luaM_toref pops the stack!
+                CLuaArguments Arguments;
+		        Arguments.ReadArguments ( luaVM, 4 );
+			    int iLuaFunction = luaM_toref ( luaVM, 3 );            
+                          
+			    if ( VERIFY_FUNCTION ( iLuaFunction ) )
+                {
+				    if ( CStaticFunctionDefinitions::BindKey ( szKey, szHitState, pLuaMain, iLuaFunction, Arguments ) )
+				    {
+					    lua_pushboolean ( luaVM, true );
+					    return 1;
+				    }
+			    }
+                else
+                    m_pScriptDebugging->LogBadPointer ( luaVM, "bindKey", "function", 3 );
+            }
+            else if ( lua_type ( luaVM, 3 ) == LUA_TSTRING )
             {
-				if ( CStaticFunctionDefinitions::BindKey ( szKey, szHitState, pLuaMain, iLuaFunction, Arguments ) )
-				{
-					lua_pushboolean ( luaVM, true );
+         		const char* szResource = pLuaMain->GetResource()->GetName();
+                const char* szCommand = lua_tostring ( luaVM, 3 );
+                const char* szArguments = "";
+                if  ( lua_type ( luaVM, 4 ) == LUA_TSTRING )
+                    szArguments = lua_tostring ( luaVM, 4 );
+                if ( CStaticFunctionDefinitions::BindKey ( szKey, szHitState, szCommand, szArguments, szResource ) )
+			    {
+			        lua_pushboolean ( luaVM, true );
 					return 1;
-				}
-			}
+		        }  
+            }
             else
-                m_pScriptDebugging->LogBadPointer ( luaVM, "bindKey", "function", 3 );
+                m_pScriptDebugging->LogBadType ( luaVM, "bindKey" );
         }
-        else
-            m_pScriptDebugging->LogBadType ( luaVM, "bindKey" );
     }
 
     lua_pushboolean ( luaVM, false );
@@ -13003,16 +13312,30 @@ int CLuaFunctionDefinitions::UnbindKey ( lua_State* luaVM )
         {
             const char* szKey = lua_tostring ( luaVM, 1 );
             const char* szHitState = NULL;
-            int iLuaFunction = 0;
 
             if ( lua_type ( luaVM, 2 ) )
                 szHitState = lua_tostring ( luaVM, 2 );
             if ( lua_type ( luaVM, 3 ) == LUA_TFUNCTION )
-                iLuaFunction = luaM_toref ( luaVM, 3 );
-
-            if ( iLuaFunction == 0 || VERIFY_FUNCTION ( iLuaFunction ) )
+            {   
+                int iLuaFunction = luaM_toref ( luaVM, 3 );
+                if ( iLuaFunction == 0 || VERIFY_FUNCTION ( iLuaFunction ) )
+                {
+			        if ( CStaticFunctionDefinitions::UnbindKey ( szKey, pLuaMain, szHitState, iLuaFunction ) )
+			        {
+				        lua_pushboolean ( luaVM, true );
+				        return 1;
+			        }
+                }
+                else
+                {
+                    m_pScriptDebugging->LogBadType ( luaVM, "unbindKey" );
+                }
+            }
+            else if ( lua_type ( luaVM, 3 ) == LUA_TSTRING )
             {
-			    if ( CStaticFunctionDefinitions::UnbindKey ( szKey, pLuaMain, szHitState, iLuaFunction ) )
+                const char* szResource = pLuaMain->GetResource()->GetName();
+                const char* szCommand = lua_tostring ( luaVM, 3 );
+			    if ( CStaticFunctionDefinitions::UnbindKey ( szKey, szHitState, szCommand, szResource ) )
 			    {
 				    lua_pushboolean ( luaVM, true );
 				    return 1;
@@ -13608,13 +13931,12 @@ int CLuaFunctionDefinitions::XMLLoadFile ( lua_State* luaVM )
         if ( luaMain )
         {
             //const char * szFilename = lua_tostring ( luaVM, 1 );
-		    char szFilename [ MAX_STRING_LENGTH ];
-            snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), lua_tostring ( luaVM, 1 ) );
+            SString strFilename ( "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), lua_tostring ( luaVM, 1 ) );
             //if ( IsValidFilePath ( szFilename ) ) // This would be checking the full path when we only need to check the user input
 		    if ( IsValidFilePath ( lua_tostring ( luaVM, 1 ) ) )
             {
                 // Create the XML
-                CXMLFile * xmlFile = luaMain->CreateXML ( szFilename );
+                CXMLFile * xmlFile = luaMain->CreateXML ( strFilename );
                 if ( xmlFile )
                 {
                     // Parse it
@@ -13769,16 +14091,12 @@ int CLuaFunctionDefinitions::XMLCreateChild ( lua_State* luaVM )
     {
 		// Get the Node
 		CXMLNode* pXMLNode = lua_toxmlnode ( luaVM, 1 );
-		char szSubNodeName [ MAX_STRING_LENGTH ];
 		if ( pXMLNode )
 		{
-			snprintf ( szSubNodeName, MAX_STRING_LENGTH, "%s", lua_tostring ( luaVM, 2 ) );
-			if ( szSubNodeName )
-			{
-				CXMLNode* pXMLSubNode = pXMLNode->CreateSubNode ( szSubNodeName );
-				lua_pushxmlnode ( luaVM, pXMLSubNode );
-				return 1;
-			}
+			SString strSubNodeName ( "%s", lua_tostring ( luaVM, 2 ) );
+			CXMLNode* pXMLSubNode = pXMLNode->CreateSubNode ( strSubNodeName );
+			lua_pushxmlnode ( luaVM, pXMLSubNode );
+			return 1;
         }
     }
 
@@ -13828,8 +14146,7 @@ int CLuaFunctionDefinitions::XMLCopyFile ( lua_State* luaVM )
              lua_type ( luaVM, 2 ) == LUA_TSTRING )
         {
             // Grab the full filepath of the copied xml and make sure its legal
-            char szFilename [ MAX_STRING_LENGTH ];
-		    snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\resources\\%s\\%s", m_pClientGame->GetModRoot(), pLUA->GetResource()->GetName() ,lua_tostring ( luaVM, 2 ) );
+		    SString strFilename ( "%s\\resources\\%s\\%s", m_pClientGame->GetModRoot(), pLUA->GetResource()->GetName() ,lua_tostring ( luaVM, 2 ) );
 		    if ( IsValidFilePath ( lua_tostring ( luaVM, 2 ) ) )
             {
                 // Grab the source node
@@ -13844,7 +14161,7 @@ int CLuaFunctionDefinitions::XMLCopyFile ( lua_State* luaVM )
                     CLuaMain* pLUA = m_pLuaManager->GetVirtualMachine ( luaVM );
 
                     // Create the new XML file and its root node
-                    CXMLFile* pNewXML = pLUA->CreateXML ( szFilename );
+                    CXMLFile* pNewXML = pLUA->CreateXML ( strFilename );
                     if ( pNewXML )
                     {
                         // Create root for new XML
@@ -14483,6 +14800,26 @@ int CLuaFunctionDefinitions::GetWeaponNameFromID ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::GetSlotFromWeapon ( lua_State* luaVM )
+{
+    if ( lua_type ( luaVM, 1 ) == LUA_TNUMBER || lua_type ( luaVM, 1 ) == LUA_TSTRING )
+    {
+        unsigned char ucWeaponID = static_cast < unsigned char > ( lua_tonumber ( luaVM, 1 ) );
+        char cSlot = CWeaponNames::GetSlotFromWeapon ( ucWeaponID );
+        if ( cSlot >= 0 )
+            lua_pushnumber ( luaVM, cSlot );
+        else
+            lua_pushboolean ( luaVM, false );
+        //lua_pushnumber ( luaVM, CWeaponNames::GetSlotFromWeapon ( ucWeaponID ) );
+        return 1;
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "getSlotFromWeapon" );
+
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
+
 
 int CLuaFunctionDefinitions::GetWeaponIDFromName ( lua_State* luaVM )
 {
@@ -14766,8 +15103,7 @@ int CLuaFunctionDefinitions::PlaySound ( lua_State* luaVM )
             CResource* pResource = luaMain->GetResource();
             if ( pResource )
             {
-		        char szFilename [ MAX_STRING_LENGTH ];
-                snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), szSound );
+                SString strFilename ( "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), szSound );
 		        if ( IsValidFilePath ( lua_tostring ( luaVM, 1 ) ) )
                 {
                     bool bLoop = false;
@@ -14775,7 +15111,7 @@ int CLuaFunctionDefinitions::PlaySound ( lua_State* luaVM )
                     {
                         bLoop = ( lua_toboolean ( luaVM, 2 ) ) ? true : false;
                     }
-                    CClientSound* pSound = CStaticFunctionDefinitions::PlaySound ( pResource, szFilename, bLoop );
+                    CClientSound* pSound = CStaticFunctionDefinitions::PlaySound ( pResource, strFilename, bLoop );
                     if ( pSound )
                     {
                         lua_pushelement ( luaVM, pSound );
@@ -14812,8 +15148,7 @@ int CLuaFunctionDefinitions::PlaySound3D ( lua_State* luaVM )
             CResource* pResource = luaMain->GetResource();
             if ( pResource )
             {
-		        char szFilename [ MAX_STRING_LENGTH ];
-                snprintf ( szFilename, MAX_STRING_LENGTH, "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), szSound );
+                SString strFilename ( "%s\\%s", luaMain->GetResource()->GetResourceDirectoryPath(), szSound );
 		        if ( IsValidFilePath ( lua_tostring ( luaVM, 1 ) ) )
                 {
                     bool bLoop = false;
@@ -14821,7 +15156,7 @@ int CLuaFunctionDefinitions::PlaySound3D ( lua_State* luaVM )
                     {
                         bLoop = ( lua_toboolean ( luaVM, 5 ) ) ? true : false;
                     }
-                    CClientSound* pSound = CStaticFunctionDefinitions::PlaySound3D ( pResource, szFilename, vecPosition, bLoop );
+                    CClientSound* pSound = CStaticFunctionDefinitions::PlaySound3D ( pResource, strFilename, vecPosition, bLoop );
                     if ( pSound )
                     {
                         lua_pushelement ( luaVM, pSound );
@@ -15156,3 +15491,31 @@ int CLuaFunctionDefinitions::SetVoiceMuteAllEnabled ( lua_State* luaVM )
 	return 1;
 }
 #endif
+
+
+int CLuaFunctionDefinitions::GetVersion ( lua_State* luaVM )
+{
+    lua_createtable ( luaVM, 0, 5 );
+
+    lua_pushstring ( luaVM, "number" );
+    lua_pushnumber ( luaVM, CStaticFunctionDefinitions::GetVersion () );
+    lua_settable   ( luaVM, -3 );
+    
+    lua_pushstring ( luaVM, "mta" );
+    lua_pushstring ( luaVM, CStaticFunctionDefinitions::GetVersionString () );
+    lua_settable   ( luaVM, -3 );
+
+    lua_pushstring ( luaVM, "name" );
+    lua_pushstring ( luaVM, CStaticFunctionDefinitions::GetVersionName () );
+    lua_settable   ( luaVM, -3 );
+
+    lua_pushstring ( luaVM, "netcode" );
+    lua_pushnumber ( luaVM, CStaticFunctionDefinitions::GetNetcodeVersion () );
+    lua_settable   ( luaVM, -3 );
+
+    lua_pushstring ( luaVM, "os" );
+    lua_pushstring ( luaVM, CStaticFunctionDefinitions::GetOperatingSystemName () );
+    lua_settable   ( luaVM, -3 );
+
+    return 1;
+}

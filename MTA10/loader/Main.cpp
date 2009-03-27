@@ -70,83 +70,28 @@ bool TerminateGTAIfRunning ( void )
     return true;
 }
 
-int GetMTAPath ( char * szBuffer, size_t sizeBufferSize )
+void GetMTASAPath ( char * szBuffer, size_t sizeBufferSize )
 {
-    WIN32_FIND_DATA fdFileInfo;
+    // Get current module full path
+    GetModuleFileName ( NULL, szBuffer, sizeBufferSize - 1 );
+
+    // Strip the module name out of the path.
+    PathRemoveFileSpec ( szBuffer );
+
+    // Save to a temp registry key
     HKEY hkey;
-    DWORD dwBufferSize = MAX_PATH;
-    char szRegBuffer[MAX_PATH];
-    DWORD dwType = 0;
     RegCreateKeyEx ( HKEY_LOCAL_MACHINE, "Software\\Multi Theft Auto: San Andreas", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, NULL );
-    if ( GetAsyncKeyState ( VK_CONTROL ) == 0 )
-    {
-        if ( hkey )
-        {
-            if ( RegQueryValueEx ( hkey, "", NULL, &dwType, (LPBYTE)szRegBuffer, &dwBufferSize ) == ERROR_SUCCESS )
-            {
-				// Check for replacement characters (?), to see if there are any (unsupported) unicode characters
-				if ( strchr ( szRegBuffer, '?' ) > 0 )
-					return -1;
 
-                _snprintf ( szBuffer, sizeBufferSize, "%s", szRegBuffer );
-                if ( strlen ( szBuffer ) != 0 )
-                {
-                    RegCloseKey ( hkey );
-                    return 1;
-                }
-            }
-        }
-    }
-    
-    MessageBox ( 0, "Could not read installation path from the registry. Please select where you have installed Multi Theft Auto from the following dialog.", "Warning", MB_OK );
-    BROWSEINFO bi = { 0 };
-    bi.lpszTitle = "Select your Multi Theft Auto: San Andreas Installation Directory";
-    LPITEMIDLIST pidl = SHBrowseForFolder ( &bi );
-
-    if ( pidl != 0 )
+    if ( hkey )
     {
-        // get the name of the  folder
-        if ( !SHGetPathFromIDList ( pidl, szBuffer ) )
-        {
-            szBuffer = NULL;
-        }
+        RegSetValueEx ( hkey, "Last Run Location", NULL, REG_SZ, (LPBYTE)szBuffer, strlen(szBuffer) + 1 );
+        RegDeleteValue ( hkey, "temp" );
+        RegDeleteValue ( hkey, "Install Directory" );
+    }
 
-        // free memory used
-        IMalloc * imalloc = 0;
-        if ( SUCCEEDED( SHGetMalloc ( &imalloc )) )
-        {
-            imalloc->Free ( pidl );
-            imalloc->Release ( );
-        }
-    
-        char szExePath[MAX_PATH];
-        sprintf ( szExePath, "%s\\mods", szBuffer );
-        if ( INVALID_HANDLE_VALUE != FindFirstFile( szExePath, &fdFileInfo ) )
-        {
-            if ( hkey )
-                RegSetValueEx ( hkey, "", NULL, REG_SZ, (LPBYTE)szBuffer, strlen(szBuffer) + 1 );
-        }
-        else
-        {
-            if ( MessageBox ( NULL, "Could not find a 'mods' folder at the path you have selected. Choose another folder?", "Error", MB_OKCANCEL ) == IDOK )
-            {
-                return GetMTAPath ( szBuffer, sizeBufferSize );
-            }
-            else
-            {
-                RegCloseKey ( hkey );
-                return 0;
-            }
-        }
-        RegCloseKey ( hkey );
-        return 1;
-    }
-    else
-    {
-        RegCloseKey ( hkey );
-        return 0;
-    }
+    RegCloseKey ( hkey );
 }
+
 
 int GetGamePath ( char * szBuffer, size_t sizeBufferSize )
 {
@@ -242,7 +187,7 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     PROCESS_INFORMATION piLoadee;
     STARTUPINFO siLoadee;
 
-    char szMTAPath[MAX_PATH];
+    char szMTASAPath[MAX_PATH];
     char szGTAPath[MAX_PATH];
 
 	int iResult;
@@ -257,15 +202,7 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return 5;
 	}
 
-	iResult = GetMTAPath ( szMTAPath, MAX_PATH );
-	if ( iResult == 0 ) {
-		MessageBox ( 0, "Registry entries are is missing. Please reinstall Multi Theft Auto: San Andreas.", "Error!", MB_ICONEXCLAMATION | MB_OK );
-        return 6;
-	}
-	else if ( iResult == -1 ) {
-		MessageBox ( 0, "The path to your installation of Multi Theft Auto: San Andreas Deathmatch contains unsupported (unicode) characters. Please reinstall Multi Theft Auto: San Andreas to a compatible path that contains only standard ASCII characters.", "Error!", MB_ICONEXCLAMATION | MB_OK );
-		return 6;
-	}
+    GetMTASAPath ( szMTASAPath, MAX_PATH );
 
     // If we aren't compiling in debug-mode...
     #ifndef MTA_DEBUG
@@ -284,13 +221,28 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	#endif
     #endif
 
+
+    // Basic check for the data files
+    char szDataFile[MAX_PATH] = {'\0'};
+    _snprintf ( szDataFile, MAX_PATH, "%s\\mta\\libcurl.dll", szMTASAPath );
+
+    // Check if libcurl.dll exists)
+    if ( INVALID_HANDLE_VALUE == FindFirstFile ( szDataFile, &fdFileInfo ) )
+    {
+        MessageBox( NULL, "Load failed.  Please ensure that "
+                          "the data files have been installed "
+                          "correctly.", "Error!", MB_ICONEXCLAMATION|MB_OK );
+        return 1;
+    }
+
+
     // Grab the MTA folder
-    char szDir [MAX_PATH];
+    char szDir[MAX_PATH];
     char szGTAEXEPath[MAX_PATH];
     strcpy ( szGTAEXEPath, szGTAPath );
     strcat ( szGTAEXEPath, "\\" );
     strcat ( szGTAEXEPath, MTA_GTAEXE_NAME ) ;
-    strcpy ( szDir, szGTAPath );
+    strcpy ( szDir, szMTASAPath );
     strcat ( szDir, "\\mta" );
    
     // Make sure the gta executable exists
@@ -326,11 +278,11 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return 2;
     }
 
-    //char szCoreDLL[MAX_PATH] = {'\0'};
-    //_snprintf ( szCoreDLL, MAX_PATH, "%s\\%s", szMTAPath, MTA_DLL_NAME );
+    char szCoreDLL[MAX_PATH] = {'\0'};
+    _snprintf ( szCoreDLL, MAX_PATH, "%s\\mta\\%s", szMTASAPath, MTA_DLL_NAME );
 
     // Check if the core (mta_blue.dll or mta_blue_d.dll exists)
-    if ( INVALID_HANDLE_VALUE == FindFirstFile ( MTA_DLL_NAME, &fdFileInfo ) )
+    if ( INVALID_HANDLE_VALUE == FindFirstFile ( szCoreDLL, &fdFileInfo ) )
     {
         MessageBox( NULL, "Load failed.  Please ensure that "
                           "the file core.dll is in the modules "
@@ -341,7 +293,7 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     }
 
     // Inject the core into GTA
-    RemoteLoadLibrary ( piLoadee.hProcess, MTA_DLL_NAME );
+    RemoteLoadLibrary ( piLoadee.hProcess, szCoreDLL );
     
     // If we aren't debugging, we destroy the splash we created
     #ifndef MTA_DEBUG

@@ -41,7 +41,7 @@ public:
                             CNetAPI                         ( CClientManager * pManager);
 
     void                    DoPulse                         ( void );
-    bool                    ProcessPacket                   ( unsigned char bytePacketID, NetBitStreamInterface &bitStream, unsigned long ulTimeStamp );
+    bool                    ProcessPacket                   ( unsigned char bytePacketID, NetBitStreamInterface &bitStream );
 
     void                    ResetReturnPosition             ( void );
 
@@ -77,10 +77,10 @@ private:
     void                    WriteFullVehicleSpecific        ( CClientVehicle* pVehicle, NetBitStreamInterface& BitStream );
 
 public:
-    bool                    IsCameraSyncNeeded              ( bool bDifferenceCheck );
+    bool                    IsCameraSyncNeeded              ( void );
     void                    WriteCameraSync                 ( NetBitStreamInterface& BitStream );
 
-    void                    RPC                             ( eServerRPCFunctions ID, NetBitStreamInterface * pBitStream = NULL, NetPacketOrdering packetOrdering = PACKET_ORDERING_GAME, bool bTimestamp = false );
+    void                    RPC                             ( eServerRPCFunctions ID, NetBitStreamInterface * pBitStream = NULL, NetPacketOrdering packetOrdering = PACKET_ORDERING_GAME );
 
 private:
     CClientManager*         m_pManager;
@@ -90,10 +90,13 @@ private:
     unsigned long           m_ulLastSyncReturnTime;    
 
     bool                    m_bStoredReturnSync;
+    bool                    m_bVehicleLastReturn;
     CVector                 m_vecLastReturnPosition;
     CVector                 m_vecLastReturnRotation;
 
     unsigned long           m_ulLastCameraSyncTime;
+    bool                    m_bLastSentCameraMode;
+    CClientEntity*          m_pLastSentCameraTarget;
     CVector                 m_vecLastSentCameraPosition;
     CVector                 m_vecLastSentCameraLookAt;
 

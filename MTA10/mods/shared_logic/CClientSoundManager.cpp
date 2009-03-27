@@ -9,7 +9,10 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using SharedUtil::CalcMTASAPath;
+using std::list;
 
 extern CCoreInterface* g_pCore;
 
@@ -31,9 +34,7 @@ CClientSoundManager::CClientSoundManager ( CClientManager* pClientManager )
     }
 
     // Load plugins (mp3 in our case)
-    char szPath[256];
-    snprintf ( szPath, 255, "%s\\MTA\\", g_pCore->GetGTAInstallRoot() );
-    m_pSoundEngine->loadPlugins ( szPath );
+    m_pSoundEngine->loadPlugins ( CalcMTASAPath("\\MTA\\") );
 }
 
 CClientSoundManager::~CClientSoundManager ( void )

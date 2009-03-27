@@ -77,6 +77,10 @@ private:
 	CGraphics *			m_pGraphics;
 	
 	CMainMenu *			m_pMainMenu;
+
+    std::vector < D3DMATERIAL9 >         pMeshMaterials;
+    std::vector < LPDIRECT3DTEXTURE9 >   pMeshTextures;
+    std::vector < bool >                 pbMeshTextures;
 };
 
 #endif

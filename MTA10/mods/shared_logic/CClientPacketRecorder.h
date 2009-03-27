@@ -19,8 +19,6 @@ class CClientPacketRecorder;
 #include "CClientManager.h"
 #include <ctime>
 
-using namespace std;
-
 class CClientPacketRecorder
 {
     friend CClientManager;
@@ -42,8 +40,8 @@ public:
 
     void                SetFrameSkip                ( unsigned int uiFrameSkip );
 
-    void                RecordPacket                ( unsigned char ucPacketID, NetBitStreamInterface& bitStream, unsigned long ulTimeStamp );
-    void                RecordLocalData             ( CClientPlayer* pLocalPlayer, unsigned long ulTimeStamp );
+    void                RecordPacket                ( unsigned char ucPacketID, NetBitStreamInterface& bitStream );
+    void                RecordLocalData             ( CClientPlayer* pLocalPlayer );
 
 private:
     void                ReadLocalData               ( FILE* pFile );

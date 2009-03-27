@@ -15,7 +15,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 CResourceManager::CResourceManager ( void )
 {
@@ -32,9 +34,9 @@ CResourceManager::~CResourceManager ( void )
     m_resources.clear ();
 }
 
-CResource* CResourceManager::Add ( unsigned short usID, char* szResourceName )
+CResource* CResourceManager::Add ( unsigned short usID, char* szResourceName, CClientEntity* pResourceEntity, CClientEntity* pResourceDynamicEntity )
 {
-    CResource* pResource = new CResource ( usID, szResourceName );
+    CResource* pResource = new CResource ( usID, szResourceName, pResourceEntity, pResourceDynamicEntity );
     if ( pResource )
     {
         m_resources.push_back ( pResource );

@@ -13,6 +13,8 @@
 #include "StdInc.h"
 #include <game/CGame.h>
 
+using std::list;
+
 SBindableKey g_bkKeys[] = 
 { 
     { "mouse1",  0x01,          GTA_KEY_LMOUSE,         DATA_NONE,              0 },
@@ -447,7 +449,8 @@ bool CKeyBinds::Call ( CKeyBind* pKeyBind )
             case KEY_BIND_COMMAND:
             {
                 CCommandBind* pBind = static_cast < CCommandBind* > ( pKeyBind );
-                m_pCore->GetCommands ()->Execute ( pBind->szCommand, pBind->szArguments );
+                if ( pBind->bActive )
+                    m_pCore->GetCommands ()->Execute ( pBind->szCommand, pBind->szArguments );
                 break;
             }
             case KEY_BIND_FUNCTION:
@@ -473,7 +476,7 @@ bool CKeyBinds::Call ( CKeyBind* pKeyBind )
 }
 
 
-bool CKeyBinds::AddCommand ( const char* szKey, const char* szCommand, const char* szArguments, bool bState )
+bool CKeyBinds::AddCommand ( const char* szKey, const char* szCommand, const char* szArguments, bool bState, const char* szResource )
 {
     if ( szKey == NULL || szCommand == NULL ) return false;
 
@@ -489,6 +492,11 @@ bool CKeyBinds::AddCommand ( const char* szKey, const char* szCommand, const cha
         {
             bind->szArguments = new char [ strlen ( szArguments ) + 1 ];
             strcpy ( bind->szArguments, szArguments );
+        }
+        if ( szResource )
+        {
+            bind->szResource = new char [ strlen ( szResource ) + 1 ];
+            strcpy ( bind->szResource, szResource );
         }
         bind->bHitState = bState;
         bind->bState = false;
@@ -525,7 +533,7 @@ bool CKeyBinds::AddCommand ( const SBindableKey* pKey, const char* szCommand, co
 }
 
 
-bool CKeyBinds::RemoveCommand ( const char* szKey, const char* szCommand, bool bCheckState, bool bState )
+bool CKeyBinds::RemoveCommand ( const char* szKey, const char* szCommand, bool bCheckState, bool bState, const char* szResource )
 {
     if ( szKey == NULL || szCommand == NULL ) return false;
 
@@ -541,16 +549,23 @@ bool CKeyBinds::RemoveCommand ( const char* szKey, const char* szCommand, bool b
                 {
                     if ( !bCheckState || pBind->bHitState == bState )
                     {
-                        if ( m_bProcessingKeyStroke )
+                        if ( !pBind->szResource )
                         {
-                            pBind->beingDeleted = true;
+                          if ( m_bProcessingKeyStroke )
+                            {
+                                pBind->beingDeleted = true;
+                            }
+                            else
+                            {
+                                delete pBind;
+                                m_pList->erase ( iter );
+                            }
+                            return true;
                         }
-                        else
+                        else if ( strcmp ( szResource, pBind->szResource ) == 0 )
                         {
-                            delete pBind;
-                            m_pList->erase ( iter );
+                            pBind->bActive = false;
                         }
-                        return true;
                     }
                 }
             }
@@ -611,7 +626,7 @@ bool CKeyBinds::RemoveAllCommands ( void )
 }
 
 
-bool CKeyBinds::CommandExists ( const char* szKey, const char* szCommand, bool bCheckState, bool bState )
+bool CKeyBinds::CommandExists ( const char* szKey, const char* szCommand, bool bCheckState, bool bState, const char* szArguments )
 {
     list < CKeyBind* > ::const_iterator iter = m_pList->begin ();
     for ( ; iter != m_pList->end (); iter++ )
@@ -619,13 +634,16 @@ bool CKeyBinds::CommandExists ( const char* szKey, const char* szCommand, bool b
         if ( (*iter)->GetType () == KEY_BIND_COMMAND )
         {
             CCommandBind* pBind = static_cast < CCommandBind* > ( *iter );
-            if ( stricmp ( pBind->boundKey->szKey, szKey ) == 0 )
+            if ( !szKey || ( stricmp ( pBind->boundKey->szKey, szKey ) == 0 ) )
             {
                 if ( strcmp ( pBind->szCommand, szCommand ) == 0 )
                 {
                     if ( !bCheckState || pBind->bHitState == bState )
                     {
-                        return true;
+                        if ( !szArguments || ( szArguments && strcmp ( pBind->szArguments, szArguments ) == 0 ) )
+                        {
+                            return true;
+                        }
                     }
                 }
             }
@@ -633,6 +651,49 @@ bool CKeyBinds::CommandExists ( const char* szKey, const char* szCommand, bool b
     }
     
     return false;
+}
+
+bool CKeyBinds::SetCommandActive ( const char* szCommand, bool bState, const char* szArguments, const char* szResource, bool bActive, bool checkHitState )
+{
+    list < CKeyBind* > ::const_iterator iter = m_pList->begin ();
+    for ( ; iter != m_pList->end (); iter++ )
+    {
+        if ( (*iter)->GetType () == KEY_BIND_COMMAND )
+        {
+            CCommandBind* pBind = static_cast < CCommandBind* > ( *iter );
+            if ( pBind->szResource && ( strcmp ( pBind->szResource, szResource ) == 0 ) )
+            {
+                if ( !szCommand || ( strcmp ( pBind->szCommand, szCommand ) == 0 ) )
+                {
+                    if ( !checkHitState || ( pBind->bHitState == bState ) )
+                    {
+                        if ( !szArguments || ( strcmp ( pBind->szArguments, szArguments ) == 0 ) )
+                        {
+                            pBind->bActive = bActive;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }  
+    return false;
+}
+
+void CKeyBinds::SetAllCommandsActive ( const char* szResource, bool bActive )
+{
+    list < CKeyBind* > ::const_iterator iter = m_pList->begin ();
+    for ( ; iter != m_pList->end (); iter++ )
+    {
+        if ( (*iter)->GetType () == KEY_BIND_COMMAND )
+        {
+            CCommandBind* pBind = static_cast < CCommandBind* > ( *iter );
+            if ( pBind->szResource && ( strcmp ( pBind->szResource, szResource ) == 0 ) )
+            {
+                pBind->bActive = bActive;
+            }
+        }
+    }  
 }
 
 
@@ -1922,7 +1983,7 @@ void CKeyBinds::DoPostFramePulse ( void )
     if ( m_pCore->GetGame ()->GetSystemState () != 9 /* GS_PLAYING_GAME */ ) return;
 
     bool bInVehicle = false, bHasDetonator = false, bIsDead = false, bEnteringVehicle = false;
-    CPed* pPed = m_pCore->GetGame ()->GetPools ()->GetPed ( 1 );
+    CPed* pPed = m_pCore->GetGame ()->GetPools ()->GetPedFromRef ( (DWORD)1 );
     // Don't set any controller states if the local player isnt alive
     if ( !pPed )
         return;
@@ -2106,7 +2167,7 @@ bool CKeyBinds::LoadFromXML ( CXMLNode* pMainNode )
                             if ( !strCommand.empty () )
                             {
                                 // HACK
-                                std::string strState, strArguments;
+                                std::string strState, strArguments, strResource ;
                                 pNode = pMainNode->GetSubNode ( i );
 
                                 pAttribute = pNode->GetAttributes ().Find ( "state" );
@@ -2124,7 +2185,14 @@ bool CKeyBinds::LoadFromXML ( CXMLNode* pMainNode )
                                     strArguments = pAttribute->GetValue ();
                                 }
 
-                                if ( !CommandExists ( strKey.c_str (), strCommand.c_str (), true, bState ) )
+                                pAttribute = pNode->GetAttributes ().Find ( "resource" );
+                                if ( pAttribute )
+                                {
+                                    strResource = pAttribute->GetValue ();
+                                    AddCommand ( strKey.c_str (), strCommand.c_str (), strArguments.c_str (), bState, strResource.c_str() );
+                                    SetCommandActive ( strCommand.c_str(), bState, strArguments.c_str(), strResource.c_str(), false, true );
+                                }
+                                else if ( !CommandExists ( strKey.c_str (), strCommand.c_str (), true, bState ) )
                                     AddCommand ( strKey.c_str (), strCommand.c_str (), strArguments.c_str (), bState );
                             }                                        
                         }
@@ -2218,23 +2286,13 @@ bool CKeyBinds::SaveToXML ( CXMLNode* pMainNode )
 						pA = pAttributes->Create ( "arguments" );						
 						pA->SetValue ( szArguments );
                     }
-                }
-                else if ( type == KEY_BIND_FUNCTION )
-                {
-                    // Create the key attribute
-                    const char* szKey = (*iter)->boundKey->szKey;
-                    if ( szKey )
+
+                    char* szResource = pBind->szResource;
+                    if ( szResource )
                     {
-						pA = pAttributes->Create ( "key" );
-						pA->SetValue ( szKey );
+						pA = pAttributes->Create ( "resource" );						
+						pA->SetValue ( szResource );
                     }
-
-                    CKeyFunctionBind* pBind = static_cast < CKeyFunctionBind* > ( *iter );
-                    char* szState = ( pBind->bHitState ) ? "down" : "up";
-
-					pA = pAttributes->Create ( "state" );
-					pA->SetValue ( szState );
-                    
                 }
                 else if ( type == KEY_BIND_GTA_CONTROL )
                 {

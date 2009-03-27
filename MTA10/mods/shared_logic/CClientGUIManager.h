@@ -22,8 +22,6 @@ struct SGUIManagerListEntry;
 #include "CClientGUIElement.h"
 #include <gui/CGUI.h>
 
-using namespace std;
-
 class CClientGUIManager
 {
     friend class CClientManager;
@@ -39,13 +37,14 @@ public:
 	bool									Exists					( CGUIElement* pCGUIElement );
     inline unsigned int						Count                   ( void )									{ return static_cast < unsigned int > ( m_Elements.size () ); };
 
+    CClientGUIElement*                      Get                    ( CGUIElement* pCGUIElement );
 private:
     void            	                    Add 					( CClientGUIElement* pGUIElement );
 	void                                    Remove					( CClientGUIElement* pGUIElement );
 
 private:
     bool                                    m_bCanRemoveFromList;
-    list < CClientGUIElement* >				m_Elements;
+    std::list < CClientGUIElement* >        m_Elements;
 };
 
 #endif

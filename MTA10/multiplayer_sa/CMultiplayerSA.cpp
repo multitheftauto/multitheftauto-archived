@@ -39,15 +39,18 @@ unsigned long CMultiplayerSA::HOOKPOS_CCustomRoadsignMgr__RenderRoadsignAtomic;
 unsigned long CMultiplayerSA::HOOKPOS_Trailer_BreakTowLink;
 unsigned long CMultiplayerSA::HOOKPOS_CRadar__DrawRadarGangOverlay;
 unsigned long CMultiplayerSA::HOOKPOS_CTaskComplexJump__CreateSubTask;
+unsigned long CMultiplayerSA::HOOKPOS_CTrain_ProcessControl_Derail;
+unsigned long CMultiplayerSA::HOOKPOS_CVehicle_Render;
+unsigned long CMultiplayerSA::HOOKPOS_CObject_Render;
 
 unsigned long CMultiplayerSA::FUNC_CStreaming_Update;
 unsigned long CMultiplayerSA::FUNC_CAudioEngine__DisplayRadioStationName;
 unsigned long CMultiplayerSA::FUNC_CHud_Draw;
 
 unsigned long CMultiplayerSA::ADDR_CursorHiding;
+unsigned long CMultiplayerSA::ADDR_GotFocus;
 
 unsigned long CMultiplayerSA::FUNC_CPlayerInfoBase;
-
 
 #define HOOKPOS_FxManager_CreateFxSystem 0x4A9BE0
 #define HOOKPOS_FxManager_DestroyFxSystem 0x4A9810
@@ -91,6 +94,7 @@ FireHandler* m_pFireHandler = NULL;
 ProjectileHandler* m_pProjectileHandler = NULL;
 ProjectileStopHandler* m_pProjectileStopHandler = NULL;
 ProcessCamHandler* m_pProcessCamHandler = NULL;
+GameProcessHandler* m_pGameProcessHandler = NULL;
 
 ExplosionHandler * m_pExplosionHandler; // stores our handler
 BreakTowLinkHandler * m_pBreakTowLinkHandler = NULL;
@@ -118,6 +122,10 @@ VOID HOOK_CCam_ProcessFixed ();
 VOID HOOK_Render3DStuff ();
 VOID HOOK_CTaskSimplePlayerOnFoot_ProcessPlayerWeapon ();
 VOID HOOK_CPed_IsPlayer ();
+VOID HOOK_CTrain_ProcessControl_Derail ();
+VOID HOOK_CVehicle_Render ();
+VOID HOOK_CObject_Render ();
+VOID HOOK_CGame_Process ();
 
 CEntitySAInterface * dwSavedPlayerPointer = 0;
 CEntitySAInterface * activeEntityForStreaming = 0; // the entity that the streaming system considers active
@@ -131,7 +139,11 @@ CEntitySAInterface * activeEntityForStreaming = 0; // the entity that the stream
 #define CALL_CWeapon_FireAreaEffect 0x73EBFE
 #define FUNC_CWeapon_FireAreaEffect 0x53A450
 #define CALL_CBike_ProcessRiderAnims 0x6BF425   // @ CBike::ProcessDrivingAnims
+
+#define CALL_CGame_Process 0x53E981
+
 DWORD FUNC_CBike_ProcessRiderAnims = 0x6B7280;
+DWORD FUNC_CEntity_Render = 0x534310;
 
 
 CMultiplayerSA::CMultiplayerSA()
@@ -204,10 +216,17 @@ void CMultiplayerSA::InitHooks()
     HookInstall(HOOKPOS_CCam_ProcessFixed, (DWORD)HOOK_CCam_ProcessFixed, 7);
     HookInstall(HOOKPOS_CTaskSimplePlayerOnFoot_ProcessPlayerWeapon, (DWORD)HOOK_CTaskSimplePlayerOnFoot_ProcessPlayerWeapon, 7);
     HookInstall(HOOKPOS_CPed_IsPlayer, (DWORD)HOOK_CPed_IsPlayer, 6);
+    HookInstall(HOOKPOS_CTrain_ProcessControl_Derail, (DWORD)HOOK_CTrain_ProcessControl_Derail, 6);
+    HookInstall(HOOKPOS_CVehicle_Render, (DWORD)HOOK_CVehicle_Render, 5);
+    HookInstall(HOOKPOS_CObject_Render, (DWORD)HOOK_CObject_Render, 5);
 
+    HookInstallCall ( CALL_CGame_Process, (DWORD)HOOK_CGame_Process );
     HookInstallCall ( CALL_CBike_ProcessRiderAnims, (DWORD)HOOK_CBike_ProcessRiderAnims );
     HookInstallCall ( CALL_Render3DStuff, (DWORD)HOOK_Render3DStuff );
 	HookInstallCall ( CALL_CWeapon_FireAreaEffect, (DWORD)HOOK_CWeapon_FireAreaEffect);
+
+    // Disable GTA setting g_bGotFocus to false when we minimize
+    memset ( (void *)ADDR_GotFocus, 0x90, pGameInterface->GetGameVersion () == VERSION_EU_10 ? 6 : 10 );
 
     // Increase double link limit from 3200 ro 4000
     *(int*)0x00550F82 = 4000;
@@ -707,6 +726,22 @@ void CMultiplayerSA::InitHooks()
 
     // Don't get golf clubs from caddies
     *(BYTE *)0x6D1A1A = 0xEB;
+
+    // Prevent CVehicle::RecalcTrainRailPosition from changing train speed
+    memset((void *)0x6F701D, 0x90, 6);
+    *(BYTE *)0x6F7069 = 0xEB;
+
+    // The instanthit function for bullets ignores the first few bullets shot by
+    // remote players after reloading because some flag isn't set (no bullet impact
+    // graphics, no damage). Makes e.g. sawnoffs completely ineffective.
+    // Remove this check so that no bullets are ignored.
+    *(BYTE *)0x73FDF9 = 0xEB;
+
+    // Make sure water is always drawn after trees and LOD instead of before
+    *(WORD *)0x53DF55 = 0x9090;
+
+    // Disallow spraying gang tags
+    memset ( (void *)0x565C5C, 0x90, 10 );
 }
 
 
@@ -930,6 +965,11 @@ void CMultiplayerSA::SetFireHandler ( FireHandler * pFireHandler )
 void CMultiplayerSA::SetProcessCamHandler ( ProcessCamHandler* pProcessCamHandler )
 {
     m_pProcessCamHandler = pProcessCamHandler;
+}
+
+void CMultiplayerSA::SetGameProcessHandler ( GameProcessHandler* pProcessHandler )
+{
+    m_pGameProcessHandler = pProcessHandler;
 }
 
 void CMultiplayerSA::HideRadar ( bool bHide )
@@ -1260,7 +1300,7 @@ no_render:
 
 bool CallBreakTowLinkHandler ( CVehicleSAInterface * vehicle )
 {
-    CVehicle * pVehicle = pGameInterface->GetPools ()->GetVehicle ( vehicle );
+    CVehicle * pVehicle = pGameInterface->GetPools ()->GetVehicle ( (DWORD *)vehicle );
     if ( pVehicle && m_pBreakTowLinkHandler )
     {
         return m_pBreakTowLinkHandler ( pVehicle );
@@ -1404,13 +1444,13 @@ bool CallExplosionHandler ( void )
 
             case ENTITY_TYPE_VEHICLE:
             {
-                pExplosionCreator = pGameInterface->GetPools ()->GetVehicle ( (CVehicleSAInterface*) pInterface );
+                pExplosionCreator = pGameInterface->GetPools ()->GetVehicle ( (DWORD*) pInterface );
                 break;
             }
 
             case ENTITY_TYPE_OBJECT:
             {
-                //pExplosionCreator = pGameInterface->GetPools ()->GetObject ( (CObjectSAInterface*) pInterface );
+                //pExplosionCreator = pGameInterface->GetPools ()->GetObject ( (DWORD*) pInterface );
                 break;
             }
         }
@@ -1423,13 +1463,13 @@ bool CallExplosionHandler ( void )
         {
             case ENTITY_TYPE_PED:
             {
-                pExplodingEntity = dynamic_cast < CEntity * > ( pGameInterface->GetPools ()->GetPed ( (DWORD*) pExplodingEntityInterface ) );
+                pExplodingEntity = dynamic_cast < CEntity * > ( pGameInterface->GetPools ()->GetPed ( (DWORD *) pExplodingEntityInterface ) );
                 break;
             }
 
             case ENTITY_TYPE_VEHICLE:
             {
-                pExplodingEntity = dynamic_cast < CEntity * > ( pGameInterface->GetPools ()->GetVehicle ( (CVehicleSAInterface*) pExplodingEntityInterface ) );
+                pExplodingEntity = dynamic_cast < CEntity * > ( pGameInterface->GetPools ()->GetVehicle ( (DWORD *) pExplodingEntityInterface ) );
                 break;
             }
 
@@ -1957,6 +1997,138 @@ VOID _declspec(naked) HOOK_CRunningScript_Process()
     }
 }
 
+static CVehicleSAInterface* pDerailingTrain = NULL;
+VOID _declspec(naked) HOOK_CTrain_ProcessControl_Derail()
+{
+    // If the train wouldn't derail, don't modify anything
+    _asm
+    {
+        jnp     train_would_derail
+        mov     eax, 0x6F8F89
+        jmp     eax
+train_would_derail:
+        pushad
+        mov     pDerailingTrain, esi
+    }
+
+    // At this point we know that GTA wants to derail the train
+    if ( pDerailingTrain->m_pVehicle->IsDerailable () )
+    {
+        // Go back to the derailment code
+        _asm
+        {
+            popad
+            mov     eax, 0x6F8DC0
+            jmp     eax
+        }
+    }
+    else
+    {
+        _asm
+        {
+            popad
+            mov     eax, 0x6F8F89
+            jmp     eax
+        }
+    }
+}
+
+
+static void SetEntityAlphaHooked ( DWORD dwEntity, DWORD dwCallback, DWORD dwAlpha )
+{
+    if ( dwEntity )
+    {
+        // Alpha setting of SetRwObjectAlpha function is done by
+        // iterating all materials of a clump and its atoms, and
+        // calling a given callback. We temporarily overwrite that
+        // callback with our own callback and then restore it.
+        *(DWORD *)(0x5332A2) = dwCallback;
+        *(DWORD *)(0x5332F3) = dwCallback;
+
+        // Call SetRwObjectAlpha
+        DWORD dwFunc = FUNC_SetRwObjectAlpha;
+        _asm
+        {
+            mov     ecx, dwEntity
+            push    dwAlpha
+            call    dwFunc
+        }
+
+        // Restore the GTA callbacks
+        *(DWORD *)(0x5332A2) = (DWORD)(0x533280);
+        *(DWORD *)(0x5332F3) = (DWORD)(0x533280);
+    }
+}
+static RpMaterial* HOOK_SetMaterialColorAlpha ( RpMaterial* pMaterial, unsigned char ucAlpha )
+{
+    unsigned char* pPad = (unsigned char *)(&pMaterial->id);
+    if ( pPad [ 0 ] != 123 )
+    {
+        // Save in the structure padding the original alpha value for this material
+        pPad [ 0 ] = 123;
+        pPad [ 1 ] = pMaterial->color.a;
+    }
+
+    pMaterial->color.a = static_cast < unsigned char > ( pPad [ 1 ] * ((float)ucAlpha / 255.0f) );
+
+    return pMaterial;
+}
+
+static DWORD dwAlphaEntity = 0;
+
+VOID _declspec(naked) HOOK_CVehicle_Render ()
+{
+    _asm
+    {
+        pushad
+        mov         dwAlphaEntity, ecx
+    }
+
+    SetEntityAlphaHooked ( dwAlphaEntity,
+                           (DWORD)HOOK_SetMaterialColorAlpha,
+                           ((CVehicleSAInterface *)dwAlphaEntity)->m_pVehicle->GetAlpha () );
+
+    _asm
+    {
+        popad
+        jmp         FUNC_CEntity_Render
+    }
+}
+
+
+static void SetObjectAlpha ()
+{
+    if ( dwAlphaEntity )
+    {
+        CObject* pObject = pGameInterface->GetPools()->GetObject ( (DWORD *)dwAlphaEntity );
+        if ( pObject )
+        {
+            SetEntityAlphaHooked ( dwAlphaEntity,
+                                   (DWORD)HOOK_SetMaterialColorAlpha,
+                                   pObject->GetAlpha () );
+        }
+    }
+}
+
+// Note: This hook is also called for world objects (light poles, wooden fences, etc).
+VOID _declspec(naked) HOOK_CObject_Render ()
+{
+    _asm
+    {
+        pushad
+        mov         dwAlphaEntity, ecx
+    }
+
+    SetObjectAlpha ( );
+
+    _asm
+    {
+        popad
+        jmp         FUNC_CEntity_Render
+    }
+}
+
+
 void CMultiplayerSA::DisableEnterExitVehicleKey( bool bDisabled )
 {
 	// PREVENT THE PLAYER LEAVING THEIR VEHICLE
@@ -2261,4 +2433,16 @@ void CMultiplayerSA::SetCustomCameraRotationEnabled ( bool bEnabled )
 void CMultiplayerSA::SetDebugVars ( float f1, float f2, float f3 )
 {
 
+}
+
+VOID _declspec(naked) HOOK_CGame_Process ()
+{
+    if ( m_pGameProcessHandler )
+        m_pGameProcessHandler ();
+
+    _asm
+    {
+        mov eax, 0x53BEE0
+        jmp eax
+    }
 }

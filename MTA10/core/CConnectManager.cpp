@@ -62,9 +62,8 @@ bool CConnectManager::Connect ( const char* szHost, unsigned short usPort, const
 	// Is the nick valid?
 	if ( !CheckNickProvided ( (char*) szNick ) )
 	{
-		char szBuffer [256];
-		_snprintf ( szBuffer, 255, "Connecting failed. Invalid nick provided!" );
-        CCore::GetSingleton ().ShowMessageBox ( "Error", szBuffer, MB_BUTTON_OK | MB_ICON_ERROR );
+        SString strBuffer = "Connecting failed. Invalid nick provided!";
+        CCore::GetSingleton ().ShowMessageBox ( "Error", strBuffer, MB_BUTTON_OK | MB_ICON_ERROR );
 		return false;
 	}
 
@@ -81,12 +80,10 @@ bool CConnectManager::Connect ( const char* szHost, unsigned short usPort, const
     pNet->SetMTUSize ( m_usMTUSize );
 
     // Try to start a network to connect
-    char szBuffer [256];
-    szBuffer [255] = 0;
     if ( !pNet->StartNetwork ( szHost, usPort ) )
     {
-        _snprintf ( szBuffer, 255, "Connecting to %s at port %u failed!", szHost, usPort );
-        CCore::GetSingleton ().ShowMessageBox ( "Error", szBuffer, MB_BUTTON_OK | MB_ICON_ERROR );
+        SString strBuffer ( "Connecting to %s at port %u failed!", szHost, usPort );
+        CCore::GetSingleton ().ShowMessageBox ( "Error", strBuffer, MB_BUTTON_OK | MB_ICON_ERROR );
         return false;
     }
 
@@ -100,8 +97,8 @@ bool CConnectManager::Connect ( const char* szHost, unsigned short usPort, const
     m_tConnectStarted = time ( NULL );
 
     // Display the status box
-    _snprintf ( szBuffer, 255, "Connecting to %s:%u ...", m_strHost.c_str(), usPort );
-    CCore::GetSingleton ().ShowMessageBox ( "Connecting", szBuffer, MB_BUTTON_CANCEL | MB_ICON_INFO, m_pOnCancelClick );
+    SString strBuffer ( "Connecting to %s:%u ...", m_strHost.c_str(), usPort );
+    CCore::GetSingleton ().ShowMessageBox ( "Connecting", strBuffer, MB_BUTTON_CANCEL | MB_ICON_INFO, m_pOnCancelClick );
 
     return true;
 }
@@ -180,40 +177,40 @@ void CConnectManager::DoPulse ( void )
             unsigned char ucError = CCore::GetSingleton ().GetNetwork ()->GetConnectionError ();
             if ( ucError != 0 )
             {
-                char szError [NET_DISCONNECT_REASON_SIZE] = {0};
+                SString strError;
                 switch ( ucError )
                 {
 		            case ID_RSA_PUBLIC_KEY_MISMATCH:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: unknown protocol error" );  // encryption key mismatch
+                        strError = "Disconnected: unknown protocol error";  // encryption key mismatch
 			            break;
 		            case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: disconnected remotely" );
+			            strError = "Disconnected: disconnected remotely";
 			            break;
 		            case ID_REMOTE_CONNECTION_LOST:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: connection lost remotely" );
+			            strError = "Disconnected: connection lost remotely";
 			            break;
 		            case ID_CONNECTION_BANNED:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: you are banned from this server" );
+			            strError = "Disconnected: you are banned from this server";
 			            break;
 		            case ID_NO_FREE_INCOMING_CONNECTIONS:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: server is full" );
+			            strError = "Disconnected: server is full";
 			            break;
 		            case ID_DISCONNECTION_NOTIFICATION:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: disconnected" );
+			            strError = "Disconnected: disconnected";
 			            break;
 		            case ID_CONNECTION_LOST:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: connection lost" );
+			            strError = "Disconnected: connection lost";
 			            break;
 		            case ID_INVALID_PASSWORD:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: invalid password" );
+			            strError = "Disconnected: invalid password";
 			            break;
                     default:
-			            _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: connection refused" );
+			            strError = "Disconnected: connection refused";
 			            break;
                 }
 
                 // Display an error, reset the error status and exit
-                CCore::GetSingleton ().ShowMessageBox ( "Error", szError, MB_BUTTON_OK | MB_ICON_ERROR );
+                CCore::GetSingleton ().ShowMessageBox ( "Error", strError, MB_BUTTON_OK | MB_ICON_ERROR );
                 CCore::GetSingleton ().GetNetwork ()->SetConnectionError ( 0 );
 				CCore::GetSingleton ().GetNetwork ()->SetImmediateError ( 0 );
                 Abort ();
@@ -233,7 +230,7 @@ void CConnectManager::DoPulse ( void )
 }
 
 
-bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStreamInterface& BitStream, unsigned long ulTimeStamp )
+bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStreamInterface& BitStream )
 {
     // We're working on connecting?
     if ( g_pConnectManager->m_bIsConnecting )
@@ -242,14 +239,12 @@ bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStre
         if ( ucPacketID == PACKET_ID_CORE_CONNECTED )
         {
             // Read out the mod to load
-            char szModName [256];
-            memset ( szModName, 0, 256 );
+            char* szModName = new char [ BitStream.GetNumberOfBytesUsed () + 1 ];
+            memset ( szModName, 0, BitStream.GetNumberOfBytesUsed () + 1 );
             if ( BitStream.Read ( szModName, BitStream.GetNumberOfBytesUsed () ) )
             {
                 // Populate the arguments to pass it (-c host port nick)
-                char szArguments [256];
-                szArguments [255] = 0;
-                _snprintf ( szArguments, 255, "%s %s", g_pConnectManager->m_strNick.c_str(), g_pConnectManager->m_strPassword.c_str() );
+                SString strArguments ( "%s %s", g_pConnectManager->m_strNick.c_str(), g_pConnectManager->m_strPassword.c_str() );
 
                 // Hide the messagebox we're currently showing
                 CCore::GetSingleton ().RemoveMessageBox ();
@@ -276,6 +271,19 @@ bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStre
                     {
                         pRecentList->Add ( RecentServer );
                     }
+
+                    // Set as our current server for xfire
+                    if ( XfireIsLoaded () )
+                    {
+                        const char *szKey[2], *szValue[2];
+                        szKey[0] = "Gamemode";
+                        szValue[0] = RecentServer.strType.c_str();
+
+                        szKey[1] = "Map";
+                        szValue[1] = RecentServer.strMap.c_str();
+
+                        XfireSetCustomGameData ( 2, szKey, szValue ); 
+                    }
                 }
 
                 // Kevuwk: Forced the config to save here so that the IP/Port isn't lost on crash
@@ -291,11 +299,11 @@ bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStre
                 g_pConnectManager->m_tConnectStarted = 0;
 
                 // Load the mod
-                if ( !CModManager::GetSingleton ().Load ( szModName, szArguments ) )
+                if ( !CModManager::GetSingleton ().Load ( szModName, strArguments ) )
                 {
                     // Failed loading the mod
-                    _snprintf ( szArguments, 255, "No such mod installed (%s)", szModName );
-                    CCore::GetSingleton ().ShowMessageBox ( "Error", szArguments, MB_BUTTON_OK | MB_ICON_ERROR );
+                    strArguments.Format ( "No such mod installed (%s)", szModName );
+                    CCore::GetSingleton ().ShowMessageBox ( "Error", strArguments, MB_BUTTON_OK | MB_ICON_ERROR );
 					g_pConnectManager->Abort ();
                 }
             }
@@ -305,6 +313,8 @@ bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStre
                 CCore::GetSingleton ().ShowMessageBox ( "Error", "Bad server response (2)", MB_BUTTON_OK | MB_ICON_ERROR );
                 g_pConnectManager->Abort ();
             }
+
+            delete [] szModName;
         }
         else
         {
@@ -324,7 +334,7 @@ bool CConnectManager::StaticProcessPacket ( unsigned char ucPacketID, NetBitStre
 }
 
 
-bool CConnectManager::CheckNickProvided ( char* szNick )
+bool CConnectManager::CheckNickProvided ( const char* szNick )
 {
     if ( stricmp ( szNick, "admin" ) == 0 )
         return false;

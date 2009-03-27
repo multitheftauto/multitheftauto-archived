@@ -32,12 +32,14 @@ CNetAPI::CNetAPI ( CClientManager* pManager )
 
     m_ulLastPuresyncTime = 0;
     m_ulLastSyncReturnTime = 0;
+    m_bLastSentCameraMode = true;       // start out in fixed mode
+    m_pLastSentCameraTarget = NULL;
     m_ulLastCameraSyncTime = 0;
     m_bStoredReturnSync = false;
 }
 
 
-bool CNetAPI::ProcessPacket ( unsigned char bytePacketID, NetBitStreamInterface& BitStream, unsigned long ulTimeStamp ) 
+bool CNetAPI::ProcessPacket ( unsigned char bytePacketID, NetBitStreamInterface& BitStream ) 
 {
     switch ( bytePacketID )
     { 
@@ -51,9 +53,6 @@ bool CNetAPI::ProcessPacket ( unsigned char bytePacketID, NetBitStreamInterface&
                 CClientPlayer* pPlayer = m_pPlayerManager->Get ( PlayerID );
                 if ( pPlayer )
                 {
-                    // Set his timestamp for later
-                    pPlayer->SetTimeStamp ( ulTimeStamp );
-
                     // Read out and apply the puresync data
                     ReadPlayerPuresync ( pPlayer, BitStream );
                 }
@@ -95,9 +94,6 @@ bool CNetAPI::ProcessPacket ( unsigned char bytePacketID, NetBitStreamInterface&
                 CClientPlayer* pPlayer = m_pPlayerManager->Get ( PlayerID );
                 if ( pPlayer )
                 {
-                    // Set his timestamp for later
-                    pPlayer->SetTimeStamp ( ulTimeStamp );
-
                     // Read out the keysync data
                     ReadKeysync ( pPlayer, BitStream );
                 }
@@ -146,6 +142,7 @@ bool CNetAPI::ProcessPacket ( unsigned char bytePacketID, NetBitStreamInterface&
                 // Remember that position
                 m_vecLastReturnPosition = vecPosition;
                 m_vecLastReturnRotation = vecRotationDegrees;
+                m_bVehicleLastReturn = true;
             }
             else
             {
@@ -169,6 +166,7 @@ bool CNetAPI::ProcessPacket ( unsigned char bytePacketID, NetBitStreamInterface&
                 // Remember that position
                 m_vecLastReturnPosition = vecPosition;
                 m_vecLastReturnRotation = CVector ( 0.0f, 0.0f, 0.0f );
+                m_bVehicleLastReturn = false;
             }
 
             // Remember the last return sync time
@@ -200,11 +198,13 @@ void CNetAPI::ResetReturnPosition ( void )
         {
             pVehicle->GetPosition ( m_vecLastReturnPosition );
             pVehicle->GetRotationDegrees ( m_vecLastReturnRotation );
+            m_bVehicleLastReturn = true;
         }
         else
         {
             pPlayer->GetPosition ( m_vecLastReturnPosition );
             m_vecLastReturnRotation = CVector ( 0.0f, 0.0f, 0.0f );
+            m_bVehicleLastReturn = false;
         }
     }
 }
@@ -260,7 +260,7 @@ void CNetAPI::DoPulse ( void )
             CClientVehicle* pVehicle = pPlayer->GetOccupiedVehicle ();
 
 			// Record local data in the packet recorder
-			m_pManager->GetPacketRecorder ()->RecordLocalData ( pPlayer, ulCurrentTime );
+			m_pManager->GetPacketRecorder ()->RecordLocalData ( pPlayer );
 
             // We should do a puresync?
             if ( IsPureSyncNeeded () )
@@ -275,8 +275,8 @@ void CNetAPI::DoPulse ( void )
                         // Write our data
                         WriteVehiclePuresync ( pPlayer, pVehicle, *pBitStream );
 
-                        // Send the packet and destroy it (timestamped)
-                        g_pNet->SendPacket( PACKET_ID_PLAYER_VEHICLE_PURESYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME, true );
+                        // Send the packet and destroy it
+                        g_pNet->SendPacket( PACKET_ID_PLAYER_VEHICLE_PURESYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME );
                         g_pNet->DeallocateNetBitStream ( pBitStream );
                     }
 
@@ -298,8 +298,8 @@ void CNetAPI::DoPulse ( void )
                             // Write our data
                             WritePlayerPuresync ( pPlayer, *pBitStream );
 
-                            // Send the packet and destroy it (timestamped)
-                            g_pNet->SendPacket( PACKET_ID_PLAYER_PURESYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME, true );
+                            // Send the packet and destroy it
+                            g_pNet->SendPacket( PACKET_ID_PLAYER_PURESYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME );
                             g_pNet->DeallocateNetBitStream ( pBitStream );
                         }
                     }
@@ -324,7 +324,7 @@ void CNetAPI::DoPulse ( void )
                 }
             }
 
-            if ( IsCameraSyncNeeded ( true ) )
+            if ( IsCameraSyncNeeded () )
             {
                 // Send a camera-sync packet
                 NetBitStreamInterface* pBitStream = g_pNet->AllocateNetBitStream ();
@@ -333,8 +333,8 @@ void CNetAPI::DoPulse ( void )
                     // Write our data
                     WriteCameraSync ( *pBitStream );
 
-                    // Send the packet and destroy it (timestamped)
-                    g_pNet->SendPacket ( PACKET_ID_CAMERA_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, PACKET_ORDERING_GAME, true );
+                    // Send the packet and destroy it
+                    g_pNet->SendPacket ( PACKET_ID_CAMERA_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_RELIABLE_ORDERED, PACKET_ORDERING_GAME );
                     g_pNet->DeallocateNetBitStream ( pBitStream );
                 }
             }
@@ -360,8 +360,11 @@ void CNetAPI::DoPulse ( void )
                         // Freeze us at the last position
                         pVehicle->SetMoveSpeed ( CVector ( 0, 0, 0 ) );
                         pVehicle->SetTurnSpeed ( CVector ( 0, 0, 0 ) );
-                        pVehicle->SetPosition ( m_vecLastReturnPosition );
-                        pVehicle->SetRotationDegrees ( m_vecLastReturnRotation );
+                        if ( m_bVehicleLastReturn )
+                        {
+                            pVehicle->SetPosition ( m_vecLastReturnPosition );
+                            pVehicle->SetRotationDegrees ( m_vecLastReturnRotation );
+                        }
                     }
                     else
                     {
@@ -413,25 +416,44 @@ bool CNetAPI::IsPureSyncNeeded ( void )
 }
 
 
-bool CNetAPI::IsCameraSyncNeeded ( bool bDifferenceCheck )
+bool CNetAPI::IsCameraSyncNeeded ()
 {
     CClientCamera * pCamera = m_pManager->GetCamera ();
-    if ( m_pManager->GetCamera ()->IsInFixedMode () )
+    if ( pCamera->IsInFixedMode () )
     {
         CVector vecPosition, vecLookAt;
         pCamera->GetPosition ( vecPosition );
         pCamera->GetTarget ( vecLookAt );
         // Is the camera at a different place?
-        if ( !bDifferenceCheck || m_vecLastSentCameraPosition != vecPosition || m_vecLastSentCameraLookAt != vecLookAt )
+        if ( m_vecLastSentCameraPosition != vecPosition || m_vecLastSentCameraLookAt != vecLookAt )
         {
             // Has it been long enough since our last sync?
             unsigned long ulCurrentTime = CClientTime::GetTime ();
             if ( ulCurrentTime >= m_ulLastCameraSyncTime + CAM_SYNC_RATE )
             {
                 m_ulLastCameraSyncTime = ulCurrentTime;
+                m_bLastSentCameraMode = true;
                 m_vecLastSentCameraPosition = vecPosition;
                 m_vecLastSentCameraLookAt = vecLookAt;
                 
+                return true;
+            }
+        }
+    }
+    else
+    {
+        // We're in player mode.
+        if ( m_bLastSentCameraMode == true ||
+             pCamera->GetFocusedPlayer () != m_pLastSentCameraTarget )
+        {
+            // Something changed (mode has become "player", or different target)
+            // Has it been long enough since our last sync?
+            unsigned long ulCurrentTime = CClientTime::GetTime ();
+            if ( ulCurrentTime >= m_ulLastCameraSyncTime + CAM_SYNC_RATE )
+            {
+                m_ulLastCameraSyncTime = ulCurrentTime;
+                m_bLastSentCameraMode = false;
+                m_pLastSentCameraTarget = pCamera->GetFocusedPlayer ();
                 return true;
             }
         }
@@ -486,10 +508,6 @@ void CNetAPI::ReadKeysync ( CClientPlayer* pPlayer, NetBitStreamInterface& BitSt
                 ControllerState.ButtonCircle = 0;
             }
 
-            // Read out the weapon state
-            unsigned char ucWeaponState;
-            BitStream.Read ( ucWeaponState );
-
             // Read out the weapon ammo
             unsigned short usWeaponAmmo = 0;
             BitStream.Read ( usWeaponAmmo );
@@ -503,7 +521,7 @@ void CNetAPI::ReadKeysync ( CClientPlayer* pPlayer, NetBitStreamInterface& BitSt
                 }
                 else
                 {
-                    pPlayer->AddChangeWeapon ( TICK_RATE, ucCurrentWeaponType, usWeaponAmmo, ucWeaponState );
+                    pPlayer->AddChangeWeapon ( TICK_RATE, ucCurrentWeaponType, usWeaponAmmo );
                 }
             }
             else
@@ -514,7 +532,7 @@ void CNetAPI::ReadKeysync ( CClientPlayer* pPlayer, NetBitStreamInterface& BitSt
                 }
                 else
                 {
-                    pPlayer->AddChangeWeapon ( TICK_RATE, 0, 0, 0 );
+                    pPlayer->AddChangeWeapon ( TICK_RATE, 0, 0 );
                 }
             }
 
@@ -557,7 +575,7 @@ void CNetAPI::ReadKeysync ( CClientPlayer* pPlayer, NetBitStreamInterface& BitSt
         }
         else
         {
-            pPlayer->AddChangeWeapon ( TICK_RATE, 0, 0, 0 );
+            pPlayer->AddChangeWeapon ( TICK_RATE, 0, 0 );
         }
     }
 
@@ -637,9 +655,6 @@ void CNetAPI::WriteKeysync ( CClientPed* pPlayerModel, NetBitStreamInterface& Bi
 
             if ( ucType != 0 )
             {
-                // Write the state
-                BitStream.Write ( static_cast < unsigned char > ( pPlayerWeapon->GetState () ) );
-
                  // Write the clip ammo
                 unsigned short usAmmoInClip = static_cast < unsigned short > ( pPlayerWeapon->GetAmmoInClip () );
                 BitStream.Write ( usAmmoInClip );
@@ -795,20 +810,18 @@ void CNetAPI::ReadPlayerPuresync ( CClientPlayer* pPlayer, NetBitStreamInterface
             ControllerState.ButtonCircle = 0;
         }
 
-        // Read out the weapon state and ammo
-        unsigned char ucWeaponState;
+        // Read out the weapon ammo
         unsigned short usWeaponAmmo;
-        BitStream.Read ( ucWeaponState );
         BitStream.Read ( usWeaponAmmo );
 
         // Valid current weapon id?
         if ( CClientPickupManager::IsValidWeaponID ( ucCurrentWeapon ) )
         {
-            pPlayer->AddChangeWeapon ( TICK_RATE, ucCurrentWeapon, usWeaponAmmo, ucWeaponState );
+            pPlayer->AddChangeWeapon ( TICK_RATE, ucCurrentWeapon, usWeaponAmmo );
         }
         else
         {
-            pPlayer->AddChangeWeapon ( TICK_RATE, 0, 0, 0 );
+            pPlayer->AddChangeWeapon ( TICK_RATE, 0, 0 );
         }
 
 		// Make sure that if he doesn't have an akimbo weapon his hands up state is false
@@ -964,9 +977,6 @@ void CNetAPI::WritePlayerPuresync ( CClientPed* pPlayerModel, NetBitStreamInterf
 
         if ( ucWeaponType != 0 )
         {
-            // Write the weapon state
-            BitStream.Write ( static_cast < unsigned char > ( pPlayerWeapon->GetState () ) );
-
             // Write the ammo states
             unsigned short usAmmoInClip = static_cast < unsigned short > ( pPlayerWeapon->GetAmmoInClip () );
             BitStream.Write ( usAmmoInClip );
@@ -979,6 +989,7 @@ void CNetAPI::WritePlayerPuresync ( CClientPed* pPlayerModel, NetBitStreamInterf
 
             // Grab the shot origin and target.
             CVector vecOrigin, vecTarget;
+
             pPlayerModel->GetShotData ( &vecOrigin, &vecTarget );
 
             // Write the source vector
@@ -1153,7 +1164,7 @@ void CNetAPI::ReadVehiclePuresync ( CClientPlayer* pPlayer, CClientVehicle* pVeh
     // Derailed state
     if ( pVehicle->GetVehicleType() == CLIENTVEHICLE_TRAIN )
     {
-        pVehicle->SetTrainDerailed ( bDerailed );
+        pVehicle->SetDerailed ( bDerailed );
     }
 
     // Current weapon id
@@ -1167,10 +1178,8 @@ void CNetAPI::ReadVehiclePuresync ( CClientPlayer* pPlayer, CClientVehicle* pVeh
             ControllerState.ButtonCircle = 0;
         }
 
-        // Read out the weapon state and ammo
-        unsigned char ucWeaponState;
+        // Read out the weapon ammo
         unsigned short usWeaponAmmo;
-        BitStream.Read ( ucWeaponState );
         BitStream.Read ( usWeaponAmmo );
 
         // Valid current weapon id?
@@ -1188,12 +1197,11 @@ void CNetAPI::ReadVehiclePuresync ( CClientPlayer* pPlayer, CClientVehicle* pVeh
                 }
             }
 
-            // Give it unlimited ammo, set the ammo in clip and weapon state
+            // Give it unlimited ammo and set the ammo in clip
             if ( pPlayerWeapon )
             {
                 pPlayerWeapon->SetAmmoTotal ( 9999 );
                 pPlayerWeapon->SetAmmoInClip ( usWeaponAmmo );
-                pPlayerWeapon->SetState ( static_cast < eWeaponState > ( ucWeaponState ) );
             }
         }
 
@@ -1347,7 +1355,7 @@ void CNetAPI::WriteVehiclePuresync ( CClientPed* pPlayerModel, CClientVehicle* p
     if ( pVehicle->IsLandingGearDown () ) ucFlags |= 0x10;
     if ( pVehicle->IsOnGround () ) ucFlags |= 0x20;
     if ( pVehicle->IsInWater () ) ucFlags |= 0x40;
-    if ( pVehicle->IsTrainDerailed () ) ucFlags |= 0x80;
+    if ( pVehicle->IsDerailed () ) ucFlags |= 0x80;
 
     // Write the flags
     BitStream.Write ( ucFlags );
@@ -1362,9 +1370,6 @@ void CNetAPI::WriteVehiclePuresync ( CClientPed* pPlayerModel, CClientVehicle* p
         BitStream.Write ( ucWeaponSlot );
         if ( ucWeaponType != 0 )
         {
-            // Write the weapon state
-            BitStream.Write ( static_cast < unsigned char > ( pPlayerWeapon->GetState () ) );
-
             // Write the ammo in clip
             unsigned short usAmmoInClip = static_cast < unsigned short > ( pPlayerWeapon->GetAmmoInClip () );
             BitStream.Write ( usAmmoInClip );
@@ -1744,7 +1749,7 @@ void CNetAPI::WriteCameraSync ( NetBitStreamInterface& BitStream )
 }
 
 
-void CNetAPI::RPC ( eServerRPCFunctions ID, NetBitStreamInterface * pBitStream, NetPacketOrdering packetOrdering, bool bTimestamp )
+void CNetAPI::RPC ( eServerRPCFunctions ID, NetBitStreamInterface * pBitStream, NetPacketOrdering packetOrdering )
 {
     NetBitStreamInterface* pRPCBitStream = g_pNet->AllocateNetBitStream ();
     if ( pRPCBitStream )
@@ -1765,7 +1770,7 @@ void CNetAPI::RPC ( eServerRPCFunctions ID, NetBitStreamInterface * pBitStream, 
             pBitStream->ResetReadPointer ();
         }
 
-        g_pNet->SendPacket ( PACKET_ID_RPC, pRPCBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, packetOrdering, bTimestamp );
+        g_pNet->SendPacket ( PACKET_ID_RPC, pRPCBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED, packetOrdering );
         g_pNet->DeallocateNetBitStream ( pRPCBitStream );
     }
 }

@@ -18,6 +18,8 @@
 #include <game/CGame.h>
 #include <utils/CMD5Hasher.h>
 
+using namespace std;
+
 #define CORE_SETTINGS_UPDATE_INTERVAL   30         // Settings update interval in frames
 #define CORE_SETTINGS_HEADERS           3
 #define CORE_SETTINGS_HEADER_GAME	    "GTA GAME CONTROLS"
@@ -394,22 +396,28 @@ CSettings::CSettings ( void )
 
     m_pCheckBoxMenuDynamic = reinterpret_cast < CGUICheckBox* > ( pManager->CreateCheckBox ( pTabVideo, "Dynamic scene rendering", true ) );
     m_pCheckBoxMenuDynamic->SetPosition ( CVector2D ( vecTemp.fX, vecTemp.fY + 32.0f ) );
-	m_pCheckBoxMenuDynamic->SetSize ( CVector2D ( 224.0f, 16.0f ) );
+	m_pCheckBoxMenuDynamic->SetSize ( CVector2D ( 174.0f, 16.0f ) );
 	m_pCheckBoxMenuDynamic->GetPosition ( vecTemp, false );
+	m_pCheckBoxMenuDynamic->SetUserData ( (void*) eCheckBox::CHECKBOX_MENU_DYNAMIC );
 
     m_pCheckBoxMenuVideo = reinterpret_cast < CGUICheckBox* > ( pManager->CreateCheckBox ( pTabVideo, "Video surface rendering", true ) );
 	m_pCheckBoxMenuVideo->SetPosition ( CVector2D ( vecTemp.fX + 200.0f, vecTemp.fY ) );
-	m_pCheckBoxMenuVideo->SetSize ( CVector2D ( 224.0f, 20.0f ) );
+	m_pCheckBoxMenuVideo->SetSize ( CVector2D ( 174.0f, 20.0f ) );
+	m_pCheckBoxMenuVideo->SetUserData ( (void*) eCheckBox::CHECKBOX_MENU_VIDEO );
 
     m_pCheckBoxMenuPostEffects = reinterpret_cast < CGUICheckBox* > ( pManager->CreateCheckBox ( pTabVideo, "PS2.0 post-effects", true ) );
 	m_pCheckBoxMenuPostEffects->SetPosition ( CVector2D ( vecTemp.fX, vecTemp.fY + 16 ) );
-	m_pCheckBoxMenuPostEffects->SetSize ( CVector2D ( 224.0f, 16.0f ) );
+	m_pCheckBoxMenuPostEffects->SetSize ( CVector2D ( 174.0f, 16.0f ) );
+	m_pCheckBoxMenuPostEffects->SetUserData ( (void*) eCheckBox::CHECKBOX_MENU_POSTEFFECTS );
 	
     // Set up the events
     m_pButtonOK->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnOKButtonClick, this ) );
     m_pButtonCancel->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnCancelButtonClick, this ) );
 	m_pButtonLogin->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnLoginButtonClick, this ) );
     m_pButtonRegister->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnRegisterButtonClick, this ) );
+    m_pCheckBoxMenuDynamic->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnCheckBoxClick, this ) );
+    m_pCheckBoxMenuVideo->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnCheckBoxClick, this ) );
+    m_pCheckBoxMenuPostEffects->SetOnClickHandler ( GUI_CALLBACK ( &CSettings::OnCheckBoxClick, this ) );
 	/*
 	// Give a warning if no community account settings were stored in config
 	CCore::GetSingleton ().ShowMessageBox ( CORE_SETTINGS_COMMUNITY_WARNING, "Multi Theft Auto: Community settings", MB_ICON_WARNING );
@@ -867,7 +875,6 @@ bool CSettings::OnBindsListClick ( CGUIElement* pElement )
     if ( pItem )
     {
 	    CGUIListItem *pItemBind = m_pBindsList->GetItem ( m_pBindsList->GetItemRowIndex ( pItem ), m_hBind );
-	    char szText [ 128 ];
 
 	    // Proceed if the user didn't select the "Bind"-column
 	    if ( pItem != pItemBind )
@@ -879,14 +886,14 @@ bool CSettings::OnBindsListClick ( CGUIElement* pElement )
 		    // Determine if the primary or secondary column was selected
 		    if ( m_pBindsList->GetItemColumnIndex ( pItem ) == 1/*m_hPriKey  Note: handle is not the same as index */ ) {
 			    // Create a messagebox to notify the user
-			    //sprintf ( szText, "Press a key to bind to '%s'", pItemBind->GetText ().c_str() );
-			    sprintf ( szText, "Press a key to bind, or escape to clear" );
-			    CCore::GetSingleton ().ShowMessageBox ( "Binding a primary key", szText, MB_ICON_QUESTION );
+			    //SString strText = SString::Printf ( "Press a key to bind to '%s'", pItemBind->GetText ().c_str () );
+			    SString strText = "Press a key to bind, or escape to clear";
+			    CCore::GetSingleton ().ShowMessageBox ( "Binding a primary key", strText, MB_ICON_QUESTION );
 		    } else {
 			    // Create a messagebox to notify the user
-			    //sprintf ( szText, "Press a key to bind to '%s'", pItemBind->GetText ().c_str() );
-			    sprintf ( szText, "Press a key to bind, or escape to clear" );
-			    CCore::GetSingleton ().ShowMessageBox ( "Binding a secondary key", szText, MB_ICON_QUESTION );
+			    //sSString strText = SString::Printf ( "Press a key to bind to '%s'", pItemBind->GetText ().c_str () );
+			    SString strText = "Press a key to bind, or escape to clear";
+			    CCore::GetSingleton ().ShowMessageBox ( "Binding a secondary key", strText, MB_ICON_QUESTION );
 		    }
 	    }
     }
@@ -1042,6 +1049,7 @@ void CSettings::Initialize ( void )
 
     SListedCommand* listedCommands = new SListedCommand [ pKeyBinds->Count ( KEY_BIND_COMMAND ) + pKeyBinds->Count ( KEY_BIND_FUNCTION ) ];
     unsigned int uiNumListedCommands = 0;
+    std::map < std::string, int > iResourceItems;
     // Loop through all the bound commands
     list < CKeyBind* > ::const_iterator iter = pKeyBinds->IterBegin ();
     for ( unsigned int uiIndex = 0 ; iter != pKeyBinds->IterEnd (); iter++, uiIndex++ )
@@ -1085,38 +1093,57 @@ void CSettings::Initialize ( void )
                 {
                     unsigned int row = iGameRowCount + 1;
                     // Combine command and arguments
-                    char* szDescription = NULL;
-                    bool bDeleteDescription = true;
+                    SString strDescription;
                     bool bSkip = true;
                     if ( bindType == KEY_BIND_COMMAND )
                     {
                         CCommandBind* pCommandBind = reinterpret_cast < CCommandBind* > ( *iter );
+                        bSkip = false;
+                        if ( pCommandBind->szResource )
+                        {
+                            if ( pCommandBind->bActive )
+                            {
+                                const char* szResource = pCommandBind->szResource;
+                                std::string strResource = szResource;
+                                if ( iResourceItems.count(strResource) == 0 )
+                                {
+                                    iBind = m_pBindsList->InsertRowAfter ( m_pBindsList->GetRowCount() );
+                                    m_pBindsList->SetItemText ( iBind, m_hBind, CORE_SETTINGS_HEADER_SPACER, false, true );
+                                    
+                                    iBind = m_pBindsList->InsertRowAfter ( iBind );
+                                    m_pBindsList->SetItemText ( iBind, m_hBind, szResource, false, true );
+                                    iResourceItems.insert( make_pair(strResource, iBind ) );
+                                }
+                                row = iResourceItems[strResource];
+                                iMultiplayerRowCount++;
+                            }
+                            else
+                            {
+                                bSkip = true;
+                            }
+                        }
                         if ( pCommandBind->szArguments && pCommandBind->szArguments[0] != '\0' )
                         {
-                            szDescription = new char [ strlen ( pCommandBind->szCommand ) + strlen ( pCommandBind->szArguments ) + 5 ];
-                            sprintf ( szDescription, "%s: %s", pCommandBind->szCommand, pCommandBind->szArguments );
+                            strDescription.Format ( "%s: %s", pCommandBind->szCommand, pCommandBind->szArguments );
+                            iMultiplayerRowCount++;
                         }
                         else
                         {
-                            szDescription = pCommandBind->szCommand;
-                            bDeleteDescription = false;
+                            strDescription = pCommandBind->szCommand;
+                            iMultiplayerRowCount++;
                         }
-                        iMultiplayerRowCount++;
-                        bSkip = false;
                     }                    
 
                     if ( !bSkip )
                     {
 				        // Add the bind to the list
 				        iBind = m_pBindsList->InsertRowAfter ( row );
-                        m_pBindsList->SetItemText ( iBind, m_hBind, szDescription );
+                        m_pBindsList->SetItemText ( iBind, m_hBind, strDescription );
 				        m_pBindsList->SetItemText ( iBind, m_hPriKey, pBind->boundKey->szKey );
                         for ( int k = 0 ; k < SecKeyNum ; k++ )
                             m_pBindsList->SetItemText ( iBind, m_hSecKeys[k], CORE_SETTINGS_NO_KEY );
                         m_pBindsList->SetItemData ( iBind, m_hBind, (void*) bindType );
                         m_pBindsList->SetItemData ( iBind, m_hPriKey, pBind );
-                        if ( bDeleteDescription )
-                            delete [] szDescription;
 
                         // Add it to the already-listed array
                         SListedCommand* pListedCommand = &listedCommands [ uiNumListedCommands ];
@@ -1129,6 +1156,7 @@ void CSettings::Initialize ( void )
             }
         }
     }
+
     delete [] listedCommands;
 }
 
@@ -1352,7 +1380,6 @@ void CSettings::LoadData ( void )
     m_pAudioSFXVolume->SetProgress ( gameSettings->GetSFXVolume() / 64 * 100.0f );
     // Video
 
-    char modeStr[100];
     VideoMode           vidModemInfo;
     int                 vidMode, numVidModes, currentVidMode;
 
@@ -1366,14 +1393,14 @@ void CSettings::LoadData ( void )
         
         if ( vidModemInfo.flags & rwVIDEOMODEEXCLUSIVE )
         {
-            sprintf ( modeStr, "%lu x %lu x %lu", vidModemInfo.width, vidModemInfo.height, vidModemInfo.depth );
-            m_pComboResolution->AddItem ( modeStr )->SetData ( (void*)vidMode );
+            SString strMode ( "%lu x %lu x %lu", vidModemInfo.width, vidModemInfo.height, vidModemInfo.depth );
+            m_pComboResolution->AddItem ( strMode )->SetData ( (void*)vidMode );
         }
         if ( vidMode == currentVidMode )
         {
-            sprintf ( modeStr, "%lu x %lu x %lu", vidModemInfo.width, vidModemInfo.height, vidModemInfo.depth );
+            SString strMode ( "%lu x %lu x %lu", vidModemInfo.width, vidModemInfo.height, vidModemInfo.depth );
             
-            m_pComboResolution->SetText ( modeStr );
+            m_pComboResolution->SetText ( strMode );
         }
     }
     m_pCheckBoxWindowed->SetSelected ( currentVidMode == 0 );
@@ -1444,6 +1471,7 @@ void CSettings::SaveData ( void )
              selectedVidMode >= 0 )
         {
             gameSettings->SetCurrentVideoMode ( selectedVidMode );
+            g_pCore->GetLocalGUI()->GetMainMenu ()->RefreshPositions();
         }
     }
     gameSettings->SetWideScreenEnabled ( m_pCheckBoxWideScreen->GetSelected() );

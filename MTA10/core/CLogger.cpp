@@ -12,7 +12,8 @@
 
 #include "StdInc.h"
 
-#define vsnprintf _vsnprintf
+using namespace std;
+
 #define MAX_STRING_LENGTH 2048
 template<> CLogger * CSingleton< CLogger >::m_pSingleton = NULL;
 
@@ -110,7 +111,7 @@ void CLogger::ErrorPrintf ( const char* szFormat, ... )
     // Convert it to a string
     va_list marker;
     va_start ( marker, szFormat );
-    vsnprintf ( szBuffer, MAX_STRING_LENGTH, szFormat, marker );
+    _VSNPRINTF ( szBuffer, MAX_STRING_LENGTH, szFormat, marker );
     va_end ( marker );
 
     // Print it to the console

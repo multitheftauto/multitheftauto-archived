@@ -18,7 +18,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 extern CClientGame* g_pClientGame;
 
@@ -100,6 +102,7 @@ CClientVehicle::CClientVehicle ( CClientManager* pManager, ElementID ID, unsigne
     memset ( m_ucPanelStates, 0, sizeof ( m_ucPanelStates ) );
     memset ( m_ucLightStates, 0, sizeof ( m_ucLightStates ) );
     m_bCanBeDamaged = true;
+    m_bSyncUnoccupiedDamage = false;
     m_bScriptCanBeDamaged = true;
     m_bTyresCanBurst = true;
     m_ucOverrideLights = 0;
@@ -118,11 +121,13 @@ CClientVehicle::CClientVehicle ( CClientManager* pManager, ElementID ID, unsigne
     m_bHasTargetRotation = false;
     m_bBlowNextFrame = false;
     m_bIsOnGround = false;
-    m_bIsDerailed = false;
     m_ulIllegalTowBreakTime = 0;
     m_bBlown = false;
     m_LastSyncedData = new SLastSyncedVehData;
-    m_iTrainDirection = 0;
+    m_bIsDerailed = false;
+    m_bIsDerailable = true;
+    m_bTrainDirection = false;
+    m_fTrainSpeed = 0.0f;
 
 #ifdef MTA_DEBUG
     m_pLastSyncer = NULL;
@@ -156,6 +161,9 @@ CClientVehicle::~CClientVehicle ( void )
         m_pTowedByVehicle->m_pTowedVehicle = NULL;
 
 	AttachTo ( NULL );
+
+    // Remove all our projectiles
+    RemoveAllProjectiles ();
 
     // Destroy the vehicle
     Destroy ();
@@ -710,7 +718,7 @@ void CClientVehicle::Blow ( bool bAllowMovement )
         }
 
         // Restore the old can be damaged state
-        m_pVehicle->SetCanBeDamaged ( m_bCanBeDamaged );
+        CalcAndUpdateCanBeDamagedFlag ();
     }
     m_fHealth = 0.0f;
     m_bBlown = true;
@@ -889,12 +897,27 @@ bool CClientVehicle::CanBeDamaged ( void )
 }
 
 
-void CClientVehicle::SetCanBeDamaged ( bool bCanBeDamaged )
+// This can be called frequently to ensure the correct setting gets to the SA vehicle
+void CClientVehicle::CalcAndUpdateCanBeDamagedFlag ( void )
 {
+     bool bCanBeDamaged = false;
+
+    // CanBeDamaged if local driver or syncing unoccupiedVehicle
+    if ( m_pDriver && m_pDriver->IsLocalPlayer () )
+        bCanBeDamaged = true;
+
+    if ( m_bSyncUnoccupiedDamage )
+        bCanBeDamaged = true;
+
+    // Script override
+    if ( !m_bScriptCanBeDamaged )
+        bCanBeDamaged = false;
+
     if ( m_pVehicle )
     {
-        m_pVehicle->SetCanBeDamaged ( bCanBeDamaged && m_bScriptCanBeDamaged );
+        m_pVehicle->SetCanBeDamaged ( bCanBeDamaged );
     }
+
     m_bCanBeDamaged = bCanBeDamaged;
 }
 
@@ -903,7 +926,16 @@ void CClientVehicle::SetScriptCanBeDamaged ( bool bCanBeDamaged )
 {
     // Needed so script doesn't interfere with syncing unoccupied vehicles
     m_bScriptCanBeDamaged = bCanBeDamaged;
-    SetCanBeDamaged ( m_bCanBeDamaged );
+    CalcAndUpdateCanBeDamagedFlag ();
+    CalcAndUpdateTyresCanBurstFlag ();
+}
+
+
+void CClientVehicle::SetSyncUnoccupiedDamage ( bool bCanBeDamaged )
+{
+    m_bSyncUnoccupiedDamage = bCanBeDamaged;
+    CalcAndUpdateCanBeDamagedFlag ();
+    CalcAndUpdateTyresCanBurstFlag ();
 }
 
 
@@ -918,8 +950,22 @@ bool CClientVehicle::GetTyresCanBurst ( void )
 }
 
 
-void CClientVehicle::SetTyresCanBurst ( bool bTyresCanBurst )
+// This can be called frequently to ensure the correct setting gets to the SA vehicle
+void CClientVehicle::CalcAndUpdateTyresCanBurstFlag ( void )
 {
+     bool bTyresCanBurst = false;
+
+    // TyresCanBurst if local driver or syncing unoccupiedVehicle
+    if ( m_pDriver && m_pDriver->IsLocalPlayer () )
+        bTyresCanBurst = true;
+
+    if ( m_bSyncUnoccupiedDamage )
+        bTyresCanBurst = true;
+
+    // Script override
+//    if ( !m_bScriptCanBeDamaged )
+//        bTyresCanBurst = false;
+
     if ( m_pVehicle )
     {
         m_pVehicle->SetTyresDontBurst ( !bTyresCanBurst );
@@ -1216,7 +1262,7 @@ void CClientVehicle::SetWheelStatus ( unsigned char ucWheel, unsigned char ucSta
                 m_pVehicle->SetBikeWheelStatus ( ucWheel, ucStatus );
 
             // Restore our tyre-burst flag
-            m_pVehicle->SetTyresDontBurst ( !m_bTyresCanBurst );
+            CalcAndUpdateTyresCanBurstFlag ();
         }
         m_ucWheelStates [ucWheel] = ucStatus;
     }
@@ -1571,23 +1617,81 @@ void CClientVehicle::SetNextTrainCarriage ( CClientVehicle* pNext )
 }
 
 
-void CClientVehicle::SetTrainDerailed ( bool bDerailed )
+bool CClientVehicle::IsDerailed ( void )
 {
-    if ( m_pVehicle && GetVehicleType() == CLIENTVEHICLE_TRAIN  )
+    if ( m_pVehicle )
     {
-        m_pVehicle->SetTrainDerailed ( bDerailed );
+        return m_pVehicle->IsDerailed ();
+    }
+    return m_bIsDerailed;
+}
+
+
+void CClientVehicle::SetDerailed ( bool bDerailed )
+{
+    if ( m_pVehicle && GetVehicleType() == CLIENTVEHICLE_TRAIN && bDerailed != IsDerailed () )
+    {
+        m_pVehicle->SetDerailed ( bDerailed );
     }
     m_bIsDerailed = bDerailed;
 }
 
-
-bool CClientVehicle::IsTrainDerailed ( void )
+bool CClientVehicle::IsDerailable ( void )
 {
     if ( m_pVehicle )
     {
-        return m_pVehicle->IsTrainDerailed ();
+        return m_pVehicle->IsDerailable ();
     }
-    return m_bIsDerailed;
+    return m_bIsDerailable;
+}
+
+void CClientVehicle::SetDerailable ( bool bDerailable )
+{
+    if ( m_pVehicle )
+    {
+        m_pVehicle->SetDerailable ( bDerailable );
+    }
+    m_bIsDerailable = bDerailable;
+}
+
+
+bool CClientVehicle::GetTrainDirection ( void )
+{
+    if ( m_pVehicle )
+    {
+        return m_pVehicle->GetTrainDirection ();
+    }
+    return m_bTrainDirection;
+}
+
+
+void CClientVehicle::SetTrainDirection ( bool bDirection )
+{
+    if ( m_pVehicle && GetVehicleType() == CLIENTVEHICLE_TRAIN  )
+    {
+        m_pVehicle->SetTrainDirection ( bDirection );
+    }
+    m_bTrainDirection = bDirection;
+}
+
+
+float CClientVehicle::GetTrainSpeed ( void )
+{
+    if ( m_pVehicle )
+    {
+        return m_pVehicle->GetTrainSpeed ();
+    }
+    return m_fTrainSpeed;
+}
+
+
+void CClientVehicle::SetTrainSpeed ( float fSpeed )
+{
+    if ( m_pVehicle && GetVehicleType() == CLIENTVEHICLE_TRAIN  )
+    {
+        m_pVehicle->SetTrainSpeed ( fSpeed );
+    }
+    m_fTrainSpeed = fSpeed;
 }
 
 
@@ -1789,7 +1893,7 @@ void CClientVehicle::Create ( void )
         {
             DWORD dwModels [1];
             dwModels [0] = m_usModel;
-            m_pVehicle = g_pGame->GetPools ()->AddTrain ( &m_Matrix.vPos, dwModels, 1, m_iTrainDirection );
+            m_pVehicle = g_pGame->GetPools ()->AddTrain ( &m_Matrix.vPos, dwModels, 1, m_bTrainDirection );
         }
         else
         {
@@ -1837,8 +1941,14 @@ void CClientVehicle::Create ( void )
         m_pVehicle->SetDoorsUndamageable ( m_bDoorsUndamageable );
         m_pVehicle->SetCanShootPetrolTank ( m_bCanShootPetrolTank );
         m_pVehicle->SetCanBeTargettedByHeatSeekingMissiles ( m_bCanBeTargettedByHeatSeekingMissiles );
-        m_pVehicle->SetTyresDontBurst ( !m_bTyresCanBurst );
-        m_pVehicle->SetTrainDerailed ( m_bIsDerailed );
+        CalcAndUpdateTyresCanBurstFlag ();
+        if ( GetVehicleType () == CLIENTVEHICLE_TRAIN )
+        {
+            m_pVehicle->SetDerailed ( m_bIsDerailed );
+            m_pVehicle->SetDerailable ( m_bIsDerailable );
+            m_pVehicle->SetTrainDirection ( m_bTrainDirection );
+            m_pVehicle->SetTrainSpeed ( m_fTrainSpeed );
+        }
 
         // Re-add all the upgrades
         if ( m_pUpgrades )
@@ -1876,7 +1986,7 @@ void CClientVehicle::Create ( void )
 
         if ( m_bBlown || m_fHealth == 0.0f ) m_bBlowNextFrame = true;
 
-        m_pVehicle->SetCanBeDamaged ( m_bCanBeDamaged && m_bScriptCanBeDamaged );
+        CalcAndUpdateCanBeDamagedFlag ();
 
         // Restore the color
         if ( m_bColorSaved )
@@ -2003,6 +2113,7 @@ void CClientVehicle::Destroy ( void )
         m_usAdjustablePropertyValue = m_pVehicle->GetAdjustablePropertyValue ();
         m_bEngineOn = m_pVehicle->IsEngineOn ();
         m_bIsOnGround = IsOnGround ();
+        m_bIsDerailed = IsDerailed ();
 
 	    if ( m_eVehicleType == CLIENTVEHICLE_CAR ||
             m_eVehicleType == CLIENTVEHICLE_PLANE ||
@@ -2759,4 +2870,17 @@ bool CClientVehicle::IsEnterable ( void )
         }
     }
     return false;
+}
+
+void CClientVehicle::RemoveAllProjectiles ( void )
+{
+    CClientProjectile * pProjectile = NULL;
+    list < CClientProjectile* > ::iterator iter = m_Projectiles.begin ();
+    for ( ; iter != m_Projectiles.end () ; iter++ )
+    {
+        pProjectile = *iter;
+        pProjectile->m_pCreator = NULL;
+        g_pClientGame->GetElementDeleter ()->Delete ( pProjectile );        
+    }
+    m_Projectiles.clear ();
 }

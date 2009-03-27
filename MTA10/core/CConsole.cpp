@@ -15,6 +15,9 @@
 
 #include "StdInc.h"
 
+using SharedUtil::CalcMTASAPath;
+using std::string;
+
 #define CONSOLE_HISTORY_LENGTH 64
 #define CONSOLE_SIZE 4096
 
@@ -50,9 +53,7 @@ CConsole::CConsole ( CGUI* pManager, CGUIElement* pParent )
 	m_pHistory->SetTextChangedHandler ( GUI_CALLBACK ( &CConsole::History_OnTextChanged, this ) );
 
     // Load the console history from a file
-    char szLogPath [256];
-    sprintf ( szLogPath, "%s\\MTA\\console.log", CCore::GetSingleton ().GetGTAInstallRoot () );
-    m_pConsoleHistory->LoadFromFile ( szLogPath, true );
+    m_pConsoleHistory->LoadFromFile ( CalcMTASAPath ( "\\MTA\\console.log" ), true );
 }
 
 CConsole::~CConsole ( void )
@@ -104,7 +105,7 @@ void CConsole::Printf ( const char* szFormat, ... )
     char szBuffer [1024];
 	va_list ap;
 	va_start ( ap, szFormat );
-	_vsnprintf ( szBuffer, 1024, szFormat, ap );
+	_VSNPRINTF ( szBuffer, 1024, szFormat, ap );
 	va_end ( ap );
 
     // Echo it

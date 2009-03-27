@@ -35,14 +35,16 @@ public:
 
     void                            StopScriptsOwnedBy      ( int iOwner );
 
-	CLuaMain*                       CreateVirtualMachine    ( void );
+	CLuaMain*                       CreateVirtualMachine    ( CResource* pResourceOwner );
     bool                            RemoveVirtualMachine    ( CLuaMain* vm );
     CLuaMain*                       GetVirtualMachine       ( lua_State* luaVM );
     CLuaMain*                       GetVirtualMachine       ( const char* szFilename );
     bool                            DoesVirtualMachineExist ( CLuaMain* vm );
 
-    inline list < CLuaMain* > ::const_iterator  IterBegin   ( void )                    { return m_virtualMachines.begin (); };
-    inline list < CLuaMain* > ::const_iterator  IterEnd     ( void )                    { return m_virtualMachines.end (); };
+    inline std::list < CLuaMain* > ::const_iterator
+                                    IterBegin               ( void )                    { return m_virtualMachines.begin (); };
+    inline std::list < CLuaMain* > ::const_iterator
+                                    IterEnd                 ( void )                    { return m_virtualMachines.end (); };
 
     void                            DoPulse                 ( void );
 
@@ -56,7 +58,7 @@ private:
     CEvents*                        m_pEvents;
     CRegisteredCommands*            m_pRegisteredCommands;
 
-    list < CLuaMain* >              m_virtualMachines;
+    std::list < CLuaMain* >         m_virtualMachines;
 };
 
 #endif

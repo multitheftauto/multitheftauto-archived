@@ -85,7 +85,7 @@ public:
     IDirect3DTexture9*  CreateTexture           ( DWORD* dwBitMap, unsigned int uiWidth, unsigned int uiHeight );
     IDirect3DTexture9*  LoadTexture             ( const char* szFile );
     IDirect3DTexture9*  LoadTexture             ( const char* szFile, unsigned int uiWidth, unsigned int uiHeight );
-    void                DrawTexture             ( IDirect3DTexture9* texture, float fX, float fY, float fScaleX = 1.0f, float fScaleY = 1.0f, unsigned char ucAlpha = 255 );
+    void                DrawTexture             ( IDirect3DTexture9* texture, float fX, float fY, float fScaleX = 1.0f, float fScaleY = 1.0f, float fRotation = 0.0f, float fCenterX = 0.0f, float fCenterY = 0.0f, unsigned char ucAlpha = 255 );
 
 	// Interface functions
 	void				SetCursorPosition		( int iX, int iY, DWORD Flags );
@@ -110,7 +110,7 @@ public:
 
     bool                DrawTextureQueued       ( float fX, float fY,
                                                   float fWidth, float fHeight,
-                                                  const string& strFilename,
+                                                  const std::string& strFilename,
                                                   float fRotation,
                                                   float fRotCenOffX,
                                                   float fRotCenOffY,
@@ -135,7 +135,7 @@ private:
     void                OnDeviceCreate          ( IDirect3DDevice9 * pDevice );
     void                OnDeviceInvalidate      ( IDirect3DDevice9 * pDevice );
     void                OnDeviceRestore         ( IDirect3DDevice9 * pDevice );
-    IDirect3DTexture9*  CacheTexture            ( const string& strFilename );
+    IDirect3DTexture9*  CacheTexture            ( const std::string& strFilename );
     void                ExpireCachedTextures    ( bool bExpireAll = false );
 
     CLocalGUI*          m_pGUI;
@@ -247,7 +247,7 @@ private:
     struct sDrawQueueItem
     {
         eDrawQueueType      eType;
-        string              strText;
+        std::string         strText;
 
         // Queue item data based on the eType.
         union
@@ -279,7 +279,7 @@ private:
         unsigned long       ulTimeLastUsed;
     };
 
-    map < string, SCachedTextureInfo > m_CachedTextureInfoMap;
+    std::map < std::string, SCachedTextureInfo > m_CachedTextureInfoMap;
 
 };
 

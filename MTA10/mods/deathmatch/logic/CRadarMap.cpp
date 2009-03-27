@@ -13,7 +13,10 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using SharedUtil::CalcMTASAPath;
+using std::list;
 
 CRadarMap::CRadarMap ( CClientManager* pManager )
 {
@@ -44,13 +47,9 @@ CRadarMap::CRadarMap ( CClientManager* pManager )
     m_iVerticalMovement = 0;
     SetupMapVariables ();
 
-    // Set the blip sizes to default
-    m_fLocalPlayerBlipSize = ( m_fMapSize / m_ucZoom ) / 35.0f;
-    m_fStandardImageBlipSize = ( m_fMapSize / m_ucZoom ) / 50.0f;
-
     // Create the radar and local player blip images
-    m_pRadarImage = g_pCore->GetGraphics()->LoadTexture ( "MTA\\cgui\\images\\radar.jpg", RADAR_TEXTURE_WIDTH, RADAR_TEXTURE_HEIGHT );
-    m_pLocalPlayerBlip = g_pCore->GetGraphics()->LoadTexture ( "MTA\\cgui\\images\\radarset\\03.png"  );
+    m_pRadarImage = g_pCore->GetGraphics()->LoadTexture ( CalcMTASAPath("MTA\\cgui\\images\\radar.jpg"), RADAR_TEXTURE_WIDTH, RADAR_TEXTURE_HEIGHT );
+    m_pLocalPlayerBlip = g_pCore->GetGraphics()->LoadTexture ( CalcMTASAPath("MTA\\cgui\\images\\radarset\\02.png")  );
 
     // Create the text display for the mode text
     m_pModeText = new CClientTextDisplay ( m_pManager->GetDisplayManager (), 0xFFFFFFFF, false );
@@ -119,19 +118,25 @@ void CRadarMap::DoPulse ( void )
                                                              static_cast < float > ( m_iMapMinY ),
                                                              m_fMapSize / RADAR_TEXTURE_WIDTH,
                                                              m_fMapSize / RADAR_TEXTURE_HEIGHT,
+                                                             0.0f, 0.0f, 0.0f,
                                                              RADAR_TEXTURE_ALPHA );
 
         // Grab the info for the local player blip
         CVector2D vecLocalPos;
         CVector vecLocal;
+        CVector vecLocalRot;
         if ( m_pManager->GetCamera()->IsInFixedMode() )
+        {
             m_pManager->GetCamera()->GetPosition ( vecLocal );
+            m_pManager->GetCamera()->GetRotation ( vecLocalRot );
+        }
         else
+        {
             m_pManager->GetPlayerManager ()->GetLocalPlayer ()->GetPosition ( vecLocal );
+            m_pManager->GetPlayerManager ()->GetLocalPlayer ()->GetRotationDegrees ( vecLocalRot );
+        }
 
-        CalculateEntityOnScreenPosition ( vecLocal, vecLocalPos, m_fLocalPlayerBlipSize, CVector2D ( 0.5f, 0.0f ) );
-        g_pCore->GetGraphics()->DrawTexture ( m_pLocalPlayerBlip, vecLocalPos.fX, vecLocalPos.fY );
-
+        CalculateEntityOnScreenPosition ( vecLocal, vecLocalPos );
 
         // Now loop our radar areas
         unsigned short usDimension = m_pRadarAreaManager->GetDimension ();
@@ -145,7 +150,7 @@ void CRadarMap::DoPulse ( void )
             {
                 // Grab the area image and calculate the position to put it on the screen
                 CVector2D vecPos;
-                CalculateEntityOnScreenPosition ( pArea, vecPos, 1.0f, CVector2D ( 0.5f, 0.5f ) );
+                CalculateEntityOnScreenPosition ( pArea, vecPos );
 
                 // Get the area size and work out the ratio
                 CVector2D vecSize;
@@ -206,7 +211,7 @@ void CRadarMap::DoPulse ( void )
                     }
                 }
 
-                CalculateEntityOnScreenPosition ( *markerIter, vecPos, fScale, CVector2D ( 0.5f, 0.5f ) );
+                CalculateEntityOnScreenPosition ( *markerIter, vecPos );
 
                 // If it is a picture icon not a blip
                 if ( (*markerIter)->GetSprite () != 0 )
@@ -215,7 +220,7 @@ void CRadarMap::DoPulse ( void )
                     if ( pImage )
                     {
                         // Set the size, position etc and show it here
-                        g_pCore->GetGraphics()->DrawTexture ( pImage, vecPos.fX, vecPos.fY, fScale, fScale );
+                        g_pCore->GetGraphics()->DrawTexture ( pImage, vecPos.fX, vecPos.fY, fScale, fScale, 0.0f, 0.5f, 0.5f );
                     }
                 }
                 else
@@ -272,11 +277,14 @@ void CRadarMap::DoPulse ( void )
                     if ( pImage )
                     {
                         // Set the size, position etc and show it here
-                        g_pCore->GetGraphics()->DrawTexture ( pImage, vecPos.fX, vecPos.fY, fScale, fScale );
+                        g_pCore->GetGraphics()->DrawTexture ( pImage, vecPos.fX, vecPos.fY, fScale, fScale, 0.0f, 0.5f, 0.5f );
                     }
                 }
             }
         }
+
+        g_pCore->GetGraphics()->DrawTexture ( m_pLocalPlayerBlip, vecLocalPos.fX, vecLocalPos.fY, 1.0, 1.0, vecLocalRot.fZ, 0.5f, 0.5f );
+
         if ( !m_pModeText->IsVisible () )
             m_pModeText->SetVisible ( true );
     }
@@ -340,37 +348,11 @@ void CRadarMap::InternalSetRadarEnabled ( bool bEnabled )
 }
 
 
-bool CRadarMap::CalculateEntityOnScreenPosition ( CClientEntity* pEntity, CVector2D& vecLocalPos, float fBlipSize, CVector2D vecBlipPosition )
+bool CRadarMap::CalculateEntityOnScreenPosition ( CClientEntity* pEntity, CVector2D& vecLocalPos )
 {
     // If the entity exists
     if ( pEntity )
     {
-        // If the X position is greater than 1.0
-        if ( vecBlipPosition.fX > 1.0f )
-        {
-            // Set the X position to 1.0
-            vecBlipPosition.fX = 1.0f;
-        }
-        // If the X position is less than 0.0
-        else if ( vecBlipPosition.fX < 0.0f )
-        {
-            // Set the X position to 0.0
-            vecBlipPosition.fX = 0.0f;
-        }
-
-        // If the Y position is greater than 1.0
-        if ( vecBlipPosition.fY > 1.0f )
-        {
-            // Set the Y position to 1.0
-            vecBlipPosition.fY = 1.0f;
-        }
-        // If the Y position is less than 0.0
-        else if ( vecBlipPosition.fY < 0.0f )
-        {
-            // Set the Y position to 0.0
-            vecBlipPosition.fY = 0.0f;
-        }
-
         // Get the Entities ingame position
         CVector vecPosition;
         pEntity->GetPosition ( vecPosition );
@@ -381,8 +363,8 @@ bool CRadarMap::CalculateEntityOnScreenPosition ( CClientEntity* pEntity, CVecto
         float fRatio = 6000.0f / m_fMapSize;
 
         // Calculate the screen position for the marker
-        vecLocalPos.fX = static_cast < float > ( m_iMapMinX ) + ( fX / fRatio ) - ( fBlipSize / ( 1 / vecBlipPosition.fX ) );
-        vecLocalPos.fY = static_cast < float > ( m_iMapMaxY ) - ( fY / fRatio ) - ( fBlipSize / ( 1 / vecBlipPosition.fY ) );
+        vecLocalPos.fX = static_cast < float > ( m_iMapMinX ) + ( fX / fRatio );
+        vecLocalPos.fY = static_cast < float > ( m_iMapMaxY ) - ( fY / fRatio );
 
         // If the position is on the screen
         if ( vecLocalPos.fX >= 0.0f &&
@@ -400,42 +382,16 @@ bool CRadarMap::CalculateEntityOnScreenPosition ( CClientEntity* pEntity, CVecto
 }
 
 
-bool CRadarMap::CalculateEntityOnScreenPosition ( CVector vecPosition, CVector2D& vecLocalPos, float fBlipSize, CVector2D vecBlipPosition )
+bool CRadarMap::CalculateEntityOnScreenPosition ( CVector vecPosition, CVector2D& vecLocalPos )
 {
-    // If the X position is greater than 1.0
-    if ( vecBlipPosition.fX > 1.0f )
-    {
-        // Set the X position to 1.0
-        vecBlipPosition.fX = 1.0f;
-    }
-    // If the X position is less than 0.0
-    else if ( vecBlipPosition.fX < 0.0f )
-    {
-        // Set the X position to 0.0
-        vecBlipPosition.fX = 0.0f;
-    }
-
-    // If the Y position is greater than 1.0
-    if ( vecBlipPosition.fY > 1.0f )
-    {
-        // Set the Y position to 1.0
-        vecBlipPosition.fY = 1.0f;
-    }
-    // If the Y position is less than 0.0
-    else if ( vecBlipPosition.fY < 0.0f )
-    {
-        // Set the Y position to 0.0
-        vecBlipPosition.fY = 0.0f;
-    }
-
     // Adjust to the map variables and create the map ratio
     float fX = vecPosition.fX + 3000.0f;
     float fY = vecPosition.fY + 3000.0f;
     float fRatio = 6000.0f / m_fMapSize;
 
     // Calculate the screen position for the marker
-    vecLocalPos.fX = static_cast < float > ( m_iMapMinX ) + ( fX / fRatio ) - ( fBlipSize / ( 1 / vecBlipPosition.fX ) );
-    vecLocalPos.fY = static_cast < float > ( m_iMapMaxY ) - ( fY / fRatio ) - ( fBlipSize / ( 1 / vecBlipPosition.fY ) );
+    vecLocalPos.fX = static_cast < float > ( m_iMapMinX ) + ( fX / fRatio );
+    vecLocalPos.fY = static_cast < float > ( m_iMapMaxY ) - ( fY / fRatio );
 
     // If the position is on the screen
     if ( vecLocalPos.fX >= 0.0f &&

@@ -24,8 +24,6 @@
 #include "CElementGroup.h"
 #include <list>
 
-using namespace std;
-
 #define MAX_RESOURCE_NAME_LENGTH	255
 #define MAX_FUNCTION_NAME_LENGTH    50
 
@@ -46,7 +44,7 @@ class CResource
 {  
 
 public:
-                            CResource       ( unsigned short usID, char* szResourceName );
+                            CResource       ( unsigned short usID, char* szResourceName, CClientEntity* pResourceEntity, CClientEntity* pResourceDynamicEntity );
                             ~CResource      ( void );
 
     inline unsigned short   GetID           ( void )                { return m_usID; };
@@ -63,8 +61,8 @@ public:
 
     CDownloadableResource*  AddConfigFile   ( char *szFileName, unsigned long ulServerCRC );
 
-    inline list < class CResourceConfigItem* >::iterator    ConfigIterBegin     ( void )        { return m_ConfigFiles.begin(); }
-    inline list < class CResourceConfigItem* >::iterator    ConfigIterEnd       ( void )        { return m_ConfigFiles.end(); }
+    inline std::list < class CResourceConfigItem* >::iterator    ConfigIterBegin     ( void )        { return m_ConfigFiles.begin(); }
+    inline std::list < class CResourceConfigItem* >::iterator    ConfigIterEnd       ( void )        { return m_ConfigFiles.end(); }
 
     CElementGroup *         GetElementGroup ( void )                { return m_pDefaultElementGroup; }
 
@@ -75,7 +73,7 @@ public:
     void                    SetResourceEntity ( CClientEntity* pEntity )    { m_pResourceEntity = pEntity; }
 	class CClientEntity*    GetResourceDynamicEntity ( void )						{ return m_pResourceDynamicEntity; }
     void                    SetResourceDynamicEntity ( CClientEntity* pEntity )		{ m_pResourceDynamicEntity = pEntity; }
-    inline const char *     GetResourceDirectoryPath () { return m_szResourceDirectoryPath; };
+    inline const char *     GetResourceDirectoryPath () { return m_strResourceDirectoryPath.c_str (); };
 	class CClientEntity*	GetResourceGUIEntity ( void )					{ return m_pResourceGUIEntity; }
 	void					SetResourceGUIEntity	  ( CClientEntity* pEntity )	{ m_pResourceGUIEntity = pEntity; }
     inline CClientEntity*   GetResourceCOLModelRoot ( void )                           { return m_pResourceCOLRoot; };
@@ -107,12 +105,12 @@ private:
     static int              m_iShowingCursor;
     bool                    m_bShowingCursor;
 
-    char                    m_szResourceDirectoryPath [MAX_PATH]; // stores the path to /mods/deathmatch/resources/resource_name
+    SString                 m_strResourceDirectoryPath; // stores the path to /mods/deathmatch/resources/resource_name
 
-    list < class CResourceFile* >           m_ResourceFiles;
-    list < class CResourceConfigItem* >     m_ConfigFiles;
-    list<CElementGroup *>   m_elementGroups; // stores elements created by scripts in this resource
-	list<CExportedFunction *>   m_exportedFunctions;
+    std::list < class CResourceFile* >           m_ResourceFiles;
+    std::list < class CResourceConfigItem* >     m_ConfigFiles;
+    std::list<CElementGroup *>   m_elementGroups; // stores elements created by scripts in this resource
+	std::list<CExportedFunction *>   m_exportedFunctions;
     CElementGroup *         m_pDefaultElementGroup;
 };
 

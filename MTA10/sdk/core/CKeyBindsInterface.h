@@ -16,7 +16,6 @@
 #include <game/CControllerConfigManager.h>
 
 #include <list>
-using namespace std;
 
 class CKeyFunctionBind;
 class CControlFunctionBind;
@@ -70,9 +69,10 @@ enum eKeyBindType
 class CKeyBind
 {
 public:
-    inline                  CKeyBind ( void ) : boundKey ( NULL ), beingDeleted ( false ) {}
+    inline                  CKeyBind ( void ) : boundKey ( NULL ), beingDeleted ( false ) { bActive = true; }
     const SBindableKey*		boundKey;
     bool                    beingDeleted;
+    bool                    bActive;
     inline bool             IsBeingDeleted ( void ) { return beingDeleted; }
     virtual eKeyBindType	GetType    ( void ) = 0;
 };
@@ -89,11 +89,12 @@ public:
 class CCommandBind: public CKeyBindWithState
 {
 public:
-    inline          CCommandBind    ( void ) { szCommand = NULL; szArguments = NULL; }
-    inline          ~CCommandBind   ( void ) { delete [] szCommand; if ( szArguments ) delete [] szArguments; }
+    inline          CCommandBind    ( void ) { szCommand = NULL; szArguments = NULL; szResource = NULL; }
+    inline          ~CCommandBind   ( void ) { delete [] szCommand; if ( szArguments ) delete [] szArguments; if ( szResource ) delete [] szResource; }
     eKeyBindType    GetType         ( void ) { return KEY_BIND_COMMAND; }
     char*           szCommand;
     char*           szArguments;
+    char*           szResource;
 };
 
 class CKeyFunctionBind: public CKeyBindWithState
@@ -132,18 +133,20 @@ public:
     virtual void                    Clear                       ( void ) = 0;
     virtual bool                    Call                        ( CKeyBind* pKeyBind ) = 0;
 
-    virtual list < CKeyBind* > ::const_iterator IterBegin       ( void ) = 0;
-    virtual list < CKeyBind* > ::const_iterator IterEnd         ( void ) = 0;
+    virtual std::list < CKeyBind* > ::const_iterator IterBegin  ( void ) = 0;
+    virtual std::list < CKeyBind* > ::const_iterator IterEnd    ( void ) = 0;
 
     // Command-bind funcs
-    virtual bool                    AddCommand                  ( const char* szKey, const char* szCommand, const char* szArguments = NULL, bool bState = true ) = 0;
+    virtual bool                    AddCommand                  ( const char* szKey, const char* szCommand, const char* szArguments = NULL, bool bState = true, const char* szResource = NULL ) = 0;
     virtual bool                    AddCommand                  ( const SBindableKey* pKey, const char* szCommand, const char* szArguments = NULL, bool bState = true ) = 0;
-    virtual bool                    RemoveCommand               ( const char* szKey, const char* szCommand, bool bCheckState = false, bool bState = true ) = 0;
+    virtual bool                    RemoveCommand               ( const char* szKey, const char* szCommand, bool bCheckState = false, bool bState = true, const char* szResource = NULL ) = 0;
     virtual bool                    RemoveAllCommands           ( const char* szKey, bool bCheckState = false, bool bState = true ) = 0;
     virtual bool                    RemoveAllCommands           ( void ) = 0;
-    virtual bool                    CommandExists               ( const char* szKey, const char* szCommand, bool bCheckState = false, bool bState = true ) = 0;
+    virtual bool                    CommandExists               ( const char* szKey, const char* szCommand, bool bCheckState = false, bool bState = true, const char* szArguments = NULL ) = 0;
+    virtual bool                    SetCommandActive            ( const char* szCommand, bool bState, const char* szArguments, const char* szResource, bool bActive, bool checkHitState ) = 0;
+    virtual void                    SetAllCommandsActive        ( const char* szResource, bool bActive ) = 0;
     virtual CCommandBind*           GetBindFromCommand          ( const char* szCommand, const char* szArguments = NULL, bool bMatchCase = true ) = 0;
-    virtual bool                    GetBoundCommands            ( const char* szCommand, list < CCommandBind * > & commandsList ) = 0;
+    virtual bool                    GetBoundCommands            ( const char* szCommand, std::list < CCommandBind * > & commandsList ) = 0;
 
     // Control-bind funcs
     virtual bool                    AddGTAControl               ( const char* szKey, const char* szControl ) = 0;
@@ -158,7 +161,7 @@ public:
     virtual unsigned int            GTAControlsCount            ( void ) = 0;
     virtual void                    CallGTAControlBind          ( CGTAControlBind* pBind, bool bState ) = 0;
     virtual void                    CallAllGTAControlBinds      ( eControlType controlType, bool bState ) = 0;
-    virtual bool                    GetBoundControls            ( SBindableGTAControl * pControl, list < CGTAControlBind * > & controlsList ) = 0;
+    virtual bool                    GetBoundControls            ( SBindableGTAControl * pControl, std::list < CGTAControlBind * > & controlsList ) = 0;
 
     virtual bool                    GetMultiGTAControlState     ( CGTAControlBind* pBind ) = 0;
     virtual bool                    IsControlEnabled            ( const char* szControl ) = 0;

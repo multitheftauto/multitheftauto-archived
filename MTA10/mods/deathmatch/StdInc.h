@@ -13,11 +13,14 @@
 #include <list>
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
 #include <cstdio>
 #include <cstring>
 
 // SDK includes
+#include "SharedUtil.h"
+#include "SString.h"
 #include <core/CCoreInterface.h>
 #include <core/CExceptionInformation.h>
 #include <xml/CXML.h>
@@ -40,6 +43,7 @@
 #include <CClientManager.h>
 #include <CClient3DMarker.h>
 #include <CClientCheckpoint.h>
+#include <CClientColShape.h>
 #include <CClientColCircle.h>
 #include <CClientColCuboid.h>
 #include <CClientColSphere.h>

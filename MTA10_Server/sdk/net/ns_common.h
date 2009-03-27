@@ -16,6 +16,8 @@
 #include "ns_packetenums.h"
 #include "ns_playerid.h"
 
+#define MTA_DM_NET_MODULE_VERSION   0x00004
+
 const NetServerPlayerID NET_INVALID_PLAYER_ID;
 #define NET_INVALID_PLAYER_INDEX 255;
 
@@ -33,7 +35,7 @@ typedef struct __static_server_data_t
 {
 } static_server_data_t, *pstatic_server_data_t;
 
-typedef bool (*PPACKETHANDLER) ( unsigned char, NetServerPlayerID&, NetServerBitStreamInterface&, unsigned long ulTimeStamp );
+typedef bool (*PPACKETHANDLER) ( unsigned char, NetServerPlayerID&, NetServerBitStreamInterface& );
 
 enum NetServerPacketPriority
 {
@@ -48,7 +50,7 @@ enum NetServerPacketReliability
 	PACKET_RELIABILITY_UNRELIABLE_SEQUENCED,
 	PACKET_RELIABILITY_RELIABLE,
 	PACKET_RELIABILITY_RELIABLE_ORDERED,
-	PACKET_RELIABILITY_RELIABLE_SEQUENCED
+	PACKET_RELIABILITY_RELIABLE_SEQUENCED   //     Can drop packets
 };
 
 enum NetServerPacketOrdering

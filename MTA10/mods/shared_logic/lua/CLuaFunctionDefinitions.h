@@ -138,6 +138,10 @@ public:
     LUA_DECLARE ( SetElementStreamable );
     LUA_DECLARE ( SetElementModel );
 
+    // Radio functions
+    LUA_DECLARE ( SetRadioChannel );
+    LUA_DECLARE ( GetRadioChannel );
+
     // Player get functions
     LUA_DECLARE ( GetLocalPlayer );
     LUA_DECLARE ( GetPlayerName );
@@ -258,6 +262,9 @@ public:
 	LUA_DECLARE ( GetHelicopterRotorSpeed );
     LUA_DECLARE ( GetVehicleEngineState );
     LUA_DECLARE ( IsTrainDerailed );
+    LUA_DECLARE ( IsTrainDerailable );
+    LUA_DECLARE ( GetTrainDirection );
+    LUA_DECLARE ( GetTrainSpeed );
 
     // Vehicle set functions
     LUA_DECLARE ( FixVehicle );
@@ -295,6 +302,9 @@ public:
     LUA_DECLARE ( SetVehicleAdjustableProperty );
 	LUA_DECLARE ( SetHelicopterRotorSpeed );
     LUA_DECLARE ( SetTrainDerailed );
+    LUA_DECLARE ( SetTrainDerailable );
+    LUA_DECLARE ( SetTrainDirection );
+    LUA_DECLARE ( SetTrainSpeed );
 
     // Object create funcs
     LUA_DECLARE ( CreateObject );
@@ -453,6 +463,8 @@ public:
 	LUA_DECLARE ( GUICreateRadioButton );
 	LUA_DECLARE ( GUICreateStaticImage );
 	LUA_DECLARE ( GUIStaticImageLoadImage );
+    LUA_DECLARE ( GUIGetSelectedTab );
+    LUA_DECLARE ( GUISetSelectedTab );
 	LUA_DECLARE ( GUIDeleteTab );
 	LUA_DECLARE ( GUIScrollBarSetScrollPosition );
 	LUA_DECLARE ( GUIScrollBarGetScrollPosition );
@@ -473,6 +485,8 @@ public:
 	LUA_DECLARE ( GUIGridListGetItemData );
 	LUA_DECLARE ( GUIGridListSetSelectionMode );
 	LUA_DECLARE ( GUIGridListGetSelectedItem );
+    LUA_DECLARE ( GUIGridListGetSelectedItems );
+    LUA_DECLARE ( GUIGridListGetSelectedCount );
     LUA_DECLARE ( GUIGridListSetSelectedItem );
 	LUA_DECLARE ( GUIScrollPaneSetScrollBars );
 	LUA_DECLARE ( GUIScrollPaneSetHorizontalScrollPosition );
@@ -618,6 +632,7 @@ public:
     // Weapon funcs
     LUA_DECLARE ( GetWeaponNameFromID );
     LUA_DECLARE ( GetWeaponIDFromName );
+    LUA_DECLARE ( GetSlotFromWeapon );
 
     // Command funcs
     LUA_DECLARE ( AddCommandHandler );
@@ -643,6 +658,8 @@ public:
 	LUA_DECLARE ( SetVoiceInputEnabled );
 	LUA_DECLARE ( SetVoiceMuteAllEnabled );
 #endif
+
+    LUA_DECLARE ( GetVersion );
 };
 
 #endif

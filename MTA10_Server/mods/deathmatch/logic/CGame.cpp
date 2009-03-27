@@ -97,6 +97,7 @@ CGame::CGame ( void )
     m_pRPCFunctions = NULL;
 	m_pLanBroadcast = NULL;
     m_pPedSync = NULL;
+    m_pWaterManager = NULL;
 
 #ifdef MTA_VOICE
     m_pVoiceServer = NULL;
@@ -183,6 +184,7 @@ CGame::~CGame ( void )
     SAFE_DELETE ( m_pRemoteCalls );
     SAFE_DELETE ( m_pResourceDownloader );
     SAFE_DELETE ( m_pRPCFunctions );
+    SAFE_DELETE ( m_pWaterManager );
 
     // Clear our global pointer
     g_pGame = NULL;
@@ -195,7 +197,7 @@ void CGame::GetTag ( char *szInfoTag, int iInfoTag )
     unsigned int uiMaxPlayers;
     if ( !m_CommandLineParser.GetMaxPlayers ( uiMaxPlayers ) )
         uiMaxPlayers = m_pMainConfig->GetMaxPlayers ();
-	_snprintf ( szInfoTag, iInfoTag, "%c[%c%c%c] MTA:SA Deathmatch R1 %c:%c: %d/%d players %c:%c: %u resources %c:%c: %u fps",
+    _snprintf ( szInfoTag, iInfoTag, "%c[%c%c%c] MTA: San Andreas %c:%c: %d/%d players %c:%c: %u resources %c:%c: %u fps",
 			   132, 135, szProgress[ucProgress], 132,
 		       130, 130, m_pPlayerManager->Count (), uiMaxPlayers,
                130, 130, m_pResourceManager->GetResourceLoadedCount (),
@@ -364,6 +366,7 @@ bool CGame::Start ( int iArgumentCount, char* szArguments [] )
     m_pConsole = new CConsole ( m_pBlipManager, m_pMapManager, m_pPlayerManager, m_pRegisteredCommands, m_pVehicleManager, m_pLuaManager, &m_WhoWas, m_pMapFiles, m_pBanManager, m_pACLManager );
     m_pMainConfig = new CMainConfig ( m_pConsole, m_pLuaManager );
     m_pRPCFunctions = new CRPCFunctions;
+    m_pWaterManager = new CWaterManager;
 
     // Parse the commandline
     if ( !m_CommandLineParser.Parse ( iArgumentCount, szArguments ) )
@@ -440,7 +443,7 @@ bool CGame::Start ( int iArgumentCount, char* szArguments [] )
 
     // Show the server header
 	CLogger::LogPrintfNoStamp ( "===========================================================\n" \
-								"= Multi Theft Auto: San Andreas Deathmatch v%s\n" \
+								"= Multi Theft Auto: San Andreas v%s\n" \
 								"===========================================================\n" \
 								"= Server name		: %s\n" \
 								"= Server IP address	: %s\n" \
@@ -720,7 +723,7 @@ void CGame::Stop ( void )
 }
 
 
-bool CGame::StaticProcessPacket ( unsigned char ucPacketID, NetServerPlayerID& Socket, NetServerBitStreamInterface& BitStream, unsigned long ulTimeStamp )
+bool CGame::StaticProcessPacket ( unsigned char ucPacketID, NetServerPlayerID& Socket, NetServerBitStreamInterface& BitStream )
 {
     // Is it a join packet? Pass it to the handler immediately
     if ( ucPacketID == PACKET_ID_PLAYER_JOIN )
@@ -732,16 +735,16 @@ bool CGame::StaticProcessPacket ( unsigned char ucPacketID, NetServerPlayerID& S
     // Is it an rpc call?
     if ( ucPacketID == PACKET_ID_RPC )
     {
-        g_pGame->m_pRPCFunctions->ProcessPacket ( Socket, BitStream, ulTimeStamp );
+        g_pGame->m_pRPCFunctions->ProcessPacket ( Socket, BitStream );
         return true;
     }
 
     // Translate the packet
-    CPacket* pPacket = g_pGame->m_pPacketTranslator->Translate ( Socket, static_cast < ePacketID > ( ucPacketID ), BitStream, ulTimeStamp );
+    CPacket* pPacket = g_pGame->m_pPacketTranslator->Translate ( Socket, static_cast < ePacketID > ( ucPacketID ), BitStream );
     if ( pPacket )
     {
         // Handle it
-        bool bHandled = g_pGame->ProcessPacket ( *pPacket, ulTimeStamp );
+        bool bHandled = g_pGame->ProcessPacket ( *pPacket );
 
         // Destroy the packet and return whether it could handle it or not
         delete pPacket;
@@ -753,7 +756,7 @@ bool CGame::StaticProcessPacket ( unsigned char ucPacketID, NetServerPlayerID& S
 }
 
 
-bool CGame::ProcessPacket ( CPacket& Packet, unsigned long ulTimeStamp )
+bool CGame::ProcessPacket ( CPacket& Packet )
 {
     // Can we handle it?
     ePacketID PacketID = Packet.GetPacketID ();
@@ -1193,14 +1196,8 @@ void CGame::Packet_PlayerJoinData ( CPlayerJoinDataPacket& Packet )
 {
 	// Grab the nick
     const char* szNick = Packet.GetNick ();
-    char szNickTemp [32];
     if ( szNick && szNick [0] != 0 )
     {
-        // Valid?
-        strncpy ( szNickTemp, szNick, sizeof ( szNickTemp ) );
-        szNickTemp [ 31 ] = 0;
-        szNick = SanityCheckNick ( szNickTemp );
-
         // Is the server passworded?
         bool bPasswordIsValid = true;
         if ( m_pMainConfig->HasPassword () )
@@ -1226,7 +1223,7 @@ void CGame::Packet_PlayerJoinData ( CPlayerJoinDataPacket& Packet )
         CPlayer* pPlayer = m_pPlayerManager->Create ( Packet.GetSourceSocket () );
         if ( pPlayer )
         {
-            if ( !CheckNickProvided ( szNickTemp ) ) // check the nick is valid
+            if ( !CheckNickProvided ( szNick ) ) // check the nick is valid
             {
                 // Tell the console
                 char szIP [22];
@@ -1462,7 +1459,7 @@ void CGame::Packet_PlayerPuresync ( CPlayerPuresyncPacket& Packet )
                     if ( pSendPlayer->IsTimeToSendSyncFrom ( *pPlayer, ulTimeNow ) )
                     {
                         // Send it.
-                        pSendPlayer->Send ( Packet, Packet.m_ulTimeStamp );
+                        pSendPlayer->Send ( Packet );
                     }
                 }
             }
@@ -1546,7 +1543,7 @@ void CGame::Packet_VehiclePuresync ( CVehiclePuresyncPacket& Packet )
                     if ( pSendPlayer->IsTimeToSendSyncFrom ( *pPlayer, ulTimeNow ) )
                     {
                         // Send it.
-                        pSendPlayer->Send ( Packet, Packet.m_ulTimeStamp );
+                        pSendPlayer->Send ( Packet );
                     }
                 }
             }
@@ -1746,21 +1743,16 @@ void CGame::Packet_ExplosionSync ( CExplosionSyncPacket& Packet )
             {
                 pSendPlayer = *iter;
 
-                /* We now tell the reporter to create the explosion too!
-                // Not the player we got the packet from?
-                if ( pSendPlayer != pPlayer )
-                */
-                {
-                    // Grab this player's camera position
-                    CVector vecCameraPosition;
-                    pSendPlayer->GetCamera ()->GetPosition ( vecCameraPosition );
+                // We tell the reporter to create the explosion too
+                // Grab this player's camera position
+                CVector vecCameraPosition;
+                pSendPlayer->GetCamera ()->GetPosition ( vecCameraPosition );
 
-                    // Is this players camera close enough to send?
-                    if ( IsPointNearPoint3D ( vecPosition, vecCameraPosition, MAX_EXPLOSION_SYNC_DISTANCE ) )
-                    {
-                        // Send the packet to him
-                        pSendPlayer->Send ( Packet );
-                    }
+                // Is this players camera close enough to send?
+                if ( IsPointNearPoint3D ( vecPosition, vecCameraPosition, MAX_EXPLOSION_SYNC_DISTANCE ) )
+                {
+                    // Send the packet to him
+                    pSendPlayer->Send ( Packet );
                 }
             }
         }
@@ -2610,7 +2602,10 @@ void CGame::Packet_CameraSync ( CCameraSyncPacket & Packet )
         {        
             CElement * pTarget = CElementIDs::GetElement ( Packet.m_TargetID );
             pCamera->SetMode ( CAMERAMODE_PLAYER );
-            pCamera->SetTarget ( pTarget );
+            if ( pTarget )
+                pCamera->SetTarget ( pTarget );
+            else
+               CLogger::LogPrintf ( "INTERNAL ERROR: Camera sync packet with invalid target\n" ); 
         }
     }
 }

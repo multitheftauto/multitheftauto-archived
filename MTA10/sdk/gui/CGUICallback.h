@@ -24,8 +24,6 @@ template < typename Ret, typename Arguments >
 class CGUICallbackInterface
 {
 public:
-    virtual         ~CGUICallbackInterface      ( void ) {};
-
 	virtual CGUICallbackInterface* Copy ( void ) = 0;
     virtual Ret     operator ()                 ( Arguments ) const = 0;
 };
@@ -109,11 +107,30 @@ public:
     // Copy constructor
 	CGUICallback ( const CGUICallback < Ret, Arguments > & copy )
 	{
-        if ( copy.m_pCallback )
-		    m_pCallback = copy.m_pCallback->Copy();
-        else
-            m_pCallback = NULL;
+        m_pCallback = NULL;
+        *this = copy;
 	}
+
+    void operator = ( const CGUICallback < Ret, Arguments > & copy )
+    {
+        if ( &copy == this )
+            return;
+
+        if ( m_pCallback )
+        {
+            delete m_pCallback;
+            m_pCallback = NULL;
+        }
+
+        if ( copy.m_pCallback )
+        {
+            m_pCallback = copy.m_pCallback->Copy();
+        }
+        else
+        {
+            m_pCallback = NULL;
+        }
+    }
 
     // Destructor
     ~CGUICallback ( void )
@@ -134,6 +151,12 @@ public:
 		return false;
     }
 
+    operator bool () const
+    {
+        return m_pCallback != NULL;
+    }
+
+protected:
     CGUICallbackInterface < Ret, Arguments >*      m_pCallback;
 };
 

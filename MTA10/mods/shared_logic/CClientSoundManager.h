@@ -19,7 +19,6 @@ class CClientSoundManager;
 #include "CClientSound.h"
 
 using namespace irrklang;
-using namespace std;
 
 class CClientSoundManager : public ISoundStopEventReceiver
 {
@@ -47,14 +46,14 @@ public:
 
 private:
 
-    bool                    m_bUse3DBuffers;
+    bool                        m_bUse3DBuffers;
 
-    CClientManager*         m_pClientManager;
-    ISoundEngine*           m_pSoundEngine;
+    CClientManager*             m_pClientManager;
+    ISoundEngine*               m_pSoundEngine;
 
-    unsigned short          m_usDimension;
+    unsigned short              m_usDimension;
 
-    list < CClientSound* >  m_Sounds;
+    std::list < CClientSound* > m_Sounds;
 };
 
 #endif

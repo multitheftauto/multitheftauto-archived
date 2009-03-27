@@ -13,6 +13,7 @@
 #include "StdInc.h"
 #include <utils/CMD5Hasher.h>
 
+using SharedUtil::CalcMTASAPath;
 extern CCore* g_pCore;
 
 CCommunityRegistration::CCommunityRegistration ( void )
@@ -158,7 +159,7 @@ void CCommunityRegistration::DoPulse ( void )
                     // TODO: Load it without a temp file
 
                     // Create a temp file for the png
-                    FILE * fp = fopen ( REGISTRATION_TEMP_FILE, "wb" );
+                    FILE * fp = fopen ( CalcMTASAPath( REGISTRATION_TEMP_FILE ), "wb" );
                     if ( fp )
                     {
                         fwrite ( &szBuffer[33], uiBufferLength, 1, fp );
@@ -170,7 +171,7 @@ void CCommunityRegistration::DoPulse ( void )
                         m_pWindow->BringToFront ();
 
                         // Delete the temp file
-                        remove ( REGISTRATION_TEMP_FILE );
+                        remove ( CalcMTASAPath( REGISTRATION_TEMP_FILE ) );
                         return;
                     }
                 }

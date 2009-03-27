@@ -23,8 +23,6 @@
 #include "CCommon.h"
 #include "CPad.h"
 
-using namespace std;
-
 #ifndef PI
 #define PI 3.14159265358979323846264338327950
 #endif
@@ -35,8 +33,7 @@ using namespace std;
 unsigned long	GetTickCount				( void );
 #endif
 
-char*			SanityCheckNick				( char* szNick );
-bool            CheckNickProvided           ( char* szNick );
+bool            CheckNickProvided           ( const char* szNick );
 float           DistanceBetweenPoints2D     ( const CVector& vecPosition1, const CVector& vecPosition2 );
 float           DistanceBetweenPoints3D     ( const CVector& vecPosition1, const CVector& vecPosition2 );
 bool            IsPointNearPoint2D          ( const CVector& vecPosition1, const CVector& vecPosition2, float fDistance );
@@ -56,6 +53,7 @@ bool            IsNumericString             ( const char* szString, size_t sizeS
 unsigned int    HashString                  ( const char* szString );
 
 void            InitializeTime              ( void );
+double          GetGameSeconds              ( void );
 
 void            DisconnectPlayer            ( class CGame* pGame, class CPlayer& Player, const char* szMessage );
 void            DisconnectConnectionDesync  ( class CGame* pGame, class CPlayer& Player, unsigned int uiCode );

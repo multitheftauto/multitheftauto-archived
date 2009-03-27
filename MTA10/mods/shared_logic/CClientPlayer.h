@@ -34,8 +34,6 @@ class CClientPlayer;
 class CClientPlayerManager;
 class CClientTeam;
 
-using namespace std;
-
 class CClientPlayer : public CClientPed
 {
     friend CClientPlayerManager;
@@ -69,15 +67,9 @@ public:
     inline unsigned long            GetLastNametagShow      ( void )                                { return m_ulLastNametagShow; };
     inline void                     SetLastNametagShow      ( unsigned long ulTime )                { m_ulLastNametagShow = ulTime; };
 
-    inline void                     SetAdminLevel           ( unsigned char ucAdminLevel )      { m_ucAdminLevel = ucAdminLevel; };
-    inline unsigned char            GetAdminLevel           ( void )                            { return m_ucAdminLevel; };
-
     inline void                     SetIsExtrapolatingAim   ( bool m_bExtrap )                  { m_bDoExtrapolatingAim = m_bExtrap; };
     inline bool                     IsExtrapolatingAim      ( void )                            { return m_bDoExtrapolatingAim; };
     void                            UpdateAimPosition       ( const CVector &vecAim );
-
-    inline unsigned long            GetTimeStamp            ( void )                            { return m_ulTimeStamp; };
-    inline void                     SetTimeStamp            ( unsigned long ulTimeStamp )       { m_ulTimeStamp = ulTimeStamp; };
 
     inline unsigned short           GetLatency              ( void )                            { return m_usLatency; };
     inline void                     SetLatency              ( unsigned short usLatency )        { m_usLatency = (m_usLatency + usLatency) / 2; };
@@ -114,7 +106,6 @@ public:
 private:
     bool                            m_bIsLocalPlayer;
     char                            m_szNick [ MAX_PLAYER_NICK_LENGTH + 1 ];
-    unsigned char                   m_ucAdminLevel;
 
     unsigned int                    m_uiPing;
 
@@ -124,7 +115,6 @@ private:
     CVector                         m_vecTargetIncrements;
     unsigned int                    m_uiFramesSincePositionUpdate;
 
-    unsigned long                   m_ulTimeStamp;
     unsigned short                  m_usLatency;
     CVector                         m_vecAimSpeed;
     CVector                         m_vecOldAim;
@@ -158,6 +148,14 @@ private:
     float                           m_fNametagDistance;
 
     bool                            m_bNetworkDead;
+
+#ifdef MTA_DEBUG
+private:
+    bool                            m_bShowingWepdata;
+public:
+    inline void                     SetShowingWepdata       ( bool bState ) { m_bShowingWepdata = bState; }
+    inline bool                     IsShowingWepdata        ( ) const       { return m_bShowingWepdata; }
+#endif
 };
 
 #endif

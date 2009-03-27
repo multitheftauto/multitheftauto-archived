@@ -11,7 +11,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 CClientGUIManager::CClientGUIManager ( void )
 {
@@ -79,6 +81,25 @@ bool CClientGUIManager::Exists ( CGUIElement* pCGUIElement )
 
     // Doesn't exist
     return false;
+}
+
+
+CClientGUIElement* CClientGUIManager::Get ( CGUIElement* pCGUIElement )
+{
+	if ( pCGUIElement ) {
+		// Find the object in the list
+		list < CClientGUIElement* > ::const_iterator iter = m_Elements.begin ();
+		for ( ; iter != m_Elements.end (); iter++ )
+		{
+			if ( (*iter)->GetCGUIElement () == pCGUIElement )
+			{
+				return *iter;
+			}
+		}
+	}
+
+    // Doesn't exist
+    return NULL;
 }
 
 

@@ -15,7 +15,6 @@
 
 #include "CCommon.h"
 #include <vector>
-using namespace std;
 #include <net/CNetServer.h>
 #include "CPlayerManager.h"
 
@@ -43,7 +42,7 @@ public:
 
     void                        AddHandlers                             ( void );
     static void                 AddHandler                              ( unsigned char ucID, pfnRPCHandler Callback );
-    void                        ProcessPacket                           ( NetServerPlayerID& Socket, NetServerBitStreamInterface& bitStream, unsigned long ulTimeStamp );
+    void                        ProcessPacket                           ( NetServerPlayerID& Socket, NetServerBitStreamInterface& bitStream );
 
 protected:
     DECLARE_RPC ( PlayerInGameNotice );
@@ -54,10 +53,9 @@ protected:
     DECLARE_RPC ( RequestStealthKill );
 
 protected:
-    static CPlayer *            m_pSourcePlayer;
-    static unsigned long        m_ulTimeStamp;
+    static CPlayer *                m_pSourcePlayer;
 
-    vector < SRPCHandler * >    m_RPCHandlers;
+    std::vector < SRPCHandler * >   m_RPCHandlers;
 
     enum eRPCFunctions
     {

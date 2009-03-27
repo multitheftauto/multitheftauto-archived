@@ -77,7 +77,7 @@ public:
     static bool                         SetElementPosition                  ( CClientEntity& Entity, const CVector& vecPosition );
     static bool                         SetElementRotation                  ( CClientEntity& Entity, const CVector& vecRotation );
     static bool                         SetElementVelocity                  ( CClientEntity& Element, const CVector& vecVelocity );
-    static bool                         SetElementParent                    ( CClientEntity& Element, CClientEntity& Parent );
+    static bool                         SetElementParent                    ( CClientEntity& Element, CClientEntity& Parent, CLuaMain* pLuaMain );
     static bool                         SetElementInterior                  ( CClientEntity& Entity, unsigned char ucInterior, bool bSetPosition, CVector& vecPosition );
     static bool                         SetElementDimension                 ( CClientEntity& Entity, unsigned short usDimension );
     static bool                         AttachElements                      ( CClientEntity& Entity, CClientEntity& AttachedToEntity, CVector& vecPosition, CVector& vecRotation );
@@ -87,6 +87,10 @@ public:
     static bool                         SetElementHealth                    ( CClientEntity& Entity, float fHealth );
     static bool                         SetElementModel                     ( CClientEntity& Entity, unsigned short usModel );
     static bool                         SetElementCollisionsEnabled         ( CClientEntity& Entity, bool bEnabled );
+
+    // Radio funcs
+    static bool                         SetRadioChannel                     ( unsigned char& ucChannel );
+    static bool                         GetRadioChannel                     ( unsigned char& ucChannel );
 
     // Player get funcs
     static CClientPlayer*               GetLocalPlayer                      ( void );
@@ -145,7 +149,7 @@ public:
 
 
     // Vehicle get funcs
-    static CClientVehicle*              CreateVehicle                       ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate = NULL, bool bDirection = false );
+    static CClientVehicle*              CreateVehicle                       ( CResource& Resource, unsigned short usModel, const CVector& vecPosition, const CVector& vecRotation, const char* szRegPlate = NULL );
     static bool                         GetVehicleModelFromName             ( const char* szName, unsigned short& usModel );
     static bool					        GetVehicleUpgradeSlotName			( unsigned char ucSlot, char* szName, unsigned short len );
 	static bool					        GetVehicleUpgradeSlotName			( unsigned short usUpgrade, char* szName, unsigned short len );
@@ -153,8 +157,11 @@ public:
     static bool                         GetVehicleDamageProof               ( CClientVehicle& Vehicle, bool& bDamageProof );
     static bool                         GetVehicleNameFromModel             ( unsigned short usModel, char* szName, unsigned short len );
 	static bool							GetHelicopterRotorSpeed				( CClientVehicle& Vehicle, float& fSpeed );
-    static bool                         GetVehicleEngineState               ( CClientVehicle& Vehicle, bool & bState );
-    static bool                         IsTrainDerailed                     ( CClientVehicle& Vehicle, bool & bDerailed );
+    static bool                         GetVehicleEngineState               ( CClientVehicle& Vehicle, bool& bState );
+    static bool                         IsTrainDerailed                     ( CClientVehicle& Vehicle, bool& bDerailed );
+    static bool                         IsTrainDerailable                   ( CClientVehicle& Vehicle, bool& bIsDerailable );
+    static bool                         GetTrainDirection                   ( CClientVehicle& Vehicle, bool& bDirection );
+    static bool                         GetTrainSpeed                       ( CClientVehicle& Vehicle, float& fSpeed );
 
     // Vehicle set functions
     static bool                         FixVehicle                          ( CClientEntity& Entity );
@@ -185,6 +192,9 @@ public:
     static bool                         SetVehicleAdjustableProperty        ( CClientEntity& Entity, unsigned short usAdjustableProperty );
 	static bool							SetHelicopterRotorSpeed				( CClientVehicle& Vehicle, float fSpeed );
 	static bool							SetTrainDerailed				    ( CClientVehicle& Vehicle, bool bDerailed );
+    static bool                         SetTrainDerailable                  ( CClientVehicle& Vehicle, bool bDerailable );
+    static bool                         SetTrainDirection                   ( CClientVehicle& Vehicle, bool bDirection );
+    static bool                         SetTrainSpeed                       ( CClientVehicle& Vehicle, float fSpeed );
 
     // Object get funcs
     static CClientObject*               CreateObject                        ( CResource& Resource, unsigned short usModelID, const CVector& vecPosition, const CVector& vecRotation );
@@ -284,6 +294,8 @@ public:
 	
 	static bool							GUIStaticImageLoadImage				( CClientEntity& Element, const char* szFile, const char* szDir );
 
+    static bool                         GUISetSelectedTab                   ( CClientEntity& Element, CClientEntity& Tab );
+    static CClientGUIElement*           GUIGetSelectedTab                   ( CClientEntity& Element );
 	static bool							GUIDeleteTab						( CLuaMain& LuaMain, CClientGUIElement *pTab, CClientGUIElement *pParent );
 
 	static void					        GUISetEnabled						( CClientEntity& Element, bool bFlag );
@@ -384,7 +396,9 @@ public:
 
     // Input functions
     static bool                         BindKey                             ( const char* szKey, const char* szHitState, CLuaMain* pLuaMain, int iLuaFunction, CLuaArguments& Arguments );
+    static bool                         BindKey                             ( const char* szKey, const char* szHitState, const char* szCommandName, const char* szArguments, const char* szResource );
     static bool                         UnbindKey                           ( const char* szKey, CLuaMain* pLuaMain, const char* szHitState = 0, int iLuaFunction = LUA_REFNIL );
+    static bool                         UnbindKey                           ( const char* szKey, const char* szHitState, const char* szCommandName, const char* szResource );
     static bool                         GetKeyState                         ( const char* szKey, bool& bState );
     static bool                         GetControlState                     ( const char* szControl, bool& bState );
     static bool                         GetAnalogControlState                     ( const char* szControl, float& fState );
@@ -455,6 +469,13 @@ public:
 	static bool							SetVoiceInputEnabled				( bool bEnabled );
 	static bool							SetVoiceMuteAllEnabled				( bool bEnabled );
 #endif
+
+    // Version funcs
+    static unsigned long                GetVersion                          ( );
+    static const char*                  GetVersionString                    ( );
+    static const char*                  GetVersionName                      ( );
+    static unsigned long                GetNetcodeVersion                   ( );
+    static const char*                  GetOperatingSystemName              ( );
 };
 
 #endif

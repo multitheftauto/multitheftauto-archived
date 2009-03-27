@@ -14,7 +14,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 extern CClientGame* g_pClientGame;
 
@@ -259,7 +261,7 @@ void CUnoccupiedVehicleSync::Packet_UnoccupiedVehicleSync ( NetBitStreamInterfac
                 if ( ucFlags & 0x10 ) pVehicle->SetHealth ( fHealth );
                 pVehicle->SetEngineOn ( ( ucFlags & 0x40 ) ? true : false );
                 if ( pVehicle->GetVehicleType() == CLIENTVEHICLE_TRAIN )
-                    pVehicle->SetTrainDerailed ( ( ucFlags & 0x80 ) ? true : false );
+                    pVehicle->SetDerailed ( ( ucFlags & 0x80 ) ? true : false );
 
 #ifdef MTA_DEBUG
 				pVehicle->m_pLastSyncer = NULL;
@@ -305,7 +307,7 @@ void CUnoccupiedVehicleSync::UpdateStates ( void )
             }
 
             // Send and destroy the packet
-            g_pNet->SendPacket ( PACKET_ID_UNOCCUPIED_VEHICLE_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE );
+            g_pNet->SendPacket ( PACKET_ID_UNOCCUPIED_VEHICLE_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED );
             g_pNet->DeallocateNetBitStream ( pBitStream );
         }
     }
@@ -338,7 +340,7 @@ void CUnoccupiedVehicleSync::WriteVehicleInformation ( NetBitStreamInterface* pB
     if ( pVehicle->m_LastSyncedData->fHealth != pVehicle->GetHealth() ) ucFlags |= 0x10;
     if ( pVehicle->m_LastSyncedData->Trailer != Trailer ) ucFlags |= 0x20;
     if ( pVehicle->IsEngineOn () ) ucFlags |= 0x40;
-    if ( pVehicle->IsTrainDerailed () ) ucFlags |= 0x80;
+    if ( pVehicle->IsDerailed () ) ucFlags |= 0x80;
 
     // If nothing has changed we dont sync the vehicle
     if ( ucFlags == 0 ) return;

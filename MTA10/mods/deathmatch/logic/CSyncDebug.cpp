@@ -92,14 +92,12 @@ void CSyncDebug::OnDraw ( void )
     float fCurrentRotation = m_pPlayer->GetCurrentRotation ();
 
     // Write it to a string
-    char szBuffer [256];
-    snprintf ( szBuffer, 256,
+    SString strBuffer (
                "== PLAYER ==\n"
                "Nick: %s\n"
                "Position: %f %f %f\n"
                "Rotation: %f\n"
                "Is dead: %u\n"
-               "Timestamp: %u\n"
                "Ping to server: %u\n"
                "Player syncs: %u\n"
                "Vehicle syncs: %u\n"
@@ -109,32 +107,27 @@ void CSyncDebug::OnDraw ( void )
                vecPosition.fX, vecPosition.fY, vecPosition.fZ,
                fCurrentRotation,
                m_pPlayer->IsDead (),
-               m_pPlayer->GetTimeStamp (),
                m_pPlayer->GetLatency (),
                m_pPlayer->GetPlayerSyncCount (),
                m_pPlayer->GetVehicleSyncCount (),
                m_pPlayer->GetKeySyncCount () );
 
     // Print it
-    m_pManager->GetDisplayManager ()->DrawText2D ( szBuffer, CVector ( 0.02f, 0.31f, 0 ), 1.0f, 0xFFFFFFFF );
+    m_pManager->GetDisplayManager ()->DrawText2D ( strBuffer, CVector ( 0.02f, 0.31f, 0 ), 1.0f, 0xFFFFFFFF );
 
 
     // ******* GENERAL NET DATA *******
     // Bytes sent totally
-    char szBytesSent [64];
-    GetDataUnit ( g_pNet->GetBitsSent () / 8, szBytesSent );
+    SString strBytesSent = GetDataUnit ( g_pNet->GetBitsSent () / 8 );
 
     // Bytes received totally
-    char szBytesRecv [64];
-    GetDataUnit ( g_pNet->GetBitsReceived () / 8, szBytesRecv );
+    SString strBytesRecv = GetDataUnit ( g_pNet->GetBitsReceived () / 8 );
 
     // Receive rate
-    char szRecvRate [64];
-    GetDataUnit ( ( m_uiBitsReceived - m_uiLastBitsReceived ) / 8, szRecvRate );
+    SString strRecvRate  = GetDataUnit ( ( m_uiBitsReceived - m_uiLastBitsReceived ) / 8 );
 
     // Send rate
-    char szSendRate [64];
-    GetDataUnit ( ( m_uiBitsSent - m_uiLastBitsSent ) / 8, szSendRate );
+    SString strSendRate  = GetDataUnit ( ( m_uiBitsSent - m_uiLastBitsSent ) / 8 );
 
     // Draw the background for global stats
     float fResWidth = static_cast < float > ( g_pCore->GetGraphics ()->GetViewportWidth () );
@@ -146,7 +139,7 @@ void CSyncDebug::OnDraw ( void )
                                         0x78000000 );
 
     // Populate a string to print
-    snprintf ( szBuffer, 256,
+    strBuffer.Format (
                "Ping: %u\n"
                "Fakelag: %u (%u)\n"
                "Packets recv: %u\n"
@@ -161,15 +154,15 @@ void CSyncDebug::OnDraw ( void )
 
                g_pNet->GetGoodPacketsReceived () + g_pNet->GetBadPacketsReceived (),
                g_pNet->GetPacketsSent (),
-               szBytesRecv,
-               szBytesSent,
-               szRecvRate,
-               szSendRate,
+               strBytesRecv.c_str (),
+               strBytesSent.c_str (),
+               strRecvRate.c_str (),
+               strSendRate.c_str (),
                m_uiPacketsReceived - m_uiLastPacketsReceived,
                m_uiPacketsSent - m_uiLastPacketsSent );
 
     // Print it
-    m_pManager->GetDisplayManager ()->DrawText2D ( szBuffer, CVector ( 0.76f, 0.31f, 0 ), 1.0f, 0xFFFFFFFF );
+    m_pManager->GetDisplayManager ()->DrawText2D ( strBuffer, CVector ( 0.76f, 0.31f, 0 ), 1.0f, 0xFFFFFFFF );
 }
 
 

@@ -479,7 +479,11 @@ void CResource::SetInfoValue ( const char * szKey, const char * szValue )
         }
     }
 
-	// If there was no matching key, create a new one and add it to our list
+    // There was no matching key.
+    if ( !szValue )         // If we were going to delete the key, we are done at this point
+        return;
+
+	// If we were going to set a new value, create a new key and add it to our list
     pValue = new CInfoValue ( szKey, szValue );
     m_infoValues.push_back ( pValue );
 
@@ -596,9 +600,6 @@ bool CResource::Start ( list<CResource *> * dependents, bool bStartedManually, b
 		}
         m_bIsPersistent = false;
 
-		// Create the virtual machine for this resource
-        CreateVM();
-
 		// Create an element group for us
         m_pDefaultElementGroup = new CElementGroup ( this );
         m_elementGroups.push_back ( m_pDefaultElementGroup ); // for use by scripts
@@ -620,6 +621,9 @@ bool CResource::Start ( list<CResource *> * dependents, bool bStartedManually, b
 
         // Set the Resource Element name
         m_pResourceElement->SetName ( m_strResourceName.c_str () );
+
+        // Create the virtual machine for this resource
+        CreateVM();
 
 		// We're now active
         m_bActive = true;

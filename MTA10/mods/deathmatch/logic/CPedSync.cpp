@@ -10,7 +10,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 extern CClientGame* g_pClientGame;
 
@@ -244,7 +246,7 @@ void CPedSync::Update ( void )
             }
 
             // Send and destroy the packet
-            g_pNet->SendPacket ( PACKET_ID_PED_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE );
+            g_pNet->SendPacket ( PACKET_ID_PED_SYNC, pBitStream, PACKET_PRIORITY_LOW, PACKET_RELIABILITY_UNRELIABLE_SEQUENCED );
             g_pNet->DeallocateNetBitStream ( pBitStream );
         }
     }

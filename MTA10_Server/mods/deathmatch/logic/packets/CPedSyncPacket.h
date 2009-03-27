@@ -17,8 +17,6 @@
 #include "CPacket.h"
 #include <vector>
 
-using namespace std;
-
 class CPedSyncPacket : public CPacket
 {
 public:
@@ -40,15 +38,15 @@ public:
                             ~CPedSyncPacket                         ( void );
             
     inline ePacketID        GetPacketID                             ( void ) const                  { return PACKET_ID_PED_SYNC; };
-    inline unsigned long    GetFlags                                ( void ) const                  { return PACKET_LOW_PRIORITY; };
+    inline unsigned long    GetFlags                                ( void ) const                  { return PACKET_LOW_PRIORITY | PACKET_SEQUENCED; };
 
     bool                    Read                                    ( NetServerBitStreamInterface& BitStream );
     bool                    Write                                   ( NetServerBitStreamInterface& BitStream ) const;
 
-    inline vector < SyncData* > ::const_iterator     IterBegin       ( void )                        { return m_Syncs.begin (); };
-    inline vector < SyncData* > ::const_iterator     IterEnd         ( void )                        { return m_Syncs.end (); };
+    inline std::vector < SyncData* > ::const_iterator     IterBegin ( void )                        { return m_Syncs.begin (); };
+    inline std::vector < SyncData* > ::const_iterator     IterEnd   ( void )                        { return m_Syncs.end (); };
 
-    vector < SyncData* >     m_Syncs;
+    std::vector < SyncData* > m_Syncs;
 };
 
 #endif

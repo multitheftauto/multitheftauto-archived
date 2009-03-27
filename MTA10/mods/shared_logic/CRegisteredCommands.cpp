@@ -11,7 +11,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 CRegisteredCommands::CRegisteredCommands ( void )
 {
@@ -72,6 +74,7 @@ bool CRegisteredCommands::RemoveCommand ( CLuaMain* pLuaMain, const char* szKey 
         // Matching vm's and names?
         if ( (*iter)->pLuaMain == pLuaMain && iCompareResult == 0 )
         {
+            bFound = true;
             // Delete it and remove it from our list
             if ( m_bIteratingList )
             {
@@ -82,9 +85,8 @@ bool CRegisteredCommands::RemoveCommand ( CLuaMain* pLuaMain, const char* szKey 
                 delete *iter;
                 m_Commands.erase ( iter );
 			    iter = m_Commands.begin ();
+                continue;
             }
-			bFound = true;
-			continue;
         }
 		iter++;
     }

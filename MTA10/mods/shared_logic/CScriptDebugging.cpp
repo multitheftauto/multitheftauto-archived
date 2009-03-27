@@ -26,19 +26,16 @@ CScriptDebugging::CScriptDebugging ( CLuaManager* pLuaManager )
 
 void CScriptDebugging::OutputDebugInfo ( lua_State* luaVM, int iLevel, unsigned char ucRed, unsigned char ucGreen, unsigned char ucBlue )
 {
-    char szDebugDump[255];
-    
     lua_Debug debugInfo;
     if ( lua_getstack ( luaVM, 1, &debugInfo ) )
     {
         lua_getinfo ( luaVM, "nlS", &debugInfo );
         
         // first version includes script path - makes much longer though
-        //  snprintf ( szDebugDump, 255, "Line: %d (%s + %d) %s", debugInfo.currentline, debugInfo.name, debugInfo.currentline - debugInfo.linedefined, debugInfo.short_src );
-        _snprintf ( szDebugDump, 255, "Line: %d (%s + %d)", debugInfo.currentline, debugInfo.name, debugInfo.currentline - debugInfo.linedefined );
-        szDebugDump[255-1] = '\0';
+        //  strDebugDump = SString::Printf ( "Line: %d (%s + %d) %s", debugInfo.currentline, debugInfo.name, debugInfo.currentline - debugInfo.linedefined, debugInfo.short_src );
+        SString strDebugDump ( "Line: %d (%s + %d)", debugInfo.currentline, debugInfo.name, debugInfo.currentline - debugInfo.linedefined );
 
-        LogString ( szDebugDump, iLevel, ucRed, ucGreen, ucBlue );
+        LogString ( strDebugDump, iLevel, ucRed, ucGreen, ucBlue );
     }
 }
 
@@ -57,16 +54,14 @@ void CScriptDebugging::LogCustom ( lua_State* luaVM, unsigned char ucRed, unsign
         // Copy it to a buffer
         va_list ap;
 	    va_start ( ap, szFormat );
-        _vsnprintf ( szBuffer, 256, szFormat, ap );
+        _VSNPRINTF ( szBuffer, 256, szFormat, ap );
         va_end ( ap );
         szBuffer[255] = '\0';
 
-        char szOutBuffer [512];
-        _snprintf ( szOutBuffer, 512, "%s: %s - Line: %d", szFilename, szBuffer, debugInfo.currentline );
-        szOutBuffer[511] = '\0';
+        SString strOutBuffer ( "%s: %s - Line: %d", szFilename, szBuffer, debugInfo.currentline );
 
         // Log it
-        LogString ( szOutBuffer, 0, ucRed, ucGreen, ucBlue );
+        LogString ( strOutBuffer, 0, ucRed, ucGreen, ucBlue );
     }
 }
 
@@ -81,7 +76,7 @@ void CScriptDebugging::LogInformation ( lua_State* luaVM, const char* szFormat, 
     // Copy it to a buffer
     va_list ap;
 	va_start ( ap, szFormat );
-    _vsnprintf ( szBuffer + 6, 250, szFormat, ap );
+    _VSNPRINTF ( szBuffer + 6, 250, szFormat, ap );
     va_end ( ap );
     szBuffer[255] = '\0';
 
@@ -101,7 +96,7 @@ void CScriptDebugging::LogWarning ( lua_State* luaVM, const char* szFormat, ... 
     // Copy it to a buffer
     va_list ap;
 	va_start ( ap, szFormat );
-    _vsnprintf ( &szBuffer [ 9 ], 247, szFormat, ap );
+    _VSNPRINTF ( &szBuffer [ 9 ], 247, szFormat, ap );
     va_end ( ap );
     szBuffer[255] = '\0';
 
@@ -122,7 +117,7 @@ void CScriptDebugging::LogError ( lua_State* luaVM, const char* szFormat, ... )
     // Copy it to a buffer
     va_list ap;
 	va_start ( ap, szFormat );
-    _vsnprintf ( szBuffer + 7, 247, szFormat, ap );
+    _VSNPRINTF ( szBuffer + 7, 247, szFormat, ap );
     va_end ( ap );
 
     // Log it

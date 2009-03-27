@@ -11,7 +11,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 extern CClientGame* g_pClientGame;
 
@@ -133,7 +135,12 @@ void CClientGUIElement::SetEvents ( const char* szFunc1, const char* szFunc2 )
 bool CClientGUIElement::_CallbackEvent1 ( CGUIElement* pCGUIElement )
 {
 	CLuaArguments Arg;
-	Arg.PushElement ( this );
+    if ( pCGUIElement )
+    {
+        CClientGUIElement* pElement = m_pGUIManager->Get ( pCGUIElement );
+        if ( pElement )
+	        Arg.PushElement ( pElement );
+    }
 	CallEvent ( _szCallbackFunc1, Arg, true );
 	return true;
 }
@@ -142,7 +149,12 @@ bool CClientGUIElement::_CallbackEvent1 ( CGUIElement* pCGUIElement )
 bool CClientGUIElement::_CallbackEvent2 ( CGUIElement* pCGUIElement )
 {
 	CLuaArguments Arg;
-	Arg.PushElement ( this );
+    if ( pCGUIElement )
+    {
+        CClientGUIElement* pElement = m_pGUIManager->Get ( pCGUIElement );
+        if ( pElement )
+	        Arg.PushElement ( pElement );
+    }
 	CallEvent ( _szCallbackFunc2, Arg, true );
 	return true;
 }

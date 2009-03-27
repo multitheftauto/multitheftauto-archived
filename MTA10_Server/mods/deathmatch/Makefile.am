@@ -157,6 +157,8 @@ libdeathmatch_la_SOURCES = \
 	logic/CObject.cpp \
 	logic/CPlayer.cpp \
 	logic/CKeyBinds.cpp \
+	logic/CWater.cpp \
+	logic/CWaterManager.cpp \
 	logic/packets/CPlayerListPacket.cpp \
 	logic/packets/CConsoleEchoPacket.cpp \
 	logic/packets/CCustomDataPacket.cpp \
@@ -220,7 +222,7 @@ libdeathmatch_la_LDFLAGS = \
 	../../../libs/ASEQuerySDK.o \
 	-L../../sdk/ \
 	-L../../../vendor/json-c/ \
-	-L../../../vendor/ehs/ \ 
+	-L../../../vendor/ehs/ \
 	-L../../../vendor/pme/ \
 	-L../../../libs/ \
 	-L../../../libs/lua \

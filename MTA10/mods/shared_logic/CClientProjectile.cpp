@@ -48,7 +48,7 @@ CClientProjectile::CClientProjectile ( class CClientManager* pManager, CProjecti
             static_cast < CClientPed * > ( pCreator )->AddProjectile ( this );
             break;
         case CCLIENTVEHICLE:
-            //static_cast < CClientVehicle * > ( pCreator )->AddProjectile ( rhis );
+            static_cast < CClientVehicle * > ( pCreator )->AddProjectile ( this );
             break;
         default: break;
     }
@@ -66,11 +66,11 @@ CClientProjectile::~CClientProjectile ( void )
         switch ( m_pCreator->GetType () )
         {
             case CCLIENTPLAYER:
-            case CCLIENTPED:               
+            case CCLIENTPED:
                 static_cast < CClientPed * > ( m_pCreator )->RemoveProjectile ( this );
                 break;
             case CCLIENTVEHICLE:
-                //static_cast < CClientVehicle * > ( m_pCreator )->RemoveProjectile ( this );
+                static_cast < CClientVehicle * > ( m_pCreator )->RemoveProjectile ( this );
                 break;
             default: break;
         }

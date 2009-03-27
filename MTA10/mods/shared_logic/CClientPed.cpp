@@ -13,7 +13,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using std::list;
 
 extern CClientGame* g_pClientGame;
 
@@ -124,6 +126,7 @@ void CClientPed::Init ( CClientManager* pManager, unsigned long ulModelID, bool 
     m_bIsChoking = false;
     m_ulLastTimeAimed = 0;
     m_ulLastTimeBeganCrouch = 0;
+    m_ulLastTimeBeganStand = 0; //Standing after crouching
     m_bRecreatingModel = false;
     m_pCurrentContactEntity = NULL;
     m_bSunbathing = false;
@@ -201,7 +204,7 @@ CClientPed::~CClientPed ( void )
 	AttachTo ( NULL );
 
     // Remove all our projectiles
-    RemoveAllProjectiles ();    
+    RemoveAllProjectiles ();
 
     // If this is the local player, give the player full health and put him at a safe location
     if ( m_bIsLocalPlayer )
@@ -430,6 +433,29 @@ void CClientPed::SetPosition ( const CVector& vecPosition )
         UpdateStreamPosition ( vecPosition );
     }
 }
+
+
+void CClientPed::SetInterior ( unsigned char ucInterior )
+{
+    CEntity * pEntity = GetGameEntity ();
+    if ( pEntity )
+    {
+        pEntity->SetAreaCode ( ucInterior );
+    }
+
+    // If local player
+    if ( m_bIsLocalPlayer )
+    {
+        // If our camera is in the same world as the player, move it
+        if ( g_pGame->GetWorld ()->GetCurrentArea() == m_ucInterior )
+        {
+            g_pGame->GetWorld ()->SetCurrentArea ( ucInterior );
+        }
+    }
+
+    m_ucInterior = ucInterior;
+}
+
 
 void CClientPed::Teleport ( const CVector& vecPosition )
 {
@@ -732,7 +758,7 @@ void CClientPed::AddKeysync ( unsigned long ulDelay, const CControllerState& Con
 }
 
 
-void CClientPed::AddChangeWeapon ( unsigned long ulDelay, unsigned char ucWeaponID, unsigned short usWeaponAmmo, unsigned char ucWeaponState )
+void CClientPed::AddChangeWeapon ( unsigned long ulDelay, unsigned char ucWeaponID, unsigned short usWeaponAmmo )
 {
     if ( !m_bIsLocalPlayer )
     {
@@ -741,7 +767,6 @@ void CClientPed::AddChangeWeapon ( unsigned long ulDelay, unsigned char ucWeapon
         pData->ucType = DELAYEDSYNC_CHANGEWEAPON;
         pData->ucWeaponID = ucWeaponID;
         pData->usWeaponAmmo = usWeaponAmmo;
-        pData->ucWeaponState = ucWeaponState;
 
         m_SyncBuffer.push_back ( pData );
     }
@@ -2082,17 +2107,51 @@ void CClientPed::StreamedInPulse ( void )
         
         CControllerState Current;
         GetControllerState ( Current );
-        unsigned long ulNow = CClientTime::GetTime ();                
+        unsigned long ulNow = CClientTime::GetTime (); 
+        //MS checks must take into account the gamespeed
+        float fSpeedRatio = (1.0f/g_pGame->GetGameSpeed ()); 
 
-        // Remember when we start the crouching if we're crouching.
-        CTask* pTask = m_pTaskManager->GetTaskSecondary ( TASK_SECONDARY_DUCK );
-        if ( pTask && pTask->GetTaskType () == TASK_SIMPLE_DUCK )
+        // Remember when we started standing from crouching
+        if ( m_bWasDucked && m_bWasDucked != IsDucked() )
         {
-            if ( m_ulLastTimeBeganCrouch == 0 )
-                m_ulLastTimeBeganCrouch = ulNow;
+            m_ulLastTimeBeganStand = ulNow;
+            m_bWasDucked = false;
+        }
+        
+        // Remember when we start aiming if we're aiming.
+        CTask* pTask = m_pTaskManager->GetTaskSecondary ( TASK_SECONDARY_ATTACK );
+        if ( pTask && pTask->GetTaskType () == TASK_SIMPLE_USE_GUN )
+        {
+            if ( m_ulLastTimeAimed == 0 )
+            {
+                m_ulLastTimeAimed = ulNow;
+            }
+            if ( m_ulLastTimeBeganStand >= ulNow - 200.0f*fSpeedRatio )
+            {
+                //Disable movement keys.  This stops an exploit where players can run
+                //with guns shortly after standing
+                Current.LeftStickX = 0;
+                Current.LeftStickY = 0;
+            }
         }
         else
         {
+            m_ulLastTimeAimed = 0;
+        }
+
+        // Remember when we start the crouching if we're crouching.
+        pTask = m_pTaskManager->GetTaskSecondary ( TASK_SECONDARY_DUCK );
+        if ( pTask && pTask->GetTaskType () == TASK_SIMPLE_DUCK )
+        {
+            m_bWasDucked = true;
+            if ( m_ulLastTimeBeganCrouch == 0 )
+                m_ulLastTimeBeganCrouch = ulNow;
+                // No longer aiming if we're in the process of crouching
+                m_ulLastTimeAimed = 0;
+        }
+        else
+        {
+            m_bWasDucked = false;
             m_ulLastTimeBeganCrouch = 0;
         }
 
@@ -2101,11 +2160,27 @@ void CClientPed::StreamedInPulse ( void )
         // the crouching animation and shoot quickly with slow shooting weapons. Also fixes
         // the exploit making you able to get crouched without being able to move and shoot
         // with infinite ammo for remote players.
-        if ( m_ulLastTimeBeganCrouch != 0 &&
-             m_ulLastTimeBeganCrouch >= ulNow - 400 )
+        if ( m_ulLastTimeBeganCrouch != 0 )
         {
-            Current.ButtonSquare = 0;
-            Current.ButtonCross = 0;
+            if ( m_ulLastTimeBeganCrouch >= ulNow - 600.0f*fSpeedRatio )
+            {
+                Current.ButtonSquare = 0;
+                Current.ButtonCross = 0;
+                //Disable the fire keys whilst crouching as well
+                Current.ButtonCircle = 0;
+                Current.LeftShoulder1 = 0;
+                if ( m_ulLastTimeBeganCrouch >= ulNow - 400.0f*fSpeedRatio )
+                {
+                    //Disable double crouching (another anim cut)
+                    Current.ShockButtonL = 0;
+                }
+            }
+        }
+        // If we just started aiming, make sure they dont try and crouch
+        else if ( m_ulLastTimeAimed != 0 &&
+             m_ulLastTimeAimed >= ulNow - 300.0f*fSpeedRatio )
+        {
+            Current.ShockButtonL = 0;
         }
 
         // Are we working on entering a vehicle?
@@ -2565,8 +2640,8 @@ void CClientPed::UpdateKeysync ( void )
                                 if ( pPlayerWeapon )
                                 {
                                     pPlayerWeapon->SetAmmoTotal ( 9999 );
-                                    pPlayerWeapon->SetAmmoInClip ( pData->usWeaponAmmo );
-                                    pPlayerWeapon->SetState ( static_cast < eWeaponState > ( pData->ucWeaponState ) );
+                                    if ( pData->usWeaponAmmo < pPlayerWeapon->GetAmmoInClip () && pPlayerWeapon->GetState () != WEAPONSTATE_RELOADING )
+                                        pPlayerWeapon->SetAmmoInClip ( pData->usWeaponAmmo );
                                 }
                             }
                             else
@@ -2720,7 +2795,7 @@ void CClientPed::_CreateLocalModel ( void )
 {
     // Init the local player and grab the pointers
     g_pGame->InitLocalPlayer ();
-    m_pPlayerPed = dynamic_cast < CPlayerPed* > ( g_pGame->GetPools ()->GetPed ( 1 ) );
+    m_pPlayerPed = dynamic_cast < CPlayerPed* > ( g_pGame->GetPools ()->GetPedFromRef ( (DWORD)1 ) );
 	
 	if ( m_pPlayerPed )
 	{
@@ -3191,6 +3266,8 @@ void CClientPed::Duck ( bool bDuck )
         }
         else
         {
+            //Reset ducking
+            m_ulLastTimeBeganCrouch = 0;
             // Jax: lets give this a whirl (it seems to cancel the task automatically)
             m_pPlayerPed->SetDucking ( false );
         }
@@ -3504,23 +3581,7 @@ void CClientPed::NextRadioChannel ( void )
     // Is our radio on?
     if ( m_bRadioOn )
     {
-        // Next channel
-        m_ucRadioChannel += 1;
-        if ( m_ucRadioChannel > 12 )
-        {
-            m_ucRadioChannel = 0;
-        }
-
-        // Local player?
-        if ( m_bIsLocalPlayer )
-        {
-            // Turn it
-            g_pGame->GetAudio ()->StartRadio ( m_ucRadioChannel );
-
-            // Turn it off again if we're not on channel none (prevent the text from previous channel staying there)
-            if ( m_ucRadioChannel == 0 )
-                g_pGame->GetAudio ()->StopRadio ();
-        }
+        SetCurrentRadioChannel ( ( m_ucRadioChannel + 1 ) % 13 );
     }
 }
 
@@ -3530,25 +3591,40 @@ void CClientPed::PreviousRadioChannel ( void )
     // Is our radio on?
     if ( m_bRadioOn )
     {
-        // Previous channel
         if ( m_ucRadioChannel == 0 )
         {
             m_ucRadioChannel = 13;
         }
 
-        m_ucRadioChannel -= 1;
-
-        // Local player?
-        if ( m_bIsLocalPlayer )
-        {
-            // Turn it on       
-            g_pGame->GetAudio ()->StartRadio ( m_ucRadioChannel );
-
-            // Turn it off again if we're not on channel none (prevent the text from previous channel staying there)
-            if ( m_ucRadioChannel == 0 )
-                g_pGame->GetAudio ()->StopRadio ();
-        }
+        SetCurrentRadioChannel ( m_ucRadioChannel - 1 );
     }
+}
+
+
+bool CClientPed::SetCurrentRadioChannel ( unsigned char ucChannel )
+{
+    // Local player?
+    if ( m_bIsLocalPlayer && ucChannel >= 0 && ucChannel <= 12 )
+    {
+        if ( m_ucRadioChannel != ucChannel )
+        {
+            CLuaArguments Arguments;
+            Arguments.PushNumber ( ucChannel );
+            if ( !CallEvent ( "onClientPlayerRadioSwitch", Arguments, true ) )
+            {
+                return false;
+            }
+        }
+
+        m_ucRadioChannel = ucChannel;
+
+        g_pGame->GetAudio ()->StartRadio ( m_ucRadioChannel );
+        if ( m_ucRadioChannel == 0 )
+            g_pGame->GetAudio ()->StopRadio ();
+
+        return true;
+    }
+    return false;
 }
 
 
@@ -3595,32 +3671,17 @@ void CClientPed::GetShotData ( CVector * pvecOrigin, CVector * pvecTarget, CVect
 			// Always use the gun muzzle as origin
 			vecOrigin = vecGunMuzzle;
 
-            if ( HasAkimboPointingUpwards () )				// Upwards pointing akimbo's
+            if ( false && HasAkimboPointingUpwards () )				// Upwards pointing akimbo's
             {
+                // Disabled temporarily until we actually get working akimbos
                 vecTarget = vecOrigin;
                 vecTarget.fZ += fRange;
             }
-            else if ( Controller.RightShoulder1 == 255 )	// First-person weapons: gun muzzle as origin (assumed)
+            else if ( Controller.RightShoulder1 == 255 )	// First-person weapons, crosshair active: sync the crosshair
             {
-                CColPoint* pCollision;
-                CVector vecTemp;
-                bool bCollision;
-
-                g_pGame->GetCamera ()->Find3rdPersonCamTargetVector ( fRange, &vecGunMuzzle, &vecTemp, &vecTarget );
-
-                bCollision = g_pGame->GetWorld ()->ProcessLineOfSight ( &vecTemp, &vecTarget, &pCollision, NULL );
-                if ( pCollision )
-                {
-                    if ( bCollision )
-                    {
-                        CVector vecBullet = *pCollision->GetPosition() - vecOrigin;
-                        vecBullet.Normalize();
-                        vecTarget = vecOrigin + (vecBullet * fRange);
-                    }
-                    pCollision->Destroy();
-                }
+                g_pGame->GetCamera ()->Find3rdPersonCamTargetVector ( fRange, &vecGunMuzzle, &vecOrigin, &vecTarget );
             }
-			else if ( pVehicle )							// Drive-by/vehicle weapons: camera origin as origin
+			else if ( pVehicle )							// Drive-by/vehicle weapons: camera origin as origin, performing collision tests
 			{
                 CColPoint* pCollision;
                 CMatrix mat;
@@ -3646,6 +3707,7 @@ void CClientPed::GetShotData ( CVector * pvecOrigin, CVector * pvecTarget, CVect
 			}
             else
             {
+                // For shooting without the crosshair showing (just holding the fire button)
                 vecOrigin = vecGunMuzzle;
 
                 float fTemp = 6.283152f - fRotation;

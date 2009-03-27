@@ -13,8 +13,6 @@
 #ifndef __CRPCFunctions_H
 #define __CRPCFunctions_H
 
-#include <vector>
-
 class CRPCFunctions;
 
 #define DECLARE_RPC(a) static void a ( class NetBitStreamInterface& bitStream );
@@ -28,7 +26,7 @@ private:
     typedef void (*pfnRPCHandler) ( class NetBitStreamInterface& bitStream );
     struct SRPCHandler
     {
-        unsigned char ID;
+        SRPCHandler () { Callback = NULL; szName[0] = '\0'; }
         pfnRPCHandler Callback;
         char szName [ 32 ];
     };
@@ -57,12 +55,10 @@ protected:
     static class CClientPathManager*            m_pPathManager;
     static class CClientTeamManager*            m_pTeamManager;
     static class CClientPedManager*             m_pPedManager;
+    static class CClientWaterManager*           m_pWaterManager;
 
     static class CBlendedWeather*               m_pBlendedWeather;
     static class CClientGame*                   m_pClientGame;
-
-private:
-    vector < SRPCHandler * >                    m_RPCHandlers;
 
 protected:
     enum eRPCFunctions
@@ -134,6 +130,9 @@ protected:
         SET_VEHICLE_WHEEL_STATES,
         SET_VEHICLE_FROZEN,
         SET_TRAIN_DERAILED,
+        SET_TRAIN_DERAILABLE,
+        SET_TRAIN_DIRECTION,
+        SET_TRAIN_SPEED,
 
         GIVE_WEAPON,
         TAKE_WEAPON,
@@ -212,8 +211,12 @@ protected:
 
         TOGGLE_DEBUGGER,
 
-        NUM_RPC_FUNCS,
+        SET_WATER_VERTEX_POSITION,
+
+        NUM_RPC_FUNCS
     };
+
+    static SRPCHandler          m_RPCHandlers [ NUM_RPC_FUNCS ];
 };
 
 #endif

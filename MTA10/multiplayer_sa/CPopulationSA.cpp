@@ -14,6 +14,8 @@
 
 #include "StdInc.h"
 
+using std::list;
+
 CPedSAInterface		* pPedStorage;
 CPopulationSA		* pSingleton;
 DWORD               pedVtable;
@@ -66,18 +68,18 @@ VOID CPopulationSA::AddPed ( CPedSAInterface * ped )
     }
 
 	//_asm int 3
-	CCivilianPedSA * pedVC = dynamic_cast < CCivilianPedSA* > ( pGameInterface->GetPools()->CreateCivilianPed((DWORD *)ped ) );
-	if ( !pedVC ) return;
+	CCivilianPedSA * pedSA = dynamic_cast < CCivilianPedSA* > ( pGameInterface->GetPools()->AddCivilianPed((DWORD *)ped ) );
+	if ( !pedSA ) return;
 
 	char szDebug[255] = {'\0'};
-	DWORD dwPedInterface = (DWORD)pedVC->GetInterface();
+	DWORD dwPedInterface = (DWORD)pedSA->GetInterface();
 	sprintf ( szDebug, "Civ ped added (%d) (0x%X -> 0x%X)\n", dwPedCount+1, ped, dwPedInterface);
 	//OutputDebugString ( szDebug );
 
 	if ( m_pCivilianAddHandler )
-		m_pCivilianAddHandler ( pedVC );
+		m_pCivilianAddHandler ( pedSA );
 
-	peds.push_back (pedVC);
+	peds.push_back (pedSA);
 	dwPedCount ++;
 }
 
@@ -89,7 +91,7 @@ VOID CPopulationSA::RemovePed ( CCivilianPed * ped )
 	if ( !pPedSA ) return;
 
 	ped->SetDoNotRemoveFromGameWhenDeleted ( true );
-	pGameInterface->GetPools()->RemovePed ( ped );
+	pGameInterface->GetPools()->RemovePed ( (CPed*)ped );
 	if ( !peds.empty () ) peds.remove ( pPedSA );
 	dwPedCount--;
 }

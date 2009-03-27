@@ -12,7 +12,9 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using SharedUtil::CalcMTASAPath;
 
 extern CClientGame* g_pClientGame;
 
@@ -24,11 +26,8 @@ CClientManager::CClientManager ( void )
     CClientTime::InitializeTime ();
 
     // Load the connection trouble texture
-    char szBuffer [MAX_PATH];
-    const char* szGTAInstallRoot = g_pCore->GetGTAInstallRoot ();
-    snprintf ( szBuffer, MAX_PATH, "%s\\%s", szGTAInstallRoot, CGUI_ICON_NETWORK_TROUBLE );
     m_pConnectionTroubleTexture = g_pCore->GetGUI ()->CreateTexture ();
-    m_pConnectionTroubleTexture->LoadFromFile ( szBuffer );
+    m_pConnectionTroubleTexture->LoadFromFile ( CalcMTASAPath( CGUI_ICON_NETWORK_TROUBLE ) );
 
     m_pMarkerStreamer = new CClientStreamer ( CClientMarker::IsLimitReached, 600.0f );
     m_pObjectStreamer = new CClientStreamer ( CClientObjectManager::IsObjectLimitReached, 500.0f );
@@ -60,6 +59,7 @@ CClientManager::CClientManager ( void )
     m_pColModelManager = new CClientColModelManager ( this );
     m_pHandlingManager = new CClientHandlingManager ( this );
     m_pExplosionManager = new CClientExplosionManager ( this );
+    m_pWaterManager = new CClientWaterManager ( this );
 
 	m_pPacketRecorder = new CClientPacketRecorder ( this );
 
@@ -163,6 +163,9 @@ CClientManager::~CClientManager ( void )
 
     delete m_pModelRequestManager;
     m_pModelRequestManager = NULL;
+
+    delete m_pWaterManager;
+    m_pWaterManager = NULL;
 
     // Delete the connection trouble texture
     delete m_pConnectionTroubleTexture;

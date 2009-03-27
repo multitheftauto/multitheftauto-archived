@@ -14,6 +14,8 @@
 
 #include "StdInc.h"
 
+using std::list;
+
 #define CGUI_MTA_DEFAULT_FONT		"tahoma.ttf"		// %WINDIR%/font/<...>
 #define CGUI_MTA_DEFAULT_FONT_BOLD	"tahomabd.ttf"		// %WINDIR%/font/<...>
 #define CGUI_MTA_CLEAR_FONT			"verdana.ttf"		// %WINDIR%/font/<...>
@@ -28,6 +30,7 @@ CGUI_Impl::CGUI_Impl ( IDirect3DDevice9* pDevice )
 {
     // Init
     m_pDevice = pDevice;
+    /*
 	m_pCharacterKeyHandler = NULL;
     m_pKeyDownHandler = NULL;
 	m_pMouseClickHandler = NULL;
@@ -38,6 +41,7 @@ CGUI_Impl::CGUI_Impl ( IDirect3DDevice9* pDevice )
 	m_pMouseLeaveHandler = NULL;
 	m_pMovedHandler = NULL;
 	m_pSizedHandler = NULL;
+    */
 
 	// Create a GUI system and get the windowmanager
     m_pRenderer = new CEGUI::DirectX9Renderer ( pDevice, 0 );
@@ -116,9 +120,7 @@ CGUI_Impl::CGUI_Impl ( IDirect3DDevice9* pDevice )
 
 CGUI_Impl::~CGUI_Impl ( void )
 {
-	// TODO: Implement correct destroy function! CEGUI is reloaded on GTA:SA initialization, therefore destroyed once!
-	if ( m_pCharacterKeyHandler != NULL )
-		delete m_pCharacterKeyHandler;
+
 }
 
 
@@ -400,7 +402,7 @@ void CGUI_Impl::GetUniqueName ( char* pBuf )
 
 bool CGUI_Impl::Event_CharacterKey ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pCharacterKeyHandler )
+	if ( m_CharacterKeyHandler )
 	{
 		const CEGUI::KeyEventArgs& e = reinterpret_cast < const CEGUI::KeyEventArgs& > ( Args );
 		CGUIKeyEventArgs NewArgs;
@@ -414,7 +416,7 @@ bool CGUI_Impl::Event_CharacterKey ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( ( e.window )->getUserData () );
 		NewArgs.pWindow = pElement;
 
-		(*m_pCharacterKeyHandler) ( NewArgs );
+		m_CharacterKeyHandler ( NewArgs );
 	}
 	return true;
 }
@@ -571,23 +573,48 @@ bool CGUI_Impl::Event_KeyDown ( const CEGUI::EventArgs& Args )
                     // Check to make sure we have valid data.
                     if ( ClipboardBuffer )
                     {
+                        SString szClipboardText = ClipboardBuffer;
+                        size_t iNewlineIndex;
+
+                        // Remove the newlines inserting spaces instead
+                        do
+                        {
+                            iNewlineIndex = szClipboardText.find ( '\n' );
+                            if ( iNewlineIndex != SString::npos )
+                            {
+                                if ( iNewlineIndex > 0 && szClipboardText[ iNewlineIndex - 1 ] == '\r' )
+                                {
+                                    // \r\n
+                                    szClipboardText [ iNewlineIndex - 1 ] = ' ';
+                                    szClipboardText.replace ( iNewlineIndex, szClipboardText.length () - iNewlineIndex,
+                                                              (const std::string&)szClipboardText, iNewlineIndex + 1,
+                                                              szClipboardText.length () - iNewlineIndex - 1 );
+                                }
+                                else
+                                {
+                                    szClipboardText [ iNewlineIndex ] = ' ';
+                                }
+                            }
+                        } while ( iNewlineIndex != SString::npos );
+
 					    // Put the editbox's data into a string and insert the data if it has not reached it's maximum text length
 					    CEGUI::String tmp = WndEdit->getText ();
-					    if ( ( strlen ( ClipboardBuffer ) + tmp.length () ) < WndEdit->getMaxTextLength( ) )
+					    if ( ( szClipboardText.length () + tmp.length () ) < WndEdit->getMaxTextLength( ) )
                         {
                             // Are there characters selected?
                             size_t sizeCaratIndex = 0;
                             if ( WndEdit->getSelectionLength () > 0 )
                             {
                                 // Replace what's selected with the pasted buffer and set the new carat index
-                                tmp.replace ( WndEdit->getSelectionStartIndex (), WndEdit->getSelectionLength (), ClipboardBuffer, strlen ( ClipboardBuffer ) );
-                                sizeCaratIndex = WndEdit->getSelectionStartIndex () + strlen ( ClipboardBuffer );
+                                tmp.replace ( WndEdit->getSelectionStartIndex (), WndEdit->getSelectionLength (),
+                                              szClipboardText.c_str (), szClipboardText.length () );
+                                sizeCaratIndex = WndEdit->getSelectionStartIndex () + szClipboardText.length ();
                             }
                             else
                             {
                                 // If not, insert the clipboard buffer where we were and set the new carat index
-						        tmp.insert ( WndEdit->getSelectionStartIndex (), ClipboardBuffer , strlen ( ClipboardBuffer ) );
-                                sizeCaratIndex = WndEdit->getCaratIndex () + strlen ( ClipboardBuffer );
+						        tmp.insert ( WndEdit->getSelectionStartIndex (), szClipboardText.c_str (), szClipboardText.length () );
+                                sizeCaratIndex = WndEdit->getCaratIndex () + szClipboardText.length ();
                             }
 
                             // Set the new text and move the carat at the end of what we pasted
@@ -635,7 +662,7 @@ bool CGUI_Impl::Event_KeyDown ( const CEGUI::EventArgs& Args )
 	}
 
 	// Call the callback if present
-	if ( m_pKeyDownHandler )
+	if ( m_KeyDownHandler )
 	{
 		const CEGUI::KeyEventArgs& e = reinterpret_cast < const CEGUI::KeyEventArgs& > ( Args );
 		CGUIKeyEventArgs NewArgs;
@@ -649,7 +676,7 @@ bool CGUI_Impl::Event_KeyDown ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( ( e.window )->getUserData () );
 		NewArgs.pWindow = pElement;
 
-		(*m_pKeyDownHandler) ( NewArgs );
+		m_KeyDownHandler ( NewArgs );
 	}
 	return true;
 }
@@ -674,7 +701,7 @@ void CGUI_Impl::SetWorkingDirectory ( const char * szDir )
 
 bool CGUI_Impl::Event_MouseClick ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMouseClickHandler )
+	if ( m_MouseClickHandler )
 	{
 		const CEGUI::MouseEventArgs& e = reinterpret_cast < const CEGUI::MouseEventArgs& > ( Args );
 		CGUIMouseEventArgs NewArgs;
@@ -698,7 +725,7 @@ bool CGUI_Impl::Event_MouseClick ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( wnd->getUserData () );
 		NewArgs.pWindow = pElement;
 		
-		(*m_pMouseClickHandler) ( NewArgs );
+		m_MouseClickHandler ( NewArgs );
 	}
 	return true;
 }
@@ -706,7 +733,7 @@ bool CGUI_Impl::Event_MouseClick ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_MouseDoubleClick ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMouseDoubleClickHandler )
+	if ( m_MouseDoubleClickHandler )
 	{
 		const CEGUI::MouseEventArgs& e = reinterpret_cast < const CEGUI::MouseEventArgs& > ( Args );
 		CGUIMouseEventArgs NewArgs;
@@ -730,7 +757,7 @@ bool CGUI_Impl::Event_MouseDoubleClick ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( wnd->getUserData () );
 		NewArgs.pWindow = pElement;
 		
-		(*m_pMouseDoubleClickHandler) ( NewArgs );
+		m_MouseDoubleClickHandler ( NewArgs );
 	}
 	return true;
 }
@@ -738,7 +765,7 @@ bool CGUI_Impl::Event_MouseDoubleClick ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_MouseWheel ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMouseWheelHandler )
+	if ( m_MouseWheelHandler )
 	{
 		const CEGUI::MouseEventArgs& e = reinterpret_cast < const CEGUI::MouseEventArgs& > ( Args );
 		CGUIMouseEventArgs NewArgs;
@@ -762,7 +789,7 @@ bool CGUI_Impl::Event_MouseWheel ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( wnd->getUserData () );
 		NewArgs.pWindow = pElement;
 		
-		(*m_pMouseWheelHandler) ( NewArgs );
+		m_MouseWheelHandler ( NewArgs );
 	}
 	return true;
 }
@@ -770,7 +797,7 @@ bool CGUI_Impl::Event_MouseWheel ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_MouseMove ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMouseMoveHandler )
+	if ( m_MouseMoveHandler )
 	{
 		const CEGUI::MouseEventArgs& e = reinterpret_cast < const CEGUI::MouseEventArgs& > ( Args );
 		CGUIMouseEventArgs NewArgs;
@@ -794,7 +821,7 @@ bool CGUI_Impl::Event_MouseMove ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( wnd->getUserData () );
 		NewArgs.pWindow = pElement;
 		
-		(*m_pMouseMoveHandler) ( NewArgs );
+		m_MouseMoveHandler ( NewArgs );
 	}
 	return true;
 }
@@ -802,7 +829,7 @@ bool CGUI_Impl::Event_MouseMove ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_MouseEnter ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMouseEnterHandler )
+	if ( m_MouseEnterHandler )
 	{
 		const CEGUI::MouseEventArgs& e = reinterpret_cast < const CEGUI::MouseEventArgs& > ( Args );
 		CGUIMouseEventArgs NewArgs;
@@ -826,7 +853,7 @@ bool CGUI_Impl::Event_MouseEnter ( const CEGUI::EventArgs& Args )
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( wnd->getUserData () );
 		NewArgs.pWindow = pElement;
 		
-		(*m_pMouseEnterHandler) ( NewArgs );
+		m_MouseEnterHandler ( NewArgs );
 	}
 	return true;
 }
@@ -834,7 +861,7 @@ bool CGUI_Impl::Event_MouseEnter ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_MouseLeave ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMouseLeaveHandler )
+	if ( m_MouseLeaveHandler )
 	{
 		const CEGUI::MouseEventArgs& e = reinterpret_cast < const CEGUI::MouseEventArgs& > ( Args );
 		CGUIMouseEventArgs NewArgs;
@@ -866,7 +893,7 @@ bool CGUI_Impl::Event_MouseLeave ( const CEGUI::EventArgs& Args )
 		
 		NewArgs.pWindow = pElement;
 		
-		(*m_pMouseLeaveHandler) ( NewArgs );
+		m_MouseLeaveHandler ( NewArgs );
 	}
 	return true;
 }
@@ -874,14 +901,14 @@ bool CGUI_Impl::Event_MouseLeave ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_Moved ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pMovedHandler )
+	if ( m_MovedHandler )
 	{
 		const CEGUI::WindowEventArgs& e = reinterpret_cast < const CEGUI::WindowEventArgs& > ( Args );
 
 		// get the CGUIElement
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( ( e.window )->getUserData () );
 		
-		(*m_pMovedHandler) ( pElement );
+		m_MovedHandler ( pElement );
 	}
 	return true;
 }
@@ -889,14 +916,14 @@ bool CGUI_Impl::Event_Moved ( const CEGUI::EventArgs& Args )
 
 bool CGUI_Impl::Event_Sized ( const CEGUI::EventArgs& Args )
 {
-	if ( m_pSizedHandler )
+	if ( m_SizedHandler )
 	{
 		const CEGUI::WindowEventArgs& e = reinterpret_cast < const CEGUI::WindowEventArgs& > ( Args );
 
 		// get the CGUIElement
 		CGUIElement * pElement = reinterpret_cast < CGUIElement* > ( ( e.window )->getUserData () );
 		
-		(*m_pSizedHandler) ( pElement );
+		m_SizedHandler ( pElement );
 	}
 	return true;
 }

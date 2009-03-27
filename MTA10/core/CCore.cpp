@@ -20,6 +20,9 @@
 #include <Accctrl.h>
 #include <Aclapi.h>
 
+using SharedUtil::CalcMTASAPath;
+using namespace std;
+
 static float fTest = 1;
 
 extern CCore* g_pCore;
@@ -105,7 +108,7 @@ CCore::CCore ( void )
     if ( RegOpenKeyEx ( HKEY_LOCAL_MACHINE, "Software\\Multi Theft Auto: San Andreas", 0, KEY_READ, &hkey ) == ERROR_SUCCESS ) 
     {
         // Read out the MTA installpath
-        if ( RegQueryValueEx ( hkey, "", NULL, &dwType, (LPBYTE)m_szInstallRoot, &dwBufferSize ) != ERROR_SUCCESS ||
+        if ( RegQueryValueEx ( hkey, "Last Run Location", NULL, &dwType, (LPBYTE)m_szInstallRoot, &dwBufferSize ) != ERROR_SUCCESS ||
              strlen ( m_szInstallRoot ) == 0 )
         {
             MessageBox ( 0, "Multi Theft Auto has not been installed properly, please reinstall.", "Error", MB_OK );
@@ -178,6 +181,7 @@ CCore::CCore ( void )
     m_bQuitOnPulse = false;
     m_bDestroyMessageBox = false;
     m_bCursorToggleControls = false;
+    m_bFocused = true;
 
     // Initialize time
     CClientTime::InitializeTime ();
@@ -374,9 +378,9 @@ void CCore::ChatEcho ( const char* szText, bool bColorCoded )
     m_pLocalGUI->EchoChat ( szText, bColorCoded );
     if ( bColorCoded )
     {
-        char szTemp [ 512 ];
-        CChatLine::RemoveColorCode ( const_cast < char* > ( szText ), szTemp, 512 );
-        m_pLocalGUI->EchoConsole ( szTemp );
+        std::string strWithoutColorCodes;
+        CChatLine::RemoveColorCode ( szText, strWithoutColorCodes );
+        m_pLocalGUI->EchoConsole ( strWithoutColorCodes.c_str () );
     }
     else
         m_pLocalGUI->EchoConsole ( szText );
@@ -400,7 +404,7 @@ void CCore::DebugPrintf ( const char* szFormat, ... )
     char szBuffer [1024];
 	va_list ap;
 	va_start ( ap, szFormat );
-	_vsnprintf ( szBuffer, 1024, szFormat, ap );
+	_VSNPRINTF ( szBuffer, 1024, szFormat, ap );
 	va_end ( ap );
 
     DebugEcho ( szBuffer );
@@ -446,7 +450,7 @@ void CCore::DebugPrintfColor ( const char* szFormat, unsigned char R, unsigned c
         char szBuffer [1024];
 	    va_list ap;
 	    va_start ( ap, B );
-	    _vsnprintf ( szBuffer, 1024, szFormat, ap );
+	    _VSNPRINTF ( szBuffer, 1024, szFormat, ap );
 	    va_end ( ap );
 
         // Echo it to the console and chat
@@ -478,9 +482,9 @@ void CCore::ChatEchoColor ( const char* szText, unsigned char R, unsigned char G
     m_pLocalGUI->EchoChat ( szText, bColorCoded );
     if ( bColorCoded )
     {
-        char szTemp [ 512 ];
-        CChatLine::RemoveColorCode ( const_cast < char* > ( szText ), szTemp, 512 );
-        m_pLocalGUI->EchoConsole ( szTemp );
+        std::string strWithoutColorCodes;
+        CChatLine::RemoveColorCode ( szText, strWithoutColorCodes );
+        m_pLocalGUI->EchoConsole ( strWithoutColorCodes.c_str () );
     }
     else
         m_pLocalGUI->EchoConsole ( szText );
@@ -493,7 +497,7 @@ void CCore::ChatPrintf ( const char* szFormat, bool bColorCoded, ... )
     char szBuffer [1024];
 	va_list ap;
 	va_start ( ap, bColorCoded );
-	_vsnprintf ( szBuffer, 1024, szFormat, ap );
+	_VSNPRINTF ( szBuffer, 1024, szFormat, ap );
 	va_end ( ap );
 
     // Echo it to the console and chat
@@ -512,7 +516,7 @@ void CCore::ChatPrintfColor ( const char* szFormat, bool bColorCoded, unsigned c
             char szBuffer [1024];
 	        va_list ap;
 	        va_start ( ap, B );
-	        _vsnprintf ( szBuffer, 1024, szFormat, ap );
+	        _VSNPRINTF ( szBuffer, 1024, szFormat, ap );
 	        va_end ( ap );
 
             // Echo it to the console and chat
@@ -671,10 +675,9 @@ void CCore::SetOfflineMod ( bool bOffline )
 }
 
 
-char * CCore::GetModInstallRoot ( char * szModName, char * szBuffer, size_t bufferSize )
+SString CCore::GetModInstallRoot ( char * szModName )
 {
-    _snprintf( szBuffer, bufferSize, "%s\\mods\\%s", GetInstallRoot(), szModName );
-    return szBuffer;
+    return SString ( "%s\\mods\\%s", GetInstallRoot(), szModName );
 }
 
 
@@ -790,9 +793,9 @@ void CCore::CreateGame ( )
 
     // Load approrpiate compilation-specific library.
 #ifdef MTA_DEBUG
-    m_GameModule.LoadModule ( "mta/game_sa_d.dll" );
+    m_GameModule.LoadModule ( CalcMTASAPath ( "mta/game_sa_d.dll" ) );
 # else
-    m_GameModule.LoadModule ( "mta/game_sa.dll" );
+    m_GameModule.LoadModule ( CalcMTASAPath ( "mta/game_sa.dll" ) );
 
 #endif
 
@@ -837,9 +840,9 @@ void CCore::CreateMultiplayer ( )
 
     // Load appropriate compilation-specific library.
 #ifdef MTA_DEBUG
-    m_MultiplayerModule.LoadModule ( "mta/multiplayer_sa_d.dll" );
+    m_MultiplayerModule.LoadModule ( CalcMTASAPath ( "mta/multiplayer_sa_d.dll" ) );
 # else
-    m_MultiplayerModule.LoadModule ( "mta/multiplayer_sa.dll" );
+    m_MultiplayerModule.LoadModule ( CalcMTASAPath ( "mta/multiplayer_sa.dll" ) );
 #endif
 
     // Get client initializer function from DLL's routine.
@@ -970,6 +973,16 @@ void CCore::CreateNetwork ( )
     // Load approrpiate compilation-specific library.
     m_NetModule.LoadModule ( "net.dll" );
 
+    // Network module compatibility check
+    typedef unsigned long (*PFNCHECKCOMPATIBILITY) ( unsigned long );
+    PFNCHECKCOMPATIBILITY pfnCheckCompatibility = static_cast< PFNCHECKCOMPATIBILITY > ( m_NetModule.GetFunctionPointer ( "CheckCompatibility" ) );
+    if ( !pfnCheckCompatibility || !pfnCheckCompatibility ( MTA_DM_NET_MODULE_VERSION ) )
+    {
+        // net.dll doesn't like our version number
+        MessageBox ( 0, "Network module not compatible!", "Error", MB_OK|MB_ICONEXCLAMATION );
+        TerminateProcess ( GetCurrentProcess (), 0 );
+    }
+
     // Get client initializer function from DLL's routine.
     pfnNetInit = static_cast< pfnNetInitializer > 
     ( m_NetModule.GetFunctionPointer ( "InitNetInterface" ) );
@@ -1035,7 +1048,7 @@ void CCore::CreateXML ( )
 
     
     // Load config XML file
-    m_pConfigFile = m_pXML->CreateXML ( MTA_CONFIG_PATH );
+    m_pConfigFile = m_pXML->CreateXML ( CalcMTASAPath ( MTA_CONFIG_PATH ) );
     if ( !m_pConfigFile ) {
         assert ( false );
         return;
@@ -1164,12 +1177,9 @@ void CCore::DoPostFramePulse ( )
                 // Does it begin with mtasa://?
                 if ( m_szCommandLineArgs && strnicmp ( m_szCommandLineArgs, "mtasa://", 8 ) == 0 )
                 {
-                    char szArguments [256];
-                    szArguments [255] = 0;
-
-                    GetConnectCommandFromURI(m_szCommandLineArgs, szArguments, sizeof(szArguments));
+                    SString strArguments = GetConnectCommandFromURI ( m_szCommandLineArgs );
                     // Run the connect command
-                    if ( strlen( szArguments ) > 0 && !m_pCommands->Execute ( szArguments ) )
+                    if ( strArguments.length () > 0 && !m_pCommands->Execute ( strArguments ) )
                     {
                         ShowMessageBox ( "Error", "Error executing URL", MB_BUTTON_OK | MB_ICON_ERROR );
                     }
@@ -1183,9 +1193,8 @@ void CCore::DoPostFramePulse ( )
                         // Try to load the mod
                         if ( !m_pModManager->Load ( szOptionValue, m_szCommandLineArgs ) )
                         {
-                            char szTemp [128];
-                            _snprintf ( szTemp, 128, "Error running mod specified in command line ('%s')", szOptionValue );
-                            ShowMessageBox ( "Error", szTemp, MB_BUTTON_OK | MB_ICON_ERROR );
+                            SString strTemp ( "Error running mod specified in command line ('%s')", szOptionValue );
+                            ShowMessageBox ( "Error", strTemp, MB_BUTTON_OK | MB_ICON_ERROR );
                         }
                     }
                     // We want to connect to a server?
@@ -1454,7 +1463,7 @@ const char* CCore::GetCommandLineOption ( const char* szOption )
         return NULL;
 }
 
-const char* CCore::GetConnectCommandFromURI ( const char* szURI, char* szDest, size_t destLength )
+SString CCore::GetConnectCommandFromURI ( const char* szURI )
 {
     // Grab the length of the string
     size_t sizeURI = strlen ( szURI );
@@ -1587,17 +1596,14 @@ const char* CCore::GetConnectCommandFromURI ( const char* szURI, char* szDest, s
     }
 
     // Generate a string with the arguments to send to the mod IF we got a host
+    SString strDest;
     if ( strlen ( szHost ) > 0 )
     {
         if ( strlen ( szPassword ) > 0 )
-            _snprintf ( szDest, destLength - 1, "connect %s %u %s %s", szHost, usPort, strNick.c_str (), szPassword );
+            strDest.Format ( "connect %s %u %s %s", szHost, usPort, strNick.c_str (), szPassword );
         else
-            _snprintf ( szDest, destLength - 1, "connect %s %u %s", szHost, usPort, strNick.c_str () );
-    }
-    else
-    {
-        szDest [ 0 ] = '\0';
+            strDest.Format ( "connect %s %u %s", szHost, usPort, strNick.c_str () );
     }
 
-    return szDest;
+    return strDest;
 }

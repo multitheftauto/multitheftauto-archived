@@ -30,5 +30,5 @@ CPlayer * CPacket::GetSourcePlayer ( void )
 
 void CPacket::Send ( CPlayer* pPlayer ) const
 {
-    pPlayer->Send ( *this, m_ulTimeStamp );
+    pPlayer->Send ( *this );
 }

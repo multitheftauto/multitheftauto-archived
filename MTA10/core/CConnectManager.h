@@ -16,6 +16,7 @@
 
 #include <ctime>
 #include <gui/CGUI.h>
+#include <xfire.h>
 
 #define	NET_MTU_MODEM		576
 #define NET_MTU_DSL			1400
@@ -35,7 +36,7 @@ public:
 
     void            DoPulse             ( void );
 
-    static bool     StaticProcessPacket ( unsigned char ucPacketID, class NetBitStreamInterface& bitStream, unsigned long ulTimeStamp );
+    static bool     StaticProcessPacket ( unsigned char ucPacketID, class NetBitStreamInterface& bitStream );
 
 	inline void		SetMTUSize			( unsigned short usMTUSize )											{ m_usMTUSize = usMTUSize; };
 
@@ -54,7 +55,7 @@ private:
 
     GUI_CALLBACK*   m_pOnCancelClick;
 
-	bool CheckNickProvided ( char* szNick );
+	bool CheckNickProvided ( const char* szNick );
 };
 
 #endif

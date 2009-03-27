@@ -19,6 +19,8 @@
 #include "net_bitstream.h"
 #include "net_packetenums.h"
 
+#define MTA_DM_NET_MODULE_VERSION   0x00004
+
 #define CNET_DOWNLOAD_INVALID		65535
 
 #define NET_CLIENT_PORT				0 // 0 will allow it to automatically choose a port, otherwise, use the value specific
@@ -26,7 +28,7 @@
 
 #define NET_INVALID_PACKET_ID		255
 
-typedef bool (*PPACKETHANDLER) ( unsigned char, NetBitStreamInterface&, unsigned long ulTimeStamp );
+typedef bool (*PPACKETHANDLER) ( unsigned char, NetBitStreamInterface& );
 
 enum NetPacketPriority
 {
@@ -41,7 +43,7 @@ enum NetPacketReliability
 	PACKET_RELIABILITY_UNRELIABLE_SEQUENCED,
 	PACKET_RELIABILITY_RELIABLE,
 	PACKET_RELIABILITY_RELIABLE_ORDERED,
-	PACKET_RELIABILITY_RELIABLE_SEQUENCED
+	PACKET_RELIABILITY_RELIABLE_SEQUENCED   //     Can drop packets
 };
 
 enum NetPacketOrdering

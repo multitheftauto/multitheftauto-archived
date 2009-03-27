@@ -20,7 +20,10 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using SharedUtil::CalcMTASAPath;
+using std::list;
 
 // Hide the "conversion from 'unsigned long' to 'DWORD*' of greater size" warning
 #pragma warning(disable:4312)
@@ -122,12 +125,7 @@ CClientGame::CClientGame ( bool bLocalPlay )
 	m_pSFX = new CSFX ();
 
     // Grab the mod path
-    if ( !g_pCore->GetModInstallRoot ( "deathmatch", m_szModRoot, MAX_PATH ) )
-    {
-        g_pCore->GetConsole()->Echo ( "Could not find mod install path, cannot startup. To fix this problem, please reinstall." );
-        g_pCore->GetConsole()->Show ();
-        g_pCore->GetModManager ()->RequestUnload ();
-    }
+    m_strModRoot = g_pCore->GetModInstallRoot ( "deathmatch" );
 
     // Override CGUI's global events
     g_pCore->GetGUI ()->SetKeyDownHandler           ( GUI_CALLBACK_KEY ( &CClientGame::OnKeyDown, this ) );
@@ -188,9 +186,8 @@ CClientGame::CClientGame ( bool bLocalPlay )
 
     // Set the screenshot path
 	/* This is now done in CCore, to maintain a global screenshot path
-    char szScreenShotPath[MAX_PATH];
-    _snprintf ( szScreenShotPath, MAX_PATH, "%s\\screenshots", m_szModRoot );
-    g_pCore->SetScreenShotPath ( szScreenShotPath );
+    SString strScreenShotPath = SString::Printf ( "%s\\screenshots", m_szModRoot );
+    g_pCore->SetScreenShotPath ( strScreenShotPath );
 	*/
 
     // Create the transfer box (GUI)
@@ -213,6 +210,7 @@ CClientGame::CClientGame ( bool bLocalPlay )
     g_pMultiplayer->SetProjectileStopHandler ( CClientProjectileManager::Hook_StaticProjectileAllow );
     g_pMultiplayer->SetProjectileHandler ( CClientProjectileManager::Hook_StaticProjectileCreation );
     g_pMultiplayer->SetRender3DStuffHandler ( CClientGame::StaticRender3DStuffHandler );
+    g_pMultiplayer->SetGameProcessHandler ( CClientGame::StaticGameProcessHandler );
     m_pProjectileManager->SetInitiateHandler ( CClientGame::StaticProjectileInitiateHandler );
     g_pCore->SetMessageProcessor ( CClientGame::StaticProcessMessage );
     g_pNet->RegisterPacketHandler ( CClientGame::StaticProcessPacket );
@@ -221,7 +219,7 @@ CClientGame::CClientGame ( bool bLocalPlay )
     m_pScriptDebugging = new CScriptDebugging ( m_pLuaManager );
 
     #if defined (MTA_SCRIPT_LOGGING)
-    m_pScriptDebugging->SetLogfile ( "mta\\clientscript.log", 3 );
+    m_pScriptDebugging->SetLogfile ( CalcMTASAPath("mta\\clientscript.log"), 3 );
     #endif
 
     m_pLuaManager->SetScriptDebugging ( m_pScriptDebugging );
@@ -333,6 +331,7 @@ CClientGame::~CClientGame ( void )
     g_pMultiplayer->SetProjectileStopHandler ( NULL );
     g_pMultiplayer->SetProjectileHandler ( NULL );
     g_pMultiplayer->SetRender3DStuffHandler ( NULL );
+    g_pMultiplayer->SetGameProcessHandler ( NULL );
     m_pProjectileManager->SetInitiateHandler ( NULL );
     g_pCore->SetMessageProcessor ( NULL );
     g_pNet->StopNetwork ();
@@ -528,8 +527,7 @@ bool CClientGame::StartLocalGame ( const char* szConfig, const char* szPassword 
     m_bWaitingForLocalConnect = false;
 
     // Gotta copy the config in case we got it from local server setup gui
-    char szTemp [MAX_PATH];
-    snprintf ( szTemp, MAX_PATH, szConfig );
+    SString strTemp = szConfig;
 
     if ( m_pLocalServer )
     {
@@ -545,7 +543,7 @@ bool CClientGame::StartLocalGame ( const char* szConfig, const char* szPassword 
     if ( m_bLocalPlay )
     {
         // Start the server locally
-        if ( !m_Server.Start ( szTemp ) )
+        if ( !m_Server.Start ( strTemp ) )
         {
             m_bWaitingForLocalConnect = true;
             m_bErrorStartingLocal = true;
@@ -630,8 +628,8 @@ void CClientGame::DoPulsePostFrame ( void )
         CControllerState cs;
         g_pGame->GetPad ()->GetCurrentControllerState ( &cs );
 
-        char szBuffer [256];
-        _snprintf ( szBuffer, 256, "LeftShoulder1: %u\n"
+        SString strBuffer;
+        strBuffer = SString::Printf ( "LeftShoulder1: %u\n"
                                    "LeftShoulder2: %u\n"
                                    "RightShoulder1: %u\n"
                                    "RightShoulder2: %u\n"
@@ -666,9 +664,9 @@ void CClientGame::DoPulsePostFrame ( void )
                                    cs.ShockButtonR,
                                    cs.m_bPedWalk );
 
-        g_pCore->GetGraphics ()->DrawTextTTF ( 300, 10, 1280, 800, 0xFFFFFFFF, szBuffer, 1.0f, 0 );
+        g_pCore->GetGraphics ()->DrawTextTTF ( 300, 10, 1280, 800, 0xFFFFFFFF, strBuffer, 1.0f, 0 );
 
-        _snprintf ( szBuffer, 256, "VehicleMouseLook: %u\n"
+        strBuffer = SString::Printf ( "VehicleMouseLook: %u\n"
                                    "LeftStickX: %u\n"
                                    "LeftStickY: %u\n"
                                    "RightStickX: %u\n"
@@ -679,9 +677,87 @@ void CClientGame::DoPulsePostFrame ( void )
                                    cs.RightStickX,
                                    cs.RightStickY );
 
-        g_pCore->GetGraphics ()->DrawTextTTF ( 300, 320, 1280, 800, 0xFFFFFFFF, szBuffer, 1.0f, 0 );
+        g_pCore->GetGraphics ()->DrawTextTTF ( 300, 320, 1280, 800, 0xFFFFFFFF, strBuffer, 1.0f, 0 );
     #endif
 
+    if ( m_pManager->IsGameLoaded () )
+    {
+        // Pulse the nametags before anything that changes player positions, we'll be 1 frame behind, but so is the camera
+        // If nametags are enabled, pulse the nametag manager
+        if ( m_bShowNametags )
+        {
+            m_pNametags->DoPulse ();
+        }
+
+        // If we're supposed to show netstat, draw it
+        if ( m_bShowNetstat )
+        {
+            m_pNetworkStats->Draw ();
+        }
+
+        // Sync debug
+        m_pSyncDebug->OnPulse ();
+
+        // Also eventually draw FPS
+        if ( m_bShowFPS )
+        {
+            DrawFPS ();
+        }
+
+        // If we're in debug mode and are supposed to show task data, do it
+        #ifdef MTA_DEBUG
+        if ( m_pShowPlayerTasks )
+        {
+            DrawTasks ( m_pShowPlayerTasks );
+        }
+
+        if ( m_pShowPlayer )
+        {
+            DrawPlayerDetails ( m_pShowPlayer );
+        }
+
+        std::list < CClientPlayer* > ::const_iterator iter = m_pPlayerManager->IterBegin ();
+        for ( ; iter != m_pPlayerManager->IterEnd (); ++iter )
+        {
+            CClientPlayer* pPlayer = *iter;
+            if ( pPlayer->IsStreamedIn () && pPlayer->IsShowingWepdata () )
+                DrawWeaponsyncData ( pPlayer );
+        }
+        #endif
+
+        #if defined (MTA_DEBUG) || defined (MTA_BETA)
+        if ( m_bShowSyncingInfo )
+        {
+            // Draw the header boxz
+            CVector vecPosition = CVector ( 0.05f, 0.32f, 0 );
+            m_pDisplayManager->DrawText2D ( "Syncing vehicles:", vecPosition, 1.0f, 0xFFFFFFFF );
+
+            // Print each vehicle we're syncing
+            CDeathmatchVehicle* pVehicle;
+            list < CDeathmatchVehicle* > ::const_iterator iter = m_pUnoccupiedVehicleSync->IterBegin ();
+            for ( ; iter != m_pUnoccupiedVehicleSync->IterEnd (); iter++ )
+            {
+                vecPosition.fY += 0.03f;
+                pVehicle = *iter;
+
+                SString strBuffer ( "ID: %u (%s)", pVehicle->GetID (), pVehicle->GetNamePointer () );
+
+                m_pDisplayManager->DrawText2D ( strBuffer, vecPosition, 1.0f, 0xFFFFFFFF );
+            }
+        }
+        #endif
+    }
+
+    // If we are focused we do the pulsing here
+    if ( g_pCore->IsFocused () )
+    {
+        DoPulses ();
+    }
+}
+
+
+void CClientGame::DoPulses ( void )
+{
     if ( m_bIsPlayingBack && m_bFirstPlaybackFrame && m_pManager->IsGameLoaded () )
     {
 		g_pCore->GetConsole()->Printf("First playback frame, starting");
@@ -697,13 +773,6 @@ void CClientGame::DoPulsePostFrame ( void )
 
     if ( m_pManager->IsGameLoaded () )
     {
-        // Pulse the nametags before anything that changes player positions, we'll be 1 frame behind, but so is the camera
-        // If nametags are enabled, pulse the nametag manager
-        if ( m_bShowNametags )
-        {
-            m_pNametags->DoPulse ();
-        }
-
         // Is the player a cheater?
         if ( !m_pManager->GetAntiCheat ().PerformChecks () )
         {
@@ -779,40 +848,16 @@ void CClientGame::DoPulsePostFrame ( void )
     // If the game is loaded ...
     if ( m_pManager->IsGameLoaded () )
     {
-        // If we're supposed to show netstat, draw it
-        if ( m_bShowNetstat )
-        {
-            m_pNetworkStats->Draw ();
-        }
-
-        // Sync debug
-        m_pSyncDebug->OnPulse ();
-
-        // Also eventually draw FPS
-        if ( m_bShowFPS )
-        {
-            DrawFPS ();
-        }
-
-        // If we're in debug mode and are supposed to show task data, do it
-        #ifdef MTA_DEBUG
-        if ( m_pShowPlayerTasks )
-        {
-            DrawTasks ( m_pShowPlayerTasks );
-        }
-
-        if ( m_pShowPlayer )
-        {
-            DrawPlayerDetails ( m_pShowPlayer );
-        }
-        #endif
-
         // Pulse the blended weather manager
         m_pBlendedWeather->DoPulse ();
 
         // If we weren't ingame last frame; call the on ingame event
         if ( !m_bGameLoaded )
         {
+            // Fix for gta not being focused sometimes
+            SetActiveWindow ( g_pCore->GetHookedWindow () );
+            SetFocus ( g_pCore->GetHookedWindow () );
+
             m_bGameLoaded = true;
             Event_OnIngame ();
         }
@@ -825,29 +870,6 @@ void CClientGame::DoPulsePostFrame ( void )
 
         // Get rid of our deleted elements
         m_ElementDeleter.DoDeleteAll ();
-
-        #if defined (MTA_DEBUG) || defined (MTA_BETA)
-        if ( m_bShowSyncingInfo )
-        {
-            // Draw the header boxz
-            char szBuffer [256];
-            CVector vecPosition = CVector ( 0.05f, 0.32f, 0 );
-            m_pDisplayManager->DrawText2D ( "Syncing vehicles:", vecPosition, 1.0f, 0xFFFFFFFF );
-
-            // Print each vehicle we're syncing
-            CDeathmatchVehicle* pVehicle;
-            list < CDeathmatchVehicle* > ::const_iterator iter = m_pUnoccupiedVehicleSync->IterBegin ();
-            for ( ; iter != m_pUnoccupiedVehicleSync->IterEnd (); iter++ )
-            {
-                vecPosition.fY += 0.03f;
-                pVehicle = *iter;
-
-                _snprintf ( szBuffer, 256, "ID: %u (%s)", pVehicle->GetID (), pVehicle->GetNamePointer () );
-
-                m_pDisplayManager->DrawText2D ( szBuffer, vecPosition, 1.0f, 0xFFFFFFFF );
-            }
-        }
-        #endif
     }
 
     // Are we connecting?
@@ -909,40 +931,40 @@ void CClientGame::DoPulsePostFrame ( void )
             }
             else
             {
-                char szError [NET_DISCONNECT_REASON_SIZE] = {0};
+                SString strError;
                 switch ( ucError )
                 {
                     case ID_RSA_PUBLIC_KEY_MISMATCH:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: unknown protocol error." );  // encryption key mismatch
+                        strError = "Disconnected: unknown protocol error.";  // encryption key mismatch
                         break;
                     case ID_REMOTE_DISCONNECTION_NOTIFICATION:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: disconnected remotely." );
+                        strError = "Disconnected: disconnected remotely.";
                         break;
                     case ID_REMOTE_CONNECTION_LOST:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: connection lost remotely." );
+                        strError = "Disconnected: connection lost remotely.";
                         break;
                     case ID_CONNECTION_BANNED:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: you are banned from this server." );
+                        strError = "Disconnected: you are banned from this server.";
                         break;
                     case ID_NO_FREE_INCOMING_CONNECTIONS:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: the server is currently full." );
+                        strError = "Disconnected: the server is currently full.";
                         break;
                     case ID_DISCONNECTION_NOTIFICATION:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: disconnected from the server." );
+                        strError = "Disconnected: disconnected from the server.";
                         break;
                     case ID_CONNECTION_LOST:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: connection to the server was lost." );
+                        strError = "Disconnected: connection to the server was lost.";
                         break;
                     case ID_INVALID_PASSWORD:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: invalid password specified." );
+                        strError = "Disconnected: invalid password specified.";
                         break;
                     default:
-                        _snprintf ( szError, NET_DISCONNECT_REASON_SIZE - 1, "Disconnected: connection was refused." );
+                        strError = "Disconnected: connection was refused.";
                         break;
                 }
 
                 // Display an error, reset the error status and exit
-                g_pCore->ShowMessageBox ( "Error", szError, MB_BUTTON_OK | MB_ICON_ERROR );
+                g_pCore->ShowMessageBox ( "Error", strError, MB_BUTTON_OK | MB_ICON_ERROR );
                 g_pNet->SetConnectionError ( 0 );
                 g_pNet->SetImmediateError ( 0 );
                 g_pCore->GetModManager ()->RequestUnload ();
@@ -998,16 +1020,10 @@ void CClientGame::DoPulsePostFrame ( void )
     // stop players dying from starvation
     g_pGame->GetPlayerInfo()->SetLastTimeEaten ( 0 );
 
-    // Call onClientRender LUA event
-    if ( m_pManager->IsGameLoaded () )
-    {
-        CLuaArguments Arguments;
-        m_pRootEntity->CallEvent ( "onClientRender", Arguments, false );
-    }
-
     // Update streaming
     m_pManager->UpdateStreamers ();
 }
+
 
 void CClientGame::HandleException ( CExceptionInformation* pExceptionInformation )
 {
@@ -1074,8 +1090,27 @@ void CClientGame::ShowNetstat ( bool bShow )
     m_bShowNetstat = bShow;
 }
 
+#ifdef MTA_WEPSYNCDBG
+void CClientGame::ShowWepdata ( const char* szNick )
+{
+    CClientPlayer* pPlayer = m_pPlayerManager->Get ( szNick );
+    if ( pPlayer )
+    {
+        pPlayer->SetShowingWepdata ( ! pPlayer->IsShowingWepdata() );
+    }
+}
+#endif
 
 #ifdef MTA_DEBUG
+
+void CClientGame::ShowWepdata ( const char* szNick )
+{
+    CClientPlayer* pPlayer = m_pPlayerManager->Get ( szNick );
+    if ( pPlayer )
+    {
+        pPlayer->SetShowingWepdata ( ! pPlayer->IsShowingWepdata() );
+    }
+}
 
 void CClientGame::ShowPlayer ( const char* szNick )
 {
@@ -1191,6 +1226,11 @@ void CClientGame::UpdateVehicleInOut ( void )
                             pInOutVehicle->SetTyresCanBurst ( false );
                         }
                     }*/ 
+                    if ( pInOutVehicle )
+                    {
+                        pInOutVehicle->CalcAndUpdateCanBeDamagedFlag ();
+                        pInOutVehicle->CalcAndUpdateTyresCanBurstFlag ();
+                    }
 
                     // Reset the vehicle in out stuff so we're ready for another car entry/leave.
                     // Don't allow a new entry/leave until we've gotten the notify return packet
@@ -1260,6 +1300,12 @@ void CClientGame::UpdateVehicleInOut ( void )
                         pInOutVehicle->SetTyresCanBurst ( true );
                     }
                     */
+                    if ( pInOutVehicle )
+                    {
+                        pInOutVehicle->CalcAndUpdateCanBeDamagedFlag ();
+                        pInOutVehicle->CalcAndUpdateTyresCanBurstFlag ();
+                    }
+
                 }
                 else
                 {
@@ -1282,7 +1328,7 @@ void CClientGame::UpdateVehicleInOut ( void )
                                 if ( pJackedPlayer )
                                 {
                                     // Jax: have we already started to jack the other player?
-                                    if ( pVehicle->GetModel () == VT_RHINO || pJackedPlayer->IsGettingJacked () )
+                                    if ( pJackedPlayer->IsGettingJacked () )
                                     {
                                         bAlreadyStartedJacking = true;
                                     }
@@ -1327,6 +1373,12 @@ void CClientGame::UpdateVehicleInOut ( void )
                         }
                     }
                     */
+                    if ( pInOutVehicle )
+                    {
+                        pInOutVehicle->CalcAndUpdateCanBeDamagedFlag ();
+                        pInOutVehicle->CalcAndUpdateTyresCanBurstFlag ();
+                    }
+
                 }
 
                 // Reset
@@ -2105,6 +2157,7 @@ void CClientGame::AddBuiltInEvents ( void )
     m_Events.AddEvent ( "onClientPlayerWeaponSwitch", "previous, current", NULL, false );
     m_Events.AddEvent ( "onClientPlayerStuntStart", "type", NULL, false );
     m_Events.AddEvent ( "onClientPlayerStuntFinish", "type, time, distance", NULL, false );
+    m_Events.AddEvent ( "onClientPlayerRadioSwitch", "", NULL, false );
 
     // Ped events
     m_Events.AddEvent ( "onClientPedDamage", "attacker, weapon, bodypart", NULL, false );
@@ -2128,6 +2181,7 @@ void CClientGame::AddBuiltInEvents ( void )
     m_Events.AddEvent ( "onClientGUIAccepted", "element", NULL, false );
     //m_Events.AddEvent ( "onClientGUIClose", "element", NULL, false );
     //m_Events.AddEvent ( "onClientGUIKeyDown", "element", NULL, false );
+    m_Events.AddEvent ( "onClientGUITabSwitched", "element", NULL, false );
 
     m_Events.AddEvent ( "onClientDoubleClick", "button, state, screenX, screenY, worldX, worldY, worldZ, element", NULL, false );
     m_Events.AddEvent ( "onClientMouseMove", "screenX, screenY", NULL, false );
@@ -2144,7 +2198,6 @@ void CClientGame::AddBuiltInEvents ( void )
 	m_Events.AddEvent ( "onClientChatMessage", "test, r, g, b", NULL, false );
 
     // Game events
-    m_Events.AddEvent ( "onClientPreRender", "", NULL, false );
     m_Events.AddEvent ( "onClientRender", "", NULL, false );
 
     // Cursor events
@@ -2186,7 +2239,6 @@ void CClientGame::DrawFPS ( void )
                                         0x78000000 );
 
 
-    char szBuffer [256];
     static char x = 0;
     static float fDisp = 0.0f;
     if ( x == 20)
@@ -2196,11 +2248,10 @@ void CClientGame::DrawFPS ( void )
     }
     else
         x++;
-    _snprintf ( szBuffer, 255,
-        "FrameRate: %4.2f\n", fDisp);
+    SString strBuffer ( "FrameRate: %4.2f\n", fDisp );
 
     // Print it
-    m_pDisplayManager->DrawText2D ( szBuffer, CVector ( 0.76f, 0.23f, 0 ), 1.0f, 0xFFFFFFFF );
+    m_pDisplayManager->DrawText2D ( strBuffer, CVector ( 0.76f, 0.23f, 0 ), 1.0f, 0xFFFFFFFF );
 }
 
 #ifdef MTA_DEBUG
@@ -2221,86 +2272,61 @@ void CClientGame::DrawTasks ( CClientPlayer* pPlayer )
 		}
 
         // Grab the current task
-        char szBuffer [256] = {0};
-        char szOutput [1024] = {0};
-        char szSubOutput [ 1024 ] = {0};
+        SString strOutput;
+        SString strSubOutput;
 
         pTask = man->GetTask ( TASK_PRIORITY_PHYSICAL_RESPONSE );
-        _snprintf ( &szBuffer[0], 256, "Physical Response: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Physical Response: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTask ( TASK_PRIORITY_EVENT_RESPONSE_TEMP );
-        _snprintf ( &szBuffer[0], 256, "Event Response Temp: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Event Response Temp: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTask ( TASK_PRIORITY_EVENT_RESPONSE_NONTEMP );
-        _snprintf ( &szBuffer[0], 256, "Event Response Non-temp: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Event Response Non-temp: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTask ( TASK_PRIORITY_PRIMARY );
-        _snprintf ( &szBuffer[0], 256, "Primary: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Primary: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTask ( TASK_PRIORITY_DEFAULT );
-        _snprintf ( &szBuffer[0], 256, "Default: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Default: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTaskSecondary ( TASK_SECONDARY_ATTACK );
-        _snprintf ( &szBuffer[0], 256, "Secondary Attack: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Secondary Attack: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTaskSecondary ( TASK_SECONDARY_DUCK );
-        _snprintf ( &szBuffer[0], 256, "Secondary Duck: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Secondary Duck: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTaskSecondary ( TASK_SECONDARY_SAY );
-        _snprintf ( &szBuffer[0], 256, "Secondary Say: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Secondary Say: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTaskSecondary ( TASK_SECONDARY_FACIAL_COMPLEX );
-        _snprintf ( &szBuffer[0], 256, "Secondary Facial Complex: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Secondary Facial Complex: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTaskSecondary ( TASK_SECONDARY_PARTIAL_ANIM );
-        _snprintf ( &szBuffer[0], 256, "Secondary Partial Anim: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Secondary Partial Anim: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
         pTask = man->GetTaskSecondary ( TASK_SECONDARY_IK );
-        _snprintf ( &szBuffer[0], 256, "Secondary IK: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szOutput[0], &szBuffer[0] );
-        _snprintf ( &szBuffer[0], 256, "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
-        strcat ( &szSubOutput[0], &szBuffer[0] );
+        strOutput += SString ( "Secondary IK: %s\n", pTask ? ( pTask->GetTaskName () ) : ( "N/A" ) );
+        strSubOutput += SString ( "%s\n", pTask && pTask->GetSubTask () ? ( pTask->GetSubTask ()->GetTaskName () ) : ( "N/A" ) );
 
-        m_pDisplayManager->DrawText2D ( szOutput, CVector ( 0.05f, 0.5f,0 ), 1.0f );
-        m_pDisplayManager->DrawText2D ( szSubOutput, CVector ( 0.5f, 0.5f,0 ), 1.0f );
+        m_pDisplayManager->DrawText2D ( strOutput, CVector ( 0.05f, 0.5f,0 ), 1.0f );
+        m_pDisplayManager->DrawText2D ( strSubOutput, CVector ( 0.5f, 0.5f,0 ), 1.0f );
     }
 }
 
 int iPlayerTask = 0;
 void CClientGame::DrawPlayerDetails ( CClientPlayer* pPlayer )
 {
-    char szBuffer [1024];
-
     // Get the info
     CControllerState cs;
 
@@ -2339,64 +2365,120 @@ void CClientGame::DrawPlayerDetails ( CClientPlayer* pPlayer )
     int iPrimaryTask = pPrimaryTask ? pPrimaryTask->GetTaskType () : -1;
 
     // Copy the stuff
-    _snprintf ( szBuffer, 1024, "Orient:\n"
-                                "Position: %f %f %f\n"
-                                "Rotation/camera: %f %f\n"
-                                "Health: %f\n"
-                                "\n"
-                                "Keys:\n"
-                                "LeftShoulder1: %hi\n"
-                                "RightShoulder1: %hi\n"
-                                "ButtonSquare: %hi\n"
-                                "ButtonCross: %hi\n"
-                                "ButtonCircle: %hi\n"
-                                "ShockButtonL: %hi\n"
-                                "PedWalk: %hi\n"
-                                "VehicleMouseLook: %hi\n"
-                                "LeftStickX: %hi\n"
-                                "LeftStickY: %hi\n"
-                                "\n"
-                                "Misc:\n"
-                                "Primary task: %d\n"
-                                "Ducked: %u\n"
-                                "Goggles: %u\n"
-                                "In vehicle: %u\n"
-                                "Weapon: %u\n"
-                                "Weapon state: %u\n"
-                                "Weapon ammo: %u\n"
-                                "Aim: %f %f\n"
-                                "Aim source: %f %f %f\n"
-                                "Aim target: %f %f %f\n"
-                                "Driveby aim: %u\n",
-                                vecPosition.fX, vecPosition.fY, vecPosition.fZ,
-                                fRotation, fCameraRotation,
-                                fHealth,
-                                cs.LeftShoulder1,
-                                cs.RightShoulder1,
-                                cs.ButtonSquare,
-                                cs.ButtonCross,
-                                cs.ButtonCircle,
-                                cs.ShockButtonL,
-                                cs.m_bPedWalk,
-                                cs.m_bVehicleMouseLook,
-                                cs.LeftStickX,
-                                cs.LeftStickY,
-                                iPrimaryTask,
-                                bIsDucked,
-                                bWearingGoggles,
-                                bInVehicle,
-                                ucWeapon,
-                                ucWeaponState,
-                                usWeaponAmmo,
-                                fAimX, fAimY,
-                                vecAimSource.fX, vecAimSource.fY, vecAimSource.fZ,
-                                vecAimTarget.fX, vecAimTarget.fY, vecAimTarget.fZ,
-                                ucDrivebyAim );
+    SString strBuffer ( "Orient:\n"
+                        "Position: %f %f %f\n"
+                        "Rotation/camera: %f %f\n"
+                        "Health: %f\n"
+                        "\n"
+                        "Keys:\n"
+                        "LeftShoulder1: %hi\n"
+                        "RightShoulder1: %hi\n"
+                        "ButtonSquare: %hi\n"
+                        "ButtonCross: %hi\n"
+                        "ButtonCircle: %hi\n"
+                        "ShockButtonL: %hi\n"
+                        "PedWalk: %hi\n"
+                        "VehicleMouseLook: %hi\n"
+                        "LeftStickX: %hi\n"
+                        "LeftStickY: %hi\n"
+                        "\n"
+                        "Misc:\n"
+                        "Primary task: %d\n"
+                        "Ducked: %u\n"
+                        "Goggles: %u\n"
+                        "In vehicle: %u\n"
+                        "Weapon: %u\n"
+                        "Weapon state: %u\n"
+                        "Weapon ammo: %u\n"
+                        "Aim: %f %f\n"
+                        "Aim source: %f %f %f\n"
+                        "Aim target: %f %f %f\n"
+                        "Driveby aim: %u\n",
+                        vecPosition.fX, vecPosition.fY, vecPosition.fZ,
+                        fRotation, fCameraRotation,
+                        fHealth,
+                        cs.LeftShoulder1,
+                        cs.RightShoulder1,
+                        cs.ButtonSquare,
+                        cs.ButtonCross,
+                        cs.ButtonCircle,
+                        cs.ShockButtonL,
+                        cs.m_bPedWalk,
+                        cs.m_bVehicleMouseLook,
+                        cs.LeftStickX,
+                        cs.LeftStickY,
+                        iPrimaryTask,
+                        bIsDucked,
+                        bWearingGoggles,
+                        bInVehicle,
+                        ucWeapon,
+                        ucWeaponState,
+                        usWeaponAmmo,
+                        fAimX, fAimY,
+                        vecAimSource.fX, vecAimSource.fY, vecAimSource.fZ,
+                        vecAimTarget.fX, vecAimTarget.fY, vecAimTarget.fZ,
+                        ucDrivebyAim );
 
     // Draw it
-    m_pDisplayManager->DrawText2D ( szBuffer, CVector ( 0.45f, 0.05f, 0 ), 1.0f, 0xFFFFFFFF );
+    m_pDisplayManager->DrawText2D ( strBuffer, CVector ( 0.45f, 0.05f, 0 ), 1.0f, 0xFFFFFFFF );
 }
 
+void CClientGame::DrawWeaponsyncData ( CClientPlayer* pPlayer )
+{
+    CWeapon* pWeapon = pPlayer->GetWeapon ( pPlayer->GetCurrentWeaponSlot () );
+
+    if ( pWeapon )
+    {
+        CVector vecSource;
+        CVector vecTarget;
+
+        // red line: Draw their synced aim line
+        pPlayer->GetShotData ( &vecSource, &vecTarget );
+        g_pCore->GetGraphics ()->DrawLine3D ( vecSource, vecTarget, 0x90DE1212, 2.0f );
+
+        // green line: Set muzzle as origin and perform a collision test for the target
+        CColPoint* pCollision;
+        CVector vecTemp;
+        bool bCollision = g_pGame->GetWorld ()->ProcessLineOfSight ( &vecSource, &vecTarget, &pCollision, NULL );
+        if ( pCollision )
+        {
+            if ( bCollision )
+            {
+                CVector vecBullet = *pCollision->GetPosition() - vecSource;
+                vecBullet.Normalize();
+                CVector vecTarget = vecSource + (vecBullet * 200);
+                g_pCore->GetGraphics ()->DrawLine3D ( vecSource, vecTarget, 0x9012DE12, 0.5f );
+            }
+            pCollision->Destroy();
+        }
+
+        if ( m_pLocalPlayer != pPlayer )
+        {
+            // Draw information about their weapon state, total ammo and ammo in clip
+            CVector vecScreenPosition;
+            CVector vecPosition;
+            float fTempX = 0, fTempY = 0;
+
+            pPlayer->GetPosition ( vecPosition );
+
+            vecPosition.fZ += 1.0f;
+            g_pGame->GetHud()->CalcScreenCoors ( &vecPosition, &vecScreenPosition, &fTempX, &fTempY, true, true );
+
+            char str [ 2048 ];
+            int yoffset;
+
+            yoffset = 0;
+            _snprintf ( str, sizeof( str ), "Ammo in clip: %d", pWeapon->GetAmmoInClip () );
+            g_pCore->GetGraphics ()->DrawText ( ( int ) vecScreenPosition.fX + 1, ( int ) vecScreenPosition.fY + 1 + yoffset, ( int ) vecScreenPosition.fX + 1, ( int ) vecScreenPosition.fY + 1 + yoffset, COLOR_ARGB ( 255, 255, 255, 255 ), str, 1.0f, 1.0f, DT_NOCLIP | DT_CENTER );
+			g_pCore->GetGraphics ()->DrawText ( ( int ) vecScreenPosition.fX, ( int ) vecScreenPosition.fY + yoffset, ( int ) vecScreenPosition.fX, ( int ) vecScreenPosition.fY + yoffset, COLOR_ARGB ( 255, 0, 0, 0 ), str, 1.0f, 1.0f, DT_NOCLIP | DT_CENTER );
+
+            yoffset = 15;
+            _snprintf ( str, sizeof( str ), "State: %d", pWeapon->GetState() );
+            g_pCore->GetGraphics ()->DrawText ( ( int ) vecScreenPosition.fX + 1, ( int ) vecScreenPosition.fY + 1 + yoffset, ( int ) vecScreenPosition.fX + 1, ( int ) vecScreenPosition.fY + 1 + yoffset, COLOR_ARGB ( 255, 255, 255, 255 ), str, 1.0f, 1.0f, DT_NOCLIP | DT_CENTER );
+			g_pCore->GetGraphics ()->DrawText ( ( int ) vecScreenPosition.fX, ( int ) vecScreenPosition.fY + yoffset, ( int ) vecScreenPosition.fX, ( int ) vecScreenPosition.fY + yoffset, COLOR_ARGB ( 255, 0, 0, 0 ), str, 1.0f, 1.0f, DT_NOCLIP | DT_CENTER );
+        }
+    }
+}
 
 void CClientGame::UpdateMimics ( void )
 {
@@ -2523,7 +2605,7 @@ void CClientGame::UpdateMimics ( void )
                         pMimic->SetAimInterpolated ( TICK_RATE, fAimX, fAimY, bAkimboUp, cVehicleAimDirection );
                         pMimic->SetTargetTarget ( TICK_RATE, vecOrigin, vecTarget );                                
 
-                        pMimic->AddChangeWeapon ( TICK_RATE, ucWeaponType, (unsigned char) ulWeaponAmmoInClip, ucWeaponState );
+                        pMimic->AddChangeWeapon ( TICK_RATE, ucWeaponType, (unsigned char) ulWeaponAmmoInClip );
                     }
                     else
                     {
@@ -2768,7 +2850,7 @@ void CClientGame::Event_OnIngame ( void )
     pHud->DisableVitalStats ( true );
     pHud->DisableAreaName ( true );
 
-    // Switch of peds and traffic
+    // Switch off peds and traffic
     g_pGame->GetPathFind ()->SwitchRoadsOffInArea ( &CVector(-100000.0f, -100000.0f, -100000.0f), &CVector(100000.0f, 100000.0f, 100000.0f) );
     g_pGame->GetPathFind ()->SwitchPedRoadsOffInArea ( &CVector(-100000.0f, -100000.0f, -100000.0f), &CVector(100000.0f, 100000.0f, 100000.0f) );
     g_pGame->GetPathFind ()->SetPedDensity ( 0.0f );
@@ -2789,6 +2871,7 @@ void CClientGame::Event_OnIngame ( void )
 
     // Reset anything from last game
     ResetMapInfo ();
+    g_pGame->GetWaterManager ()->Reset ();      // Deletes all custom water elements, ResetMapInfo only reverts changes to water level
 
     // Create a local player for us
     m_pLocalPlayer = new CClientPlayer ( m_pManager, m_LocalID, true );
@@ -2873,6 +2956,11 @@ void CClientGame::StaticRender3DStuffHandler ( void )
     g_pClientGame->Render3DStuffHandler ();
 }
 
+void CClientGame::StaticGameProcessHandler ( void )
+{
+    g_pClientGame->GameProcessHandler ();
+}
+
 void CClientGame::DrawRadarAreasHandler ( void )
 {
     m_pRadarAreaManager->DoPulse ();
@@ -2936,10 +3024,23 @@ void CClientGame::ProjectileInitiateHandler ( CClientProjectile * pProjectile )
 
 void CClientGame::Render3DStuffHandler ( void )
 {
+
+}
+
+
+void CClientGame::GameProcessHandler ( void )
+{
+    // If we are minimized we do the pulsing here
+    if ( !g_pCore->IsFocused() )
+    {
+        DoPulses ();
+    }
+
+    // Call onClientRender LUA event
     if ( m_pManager->IsGameLoaded () )
     {
         CLuaArguments Arguments;
-        m_pRootEntity->CallEvent ( "onClientPreRender", Arguments, false );
+        m_pRootEntity->CallEvent ( "onClientRender", Arguments, false );
     }
 }
 
@@ -3368,7 +3469,7 @@ void CClientGame::ProcessVehicleInOutKey ( bool bPassenger )
                                                 pBitStream->Write ( static_cast < unsigned char > ( uiDoor ) );
 
                                                 // Send and destroy it
-                                                g_pNet->SendPacket ( PACKET_ID_VEHICLE_INOUT, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_SEQUENCED );
+                                                g_pNet->SendPacket ( PACKET_ID_VEHICLE_INOUT, pBitStream, PACKET_PRIORITY_HIGH, PACKET_RELIABILITY_RELIABLE_ORDERED );
                                                 g_pNet->DeallocateNetBitStream ( pBitStream );
 
                                                 // We're now entering a vehicle
@@ -3526,12 +3627,12 @@ void CClientGame::PostWeaponFire ( void )
 }
 
 
-bool CClientGame::StaticProcessPacket ( unsigned char ucPacketID, NetBitStreamInterface& bitStream, unsigned long ulTimeStamp )
+bool CClientGame::StaticProcessPacket ( unsigned char ucPacketID, NetBitStreamInterface& bitStream )
 {
     if ( g_pClientGame )
     {
-        g_pClientGame->GetManager ()->GetPacketRecorder ()->RecordPacket ( ucPacketID, bitStream, ulTimeStamp );
-        return g_pClientGame->m_pPacketHandler->ProcessPacket ( ucPacketID, bitStream, ulTimeStamp );
+        g_pClientGame->GetManager ()->GetPacketRecorder ()->RecordPacket ( ucPacketID, bitStream );
+        return g_pClientGame->m_pPacketHandler->ProcessPacket ( ucPacketID, bitStream );
     }
 
     return false;
@@ -3739,7 +3840,7 @@ void CClientGame::ResetMapInfo ( void )
     g_pMultiplayer->ResetSky ();
 
     // Water
-    g_pGame->GetWaterManager ()->Reset ();
+    g_pGame->GetWaterManager ()->UndoChanges ();
 
     // Cheats
     g_pGame->ResetCheats ();

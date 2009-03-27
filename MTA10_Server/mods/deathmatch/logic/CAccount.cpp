@@ -70,12 +70,19 @@ bool CAccount::IsPassword ( const char* szPassword )
 {
     if ( szPassword )
 	{
-		std::string strPassword;
+        std::string strPassword(szPassword);
+        //First check if the raw string matches the account password
+        if ( strPassword == m_strPassword )
+        {
+            //We have an unhashed password, so lets update it
+            SetPassword ( szPassword );
+            return true;
+        }
         HashPassword ( szPassword, strPassword );
-		// Lower case, we dont need a case sensetive comparsion on hashes
-		std::transform ( strPassword.begin(), strPassword.end(), strPassword.begin(), towlower );
-		std::transform ( m_strPassword.begin(), m_strPassword.end(), m_strPassword.begin(), towlower );
-		return m_strPassword == strPassword;
+        // Lower case, we dont need a case sensetive comparsion on hashes
+        std::transform ( strPassword.begin(), strPassword.end(), strPassword.begin(), ::tolower );
+        std::transform ( m_strPassword.begin(), m_strPassword.end(), m_strPassword.begin(), ::tolower );
+        return m_strPassword == strPassword;
     }
 
     return false;

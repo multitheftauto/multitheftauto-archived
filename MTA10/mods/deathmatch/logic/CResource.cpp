@@ -14,13 +14,15 @@
 *
 *****************************************************************************/
 
-#include <StdInc.h>
+#include "StdInc.h"
+
+using namespace std;
 
 extern CClientGame* g_pClientGame;
 
 int CResource::m_iShowingCursor = 0;
 
-CResource::CResource ( unsigned short usID, char* szResourceName )
+CResource::CResource ( unsigned short usID, char* szResourceName, CClientEntity* pResourceEntity, CClientEntity* pResourceDynamicEntity )
 {
     m_usID = usID;
 	m_bActive = false;
@@ -39,8 +41,8 @@ CResource::CResource ( unsigned short usID, char* szResourceName )
     m_pRootEntity = g_pClientGame->GetRootEntity ();
     m_pDefaultElementGroup = new CElementGroup ( this );
     m_elementGroups.push_back ( m_pDefaultElementGroup ); // for use by scripts
-    m_pResourceEntity = NULL;
-	m_pResourceDynamicEntity = NULL;
+    m_pResourceEntity = pResourceEntity;
+	m_pResourceDynamicEntity = pResourceDynamicEntity;
 
 	// Create our GUI root element. We set its parent when we're loaded.
     // Make it a system entity so nothing but us can delete it.
@@ -62,13 +64,12 @@ CResource::CResource ( unsigned short usID, char* szResourceName )
 	m_pResourceTXDRoot = new CClientDummy ( g_pClientGame->GetManager(), INVALID_ELEMENT_ID, "txdroot" );
     m_pResourceTXDRoot->MakeSystemEntity ();
 
-    _snprintf ( m_szResourceDirectoryPath, MAX_PATH, "%s\\resources\\%s", g_pClientGame->GetModRoot (), m_szResourceName );
+    m_strResourceDirectoryPath = SString ( "%s\\resources\\%s", g_pClientGame->GetModRoot (), m_szResourceName );
 
-    m_pLuaVM = m_pLuaManager->CreateVirtualMachine();
+    m_pLuaVM = m_pLuaManager->CreateVirtualMachine ( this );
     if ( m_pLuaVM )
     {
         m_pLuaVM->SetScriptName ( szResourceName );
-        m_pLuaVM->SetResource ( this );
     }
 }
 
@@ -84,6 +85,7 @@ CResource::~CResource ( void )
 
     // Remove all keybinds on this VM
     g_pClientGame->GetScriptKeyBinds ()->RemoveAllKeys ( m_pLuaVM );
+    g_pCore->GetKeyBinds()->SetAllCommandsActive ( m_szResourceName, false );
 
     // Destroy the txd root so all dff elements are deleted except those moved out
 	g_pClientGame->GetElementDeleter ()->DeleteRecursive ( m_pResourceTXDRoot );
@@ -143,12 +145,9 @@ CResource::~CResource ( void )
 CDownloadableResource* CResource::QueueFile ( CDownloadableResource::eResourceType resourceType, const char *szFileName, unsigned long ulServerCRC )
 {
     // Create the resource file and add it to the list
-    char szBuffer [ MAX_PATH ] = { 0 };
-    _snprintf ( szBuffer, MAX_PATH, "%s\\resources\\%s\\%s", g_pClientGame->GetModRoot (), m_szResourceName, szFileName );
-    if ( MAX_PATH )
-        szBuffer [ MAX_PATH-1 ] = '\0';
+    SString strBuffer ( "%s\\resources\\%s\\%s", g_pClientGame->GetModRoot (), m_szResourceName, szFileName );
 
-    CResourceFile* pResourceFile = new CResourceFile ( resourceType, szFileName, szBuffer, ulServerCRC );
+    CResourceFile* pResourceFile = new CResourceFile ( resourceType, szFileName, strBuffer, ulServerCRC );
     if ( pResourceFile )
     {
         m_ResourceFiles.push_back ( pResourceFile );
@@ -161,12 +160,9 @@ CDownloadableResource* CResource::QueueFile ( CDownloadableResource::eResourceTy
 CDownloadableResource* CResource::AddConfigFile ( char *szFileName, unsigned long ulServerCRC )
 {
     // Create the config file and add it to the list
-    char szBuffer [ MAX_PATH ] = { 0 };
-    _snprintf ( szBuffer, MAX_PATH, "%s\\resources\\%s\\%s", g_pClientGame->GetModRoot (), m_szResourceName, szFileName );
-    if ( MAX_PATH )
-        szBuffer [ MAX_PATH-1 ] = '\0';
+    SString strBuffer ( "%s\\resources\\%s\\%s", g_pClientGame->GetModRoot (), m_szResourceName, szFileName );
     
-    CResourceConfigItem* pConfig = new CResourceConfigItem ( this, szFileName, szBuffer, ulServerCRC );
+    CResourceConfigItem* pConfig = new CResourceConfigItem ( this, szFileName, strBuffer, ulServerCRC );
     if ( pConfig )
     {
         m_ConfigFiles.push_back ( pConfig );
@@ -301,9 +297,8 @@ void CResource::Load ( CClientEntity *pRootEntity )
         else
         if ( CheckFileForCorruption ( ( *iter )->GetName () ) )
         {
-            char buffer[256];
-            snprintf ( buffer, 256, "WARNING: File '%s' in resource '%s' is invalid.", (*iter)->GetShortName (), m_szResourceName );
-            g_pCore->ChatEchoColor ( buffer, 255, 0, 0 );
+            SString strBuffer ( "WARNING: File '%s' in resource '%s' is invalid.", (*iter)->GetShortName (), m_szResourceName );
+            g_pCore->ChatEchoColor ( strBuffer, 255, 0, 0 );
         }
     }
 
