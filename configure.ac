@@ -34,6 +34,16 @@ AH_TEMPLATE([X64], Define this if you are under an X64-based operating system.)
 AH_TEMPLATE([X86], Define this if you are under an X86-based 32bit operating system.)
 AH_TEMPLATE([MTA_REVISION], The revision of the latest checkout)
 
+# Flags 
+
+AC_ARG_ENABLE(debug,
+     AC_HELP_STRING([--enable-debug],[enable debug]),
+     [ if test "x$enable_debug" = "xyes" ; then
+           CFLAGS="$CFLAGS -g"
+           CXXFLAGS="$CXXFLAGS -g"
+       fi
+     ],
+)
 
 # Checks for libraries.
 
@@ -41,6 +51,12 @@ AH_TEMPLATE([MTA_REVISION], The revision of the latest checkout)
 AX_PATH_LIB_PCRE()
 AC_SUBST(PCRE_CFLAGS)
 AC_SUBST(PCRE_LIBS)
+
+# sqlite3
+AX_LIB_SQLITE3()
+
+# curl
+AC_CHECK_CURL(7)
 
 # Checking for a 64bit system
 AC_MSG_CHECKING([uname -m for detecting host operating system architecture])
@@ -76,10 +92,10 @@ AC_CHECK_LIB(curses, stdscr,, AC_MSG_ERROR([can't find curses]))
 
 # Define compile/library flags.
 AC_SUBST(AM_CXXFLAGS, "$AM_CXXFLAGS $INCLUDES -DLINUX $PCRE_CFLAGS -Wall -DTIXML_USE_STL")
-AC_SUBST(AM_LDFLAGS, "$AM_LDFLAGS")
+AC_SUBST(AM_LDFLAGS, "$AM_LDFLAGS -lstdc++")
 
 # Checks for header files.
-AC_CHECK_HEADERS(fcntl.h limits.h strings.h syslog.h unistd.h [sys/param.h] stdarg.h)
+AC_CHECK_HEADERS(curses.h sqlite3.h pcre.h fcntl.h limits.h strings.h syslog.h unistd.h [sys/param.h] stdarg.h)
 
 # Check for libraries
 AC_CHECK_FUNCS(strndup strerror vsnprintf vasprintf open vsyslog strncasecmp)
