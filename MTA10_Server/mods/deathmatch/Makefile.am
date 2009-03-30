@@ -6,6 +6,19 @@ INCLUDES += -I$(srcdir)/../../../vendor/
 INCLUDES += -I$(srcdir)/../../../vendor/pme/
 INCLUDES += -I$(srcdir)/../../../vendor/json-c/
 
+if PRECOMPILE_HEADERS
+BUILT_SOURCES = StdInc.h.gch
+AM_CXXFLAGS += -Winvalid-pch
+
+StdInc.h.gch: StdInc.h
+	-rm -f StdInc.h.gch
+	$(CXX) -fPIC -DPIC $(DEFS) $(DEFAULT_INCLUDES) \
+		$(AM_CXXFLAGS) $(CXXFLAGS) $(CPPFLAGS) \
+		$(INCLUDES) -o StdInc.h.gch -xc++-header StdInc.h
+
+clean-local:
+	-rm -f StdInc.h.gch
+endif
 
 lib_LTLIBRARIES = \
 	libdeathmatch.la

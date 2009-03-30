@@ -24,8 +24,9 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
 AM_INIT_AUTOMAKE
-#AM_PROG_CC_C_O
+AM_PROG_CC_C_O
 AC_PROG_MAKE_SET
+AM_CHECK_PCH
 
 # Templates
 AH_TEMPLATE([USING_BIG_ENDIAN], Define this if you are on a big-endian system.)
