@@ -340,6 +340,7 @@ void CLuaManager::LoadCFunctions ( void )
     // Radio funcs
     CLuaCFunctions::AddFunction ( "setRadioChannel", CLuaFunctionDefinitions::SetRadioChannel );
     CLuaCFunctions::AddFunction ( "getRadioChannel", CLuaFunctionDefinitions::GetRadioChannel );
+    CLuaCFunctions::AddFunction ( "getRadioChannelName", CLuaFunctionDefinitions::GetRadioChannelName );
 
     // Player get funcs
     CLuaCFunctions::AddFunction ( "getLocalPlayer", CLuaFunctionDefinitions::GetLocalPlayer );
@@ -760,6 +761,7 @@ void CLuaManager::LoadCFunctions ( void )
     CLuaCFunctions::AddFunction ( "getGarageSize", CLuaFunctionDefinitions::GetGarageSize );
     CLuaCFunctions::AddFunction ( "getGarageBoundingBox", CLuaFunctionDefinitions::GetGarageBoundingBox );
     CLuaCFunctions::AddFunction ( "isWorldSpecialPropertyEnabled", CLuaFunctionDefinitions::IsWorldSpecialPropertyEnabled );
+    CLuaCFunctions::AddFunction ( "getBlurLevel", CLuaFunctionDefinitions::GetBlurLevel );
 
     // World set funcs
     CLuaCFunctions::AddFunction ( "setTime", CLuaFunctionDefinitions::SetTime );
@@ -776,6 +778,7 @@ void CLuaManager::LoadCFunctions ( void )
 	CLuaCFunctions::AddFunction ( "setMinuteDuration", CLuaFunctionDefinitions::SetMinuteDuration );
     CLuaCFunctions::AddFunction ( "setGarageOpen", CLuaFunctionDefinitions::SetGarageOpen );
     CLuaCFunctions::AddFunction ( "setWorldSpecialPropertyEnabled", CLuaFunctionDefinitions::SetWorldSpecialPropertyEnabled );
+    CLuaCFunctions::AddFunction ( "setBlurLevel", CLuaFunctionDefinitions::SetBlurLevel );
 
     // Input functions
     CLuaCFunctions::AddFunction ( "bindKey", CLuaFunctionDefinitions::BindKey );

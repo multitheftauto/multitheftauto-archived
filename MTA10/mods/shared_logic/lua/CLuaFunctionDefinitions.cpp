@@ -3554,6 +3554,23 @@ int CLuaFunctionDefinitions::GetRadioChannel ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::GetRadioChannelName ( lua_State* luaVM )
+{
+    static const char* szRadioStations[] = { "Radio off", "Playback FM", "K-Rose", "K-DST",
+        "Bounce FM", "SF-UR", "Radio Los Santos", "Radio X", "CSR 103.9", "K-Jah West",
+        "Master Sounds 98.3", "WCTR", "User Track Player" };
+
+    if ( lua_type ( luaVM, 1 ) == LUA_TNUMBER )
+    {
+        int iChannel = static_cast < int > ( lua_tonumber ( luaVM, 1 ) );
+        if ( iChannel >= 0 && iChannel < sizeof(szRadioStations)/sizeof(char *) ) {
+            lua_pushstring ( luaVM, szRadioStations [ iChannel ] );
+            return 1;
+        }
+    }
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
 
 int CLuaFunctionDefinitions::GetLocalPlayer ( lua_State* luaVM )
 {
@@ -10937,21 +10954,29 @@ int CLuaFunctionDefinitions::GUIGridListGetSelectedItems ( lua_State* luaVM )
             CGUIGridList* pList = static_cast < CGUIGridList* > ( pGUIElement->GetCGUIElement () );
             CGUIListItem* pItem = NULL;
 
-            CLuaArguments list;
-            for ( int i = 1; i < pList->GetSelectedCount(); i++ )
+            lua_newtable ( luaVM );
+
+            for ( int i = 1; i <= pList->GetSelectedCount(); i++ )
             {
                 pItem = pList->GetNextSelectedItem ( pItem );
                 if ( !pItem ) break;
 
-                CLuaArguments item;
-                item.PushString ( "column" );
-                item.PushNumber ( pList->GetItemColumnIndex ( pItem ) );
-                item.PushString ( "row" );
-                item.PushNumber ( pList->GetItemRowIndex ( pItem ) );
-                list.PushTable ( &item );
-            }
+                lua_pushnumber ( luaVM, i );
+                lua_newtable ( luaVM );
 
-            list.PushAsTable ( luaVM );
+                // column
+                lua_pushstring ( luaVM, "column" );
+                lua_pushnumber ( luaVM, pList->GetItemColumnIndex ( pItem ) );
+                lua_settable ( luaVM, -3 );
+
+                // row
+                lua_pushstring ( luaVM, "row" );
+                lua_pushnumber ( luaVM, pList->GetItemRowIndex ( pItem ) );
+                lua_settable ( luaVM, -3 );
+
+                // push to main table
+                lua_settable ( luaVM, -3 );
+            }
 
 		    return 1;
         }
@@ -13032,6 +13057,30 @@ int CLuaFunctionDefinitions::GetGarageBoundingBox ( lua_State* luaVM )
     return 1;
 }
 
+int CLuaFunctionDefinitions::GetBlurLevel ( lua_State* luaVM )
+{
+    lua_pushnumber ( luaVM, g_pGame->GetBlurLevel () );
+    return 1;
+}
+
+int CLuaFunctionDefinitions::SetBlurLevel ( lua_State* luaVM )
+{
+    int iArgument1 = lua_type ( luaVM, 1 );
+    if ( iArgument1 == LUA_TNUMBER || iArgument1 == LUA_TSTRING )
+    {
+        if ( CStaticFunctionDefinitions::SetBlurLevel ( static_cast < unsigned char > ( lua_tonumber ( luaVM, 1 ) ) ) )
+        {
+            lua_pushboolean ( luaVM, true );
+            return 1;
+        }
+    }
+    else
+        m_pScriptDebugging->LogBadType ( luaVM, "setBlurLevel" );
+
+    // Return false
+    lua_pushboolean ( luaVM, false );
+    return 1;
+}
 
 int CLuaFunctionDefinitions::SetTime ( lua_State* luaVM )
 {

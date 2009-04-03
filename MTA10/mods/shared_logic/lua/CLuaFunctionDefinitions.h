@@ -141,7 +141,7 @@ public:
     // Radio functions
     LUA_DECLARE ( SetRadioChannel );
     LUA_DECLARE ( GetRadioChannel );
-
+	LUA_DECLARE ( GetRadioChannelName );
     // Player get functions
     LUA_DECLARE ( GetLocalPlayer );
     LUA_DECLARE ( GetPlayerName );
@@ -563,6 +563,7 @@ public:
     LUA_DECLARE ( GetGarageSize );
     LUA_DECLARE ( GetGarageBoundingBox );
     LUA_DECLARE ( IsWorldSpecialPropertyEnabled );
+    LUA_DECLARE ( GetBlurLevel );
 
     LUA_DECLARE ( SetTime );
     LUA_DECLARE ( SetSkyGradient );
@@ -577,6 +578,7 @@ public:
     LUA_DECLARE ( SetWaveHeight );
     LUA_DECLARE ( SetGarageOpen );
     LUA_DECLARE ( SetWorldSpecialPropertyEnabled );
+    LUA_DECLARE ( SetBlurLevel );
 
     // Input functions
     LUA_DECLARE ( BindKey );
