@@ -14,28 +14,16 @@
 
 #include "StdInc.h"
 
-VOID C3DMarkerSA::SetPosition(CVector * vecPosition)
+VOID C3DMarkerSA::SetPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("VOID C3DMarkerSA::SetPosition(CVector * vecPosition)");
-    this->GetInterface()->m_mat.vPos = *vecPosition;
+	DEBUG_TRACE("VOID C3DMarkerSA::SetPosition( const CVector& vecPosition )");
+    this->GetInterface()->m_mat.setTranslation( vecPosition );
 }
 
-VOID C3DMarkerSA::SetUp(CVector * vecUp)
+const CVector C3DMarkerSA::GetPosition( void )
 {
-	DEBUG_TRACE("VOID C3DMarkerSA::SetUp(CVector * vecUP)");
-	this->GetInterface()->m_mat.vWas = *vecUp;
-}
-
-CVector * C3DMarkerSA::GetUp()
-{
-	DEBUG_TRACE("CVector * C3DMarkerSA::GetUp()");
-	return &this->GetInterface()->m_mat.vWas;
-}
-
-CVector * C3DMarkerSA::GetPosition()
-{
-	DEBUG_TRACE("CVector * C3DMarkerSA::GetPosition()");
-	return &this->GetInterface()->m_mat.vPos;
+	DEBUG_TRACE("const CVector& C3DMarkerSA::GetPosition( void )");
+	return this->GetInterface()->m_mat.getTranslation();
 }
 
 DWORD C3DMarkerSA::GetType()
@@ -155,5 +143,5 @@ VOID C3DMarkerSA::DeleteMarkerObject ()
 
 VOID C3DMarkerSA::Reset()
 {
-    this->internalInterface->m_lastPosition = this->internalInterface->m_mat.vPos;
+    this->internalInterface->m_mat.setTranslation( this->internalInterface->m_lastPosition );
 }

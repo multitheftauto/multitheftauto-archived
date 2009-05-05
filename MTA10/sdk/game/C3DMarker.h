@@ -14,7 +14,6 @@
 
 #include "Common.h"
 
-class CVector;
 struct RpClump;
 
 /**
@@ -25,10 +24,8 @@ class C3DMarker
 public:
     virtual                 ~C3DMarker ( void ) {};
 
-	virtual VOID			SetPosition(CVector * vecPosition)=0;
-	virtual CVector			* GetPosition()=0;
-	virtual VOID			SetUp(CVector * vecUp)=0;
-	virtual CVector			* GetUp()=0;
+	virtual VOID			SetPosition( const CVector& vecPosition )=0;
+	virtual const CVector	GetPosition( void )=0;
 	virtual DWORD			GetType()=0; // need enum?
 	virtual BOOL			IsActive()=0;
 	virtual DWORD			GetIdentifier()=0;

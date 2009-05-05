@@ -956,9 +956,9 @@ CVehicle* CPoolsSA::AddTrain ( CVector * vecPosition, DWORD dwModels[], int iSiz
     CVehicleSAInterface * trainBegining;
     CVehicleSAInterface * trainEnd;
 
-    float fX = vecPosition->fX;
-    float fY = vecPosition->fY;
-    float fZ = vecPosition->fZ;
+    float fX = vecPosition->getX();
+    float fY = vecPosition->getY();
+    float fZ = vecPosition->getZ();
 
     // Disable GetVehicle because CreateMissionTrain calls it before our CVehicleSA instance is inited
     m_bGetVehicleEnabled = false;

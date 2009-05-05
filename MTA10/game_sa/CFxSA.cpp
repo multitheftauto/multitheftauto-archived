@@ -52,7 +52,7 @@ void CFxSA::AddSparks ( CVector & vecPosition, CVector & vecDirection, float fFo
 {
     CVector * pvecPosition = &vecPosition;
     CVector * pvecDirection = &vecDirection;
-    float fX = vecAcrossLine.fX, fY = vecAcrossLine.fY, fZ = vecAcrossLine.fZ;
+    float fX = vecAcrossLine.getX(), fY = vecAcrossLine.getY(), fZ = vecAcrossLine.getZ();
     DWORD dwThis = ( DWORD ) m_pInterface;
     DWORD dwFunc = FUNC_CFx_AddSparks;
     _asm

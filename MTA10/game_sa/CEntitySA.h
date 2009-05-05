@@ -21,7 +21,6 @@
 #include "COffsets.h"
 #include <game/CEntity.h>
 #include <CMatrix.h>
-#include <CMatrix_Pad.h>
 #include <CVector2D.h>
 #include <CVector.h>
 
@@ -30,8 +29,8 @@
 #define FUNC_SetRwObjectAlpha								0x5332C0
 #define FUNC_SetOrientation									0x439A80
 
-#define FUNC_CMatrix__ConvertToEulerAngles                    0x59A840
-#define FUNC_CMatrix__ConvertFromEulerAngles                0x59AA40
+//#define FUNC_CMatrix__ConvertToEulerAngles                  0x59A840
+//#define FUNC_CMatrix__ConvertFromEulerAngles                0x59AA40
 
 #define FUNC_IsOnScreen										0x534540
 #define FUNC_IsVisible                                      0x536BC0
@@ -91,7 +90,7 @@ class CPlaceableSAInterface
 {
 public:
 	CSimpleTransformSAInterface		m_transform;
-	CMatrix_Padded					* matrix;
+	CMatrix4						* matrix;
 };
 
 class CEntitySAInterface;
@@ -186,24 +185,19 @@ public:
 	inline CEntitySAInterface * GetInterface() { return m_pInterface; };
 	VOID						SetInterface( CEntitySAInterface * intInterface ) { m_pInterface = intInterface; };
 
-	VOID						SetPosition ( float fX, float fY, float fZ );
-	VOID						Teleport ( float fX, float fY, float fZ );
+	VOID						SetPosition ( const CVector& vecPosition );
 	VOID						ProcessControl ( void );
 	VOID						SetupLighting ( );
 	VOID						Render ( );
 	VOID						SetOrientation ( float fX, float fY, float fZ );
     VOID                        FixBoatOrientation ( void );        // eAi you might want to rename this
-	VOID						SetPosition ( CVector * vecPosition );
-    VOID                        SetRoll ( CVector * vecRoll );
-    VOID                        SetDirection ( CVector * vecDir );
-    VOID                        SetWas ( CVector * vecWas );
 
 	void						SetUnderwater ( bool bUnderwater );
 	bool						GetUnderwater ( void );
 
-	CVector						* GetPosition (  );
-	CMatrix						* GetMatrix ( CMatrix * matrix ) const;
-	VOID						SetMatrix ( CMatrix * matrix );
+	CVector&					GetPosition ( CVector& vector );
+	CMatrix4&					GetMatrix ( CMatrix4& matrix );
+	VOID						SetMatrix ( const CMatrix4& matrix );
 	WORD						GetModelIndex ();
 	eEntityType					GetEntityType ();
 	bool						IsOnScreen ();

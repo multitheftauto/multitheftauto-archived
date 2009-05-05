@@ -22,8 +22,6 @@
 #include "CEntitySA.h"
 #include "COffsets.h"
 
-#include <CMatrix_Pad.h>
-
 #define FUNC_TakeControl					0x50C7C0 // ##SA##
 #define FUNC_TakeControlNoEntity			0x50C8B0
 #define FUNC_TakeControlAttachToEntity		0x50C910
@@ -335,12 +333,12 @@ public:
 	bool m_bResetOldMatrix;
 
 //	protected:
-	CMatrix_Padded m_cameraMatrix;
-	CMatrix_Padded m_cameraMatrixOld;
-	CMatrix_Padded m_viewMatrix;
-	CMatrix_Padded m_matInverse;
-	CMatrix_Padded m_matMirrorInverse;
-	CMatrix_Padded m_matMirror;
+	CMatrix4 m_cameraMatrix;
+	CMatrix4 m_cameraMatrixOld;
+	CMatrix4 m_viewMatrix;
+	CMatrix4 m_matInverse;
+	CMatrix4 m_matMirrorInverse;
+	CMatrix4 m_matMirror;
 
 	CVector m_vecFrustumNormals[4];
 	CVector m_vecFrustumWorldNormals[4];
@@ -402,8 +400,8 @@ public:
 														  float fTilt, int CamSwitchStyle);
 	VOID						Restore();
     VOID						RestoreWithJumpCut();
-	CMatrix						* GetMatrix ( CMatrix * matrix );
-	VOID						SetMatrix ( CMatrix * matrix );
+	CMatrix4&					GetMatrix ( CMatrix4& matrix );
+	VOID						SetMatrix ( const CMatrix4& matrix );
 	VOID						SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset );
 	VOID						Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget );
 	BYTE						GetActiveCam();

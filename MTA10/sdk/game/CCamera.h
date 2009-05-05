@@ -101,8 +101,8 @@ public:
 																  float fTilt, int CamSwitchStyle)=0;
 	virtual VOID						Restore()=0;
     virtual VOID                        RestoreWithJumpCut()=0;
-	virtual CMatrix						* GetMatrix ( CMatrix * matrix )=0;
-	virtual VOID						SetMatrix ( CMatrix * matrix )=0;
+	virtual CMatrix4&					GetMatrix ( CMatrix4& matrix )=0;
+	virtual VOID						SetMatrix ( const CMatrix4& matrix )=0;
 	virtual VOID						SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset )=0;
 	virtual VOID						Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )=0;
 	virtual BYTE						GetActiveCam()=0;

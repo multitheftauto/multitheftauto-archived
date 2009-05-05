@@ -185,37 +185,19 @@ VOID CCameraSA::TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * Atta
 	}
 }
 
-CMatrix * CCameraSA::GetMatrix ( CMatrix * matrix )
+CMatrix4& CCameraSA::GetMatrix ( CMatrix4& matrix )
 {
-	DEBUG_TRACE("CMatrix * CCameraSA::GetMatrix ( CMatrix * matrix )");
-	//_asm int 3
-	//CCameraSAInterface * pCamInterface = this->GetInterface();
-	CMatrix_Padded * pCamMatrix = &this->GetInterface()->m_cameraMatrix; // ->Placeable.matrix;
-	if ( pCamMatrix )
-	{
-		memcpy(&matrix->vDirection,		&pCamMatrix->vDirection,	sizeof(CVector));
-		memcpy(&matrix->vPos,			&pCamMatrix->vPos,			sizeof(CVector));
-		memcpy(&matrix->vWas,			&pCamMatrix->vWas,			sizeof(CVector));
-		memcpy(&matrix->vRoll,			&pCamMatrix->vRoll,			sizeof(CVector));	
-	}
-	else
-	{
-		memset(matrix, 0, sizeof(CMatrix));
-	}
+	DEBUG_TRACE("const CMatrix4& CCameraSA::GetMatrix ( void )");
+	matrix = this->GetInterface()->m_cameraMatrix; // Placeable.matrix?
 	return matrix;
 }
 
-VOID CCameraSA::SetMatrix ( CMatrix * matrix )
+VOID CCameraSA::SetMatrix ( const CMatrix4& matrix )
 {
-	DEBUG_TRACE("VOID CCameraSA::SetMatrix ( CMatrix * matrix )");
-	CMatrix_Padded * pCamMatrix = this->GetInterface()->Placeable.matrix;
-	if ( pCamMatrix )
-	{
-		memcpy(&pCamMatrix->vDirection,		&matrix->vDirection,	sizeof(CVector));
-		memcpy(&pCamMatrix->vPos,			&matrix->vPos,			sizeof(CVector));
-		memcpy(&pCamMatrix->vWas,			&matrix->vWas,			sizeof(CVector));
-		memcpy(&pCamMatrix->vRoll,			&matrix->vRoll,			sizeof(CVector));
-	}	
+	DEBUG_TRACE("VOID CCameraSA::SetMatrix ( const CMatrix4& matrix )");
+	if( this->GetInterface()->Placeable.matrix ) {
+		*(this->GetInterface()->Placeable.matrix) = matrix;
+	}
 }
 
 VOID CCameraSA::SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset )
@@ -234,9 +216,9 @@ VOID CCameraSA::SetCamPositionForFixedMode ( CVector * vecPosition, CVector * ve
 VOID CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )
 {
 	DEBUG_TRACE("VOID CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )");
-	FLOAT fOriginX = vecGunMuzzle->fX;
-	FLOAT fOriginY = vecGunMuzzle->fY;
-	FLOAT fOriginZ = vecGunMuzzle->fZ;
+	FLOAT fOriginX = vecGunMuzzle->getX();
+	FLOAT fOriginY = vecGunMuzzle->getY();
+	FLOAT fOriginZ = vecGunMuzzle->getZ();
 	DWORD dwFunc = FUNC_Find3rdPersonCamTargetVector;
 	CCameraSAInterface * cameraInterface = this->GetInterface();
 	_asm

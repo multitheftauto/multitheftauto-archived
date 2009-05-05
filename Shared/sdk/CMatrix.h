@@ -12,6 +12,24 @@
 #ifndef __CMatrix_H
 #define __CMatrix_H
 
+/*
+	Vector Math library for 3-D linear algebra (vector, matrix, quaternion)
+	SIMD support for SSE, PowerPC (PPU) and the SPU.
+	Also includes generic multi-platform scalar version. 
+
+	Copyright (C) 2006, 2007 Sony Computer Entertainment Inc. 
+	All rights reserved.
+*/
+#include <vectormath/cpp/vectormath_aos.h>
+typedef Vectormath::Aos::Matrix3	CMatrix3;
+typedef Vectormath::Aos::Matrix4	CMatrix4;
+
+#define CMath Vectormath::Aos
+
+#endif
+
+#if 0
+
 #include "CVector.h"
 
 /**

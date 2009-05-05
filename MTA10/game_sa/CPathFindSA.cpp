@@ -82,13 +82,13 @@ CVector * CPathFindSA::GetNodePosition ( CNodeAddress * pNode, CVector * pPositi
 
 void CPathFindSA::SwitchRoadsOffInArea ( CVector * vecAreaCorner1, CVector * vecAreaCorner2, bool bEnable )
 {
-    float fX1 = vecAreaCorner1->fX;
-    float fY1 = vecAreaCorner1->fY;
-    float fZ1 = vecAreaCorner1->fZ;
+    float fX1 = vecAreaCorner1->getX();
+    float fY1 = vecAreaCorner1->getY();
+    float fZ1 = vecAreaCorner1->getZ();
 
-    float fX2 = vecAreaCorner2->fX;
-    float fY2 = vecAreaCorner2->fY;
-    float fZ2 = vecAreaCorner2->fZ;
+    float fX2 = vecAreaCorner2->getX();
+    float fY2 = vecAreaCorner2->getY();
+    float fZ2 = vecAreaCorner2->getZ();
 
     DWORD dwEnable = !bEnable;
 
@@ -112,13 +112,13 @@ void CPathFindSA::SwitchRoadsOffInArea ( CVector * vecAreaCorner1, CVector * vec
 
 void CPathFindSA::SwitchPedRoadsOffInArea ( CVector * vecAreaCorner1, CVector * vecAreaCorner2, bool bEnable )
 {
-    float fX1 = vecAreaCorner1->fX;
-    float fY1 = vecAreaCorner1->fY;
-    float fZ1 = vecAreaCorner1->fZ;
+    float fX1 = vecAreaCorner1->getX();
+    float fY1 = vecAreaCorner1->getY();
+    float fZ1 = vecAreaCorner1->getZ();
 
-    float fX2 = vecAreaCorner2->fX;
-    float fY2 = vecAreaCorner2->fY;
-    float fZ2 = vecAreaCorner2->fZ;
+    float fX2 = vecAreaCorner2->getX();
+    float fY2 = vecAreaCorner2->getY();
+    float fZ2 = vecAreaCorner2->getZ();
 
     DWORD dwEnable = !bEnable;
 

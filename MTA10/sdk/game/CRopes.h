@@ -12,8 +12,8 @@
 #ifndef __CRopes_H
 #define __CRopes_H
 
-typedef unsigned long DWORD;
-class CVector;
+#include "Common.h"
+#include <CVector.h>
 
 class CRopes
 {

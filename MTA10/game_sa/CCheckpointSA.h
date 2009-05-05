@@ -14,7 +14,6 @@
 #define __CGAMESA_CHECKPOINT
 
 #include <game/CCheckpoint.h>
-#include <CMatrix_Pad.h>
 #include "Common.h"
 
 class CCheckpointSAInterface

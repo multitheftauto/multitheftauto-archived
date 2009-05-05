@@ -46,7 +46,7 @@ CMarker	* CRadarSA::CreateMarker(CVector * vecPosition)
     }
 
 /*	DWORD dwFunc = FUNC_SetCoordBlip;
-	FLOAT fX = vecPosition->fX; FLOAT fY = vecPosition->fY;	FLOAT fZ = vecPosition->fZ;
+	FLOAT fX = vecPosition->getX(); FLOAT fY = vecPosition->getY();	FLOAT fZ = vecPosition->getZ();
 	_asm {
 		push 0
 		push 2

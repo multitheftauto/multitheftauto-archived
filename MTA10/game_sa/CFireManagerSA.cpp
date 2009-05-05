@@ -36,9 +36,9 @@ CFireManagerSA::~CFireManagerSA ( void )
 VOID CFireManagerSA::ExtinguishPoint ( CVector & vecPosition, float fRadius )
 {
 	DEBUG_TRACE("VOID CFireManagerSA::ExtinguishPoint ( CVector & vecPosition, float fRadius )");
-	FLOAT fX = vecPosition.fX;
-	FLOAT fY = vecPosition.fY;
-	FLOAT fZ = vecPosition.fZ;
+	FLOAT fX = vecPosition.getX();
+	FLOAT fY = vecPosition.getY();
+	FLOAT fZ = vecPosition.getZ();
 	DWORD dwFunction  = FUNC_ExtinguishPoint;
 		
 	_asm

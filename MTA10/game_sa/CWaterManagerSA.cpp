@@ -479,8 +479,13 @@ void CWaterManagerSA::GetZonesContaining ( CVector& v1, CVector& v2, CVector& v3
         float fRowBottom = -3000.0f;
         for ( int row = 0; row < 12; row++ )
         {
-            if ( v2.fX >= fColumnLeft && v1.fX < fColumnLeft + 500.0f && std::max<float>(v1.fY, v3.fY) >= fRowBottom && std::min<float>(v1.fY, v3.fY) < fRowBottom + 500.0f )
-                 out.push_back ( &m_Zones [ column*12 + row ] );
+            if ( v2.getX() >= fColumnLeft &&
+				 v1.getX() < ( fColumnLeft + 500.0f ) &&
+				 std::max< float >( v1.getY(), v3.getY() ) >= fRowBottom &&
+				 std::min< float >( v1.getY(), v3.getY() ) < ( fRowBottom + 500.0f ) )
+			{
+                 out.push_back ( &m_Zones[ column * 12 + row ] );
+			}
             fRowBottom += 500.0f;
         }
         fColumnLeft += 500.0f;
@@ -489,23 +494,23 @@ void CWaterManagerSA::GetZonesContaining ( CVector& v1, CVector& v2, CVector& v3
 
 CWaterVertex* CWaterManagerSA::CreateVertex ( CVector& vecPosition )
 {
-    WORD wID = ( (CreateWaterVertex_t) FUNC_CreateWaterVertex )( ((short)vecPosition.fX) & ~1, ((short)vecPosition.fY) & ~1, vecPosition.fZ, 0.2f, 0.1f, 0 );
+    WORD wID = ( (CreateWaterVertex_t) FUNC_CreateWaterVertex )( ((short)vecPosition.getX()) & ~1, ((short)vecPosition.getY()) & ~1, vecPosition.getZ(), 0.2f, 0.1f, 0 );
     return &m_Vertices [ wID ];
 }
 
 CWaterPoly* CWaterManagerSA::GetPolyAtPoint ( CVector& vecPosition )
 {
-    if ( vecPosition.fX < -3000.0f || vecPosition.fX > 3000.0f || vecPosition.fY < -3000.0f || vecPosition.fY > 3000.0f )
+    if ( vecPosition.getX() < -3000.0f || vecPosition.getX() > 3000.0f || vecPosition.getY() < -3000.0f || vecPosition.getY() > 3000.0f )
         return NULL;
 
-    CWaterZoneSA* pZone = GetZoneContaining ( vecPosition.fX, vecPosition.fY );
+    CWaterZoneSA* pZone = GetZoneContaining ( vecPosition.getX(), vecPosition.getY() );
     if ( !pZone )
         return NULL;
 
     CWaterZoneSA::iterator it;
     for ( it = pZone->begin (); *it; ++it )
     {
-        if ( (*it)->ContainsPoint ( vecPosition.fX, vecPosition.fY ) )
+        if ( (*it)->ContainsPoint ( vecPosition.getX(), vecPosition.getY() ) )
         {
             return *it;
         }
@@ -518,12 +523,12 @@ CWaterPoly* CWaterManagerSA::CreateQuad ( CVector& vecBL, CVector& vecBR, CVecto
     if ( *(DWORD *)VAR_NumWaterQuads >= NUM_NewWaterQuads )
         return NULL;
 
-    if ( vecTL.fX >= vecTR.fX || vecBL.fX >= vecBR.fX ||
-         vecTL.fY <= vecBL.fY || vecTR.fY <= vecBR.fY ||
-         vecTL.fX < -3000.0f || vecTL.fX > 3000.0f || vecTL.fY < -3000.0f || vecTL.fY > 3000.0f ||
-         vecTR.fX < -3000.0f || vecTR.fX > 3000.0f || vecTR.fY < -3000.0f || vecTR.fY > 3000.0f ||
-         vecBL.fX < -3000.0f || vecBL.fX > 3000.0f || vecBL.fY < -3000.0f || vecBL.fY > 3000.0f ||
-         vecBR.fX < -3000.0f || vecBR.fX > 3000.0f || vecBR.fY < -3000.0f || vecBR.fY > 3000.0f )
+    if ( vecTL.getX() >= vecTR.getX() || vecBL.getX() >= vecBR.getX() ||
+         vecTL.getY() <= vecBL.getY() || vecTR.getY() <= vecBR.getY() ||
+         vecTL.getX() < -3000.0f || vecTL.getX() > 3000.0f || vecTL.getY() < -3000.0f || vecTL.getY() > 3000.0f ||
+         vecTR.getX() < -3000.0f || vecTR.getX() > 3000.0f || vecTR.getY() < -3000.0f || vecTR.getY() > 3000.0f ||
+         vecBL.getX() < -3000.0f || vecBL.getX() > 3000.0f || vecBL.getY() < -3000.0f || vecBL.getY() > 3000.0f ||
+         vecBR.getX() < -3000.0f || vecBR.getX() > 3000.0f || vecBR.getY() < -3000.0f || vecBR.getY() > 3000.0f )
         return NULL;
 
     if ( *(DWORD *)VAR_NumWaterVertices + 4 > NUM_NewWaterVertices ||
@@ -567,11 +572,11 @@ CWaterPoly* CWaterManagerSA::CreateTriangle ( CVector& vec1, CVector& vec2, CVec
     if ( *(DWORD *)VAR_NumWaterVertices >= NUM_NewWaterVertices )
         return NULL;
 
-    if ( vec1.fX >= vec2.fX || vec1.fY == vec3.fY || vec2.fY == vec3.fY ||
-         (vec1.fY < vec3.fY) != (vec2.fY < vec3.fY) ||
-         vec1.fX < -3000.0f || vec1.fX > 3000.0f || vec1.fY < -3000.0f || vec1.fY > 3000.0f ||
-         vec2.fX < -3000.0f || vec2.fX > 3000.0f || vec2.fY < -3000.0f || vec2.fY > 3000.0f ||
-         vec3.fX < -3000.0f || vec3.fX > 3000.0f || vec3.fY < -3000.0f || vec3.fY > 3000.0f )
+    if ( vec1.getX() >= vec2.getX() || vec1.getY() == vec3.getY() || vec2.getY() == vec3.getY() ||
+         (vec1.getY() < vec3.getY()) != (vec2.getY() < vec3.getY()) ||
+         vec1.getX() < -3000.0f || vec1.getX() > 3000.0f || vec1.getY() < -3000.0f || vec1.getY() > 3000.0f ||
+         vec2.getX() < -3000.0f || vec2.getX() > 3000.0f || vec2.getY() < -3000.0f || vec2.getY() > 3000.0f ||
+         vec3.getX() < -3000.0f || vec3.getX() > 3000.0f || vec3.getY() < -3000.0f || vec3.getY() > 3000.0f )
         return NULL;
 
     if ( *(DWORD *)VAR_NumWaterVertices + 4 > NUM_NewWaterVertices ||
@@ -635,7 +640,7 @@ bool CWaterManagerSA::DeletePoly ( CWaterPoly* pPoly )
 bool CWaterManagerSA::GetWaterLevel ( CVector& vecPosition, float* pfLevel, bool bCheckWaves, CVector* pvecUnknown )
 {
     return ( (GetWaterLevel_t) FUNC_GetWaterLevel )
-        ( vecPosition.fX, vecPosition.fY, vecPosition.fZ, pfLevel, bCheckWaves, pvecUnknown );
+        ( vecPosition.getX(), vecPosition.getY(), vecPosition.getZ(), pfLevel, bCheckWaves, pvecUnknown );
 }
 
 bool CWaterManagerSA::SetWaterLevel ( CVector* pvecPosition, float fLevel, void* pChangeSource )
@@ -656,7 +661,7 @@ bool CWaterManagerSA::SetWaterLevel ( CVector* pvecPosition, float fLevel, void*
         for ( DWORD i = 0; i < *(DWORD *)VAR_NumWaterVertices; i++ )
         {
             m_Vertices [ i ].GetPosition ( vecVertexPos );
-            vecVertexPos.fZ = fLevel;
+            vecVertexPos.setZ( fLevel );
             m_Vertices [ i ].SetPosition ( vecVertexPos, pChangeSource );
         }
     }
@@ -669,7 +674,7 @@ bool CWaterManagerSA::SetWaterLevel ( CWaterPoly* pPoly, float fLevel, void* pCh
     for ( int i = 0; i < pPoly->GetNumVertices (); i++ )
     {
         pPoly->GetVertex ( i )->GetPosition ( vecVertexPos );
-        vecVertexPos.fZ = fLevel;
+        vecVertexPos.setZ( fLevel );
         pPoly->GetVertex ( i )->SetPosition ( vecVertexPos, pChangeSource );
     }
     return true;
@@ -719,7 +724,7 @@ void CWaterManagerSA::SetWaveLevel ( float fWaveLevel )
 bool CWaterManagerSA::TestLineAgainstWater ( CVector& vecStart, CVector& vecEnd, CVector* vecCollision )
 {
     return ( (TestLineAgainstWater_t) FUNC_TestLineAgainstWater )
-        ( vecEnd.fX, vecEnd.fY, vecEnd.fZ, vecStart.fX, vecStart.fY, vecStart.fZ, vecCollision );
+        ( vecEnd.getX(), vecEnd.getY(), vecEnd.getZ(), vecStart.getX(), vecStart.getY(), vecStart.getZ(), vecCollision );
 }
 
 void CWaterManagerSA::AddChange ( void *pChangeSource, void* pChangedObject, CWaterChange* pChange )

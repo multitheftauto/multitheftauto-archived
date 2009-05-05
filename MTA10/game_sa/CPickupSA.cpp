@@ -28,18 +28,18 @@ VOID CPickupSA::SetPosition(CVector * vecPosition)
 	this->GetInterface()->bIsPickupNearby = 0;
 
 	CPickupSAInterface * iPickup = this->GetInterface();
-	iPickup->CoorsX = (short)(vecPosition->fX * 8);
-	iPickup->CoorsY = (short)(vecPosition->fY * 8);
-	iPickup->CoorsZ = (short)(vecPosition->fZ * 8);
+	iPickup->CoorsX = (short)(vecPosition->getX() * 8);
+	iPickup->CoorsY = (short)(vecPosition->getY() * 8);
+	iPickup->CoorsZ = (short)(vecPosition->getZ() * 8);
 }
 
 CVector * CPickupSA::GetPosition(CVector * vecPosition)
 {	
 	DEBUG_TRACE("CVector * CPickupSA::GetPosition(CVector * vecPosition)");
 	CPickupSAInterface * iPickup = this->GetInterface();
-	vecPosition->fX = iPickup->CoorsX / 8.0f;
-	vecPosition->fY = iPickup->CoorsY / 8.0f;
-	vecPosition->fZ = iPickup->CoorsZ / 8.0f;
+	vecPosition->setX( iPickup->CoorsX / 8.0f );
+	vecPosition->setY( iPickup->CoorsY / 8.0f );
+	vecPosition->setZ( iPickup->CoorsZ / 8.0f );
 	return vecPosition;
 }
 

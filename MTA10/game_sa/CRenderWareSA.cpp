@@ -612,9 +612,9 @@ bool CRenderWareSA::PositionFrontSeat ( RpClump *pClump, unsigned short usModelI
 
 	// in the vehicle specific dummy data, +30h contains the front seat vector
 	CVector *vecFrontSeat = ( CVector* ) ( pVehicleDummies + 0x30 );
-	vecFrontSeat->fX = pPedFrontSeat->modelling.pos.x;
-	vecFrontSeat->fY = pPedFrontSeat->modelling.pos.y;
-	vecFrontSeat->fZ = pPedFrontSeat->modelling.pos.z;
+	vecFrontSeat->setX( pPedFrontSeat->modelling.pos.x );
+	vecFrontSeat->setY( pPedFrontSeat->modelling.pos.y );
+	vecFrontSeat->setZ( pPedFrontSeat->modelling.pos.z );
 
 	return true;
 }

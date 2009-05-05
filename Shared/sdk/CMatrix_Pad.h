@@ -9,6 +9,8 @@
 *
 *****************************************************************************/
 
+#if 0
+
 #ifndef __CMATRIX_PAD_H
 #define __CMATRIX_PAD_H
 
@@ -63,5 +65,7 @@ public:
         dwPadRoll = 0;
     }
 };
+
+#endif
 
 #endif

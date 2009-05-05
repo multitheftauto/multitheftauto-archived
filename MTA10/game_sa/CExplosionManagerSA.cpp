@@ -54,9 +54,9 @@ CExplosion * CExplosionManagerSA::AddExplosion ( eExplosionType explosiontype, C
 	unsigned char bMakeSound = true, float fCamShake=-1.0f, unsigned char noDamage=false);
 	*/
 
-	FLOAT fX = vecPosition->fX;
-	FLOAT fY = vecPosition->fY;
-	FLOAT fZ = vecPosition->fZ;
+	FLOAT fX = vecPosition->getX();
+	FLOAT fY = vecPosition->getY();
+	FLOAT fZ = vecPosition->getZ();
 
 	_asm
 	{
@@ -99,9 +99,9 @@ VOID CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLO
 	
 /*	DWORD dwFunction = FUNC_RemoveAllExplosionsInArea;
 	CVector * vecPos = (CVector *)vecPosition;
-	FLOAT fX = vecPos->fX;
-	FLOAT fY = vecPos->fY;
-	FLOAT fZ = vecPos->fZ;
+	FLOAT fX = vecPos->getX();
+	FLOAT fY = vecPos->getY();
+	FLOAT fZ = vecPos->getZ();
 	
 	_asm
 	{

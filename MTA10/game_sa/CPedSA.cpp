@@ -112,9 +112,9 @@ void CPedSA::AttachPedToBike(CEntity * entity, CVector * vector, unsigned short 
 
 	DWORD dwEntityInterface = (DWORD)pEntitySA->GetInterface();
 	DWORD dwFunc = FUNC_AttachPedToBike;
-	FLOAT fX = vector->fX;
-	FLOAT fY = vector->fY;
-	FLOAT fZ = vector->fZ;
+	FLOAT fX = vector->getX();
+	FLOAT fY = vector->getY();
+	FLOAT fZ = vector->getZ();
     DWORD dwThis = (DWORD)this->GetInterface();
 	_asm
 	{
@@ -160,9 +160,9 @@ void CPedSA::AttachPedToEntity(DWORD dwEntityInterface, CVector * vector, unsign
 	DEBUG_TRACE("void CPedSA::AttachPedToEntity(CVehicle * entity, CVector * vector, unsigned short sUnk, FLOAT fUnk, eWeaponType weaponType)");
 	DWORD dwFunc = FUNC_AttachPedToEntity;
     DWORD dwThis = (DWORD)this->GetInterface();
-	FLOAT fX = vector->fX;
-	FLOAT fY = vector->fY;
-	FLOAT fZ = vector->fZ;
+	FLOAT fX = vector->getX();
+	FLOAT fY = vector->getY();
+	FLOAT fZ = vector->getZ();
 	BYTE bPedType = ((CPedSAInterface*)GetInterface())->bPedType;
 
 	// Hack the CPed type(?) to non-player so the camera doesn't get changed
@@ -234,9 +234,9 @@ void CPedSA::Respawn(CVector * position, bool bCameraCut)
     }
 
 	DEBUG_TRACE("void CPedSA::Respawn(CVector * position)");
-	FLOAT fX = position->fX;
-	FLOAT fY = position->fY;
-	FLOAT fZ = position->fZ;
+	FLOAT fX = position->getX();
+	FLOAT fY = position->getY();
+	FLOAT fZ = position->getZ();
 	FLOAT fUnk = 1.0f; 
 	DWORD dwFunc = FUNC_RestorePlayerStuffDuringResurrection;
 	DWORD dwThis = (DWORD)this->GetInterface();
@@ -1374,9 +1374,9 @@ void CPedSA::SetObjective ( eObjective  objective, CVector * vecPoint )
 	DWORD dwFunction = FUNC_SetObjective_VECTOR;
 	DWORD dwThis = (DWORD)this->GetInterface();
 	FLOAT fx, fy, fz;
-	fx = ((CVector *)vecPoint)->fX;
-	fy = ((CVector *)vecPoint)->fY;
-	fz = ((CVector *)vecPoint)->fZ;
+	fx = ((CVector *)vecPoint)->getX();
+	fy = ((CVector *)vecPoint)->getY();
+	fz = ((CVector *)vecPoint)->getZ();
 	_asm
 	{
 		mov		ecx, dwThis
@@ -1462,9 +1462,9 @@ void CPedSA::Teleport ( CVector * vecPoint )
 	DWORD dwFunction = FUNC_Teleport;
 	DWORD dwThis = (DWORD)this->GetInterface();
 	FLOAT fx, fy, fz;
-	fx = ((CVector *)vecPoint)->fX;
-	fy = ((CVector *)vecPoint)->fY;
-	fz = ((CVector *)vecPoint)->fZ;
+	fx = ((CVector *)vecPoint)->getX();
+	fy = ((CVector *)vecPoint)->getY();
+	fz = ((CVector *)vecPoint)->getZ();
 	_asm
 	{
 		mov		ecx, dwThis

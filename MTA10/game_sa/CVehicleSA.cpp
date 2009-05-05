@@ -180,10 +180,9 @@ VOID CVehicleSA::SetMoveSpeed ( CVector* vecMoveSpeed )
             // Get the direction vector between the nodes the train is between
             CVector vecNode1 ( (float)(pNode - 1)->sX / 8.0f, (float)(pNode - 1)->sY / 8.0f, (float)(pNode - 1)->sZ / 8.0f );
             CVector vecNode2 ( (float)pNode->sX / 8.0f, (float)pNode->sY / 8.0f, (float)pNode->sZ / 8.0f );
-            CVector vecDirection = vecNode2 - vecNode1;
-            vecDirection.Normalize ();
+			CVector vecDirection = CMath::normalize( vecNode2 - vecNode1 );
             // Set the speed
-            pInterf->m_fTrainSpeed = vecDirection.DotProduct ( vecMoveSpeed );
+			pInterf->m_fTrainSpeed = CMath::dot( vecDirection, vecMoveSpeed );
         }
     }
 }

@@ -24,24 +24,17 @@ unsigned long CEntitySA::FUNC_RwFrameGetLTM;
 {
 	this->internalInterface->ModelClump->SetAlpha(iAlpha);
 }*/
-VOID CEntitySA::SetPosition(float fX, float fY, float fZ)
+VOID CEntitySA::SetPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("VOID CEntitySA::SetPosition(float fX, float fY, float fZ)");
-    CVector * vecPos;
-    if ( m_pInterface->Placeable.matrix )
+	DEBUG_TRACE("VOID CEntitySA::SetPosition( const CVector& vecPosition )");
+
+	if ( m_pInterface->Placeable.matrix )
     {
-        vecPos = &m_pInterface->Placeable.matrix->vPos;
+        m_pInterface->Placeable.matrix->setTranslation( vecPosition );
     }
     else
     {
-        vecPos = &m_pInterface->Placeable.m_transform.m_translate;
-    }
-
-    if ( vecPos )
-    {
-        vecPos->fX = fX;
-        vecPos->fY = fY;
-        vecPos->fZ = fZ;
+        m_pInterface->Placeable.m_transform.m_translate = vecPosition;
     }
 
     WORD wModelID = GetModelIndex();
@@ -58,6 +51,7 @@ VOID CEntitySA::SetPosition(float fX, float fY, float fZ)
     }
 }
 
+/*
 VOID CEntitySA::Teleport ( float fX, float fY, float fZ )
 {
     DEBUG_TRACE("VOID CEntitySA::Teleport ( float fX, float fY, float fZ )");
@@ -81,9 +75,8 @@ VOID CEntitySA::Teleport ( float fX, float fY, float fZ )
     {
         SetPosition ( fX, fY, fZ );
     }
-
-
 }
+*/
 
 VOID CEntitySA::ProcessControl ( void )
 {
@@ -197,88 +190,33 @@ VOID CEntitySA::FixBoatOrientation ( void )
 	pGame->GetWorld()->Add ( this );
 }
 
-VOID CEntitySA::SetPosition( CVector * vecPosition )
+CVector& CEntitySA::GetPosition( CVector& position )
 {
-	DEBUG_TRACE("VOID CEntitySA::SetPosition( CVector * vecPosition )");
-/*	FLOAT fX = vecPosition->fX;
-	FLOAT fY = vecPosition->fY;
-	FLOAT fZ = vecPosition->fZ;
-	DWORD dwFunc = 0x5A17B0;
-	DWORD dwThis = (DWORD) m_pInterface;
-	_asm
-	{
-		mov		ecx, dwThis
-		push 0
-		push fZ
-		push fY
-		push fX
-		call	dwFunc
-	}*/
-
-    if ( vecPosition )
-        SetPosition ( vecPosition->fX, vecPosition->fY, vecPosition->fZ );
-}
-
-CVector * CEntitySA::GetPosition( )
-{
-	DEBUG_TRACE("CVector * CEntitySA::GetPosition( )");
+	DEBUG_TRACE("CVector& CEntitySA::GetPosition( CVector& vector )");
     if ( m_pInterface->Placeable.matrix )
-	    return &m_pInterface->Placeable.matrix->vPos;
+	    position = m_pInterface->Placeable.matrix->getTranslation();
     else
-        return &m_pInterface->Placeable.m_transform.m_translate; 
-}
-void CEntitySA::SetRoll ( CVector * vecRoll )
-{
-    if ( m_pInterface->Placeable.matrix )
-    {
-        m_pInterface->Placeable.matrix->vRoll = *vecRoll;
-    }
-}   
-void CEntitySA::SetDirection ( CVector * vecDir )
-{
-    if ( m_pInterface->Placeable.matrix )
-    {
-        m_pInterface->Placeable.matrix->vDirection = *vecDir;
-    }
+        position = m_pInterface->Placeable.m_transform.m_translate;
+	return position;
 }
 
-void CEntitySA::SetWas ( CVector * vecWas )
+CMatrix4& CEntitySA::GetMatrix ( CMatrix4& matrix )
 {
+	DEBUG_TRACE("CMatrix& CEntitySA::GetMatrix ( CMatrix4& matrix )");
     if ( m_pInterface->Placeable.matrix )
-    {
-        m_pInterface->Placeable.matrix->vWas = *vecWas;
-    }
-}
-
-
-CMatrix * CEntitySA::GetMatrix ( CMatrix * matrix ) const
-{
-	DEBUG_TRACE("CMatrix * CEntitySA::GetMatrix ( CMatrix * matrix )");
-    if ( m_pInterface->Placeable.matrix && matrix )
-    {
-	    memcpy(&matrix->vDirection,		&m_pInterface->Placeable.matrix->vDirection, sizeof(CVector));
-	    memcpy(&matrix->vPos,			&m_pInterface->Placeable.matrix->vPos, sizeof(CVector));
-	    memcpy(&matrix->vWas,			&m_pInterface->Placeable.matrix->vWas, sizeof(CVector));
-	    memcpy(&matrix->vRoll,			&m_pInterface->Placeable.matrix->vRoll, sizeof(CVector));
-	    return matrix;
-    }
+		matrix = *(m_pInterface->Placeable.matrix);
     else
-    {
-        return NULL;
-    }
+		matrix = CMatrix4::identity();
+	return matrix;
 }
 
-VOID CEntitySA::SetMatrix ( CMatrix * matrix )
+VOID CEntitySA::SetMatrix ( const CMatrix4& matrix )
 {
-	DEBUG_TRACE("VOID CEntitySA::SetMatrix ( CMatrix * matrix )");
-    if ( m_pInterface->Placeable.matrix && matrix )
+	DEBUG_TRACE("VOID CEntitySA::SetMatrix ( const CMatrix& matrix )");
+    if ( m_pInterface->Placeable.matrix )
     {
-	    memcpy(&m_pInterface->Placeable.matrix->vDirection,		&matrix->vDirection, sizeof(CVector));
-	    memcpy(&m_pInterface->Placeable.matrix->vPos,			&matrix->vPos, sizeof(CVector));
-	    memcpy(&m_pInterface->Placeable.matrix->vWas,			&matrix->vWas, sizeof(CVector));
-	    memcpy(&m_pInterface->Placeable.matrix->vRoll,			&matrix->vRoll, sizeof(CVector));
-
-        m_pInterface->Placeable.m_transform.m_translate = matrix->vPos;
+		*(m_pInterface->Placeable.matrix) = matrix;
+		m_pInterface->Placeable.m_transform.m_translate = matrix.getTranslation();
 
         /*
         WORD wModelID = GetModelIndex();
@@ -434,42 +372,6 @@ bool CEntitySA::IsVisible ( void )
 void CEntitySA::SetVisible ( bool bVisible )
 {
     m_pInterface->bIsVisible = bVisible;
-}
-
-VOID CEntitySA::MatrixConvertFromEulerAngles ( float fX, float fY, float fZ, int iUnknown )
-{
-    CMatrix_Padded * matrixPadded = m_pInterface->Placeable.matrix;
-    if ( matrixPadded )
-    {
-        DWORD dwFunc = FUNC_CMatrix__ConvertFromEulerAngles;
-        _asm
-        {
-            push    iUnknown
-            push    fZ
-            push    fY
-            push    fX
-            mov     ecx, matrixPadded
-            call    dwFunc
-        }
-    }
-}
-
-VOID CEntitySA::MatrixConvertToEulerAngles ( float * fX, float * fY, float * fZ, int iUnknown )
-{
-    CMatrix_Padded * matrixPadded = m_pInterface->Placeable.matrix;
-    if ( matrixPadded )
-    {
-        DWORD dwFunc = FUNC_CMatrix__ConvertToEulerAngles;
-        _asm
-        {
-            push    iUnknown
-            push    fZ
-            push    fY
-            push    fX
-            mov     ecx, matrixPadded
-            call    dwFunc
-        }
-    }
 }
 
 bool CEntitySA::IsPlayingAnimation ( char * szAnimName )
