@@ -36,23 +36,23 @@
  */
 class CRadarSA : public CRadar
 {
-
 public:
-						CRadarSA (  );
-                        ~CRadarSA ( );
-	CMarker				* CreateMarker(CVector * vecPosition);
-	CMarker				* CreateMarker(CVehicle * vehicle);
-	CMarker				* CreateMarker(CObject * object);
-	CMarker				* CreateMarker(CPed * ped);
+						CRadarSA( void );
+                        ~CRadarSA( void );
 
-	CMarker				* GetFreeMarker(  );
-	CMarker				* GetMarker( DWORD dwMarkerID );
+	CMarker*			CreateMarker( const CVector& vecPosition );
+	CMarker*			CreateMarker( CVehicle * vehicle );
+	CMarker*			CreateMarker( CObject * object );
+	CMarker*			CreateMarker( CPed * ped );
 
-	void				ClearMarkerForEntity(CVehicle * vehicle);
-	void				ClearMarkerForEntity(CObject * object);
-	void				ClearMarkerForEntity(CPed * ped);
+	CMarker*			GetFreeMarker( void );
+	CMarker*			GetMarker( DWORD dwMarkerID );
 
-    void                DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD abgr );
+	void				ClearMarkerForEntity( CVehicle * vehicle );
+	void				ClearMarkerForEntity( CObject * object );
+	void				ClearMarkerForEntity( CPed * ped );
+
+    void                DrawAreaOnRadar( float fX1, float fY1, float fX2, float fY2, DWORD abgr );
 };
 
 #endif

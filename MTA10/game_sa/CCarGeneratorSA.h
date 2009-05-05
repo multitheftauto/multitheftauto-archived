@@ -55,8 +55,8 @@ public:
 
 	DWORD		GetModelIndex();
 	void		SetModelIndex(DWORD dwModelIndex);
-	CVector		* GetPosition(CVector * position);
-	void		SetPosition(CVector * position);
+	CVector&	GetPosition( CVector& position );
+	void		SetPosition( const CVector& position );
 	BYTE		GetChanceOfCarAlarm();
 	void		SetChanceOfCarAlarm(BYTE bChance);
 	BYTE		GetChanceOfCarLocked();

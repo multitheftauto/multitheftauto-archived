@@ -38,7 +38,7 @@ public:
 	DWORD		CrimeType; // was eCrimeType
 	long		CrimeID;
 	DWORD		TimeOfQing;
-	CVector	Coors;
+	CVectorGTA	Coors;
 	bool		bAlreadyReported;
 	bool		bPoliceDontReallyCare;
 };

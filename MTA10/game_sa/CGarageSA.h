@@ -23,7 +23,7 @@
 class CGarageSAInterface : public CGarageInterface
 {
 public:
-    CVector vecPosition;                //  0
+    CVectorGTA vecPosition;             //  0
     FLOAT DirectionA_X, DirectionA_Y;   // 12
     FLOAT DirectionB_X, DirectionB_Y;   // 20
     FLOAT Height, Width, Depth;         // 28
@@ -42,20 +42,20 @@ public:
 class CGarageSA : public CGarage
 {
 public:
-                                CGarageSA       ( CGarageSAInterface * pInterface );
+                                CGarageSA			( CGarageSAInterface * pInterface );
 
-    void                        SetType         ( BYTE type );
-    inline BYTE                 GetType         ( ) const   { return this->internalInterface->Type; }
+    void                        SetType				( BYTE type );
+    inline BYTE                 GetType				( void ) const   { return this->internalInterface->Type; }
 
-    void                        GetPosition         ( CVector& vecPosition ) const;
+    const CVector				GetPosition         ( void );
     void                        GetDirection        ( float& x1, float& y1, float& x2, float& y2 ) const;
     void                        GetSize             ( float& height, float& width, float& depth ) const;
     void                        GetBoundingBox      ( float& left, float& right, float& front, float& back ) const;
 
     void                        SetOpen             ( bool bOpen );
-    bool                        IsOpen              ( ) const;
+    bool                        IsOpen              ( void ) const;
 
-    inline CGarageInterface*    GetInterface    ( )         { return this->internalInterface; }
+    inline CGarageInterface*    GetInterface		( void )         { return this->internalInterface; }
 
 private:
     CGarageSAInterface *        internalInterface;

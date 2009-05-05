@@ -44,18 +44,18 @@ public:
 	DWORD						dwCounter;
 	BYTE						bProjectileActive;
     BYTE                        bPad [ 3 ];
-	CVector					    OldCoors;
+	CVectorGTA					OldCoors;
     DWORD                       dwUnk;
 };
 //#pragma pack(pop)
 
 class CProjectileInfoSA : public CProjectileInfo
 {
-private:
-    CProjectileInfoSA  *             projectileInfo[PROJECTILE_INFO_COUNT];
-    CProjectileInfoSAInterface *            internalInterface;
+    CProjectileInfoSA*			projectileInfo[PROJECTILE_INFO_COUNT];
+    CProjectileInfoSAInterface*	internalInterface;
+
 public:
-    CProjectileInfoSA		(  )
+    CProjectileInfoSA( void )
     {
         for ( int i = 0; i < PROJECTILE_INFO_COUNT; i++ )
         {
@@ -63,25 +63,25 @@ public:
         }
     }
 
-    CProjectileInfoSA  ( CProjectileInfoSAInterface * projectileInfoInterface )
+    CProjectileInfoSA( CProjectileInfoSAInterface * projectileInfoInterface )
     {
         internalInterface = projectileInfoInterface;
     }
 
+	bool					AddProjectile( CEntity * creator, eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity * targetEntity );
+    CProjectile *           GetProjectile( void * projectilePointer );
+    void                    RemoveProjectile( CProjectileInfo * pProjectileInfo, CProjectile * pProjectile );
+	void					RemoveAllProjectiles( void );
 
-	void					RemoveAllProjectiles (  );
-    void                    RemoveProjectile ( CProjectileInfo * pProjectileInfo, CProjectile * pProjectile );
-	CProjectile				* GetProjectile ( DWORD ID );
-    CProjectileInfo         * GetProjectileInfo ( void * projectileInfoInterface );
-    CProjectileInfo         * GetProjectileInfo ( DWORD dwIndex );
-    CProjectileInfo         * GetNextFreeProjectileInfo ( );
-	bool					 AddProjectile ( CEntity * creator, eWeaponType eWeapon, CVector vecOrigin, float fForce, CVector * target, CEntity * targetEntity );
-    CProjectile *           GetProjectile ( void * projectilePointer );
+	CProjectile				* GetProjectile( DWORD ID );
+    CProjectileInfo         * GetProjectileInfo( void * projectileInfoInterface );
+    CProjectileInfo         * GetProjectileInfo( DWORD dwIndex );
+    CProjectileInfo         * GetNextFreeProjectileInfo( void );
 
-    CEntity*                GetTarget ( void );
-    void                    SetTarget ( CEntity* pEntity );
+	CEntity*                GetTarget( void );
+    void                    SetTarget( CEntity* pEntity );
 
-    bool                    IsActive ( void );
+    bool                    IsActive( void );
 };
 
 #endif

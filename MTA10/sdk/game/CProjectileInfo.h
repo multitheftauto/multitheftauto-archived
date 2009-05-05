@@ -14,21 +14,23 @@
 
 class CProjectile;
 class CPlayerPed;
+
 class CProjectileInfo
 {
 public:
-    virtual bool					AddProjectile ( CEntity * creator, eWeaponType eWeapon, CVector vecOrigin, float fForce, CVector * target, CEntity * targetEntity )=0;
-    virtual CProjectile *           GetProjectile ( DWORD ID ) = 0;
-    virtual CProjectile *           GetProjectile ( void * projectilePointer )=0; //hack, don't use please
-    virtual CProjectileInfo         * GetProjectileInfo ( void * projectileInfoInterface )=0; //don't use
-    virtual void                    RemoveProjectile ( CProjectileInfo * pProjectileInfo, CProjectile * pProjectile )=0;
-    virtual CProjectileInfo         * GetNextFreeProjectileInfo ( )=0;
-    virtual CProjectileInfo         * GetProjectileInfo ( DWORD Index )=0;
+    virtual bool				AddProjectile( CEntity * creator, eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity * targetEntity ) = 0;
+    virtual void				RemoveProjectile( CProjectileInfo* pProjectileInfo, CProjectile* pProjectile ) = 0;
 
-    virtual CEntity*                GetTarget ( void ) = 0;
-    virtual void                    SetTarget ( CEntity* pEntity ) = 0;
+	virtual CProjectile*		GetProjectile( DWORD ID ) = 0;
+    virtual CProjectile*		GetProjectile( void * projectilePointer ) = 0; /* Unsafe function */
+    virtual CProjectileInfo*	GetProjectileInfo( void * projectileInfoInterface ) = 0; /* Unsafe function */
+    virtual CProjectileInfo*	GetProjectileInfo( DWORD Index ) = 0;
+    virtual CProjectileInfo*	GetNextFreeProjectileInfo( void ) = 0;
 
-    virtual bool                    IsActive ( void ) = 0;
+    virtual CEntity*			GetTarget( void ) = 0;
+    virtual void				SetTarget( CEntity* pEntity ) = 0;
+
+    virtual bool				IsActive( void ) = 0;
 };
 
 #endif

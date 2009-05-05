@@ -116,14 +116,16 @@ private:
 class CWaterChange
 {
 public:
-    virtual void                     Undo              ( void* pChangedObject ) = 0;
+    virtual void                     Undo( void* pChangedObject ) = 0;
 };
 
 class CWaterChangeVertexMove : public CWaterChange
 {
 public:
-                                     CWaterChangeVertexMove ( CWaterVertex* pVertex ) { pVertex->GetPosition ( m_vecOriginalPosition ); }
-    void                             Undo              ( void* pChangedObject );
+                                     CWaterChangeVertexMove( CWaterVertex* pVertex ) { pVertex->GetPosition ( m_vecOriginalPosition ); }
+
+    void                             Undo( void* pChangedObject );
+
 private:
     CVector                          m_vecOriginalPosition;
 };
@@ -134,43 +136,43 @@ private:
 class CWaterManagerSA : public CWaterManager
 {
 public:
-                                     CWaterManagerSA   ();
-                                     ~CWaterManagerSA  ();
+                                     CWaterManagerSA( void );
+                                     ~CWaterManagerSA( void );
 
-    void                             RelocatePools     ();
-    void                             InstallHooks      ();
-    CWaterZoneSA*                    GetZoneContaining ( float fX, float fY );
-    void                             GetZonesContaining ( CWaterPoly* pPoly, std::vector < CWaterZoneSA* >& out );
-    void                             GetZonesContaining ( CVector& v1, CVector& v2, CVector& v3, std::vector < CWaterZoneSA* >& out );
+    void                             RelocatePools( void );
+    void                             InstallHooks( void );
+    CWaterZoneSA*                    GetZoneContaining( float fX, float fY );
+    void                             GetZonesContaining( CWaterPoly* pPoly, std::vector < CWaterZoneSA* >& out );
+    void                             GetZonesContaining( const CVector& v1, const CVector& v2, const CVector& v3, std::vector < CWaterZoneSA* >& out );
 
-    CWaterVertex*                    CreateVertex      ( CVector& vecPosition );
+    CWaterVertex*                    CreateVertex( const CVector& vecPosition );
 
-    CWaterPoly*                      GetPolyAtPoint    ( CVector& vecPosition );
-    CWaterPoly*                      CreateQuad        ( CVector& vecBL, CVector& vecBR, CVector& vecTL, CVector& vecTR, bool bShallow = false );
-    CWaterPoly*                      CreateTriangle    ( CVector& vec1, CVector& vec2, CVector& vec3, bool bShallow = false );
-    bool                             DeletePoly        ( CWaterPoly* pPoly );
+    CWaterPoly*                      GetPolyAtPoint( const CVector& vecPosition );
+    CWaterPoly*                      CreateQuad( const CVector& vecBL, const CVector& vecBR, const CVector& vecTL, const CVector& vecTR, bool bShallow = false );
+    CWaterPoly*                      CreateTriangle( const CVector& vec1, const CVector& vec2, const CVector& vec3, bool bShallow = false );
+    bool                             DeletePoly( CWaterPoly* pPoly );
 
-    bool                             GetWaterLevel     ( CVector& vecPosition, float* pfLevel, bool bCheckWaves, CVector* pvecUnknown );
-    bool                             SetWaterLevel     ( CVector* pvecPosition, float fLevel, void* pChangeSource = NULL );
-    bool                             SetWaterLevel     ( CWaterPoly* pPoly, float fLevel, void* pChangeSource = NULL );
-    float                            GetWaveLevel      ();
-    void                             SetWaveLevel      ( float fWaveLevel );
+    bool                             GetWaterLevel( CVector& vecPosition, float* pfLevel, bool bCheckWaves, CVector* pVecUnknown );
+    bool                             SetWaterLevel( const CVector& vecPosition, float fLevel, void* pChangeSource = NULL );
+    bool                             SetWaterLevel( CWaterPoly* pPoly, float fLevel, void* pChangeSource = NULL );
+    float                            GetWaveLevel( void );
+    void                             SetWaveLevel( float fWaveLevel );
     
-    bool                             TestLineAgainstWater ( CVector& vecStart, CVector& vecEnd, CVector* vecCollision );
+    bool                             TestLineAgainstWater( const CVector& vecStart, const CVector& vecEnd, CVector& vecCollision );
 
-    void                             AddChange         ( void* pChangeSource, void* pChangedObject, CWaterChange* pChange );
-    void                             UndoChanges       ( void* pChangeSource = NULL );
-    void                             RebuildIndex      ();
-    void                             Reset             ();
+    void                             AddChange( void* pChangeSource, void* pChangedObject, CWaterChange* pChange );
+    void                             UndoChanges( void* pChangeSource = NULL );
+    void                             RebuildIndex( void );
+    void                             Reset( void );
 
 private:
-    CWaterVertexSA                   m_Vertices [NUM_NewWaterVertices];
-    CWaterQuadSA                     m_Quads    [NUM_NewWaterQuads];
+    CWaterVertexSA                   m_Vertices[NUM_NewWaterVertices];
+    CWaterQuadSA                     m_Quads[NUM_NewWaterQuads];
     CWaterTriangleSA                 m_Triangles[NUM_NewWaterTriangles];
-    CWaterZoneSA                     m_Zones    [NUM_WaterZones];
+    CWaterZoneSA                     m_Zones[NUM_WaterZones];
 
-    CWaterVertexSAInterface          m_VertexPool  [NUM_NewWaterVertices];
-    CWaterQuadSAInterface            m_QuadPool    [NUM_NewWaterQuads];
+    CWaterVertexSAInterface          m_VertexPool[NUM_NewWaterVertices];
+    CWaterQuadSAInterface            m_QuadPool[NUM_NewWaterQuads];
     CWaterTriangleSAInterface        m_TrianglePool[NUM_NewWaterTriangles];
     CWaterPolyEntrySAInterface       m_ZonePolyPool[NUM_NewWaterZonePolys];
 

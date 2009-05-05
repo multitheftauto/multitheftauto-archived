@@ -22,7 +22,7 @@ class CExplosionSAInterface // 124 bytes, ok
 {
 public:
 	eExplosionType			m_ExplosionType;
-	CVector					m_vecPosition;
+	CVectorGTA				m_vecPosition;
 	FLOAT					m_fExplosionRadius;
 	FLOAT					m_fExplosionPropagationRate;
 	CEntitySAInterface		* m_pEntExplosionOwner;
@@ -37,36 +37,38 @@ public:
 	FLOAT					m_fExplosionForce; // 48
 	FLOAT					m_fGroundZ;
 	DWORD 					m_fuelTime;
-	CVector 				m_fuelDir[3];
+	CVectorGTA 				m_fuelDir[3];
 	FLOAT					m_fuelOffsetDist[3];
 	FLOAT					m_fuelSpeed[3];
 };
 
 class CExplosionSA : public CExplosion
 {
-private:
-	CExplosionSAInterface	* internalInterface;
+	CExplosionSAInterface*	internalInterface;
+
 public:
-	CExplosionSA(CExplosionSAInterface * explosionInterface) { this->internalInterface = explosionInterface; }
+							CExplosionSA( CExplosionSAInterface * explosionInterface )
+							{ this->internalInterface = explosionInterface; }
 
-	CExplosionSAInterface	* GetInterface() { return this->internalInterface; };
+	CExplosionSAInterface*	GetInterface( void ) { return this->internalInterface; };
 
-	eExplosionType          GetExplosionType            ( void );
-	CVector*                GetExplosionPosition        ( void );
-	void                    SetExplosionPosition        ( const CVector* vecPosition );
-	CEntity*                GetExplosionCreator         ( void );
-	CEntity*                GetExplodingEntity          ( void );
-	bool					IsActive                    ( void );
-	void					Remove                      ( void );
-	float                   GetExplosionForce           ( void );
-	void                    SetExplosionForce           ( float fForce );
-	void                    SetSilent                   ( bool bSilent );
-	unsigned long           GetActivationTimer          ( void );
-	void                    SetActivationTimer          ( unsigned long ulActivationTime );
-	DWORD                   GetExpiryTime               ( void );
-	void                    SetExpiryTime               ( DWORD dwExpiryTime );
-	float                   GetExplosionRadius          ( void );
-	void					SetExplosionRadius          ( float fRadius );
+	eExplosionType          GetExplosionType( void );
+	const CVector           GetExplosionPosition( void );
+	void                    SetExplosionPosition( const CVector& vecPosition );
+	CEntity*                GetExplosionCreator( void );
+	CEntity*                GetExplodingEntity( void );
+	float                   GetExplosionForce( void );
+	void                    SetExplosionForce( float fForce );
+	float                   GetExplosionRadius( void );
+	void					SetExplosionRadius( float fRadius );
+
+	bool					IsActive( void );
+	void					Remove( void );
+	void                    SetSilent( bool bSilent );
+	unsigned long           GetActivationTimer( void );
+	void                    SetActivationTimer( unsigned long ulActivationTime );
+	DWORD                   GetExpiryTime( void );
+	void                    SetExpiryTime( DWORD dwExpiryTime );
 };
 
 #endif

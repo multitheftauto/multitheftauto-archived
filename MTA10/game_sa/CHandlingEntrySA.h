@@ -45,7 +45,7 @@ struct tHandlingDataSA
 
     float           fTurnMass;                      // +12
     float           fDragCoeff;                     // +16
-    CVector         vecCenterOfMass;                // +20
+    CVectorGTA      vecCenterOfMass;                // +20
     unsigned int    uiPercentSubmerged;             // +32
 
     float           fUnknown2;                      // +36  Automatically calculated
@@ -104,7 +104,7 @@ public:
     float           GetMass                         ( void ) const    { return m_Handling.fMass; };
     float           GetTurnMass                     ( void ) const    { return m_Handling.fTurnMass; };
     float           GetDragCoeff                    ( void ) const    { return m_Handling.fDragCoeff; };
-    const CVector&  GetCenterOfMass                 ( void ) const    { return m_Handling.vecCenterOfMass; };
+	const CVector   GetCenterOfMass                 ( void ) const    { return CVectorGTA::unwrap( m_Handling.vecCenterOfMass ); };
 
     unsigned int    GetPercentSubmerged             ( void ) const    { return m_Handling.uiPercentSubmerged; };
     float           GetTractionMultiplier           ( void ) const    { return m_Handling.fTractionMultiplier; };

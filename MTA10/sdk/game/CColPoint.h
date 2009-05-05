@@ -17,40 +17,42 @@
 // ChrML: Dunno where to put this, so I put it here.. but I guess this should be in some
 //        kind of global section..
 
+class CColPointSAInterface;
+
 class CColPoint
 {
 public:
-    virtual                 ~CColPoint ( void ) {};
+    virtual							~CColPoint( void ) {};
 
-    virtual class CColPointSAInterface * GetInterface() = 0;
-	virtual CVector * GetPosition()=0;
-	virtual void SetPosition(CVector * vecPosition)=0;
+    virtual CColPointSAInterface*	GetInterface( void ) = 0;
+	virtual const CVector			GetPosition( void ) = 0;
+	virtual void					SetPosition( const CVector& vecPosition ) = 0;
 
-	virtual CVector * GetNormal()=0;
-	virtual void SetNormal(CVector * vecNormal)=0;
+	virtual const CVector			GetNormal( void ) = 0;
+	virtual void					SetNormal( const CVector& vecNormal ) = 0;
 
-	virtual BYTE GetSurfaceTypeA()=0;
-	virtual BYTE GetSurfaceTypeB()=0;
+	virtual BYTE					GetSurfaceTypeA( void ) = 0;
+	virtual BYTE					GetSurfaceTypeB( void ) = 0;
 
-	virtual void SetSurfaceTypeA(BYTE bSurfaceType)=0;
-	virtual void SetSurfaceTypeB(BYTE bSurfaceType)=0;
+	virtual void					SetSurfaceTypeA( BYTE bSurfaceType ) = 0;
+	virtual void					SetSurfaceTypeB( BYTE bSurfaceType ) = 0;
 
-	virtual	BYTE GetPieceTypeA()=0;
-	virtual BYTE GetPieceTypeB()=0;
+	virtual	BYTE					GetPieceTypeA( void ) = 0;
+	virtual BYTE					GetPieceTypeB( void ) = 0;
 
-	virtual void SetPieceTypeA(BYTE bPieceType)=0;
-	virtual void SetPieceTypeB(BYTE bPieceType)=0;
+	virtual void					SetPieceTypeA( BYTE bPieceType ) = 0;
+	virtual void					SetPieceTypeB( BYTE bPieceType ) = 0;
 
-	virtual BYTE GetLightingA()=0;
-	virtual BYTE GetLightingB()=0;
+	virtual BYTE					GetLightingA( void ) = 0;
+	virtual BYTE					GetLightingB( void ) = 0;
 
-	virtual void SetLightingA(BYTE bLighting)=0;
-	virtual void SetLightingB(BYTE bLighting)=0;
+	virtual void					SetLightingA( BYTE bLighting ) = 0;
+	virtual void					SetLightingB( BYTE bLighting ) = 0;
 
-	virtual FLOAT GetDepth()=0;
-	virtual void SetDepth(FLOAT fDepth)=0;
+	virtual FLOAT					GetDepth( void ) = 0;
+	virtual void					SetDepth( FLOAT fDepth ) = 0;
 
-	virtual void Destroy()=0;
+	virtual void					Destroy( void ) = 0;
 };
 
 #endif

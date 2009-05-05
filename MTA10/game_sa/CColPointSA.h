@@ -19,9 +19,9 @@
 class CColPointSAInterface
 {
 public:
-	CVector Position;
+	CVectorGTA Position;
 	FLOAT fUnknown1;
-	CVector Normal;
+	CVectorGTA Normal;
 	FLOAT fUnknown2;
 	BYTE bSurfaceTypeA;
 	BYTE bPieceTypeA;
@@ -52,11 +52,11 @@ public:
 	CColPointSA();
     CColPointSA(CColPointSAInterface * pInterface ) { this->internalInterface = pInterface; };
 
-	CVector * GetPosition()  { return &this->GetInterface()->Position; };
-	void SetPosition(CVector * vecPosition)  { memcpy(&this->GetInterface()->Position, vecPosition, sizeof(CVector)); };
+	const CVector GetPosition( void ) { return CVectorGTA::unwrap( this->GetInterface()->Position ); };
+	void SetPosition( const CVector& vecPosition ) { this->GetInterface()->Position = vecPosition; };
 
-	CVector * GetNormal() { return &this->GetInterface()->Normal; };
-	void SetNormal(CVector * vecNormal) { memcpy(&this->GetInterface()->Normal, vecNormal, sizeof(CVector)); };
+	const CVector GetNormal( void ) { return CVectorGTA::unwrap( this->GetInterface()->Normal ); };
+	void SetNormal( const CVector& vecNormal ) { this->GetInterface()->Normal = vecNormal; };
 
 	BYTE GetSurfaceTypeA() { return this->GetInterface()->bSurfaceTypeA; };
 	BYTE GetSurfaceTypeB() { return this->GetInterface()->bSurfaceTypeB; };

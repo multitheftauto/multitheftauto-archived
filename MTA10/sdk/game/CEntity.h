@@ -61,7 +61,7 @@ public:
 	virtual void						SetOrientation ( float fX, float fY, float fZ )=0;
     virtual void                        FixBoatOrientation ( void ) = 0;
 	virtual void						SetPosition ( const CVector& vecPosition )=0;
-	virtual CVector&					GetPosition ( CVector& vector )=0;
+	virtual const CVector				GetPosition ( void )=0;
 	virtual CMatrix4&					GetMatrix ( CMatrix4& matrix )=0;
 	virtual void						SetMatrix ( const CMatrix4& matrix )=0;
 	virtual WORD						GetModelIndex ()=0;

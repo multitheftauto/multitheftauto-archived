@@ -118,7 +118,7 @@ public:
 
 	DWORD	m_LastTimeFiring;
 	DWORD	m_nTargetBone;
-	CVector m_vecTargetBoneOffset;
+	CVectorGTA m_vecTargetBoneOffset;
 	
 	DWORD	m_busFaresCollected;
 	bool 	m_bPlayerSprintDisabled;

@@ -66,14 +66,14 @@ public:
 	CWeaponInfo *m_pWeaponInfo;
 
 	CEntity *m_pTargetEntity;
-    CVector m_vecCoords;
+    CVectorGTA m_vecCoords;
 };
 
 class CTaskSimpleGangDriveBySA : public virtual CTaskSimpleSA, public virtual CTaskSimpleGangDriveBy
 {
 public:
-    CTaskSimpleGangDriveBySA ( void ) {};
-	CTaskSimpleGangDriveBySA ( CEntity *pTargetEntity, const CVector *pVecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS );
+    CTaskSimpleGangDriveBySA( void ) {};
+	CTaskSimpleGangDriveBySA( CEntity *pTargetEntity, const CVector& pVecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS );
 };
 
 class CTaskSimpleUseGunSAInterface : public CTaskSimpleSAInterface
@@ -92,7 +92,7 @@ public:
 	CVector2D m_vecMoveCommand;
 	
 	CEntity *m_pTargetEntity;
-    CVector m_vecCoords;
+    CVectorGTA m_vecCoords;
 
 	CAnimBlendAssociation *m_pAnim;
 	
@@ -111,11 +111,11 @@ class CTaskSimpleUseGunSA : public virtual CTaskSimpleSA, public virtual CTaskSi
 {
 public:
                 CTaskSimpleUseGunSA ( void ) {};
-	            CTaskSimpleUseGunSA ( CEntity *pTargetEntity, CVector vecTarget, char nCommand, short nBurstLength=1, unsigned char bAimImmediate=false );
+	            CTaskSimpleUseGunSA ( CEntity *pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength = 1, unsigned char bAimImmediate = false );
 
-    bool        ControlGun          ( CPed* pPed, CEntity *pTargetEntity, char nCommand );
-    bool        ControlGunMove      ( CVector2D * pMoveVec );
-    void        Reset               ( CPed *pPed, CEntity *pTargetEntity, CVector vecTarget, char nCommand, short nBurstLength=1 );
+    bool        ControlGun          ( CPed* pPed, CEntity* pTargetEntity, char nCommand );
+    bool        ControlGunMove      ( const CVector2D& pMoveVec );
+    void        Reset               ( CPed* pPed, CEntity* pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength = 1 );
 };
 
 class CTaskSimpleFightSAInterface : public CTaskSimpleSAInterface

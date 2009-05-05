@@ -30,7 +30,7 @@ public:
 	// The following parameter is used when Blip Type is CAR, CHAR or OBJECT
 	long PoolIndex;	
 	// The following parameter is used when Blip Type is COORDS	
-	CVector position;//vec2DBlip;
+	CVectorGTA position;//vec2DBlip;
 
 	WORD ReferenceIndex;
 
@@ -56,24 +56,27 @@ class CMarkerSA : public CMarker
 {
 public:
 	/* Our Functions */
-						CMarkerSA       ( CMarkerSAInterface * markerInterface ) { internalInterface = markerInterface; };
+						CMarkerSA( CMarkerSAInterface * markerInterface ) { internalInterface = markerInterface; };
 
-    void                Init            ( void );
+    void                Init( void );
 
-	void				SetSprite ( eMarkerSprite Sprite );
-	void				SetDisplay ( eMarkerDisplay wDisplay );
-	void				SetScale ( WORD wScale );
-	void				SetColor ( eMarkerColor color );
-	void				SetColor ( RGBA color );
-	void				Remove ( );
-	bool				IsActive (  );
-	void				SetPosition ( CVector * vecPosition );
-	void				SetEntity ( CVehicle * vehicle );
-	void				SetEntity ( CPed * ped );
-	void				SetEntity ( CObject * object );
-	CEntity				* GetEntity (  );
-	CVector			* GetPosition (  );
-	CMarkerSAInterface	* GetInterface (  ) { return internalInterface; };
+	void				SetSprite( eMarkerSprite Sprite );
+	void				SetDisplay( eMarkerDisplay wDisplay );
+	void				SetScale( WORD wScale );
+	void				SetColor( eMarkerColor color );
+	void				SetColor( RGBA color );
+	void				Remove( void );
+	bool				IsActive( void );
+
+	const CVector		GetPosition( void );
+	void				SetPosition( const CVector& vecPosition );
+
+	void				SetEntity( CVehicle * vehicle );
+	void				SetEntity( CPed * ped );
+	void				SetEntity( CObject * object );
+	CEntity*			GetEntity( void );
+	CMarkerSAInterface*	GetInterface( void )	{ return internalInterface; };
+
 private:
 	CMarkerSAInterface	* internalInterface;
 };

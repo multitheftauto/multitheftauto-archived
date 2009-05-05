@@ -24,22 +24,23 @@ public:
 class CFire
 {
 public:
-	virtual void					Extinguish (  )=0;
-	virtual CVector				    * GetPosition ( )=0;
-	virtual void					SetPosition ( CVector & vecPosition )=0;
-	virtual void					SetTimeToBurnOut ( DWORD dwTime )=0;
-	virtual DWORD					GetTimeToBurnOut (  )=0;
-	virtual CEntity					* GetCreator (  )=0;
-	virtual CEntity					* GetEntityOnFire (  )=0;
-	virtual void					SetTarget ( CEntity * entity )=0;
-	virtual bool					IsIgnited (  )=0;
-	virtual void					SetSilent ( bool bSilent )=0;
-	virtual bool					IsBeingExtinguished ()=0;
-	virtual void					Ignite( )=0;
-	virtual	FLOAT					GetStrength (  )=0;
-	virtual	void					SetStrength ( FLOAT fStrength )=0;
-    virtual	void                    SetNumGenerationsAllowed ( char generations )=0;
-    virtual CFireInterface*         GetInterface ( ) = 0;
+	virtual const CVector			GetPosition( void ) = 0;
+	virtual void					SetPosition( const CVector& vecPosition ) = 0;
+
+	virtual void					Extinguish( void ) = 0;
+	virtual void					SetTimeToBurnOut( DWORD dwTime ) = 0;
+	virtual DWORD					GetTimeToBurnOut( void ) = 0;
+	virtual CEntity*				GetCreator( void ) = 0;
+	virtual CEntity*				GetEntityOnFire( void ) = 0;
+	virtual void					SetTarget( CEntity * entity ) = 0;
+	virtual bool					IsIgnited( void ) = 0;
+	virtual void					SetSilent( bool bSilent ) = 0;
+	virtual bool					IsBeingExtinguished( void ) = 0;
+	virtual void					Ignite( void ) = 0;
+	virtual	FLOAT					GetStrength( void ) = 0;
+	virtual	void					SetStrength( FLOAT fStrength ) = 0;
+    virtual	void                    SetNumGenerationsAllowed( char generations ) = 0;
+    virtual CFireInterface*         GetInterface( void ) = 0;
 };
 
 #endif

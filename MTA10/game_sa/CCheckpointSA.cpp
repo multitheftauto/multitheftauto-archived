@@ -12,75 +12,64 @@
 
 #include "StdInc.h"
 
-void CCheckpointSA::SetPosition(CVector * vecPosition)
+void CCheckpointSA::SetPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("void CCheckpointSA::SetPosition(CVector * vecPosition)");
-	memcpy(&this->GetInterface()->m_pos, vecPosition, sizeof(CVector));
+	this->GetInterface()->m_pos = vecPosition;
 }
 
-CVector * CCheckpointSA::GetPosition()
+const CVector CCheckpointSA::GetPosition( void )
 {
-	DEBUG_TRACE("CVector * CCheckpointSA::GetPosition()");
-	return &this->GetInterface()->m_pos;
+	return CVectorGTA::unwrap( this->GetInterface()->m_pos );
 }
 
-void CCheckpointSA::SetPointDirection(CVector * vecPointDirection)
+void CCheckpointSA::SetPointDirection( const CVector& vecPointDirection )
 {
-	DEBUG_TRACE("void CCheckpointSA::SetPointDirection(CVector * vecPointDirection)");
-	memcpy(&this->GetInterface()->m_pointDir, vecPointDirection, sizeof(CVector));
+	this->GetInterface()->m_pointDir = vecPointDirection;
 }
 
-CVector * CCheckpointSA::GetPointDirection()
+const CVector CCheckpointSA::GetPointDirection( void )
 {
-	DEBUG_TRACE("CVector * CCheckpointSA::GetPointDirection()");
-	return &this->GetInterface()->m_pointDir;
+	return CVectorGTA::unwrap( this->GetInterface()->m_pointDir );
 }
 
-DWORD CCheckpointSA::GetType()
+DWORD CCheckpointSA::GetType( void )
 {
-	DEBUG_TRACE("DWORD CCheckpointSA::GetType()");
 	return this->GetInterface()->m_nType;
 }
 
-void CCheckpointSA::SetType(WORD wType)
+void CCheckpointSA::SetType( WORD wType )
 {
-	DEBUG_TRACE("void CCheckpointSA::SetType(DWORD dwType)");
 	this->GetInterface()->m_nType = wType;
 }
 
-bool CCheckpointSA::IsActive()
+bool CCheckpointSA::IsActive( void )
 {
-	DEBUG_TRACE("bool CCheckpointSA::IsActive()");
 	return (bool)this->GetInterface()->m_bIsUsed;
 }
 
-void CCheckpointSA::Activate()
+void CCheckpointSA::Activate( void )
 {
-	DEBUG_TRACE("void CCheckpointSA::Activate()");
 	this->GetInterface()->m_bIsUsed = true;
 }
 
-DWORD CCheckpointSA::GetIdentifier()
+DWORD CCheckpointSA::GetIdentifier( void )
 {
 	DEBUG_TRACE("DWORD CCheckpointSA::GetIdentifier()");
 	return this->GetInterface()->m_nIdentifier;
 }
 
-void CCheckpointSA::SetIdentifier(DWORD dwIdentifier)
+void CCheckpointSA::SetIdentifier( DWORD dwIdentifier )
 {
-	DEBUG_TRACE("void CCheckpointSA::SetIdentifier(DWORD dwIdentifier)");
 	this->GetInterface()->m_nIdentifier = dwIdentifier;
 }
 
-RGBA CCheckpointSA::GetColor()
+RGBA CCheckpointSA::GetColor( void )
 {
-	DEBUG_TRACE("RGBA CCheckpointSA::GetColor()");
 	return this->GetInterface()->rwColour;
 }
 
-void CCheckpointSA::SetColor(RGBA color)
+void CCheckpointSA::SetColor( RGBA color )
 {
-	DEBUG_TRACE("void CCheckpointSA::SetColor(RGBA color)");
 	this->GetInterface()->rwColour = color;
 }
 

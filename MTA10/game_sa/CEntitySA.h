@@ -76,14 +76,14 @@ public:
  */
 class CReferences
 {
-	CEntity		* pEntity;
+	CEntity*	pEntity;
 };
 
 class CSimpleTransformSAInterface
 {
 public:
-	CVector							m_translate;
-	FLOAT							m_heading;
+	CVectorGTA	m_translate;
+	float		m_heading;
 };
 
 class CPlaceableSAInterface
@@ -174,52 +174,51 @@ public:
 class CEntitySA : public virtual CEntity
 {
     friend COffsets;
-public:
-                                CEntitySA           ( void ) { m_pStoredPointer = NULL; m_ulArrayID = 0; };
 
+public:
 	CEntitySAInterface*         m_pInterface;
 
 	DWORD						internalID;
 //	void						SetModelAlpha ( int iAlpha );
 
-	inline CEntitySAInterface * GetInterface() { return m_pInterface; };
+								CEntitySA( void )		{ m_pStoredPointer = NULL; m_ulArrayID = 0; };
+
+	inline CEntitySAInterface*	GetInterface( void )	{ return m_pInterface; };
 	void						SetInterface( CEntitySAInterface * intInterface ) { m_pInterface = intInterface; };
 
-	void						SetPosition ( const CVector& vecPosition );
-	void						ProcessControl ( void );
-	void						SetupLighting ( );
-	void						Render ( );
-	void						SetOrientation ( float fX, float fY, float fZ );
-    void                        FixBoatOrientation ( void );        // eAi you might want to rename this
+	void						SetPosition( const CVector& vecPosition );
+	const CVector				GetPosition( void );
+	CMatrix4&					GetMatrix( CMatrix4& matrix );
+	void						SetMatrix( const CMatrix4& matrix );
 
-	void						SetUnderwater ( bool bUnderwater );
-	bool						GetUnderwater ( void );
+	void						ProcessControl( void );
+	void						SetupLighting( void );
+	void						Render( void );
+	void						SetOrientation( float fX, float fY, float fZ );
+    void                        FixBoatOrientation( void );
 
-	CVector&					GetPosition ( CVector& vector );
-	CMatrix4&					GetMatrix ( CMatrix4& matrix );
-	void						SetMatrix ( const CMatrix4& matrix );
-	WORD						GetModelIndex ();
-	eEntityType					GetEntityType ();
-	bool						IsOnScreen ();
+	void						SetUnderwater( bool bUnderwater );
+	bool						GetUnderwater( void );
 
-    bool                        IsVisible ( void );
-    void                        SetVisible ( bool bVisible );
+	WORD						GetModelIndex( void );
+	eEntityType					GetEntityType( void );
+	bool						IsOnScreen( void );
 
-    BYTE                        GetAreaCode ( void );
-    void                        SetAreaCode ( BYTE areaCode );
+    bool                        IsVisible( void );
+    void                        SetVisible( bool bVisible );
 
-	FLOAT						GetDistanceFromCentreOfMassToBaseOfModel();
-	/**
-	 * \todo Find enum for SetEntityStatus
-	 */
-	void						SetEntityStatus( eEntityStatus bStatus );
-	eEntityStatus				GetEntityStatus( );
+    BYTE                        GetAreaCode( void );
+    void                        SetAreaCode( BYTE areaCode );
 
-    RwFrame *                   GetFrameFromId ( int id );
-    RwMatrix *                  GetLTMFromId ( int id );
+	FLOAT						GetDistanceFromCentreOfMassToBaseOfModel( void );
 
-	RpClump *					GetRpClump ();
+	void						SetEntityStatus( eEntityStatus bStatus );	// TODO: use enum
+	eEntityStatus				GetEntityStatus( void );
 
+    RwFrame *                   GetFrameFromId( int id );
+    RwMatrix *                  GetLTMFromId( int id );
+
+	RpClump *					GetRpClump( void );
 
 	bool						BeingDeleted; // to prevent it trying to delete twice
 	bool						DoNotRemoveFromGame; // when deleted, if this is true, it won't be removed from the game

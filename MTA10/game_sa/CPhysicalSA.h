@@ -32,12 +32,12 @@ class CPhysicalSAInterface : public CEntitySAInterface // begin +68 (244 bytes t
 {
 public:
 /* IMPORTANT: KEEP "pad" in CVehicle UP-TO-DATE if you add something here (or eventually pad someplace else) */
-	CVector * vecVelocity;
-	CVector * vecSpin;
-	CVector * vecUnk3;
-	CVector * vecUnk4;
-	CVector * vecUnk5;
-	CVector * vecUnk6;
+	CVectorGTA * vecVelocity;
+	CVectorGTA * vecSpin;
+	CVectorGTA * vecUnk3;
+	CVectorGTA * vecUnk4;
+	CVectorGTA * vecUnk5;
+	CVectorGTA * vecUnk6;
     float pad [12];
 	float fMass;
     float fTurnMass;
@@ -47,7 +47,7 @@ public:
 
     float fElasticity; // 156
     float fBuoyancyConstant; // 160
-    CVector * vecCenterOfMass; // 164
+    CVectorGTA * vecCenterOfMass; // 164
 
     DWORD dwUnk2; // 176
     DWORD * unkCPtrNodeDoubleLink; // 180
@@ -65,66 +65,43 @@ public:
 
     BYTE pad2[28];
 	CEntitySAInterface * pAttachedEntity;   // 252
-    CVector vecAttachedPosition;    // 256
-    CVector vecAttachedRotation;    // 268
+    CVectorGTA vecAttachedPosition;    // 256
+    CVectorGTA vecAttachedRotation;    // 268
     BYTE pad3[32];
 };
 
 class CPhysicalSA : public virtual CPhysical, public virtual CEntitySA
 {
 public:
-	CVector	*   GetMoveSpeed                ( CVector * vecMoveSpeed );
-	CVector	*   GetTurnSpeed                ( CVector * vecTurnSpeed );
-	void		SetMoveSpeed                ( CVector * vecMoveSpeed );
-	void		SetTurnSpeed                ( CVector * vecTurnSpeed );
+	const CVector	GetMoveSpeed( void );
+	const CVector	GetTurnSpeed( void );
+	void			SetMoveSpeed( const CVector& vecMoveSpeed );
+	void			SetTurnSpeed( const CVector& vecTurnSpeed );
 
-    float       GetMass                     ( void );
-    void        SetMass                     ( float fMass );
-    float       GetTurnMass                 ( void );
-    void        SetTurnMass                 ( float fTurnMass );
-    float       GetElasticity               ( void );
-    void        SetElasticity               ( float fElasticity );
-    float       GetBuoyancyConstant         ( void );
-    void        SetBuoyancyConstant         ( float fBuoyancyConstant );
+    float			GetMass( void );
+    void			SetMass( float fMass );
+    float			GetTurnMass( void );
+    void			SetTurnMass( float fTurnMass );
+    float			GetElasticity( void );
+    void			SetElasticity( float fElasticity );
+    float			GetBuoyancyConstant( void );
+    void			SetBuoyancyConstant( float fBuoyancyConstant );
 
-	void		ProcessCollision            ( void );
+	void			ProcessCollision( void );
 
-    float       GetDamageImpulseMagnitude   ( void );
-    void        SetDamageImpulseMagnitude   ( float fMagnitude );
-    CEntity*    GetDamageEntity             ( void );
-    void        SetDamageEntity             ( CEntity* pEntity );
-    void        ResetLastDamage             ( void );
+    float			GetDamageImpulseMagnitude( void );
+    void			SetDamageImpulseMagnitude( float fMagnitude );
+    CEntity*		GetDamageEntity( void );
+    void			SetDamageEntity( CEntity* pEntity );
+    void			ResetLastDamage( void );
 
-    CEntity *   GetAttachedEntity           ( void );
-    void        AttachEntityToEntity        ( CPhysical& Entity, const CVector& vecPosition, const CVector& vecRotation );
-    void        DetachEntityFromEntity      ( float fUnkX, float fUnkY, float fUnkZ, bool bUnk );
-    void        GetAttachedOffsets          ( CVector & vecPosition, CVector & vecRotation );
-    void        SetAttachedOffsets          ( CVector & vecPosition, CVector & vecRotation );
+    CEntity*		GetAttachedEntity( void );
+    void			AttachEntityToEntity( CPhysical& Entity, const CVector& vecPosition, const CVector& vecRotation );
+    void			DetachEntityFromEntity( float fUnkX, float fUnkY, float fUnkZ, bool bUnk );
+    void			GetAttachedOffsets( const CVector& vecPosition, const CVector& vecRotation );
+    void			SetAttachedOffsets( const CVector& vecPosition, const CVector& vecRotation );
 
-    virtual bool InternalAttachEntityToEntity ( DWORD dwEntityInterface, const CVector * vecPosition, const CVector * vecRotation );
-
-	
-    /*
-	void		SetMassMultiplier(FLOAT fMassMultiplier);
-	FLOAT		GetMassMultiplier();
-	void		SetAirResistance(FLOAT fAirResistance);
-	FLOAT		GetAirResistance();
-	void		SetCenterOfMass(CVector * vecCenterOfMass);
-	CVector	* GetCenterOfMass();
-
-	bool		GetExtraHeavy();
-	void		SetExtraHeavy(bool bExtraHeavy);
-	bool		GetDoGravity();
-	void		SetDoGravity(bool bDoGravity);
-	bool		GetInfiniteMass();
-	void		SetInfiniteMass(bool bInfiniteMass);
-	bool		GetPositionFrozen();
-	void		SetPositionFrozen(bool bPositionFrozen);
-	BYTE		GetLastMaterialToHaveBeenStandingOn();
-
-	BYTE		GetLevel();
-	void		SetLevel(BYTE LivesInThisLevel);*/
-
+    virtual bool	InternalAttachEntityToEntity( DWORD dwEntityInterface, const CVector& vecPosition, const CVector& vecRotation );
 };
 
 #endif

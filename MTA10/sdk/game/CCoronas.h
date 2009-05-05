@@ -24,10 +24,10 @@
 class CCoronas
 {
 public:
-	virtual CRegisteredCorona		* GetCorona(DWORD ID)=0;
-	virtual CRegisteredCorona		* CreateCorona(DWORD Identifier, CVector * position)=0;
-	virtual CRegisteredCorona		* FindFreeCorona()=0;
-	virtual CRegisteredCorona		* FindCorona(DWORD Identifier)=0;
-    virtual void                    DisableSunAndMoon ( bool bDisabled )=0;
+	virtual CRegisteredCorona*	GetCorona( DWORD ID ) = 0;
+	virtual CRegisteredCorona*	CreateCorona( DWORD Identifier, const CVector& vecPosition ) = 0;
+	virtual CRegisteredCorona*	FindFreeCorona( void ) = 0;
+	virtual CRegisteredCorona*	FindCorona( DWORD Identifier ) = 0;
+    virtual void				DisableSunAndMoon( bool bDisabled ) = 0;
 };
 #endif

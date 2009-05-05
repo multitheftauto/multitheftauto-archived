@@ -27,15 +27,15 @@ class CCheckpointSA;
 
 class CCheckpointsSA : public CCheckpoints
 {
-private:
 	CCheckpointSA		* Checkpoints[MAX_CHECKPOINTS];
+
 public:	
 	// constructor
-	CCheckpointsSA();
-    ~CCheckpointsSA ( void );
+						CCheckpointsSA( void );
+						~CCheckpointsSA ( void );
 
-	CCheckpoint			* CreateCheckpoint(DWORD Identifier, WORD wType, CVector * vecPosition, CVector * vecPointDir, FLOAT fSize, FLOAT fPulseFraction, RGBA Color);
-	CCheckpoint			* FindFreeMarker();
+	CCheckpoint*		CreateCheckpoint( DWORD Identifier, WORD wType, const CVector& vecPosition, const CVector& vecPointDir, FLOAT fSize, FLOAT fPulseFraction, RGBA Color );
+	CCheckpoint*		FindFreeMarker( void );
 };
 
 #endif

@@ -26,20 +26,23 @@
 class CMarker
 {
 public:
-	/* Our Functions */
-	virtual void				SetSprite ( eMarkerSprite Sprite )=0;
-	virtual void				SetDisplay ( eMarkerDisplay wDisplay )=0;
-	virtual void				SetScale ( WORD wScale )=0;
-	virtual void				SetColor ( eMarkerColor color )=0;
-	virtual void				SetColor ( RGBA color )=0;
-	virtual void				Remove ( )=0;
-	virtual bool				IsActive (  )=0;
-	virtual void				SetPosition ( CVector * vecPosition )=0;
-	virtual void				SetEntity ( CVehicle * vehicle )=0;
-	virtual void				SetEntity ( CPed * ped )=0;
-	virtual void				SetEntity ( CObject * object )=0;
-	virtual CEntity				* GetEntity (  )=0;
-	virtual CVector			* GetPosition (  )=0;
+	virtual void			SetSprite( eMarkerSprite Sprite ) = 0;
+	virtual void			SetDisplay( eMarkerDisplay wDisplay ) = 0;
+	virtual void			SetScale( WORD wScale ) = 0;
+
+	virtual void			SetColor( eMarkerColor color ) = 0;
+	virtual void			SetColor( RGBA color ) = 0;
+
+	virtual void			Remove( void ) = 0;
+	virtual bool			IsActive( void ) = 0;
+
+	virtual void			SetPosition( CVector* vecPosition ) = 0;
+	virtual const CVector	GetPosition( void ) = 0;
+
+	virtual void			SetEntity( CVehicle* vehicle ) = 0;
+	virtual void			SetEntity( CPed* ped ) = 0;
+	virtual void			SetEntity( CObject* object ) = 0;
+	virtual CEntity*		GetEntity( void ) = 0;
 };
 
 #endif

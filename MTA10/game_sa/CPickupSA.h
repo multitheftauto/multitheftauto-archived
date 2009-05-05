@@ -46,38 +46,37 @@ public:
 
 class CPickupSA : public CPickup
 {
-private:
-	CPickupSAInterface	* internalInterface;
-	CObjectSA			* object;
+	CPickupSAInterface*	internalInterface;
+	CObjectSA*			object;
 	CBPickup			callback; // function to call when the pickup is picked up [not used yet/ever]
 public:
 	// constructor	
-						CPickupSA(CPickupSAInterface * pickupInterface);
-	CPickupSAInterface	* GetInterface() { return internalInterface; }; // not to be exported
-    CObject             * GetObject() { return object; };
+						CPickupSA( CPickupSAInterface * pickupInterface );
+	CPickupSAInterface*	GetInterface( void ) { return internalInterface; }; // not to be exported
+    CObject*			GetObject( void ) { return object; };
 
-	void				SetPosition (CVector * vecPosition);
-	CVector			    * GetPosition (CVector * vecPosition);
+	void				SetPosition( const CVector& vecPosition );
+	const CVector		GetPosition( void );
 	
-	ePickupType			GetType();
-	void				SetType(ePickupType type);
-	FLOAT				GetCurrentValue();
-	void				SetCurrentValue(FLOAT fCurrentValue);
-	void				SetRegenerationTime(DWORD dwTime);
-	void				SetMoneyPerDay(WORD wMoneyPerDay);
-	WORD				GetMoneyPerDay();
-	WORD				GetModel();
-	void				SetModel(WORD wModelIndex); // do not export
-	ePickupState		GetState();
-	void				SetState(ePickupState bState);
-	BYTE				GetAmmo();
-	void				SetAmmo(BYTE bAmmo);
-	long				GetMonetaryValue();
-	void				SetMonetaryValue(long lMonetaryValue);
-	BYTE				IsNearby();
-	void				GiveUsAPickUpObject(int ForcedObjectIndex=-1);
-	void				GetRidOfObjects();
-    void                Remove();
+	ePickupType			GetType( void );
+	void				SetType( ePickupType type );
+	FLOAT				GetCurrentValue( void );
+	void				SetCurrentValue( FLOAT fCurrentValue );
+	void				SetRegenerationTime( DWORD dwTime );
+	WORD				GetMoneyPerDay( void );
+	void				SetMoneyPerDay( WORD wMoneyPerDay );
+	WORD				GetModel( void );
+	void				SetModel( WORD wModelIndex ); // do not export
+	ePickupState		GetState( void );
+	void				SetState( ePickupState bState );
+	BYTE				GetAmmo( void );
+	void				SetAmmo( BYTE bAmmo );
+	long				GetMonetaryValue( void );
+	void				SetMonetaryValue( long lMonetaryValue );
+	BYTE				IsNearby( void );
+	void				GiveUsAPickUpObject( int ForcedObjectIndex = -1 );
+	void				GetRidOfObjects( void );
+    void                Remove( void );
 };
 
 #endif

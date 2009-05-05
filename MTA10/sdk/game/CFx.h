@@ -20,20 +20,20 @@ class CVehicle;
 class CFx
 {
 public:
-    virtual void                AddBlood                ( CVector & vecPosition, CVector & vecDirection, int iCount, float fBrightness ) = 0;
-    virtual void                AddWood                 ( CVector & vecPosition, CVector & vecDirection, int iCount, float fBrightness ) = 0;
-    virtual void                AddSparks               ( CVector & vecPosition, CVector & vecDirection, float fForce, int iCount, CVector vecAcrossLine, unsigned char ucBlurIf0, float fSpread, float fLife ) = 0;
-    virtual void                AddTyreBurst            ( CVector & vecPosition, CVector & vecDirection ) = 0;
-    virtual void                AddBulletImpact         ( CVector & vecPosition, CVector & vecDirection, int iSmokeSize, int iSparkCount, float fSmokeIntensity ) = 0;
-    virtual void                AddPunchImpact          ( CVector & vecPosition, CVector & vecDirection, int i ) = 0;
-    virtual void                AddDebris               ( CVector & vecPosition, RwColor & rwColor, float fScale, int iCount ) = 0;
-    virtual void                AddGlass                ( CVector & vecPosition, RwColor & rwColor, float fScale, int iCount ) = 0;
-    virtual void                TriggerWaterHydrant     ( CVector & vecPosition ) = 0;
-    virtual void                TriggerGunshot          ( CEntity * pEntity, CVector & vecPosition, CVector & vecDirection, bool bIncludeSparks ) = 0;
-    virtual void                TriggerTankFire         ( CVector & vecPosition, CVector & vecDirection ) = 0;
-    virtual void                TriggerWaterSplash      ( CVector & vecPosition ) = 0;
-    virtual void                TriggerBulletSplash     ( CVector & vecPosition ) = 0;
-    virtual void                TriggerFootSplash       ( CVector & vecPosition ) = 0;
+    virtual void                AddBlood                ( const CVector& vecPosition, const CVector& vecDirection, int iCount, float fBrightness ) = 0;
+    virtual void                AddWood                 ( const CVector& vecPosition, const CVector& vecDirection, int iCount, float fBrightness ) = 0;
+    virtual void                AddSparks               ( const CVector& vecPosition, const CVector& vecDirection, float fForce, int iCount, CVector vecAcrossLine, unsigned char ucBlurIf0, float fSpread, float fLife ) = 0;
+    virtual void                AddTyreBurst            ( const CVector& vecPosition, const CVector& vecDirection ) = 0;
+    virtual void                AddBulletImpact         ( const CVector& vecPosition, const CVector& vecDirection, int iSmokeSize, int iSparkCount, float fSmokeIntensity ) = 0;
+    virtual void                AddPunchImpact          ( const CVector& vecPosition, const CVector& vecDirection, int i ) = 0;
+    virtual void                AddDebris               ( const CVector& vecPosition, const RwColor& rwColor, float fScale, int iCount ) = 0;
+    virtual void                AddGlass                ( const CVector& vecPosition, const RwColor& rwColor, float fScale, int iCount ) = 0;
+    virtual void                TriggerWaterHydrant     ( const CVector& vecPosition ) = 0;
+    virtual void                TriggerGunshot          ( CEntity * pEntity, const CVector& vecPosition, const CVector& vecDirection, bool bIncludeSparks ) = 0;
+    virtual void                TriggerTankFire         ( const CVector& vecPosition, const CVector& vecDirection ) = 0;
+    virtual void                TriggerWaterSplash      ( const CVector& vecPosition ) = 0;
+    virtual void                TriggerBulletSplash     ( const CVector& vecPosition ) = 0;
+    virtual void                TriggerFootSplash       ( const CVector& vecPosition ) = 0;
 };
 
 #endif

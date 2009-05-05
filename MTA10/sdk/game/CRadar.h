@@ -24,19 +24,19 @@
 class CRadar
 {
 public:
-	virtual CMarker				* CreateMarker(CVector * vecPosition)=0;
-	virtual CMarker				* CreateMarker(CVehicle * vehicle)=0;
-	virtual CMarker				* CreateMarker(CObject * object)=0;
-	virtual CMarker				* CreateMarker(CPed * ped)=0;
+	virtual CMarker*	CreateMarker( const CVector& vecPosition ) = 0;
+	virtual CMarker*	CreateMarker( CVehicle * vehicle ) = 0;
+	virtual CMarker*	CreateMarker( CObject * object ) = 0;
+	virtual CMarker*	CreateMarker( CPed * ped ) = 0;
 
-	virtual CMarker				* GetFreeMarker(  )=0;
-	virtual CMarker				* GetMarker( DWORD dwMarkerID )=0;
+	virtual CMarker*	GetFreeMarker( void ) = 0;
+	virtual CMarker*	GetMarker( DWORD dwMarkerID ) = 0;
 
-	virtual void				ClearMarkerForEntity(CVehicle * vehicle)=0;
-	virtual void				ClearMarkerForEntity(CObject * object)=0;
-	virtual void				ClearMarkerForEntity(CPed * ped)=0;
+	virtual void		ClearMarkerForEntity( CVehicle * vehicle ) = 0;
+	virtual void		ClearMarkerForEntity( CObject * object ) = 0;
+	virtual void		ClearMarkerForEntity( CPed * ped ) = 0;
 
-    virtual void                DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD bgra )=0;
+    virtual void		DrawAreaOnRadar( float fX1, float fY1, float fX2, float fY2, DWORD bgra ) = 0;
 };
 
 #endif

@@ -25,19 +25,19 @@
 
 class CCoronasSA : public CCoronas
 {
-private:
 	CRegisteredCoronaSA		* Coronas[MAX_CORONAS];
+
 public:
-							CCoronasSA();
-                            ~CCoronasSA ();
+							CCoronasSA( void );
+                            ~CCoronasSA( void );
 
-	CRegisteredCorona		* GetCorona(DWORD ID);
-	CRegisteredCorona		* CreateCorona(DWORD Identifier, CVector * position);
-	CRegisteredCorona		* FindFreeCorona();
-	CRegisteredCorona		* FindCorona(DWORD Identifier);
-	RwTexture				* GetTexture(eCoronaType type);
+	CRegisteredCorona*		GetCorona( DWORD ID );
+	CRegisteredCorona*		CreateCorona( DWORD Identifier, const CVector& position );
+	CRegisteredCorona*		FindFreeCorona( void );
+	CRegisteredCorona*		FindCorona( DWORD Identifier );
+	RwTexture*				GetTexture( eCoronaType type );
 
-    void                    DisableSunAndMoon ( bool bDisabled );
+    void                    DisableSunAndMoon( bool bDisabled );
 };
 
 #endif

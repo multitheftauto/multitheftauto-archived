@@ -53,64 +53,64 @@ enum eVehicleUpgradePosn
 class CModelInfo
 {
 public:
-    virtual class CBaseModelInfoSAInterface *     GetInterface            ( void ) = 0;
+    virtual class CBaseModelInfoSAInterface* GetInterface( void ) = 0;
 
-	virtual bool			IsBoat                  () = 0;
-	virtual bool			IsCar                   () = 0;
-	virtual bool			IsTrain                 () = 0;
-	virtual bool			IsHeli                  () = 0;
-	virtual bool			IsPlane                 () = 0;
-	virtual bool			IsBike                  () = 0;
-	virtual bool			IsFakePlane             () = 0;
-	virtual bool			IsMonsterTruck          () = 0;
-	virtual bool			IsQuadBike              () = 0;
-	virtual bool			IsBmx                   () = 0;
-	virtual bool			IsTrailer               () = 0;
-	virtual bool			IsVehicle               () = 0;
+	virtual bool			IsBoat( void ) = 0;
+	virtual bool			IsCar( void ) = 0;
+	virtual bool			IsTrain( void ) = 0;
+	virtual bool			IsHeli( void ) = 0;
+	virtual bool			IsPlane( void ) = 0;
+	virtual bool			IsBike( void ) = 0;
+	virtual bool			IsFakePlane( void ) = 0;
+	virtual bool			IsMonsterTruck( void ) = 0;
+	virtual bool			IsQuadBike( void ) = 0;
+	virtual bool			IsBmx( void ) = 0;
+	virtual bool			IsTrailer( void ) = 0;
+	virtual bool			IsVehicle( void ) = 0;
 
-	virtual char			* GetNameIfVehicle      () = 0;
+	virtual char*			GetNameIfVehicle( void ) = 0;
 
-	virtual void			Request                 ( bool bAndLoad = false, bool bWaitForLoad = false ) = 0;
-	virtual void			Remove                  () = 0;
-	virtual void			LoadAllRequestedModels  () = 0;
-	virtual BYTE			GetLevelFromPosition    ( CVector * vecPosition ) = 0;
-	virtual bool			IsLoaded                () = 0;
-	virtual BYTE			GetFlags                () = 0;
-	virtual CBoundingBox	* GetBoundingBox        () = 0;
-	virtual bool			IsValid                 () = 0;
-    virtual unsigned short  GetTextureDictionaryID  () = 0;
-    virtual void            RestreamIPL             () = 0;
+	virtual void			Request( bool bAndLoad = false, bool bWaitForLoad = false ) = 0;
+	virtual void			Remove( void ) = 0;
+	virtual void			LoadAllRequestedModels( void ) = 0;
+	virtual BYTE			GetLevelFromPosition( const CVector& vecPosition ) = 0;
+	virtual bool			IsLoaded( void ) = 0;
+	virtual BYTE			GetFlags( void ) = 0;
+	virtual CBoundingBox*	GetBoundingBox( void ) = 0;
+	virtual bool			IsValid( void ) = 0;
+    virtual unsigned short  GetTextureDictionaryID( void ) = 0;
+    virtual void            RestreamIPL( void ) = 0;
 
-	virtual void			AddRef                  ( bool bWaitForLoad ) = 0;
-	virtual void			RemoveRef               () = 0;
-    virtual int             GetRefCount             () = 0;
+	virtual void			AddRef( bool bWaitForLoad ) = 0;
+	virtual void			RemoveRef( void ) = 0;
+    virtual int             GetRefCount( void ) = 0;
 
-	virtual float			GetDistanceFromCentreOfMassToBaseOfModel () = 0;
+	virtual float			GetDistanceFromCentreOfMassToBaseOfModel( void ) = 0;
 
     // ONLY use for CVehicleModelInfos
-    virtual short           GetAvailableVehicleMod  ( unsigned short usSlot ) = 0;
-    virtual bool            IsUpgradeAvailable      ( eVehicleUpgradePosn posn ) = 0;
-    virtual void            SetCustomCarPlateText   ( const char * szText ) = 0;
-    virtual unsigned int    GetNumRemaps            ( void ) = 0;
+    virtual short           GetAvailableVehicleMod( unsigned short usSlot ) = 0;
+    virtual bool            IsUpgradeAvailable( eVehicleUpgradePosn posn ) = 0;
+    virtual void            SetCustomCarPlateText( const char * szText ) = 0;
+    virtual unsigned int    GetNumRemaps( void ) = 0;
 
     // ONLY use for upgrade models
-    virtual void            RequestVehicleUpgrade   ( void ) = 0;
+    virtual void            RequestVehicleUpgrade( void ) = 0;
 
     // ONLY use for peds
-    virtual void            GetVoice                ( short* psVoiceType, short* psVoice ) = 0;
-    virtual void            GetVoice                ( const char** pszVoiceType, const char** szVoice ) = 0;
-    virtual void            SetVoice                ( short sVoiceType, short sVoice ) = 0;
-    virtual void            SetVoice                ( const char* szVoiceType, const char* szVoice ) = 0;
+    virtual void            GetVoice( short* psVoiceType, short* psVoice ) = 0;
+    virtual void            GetVoice( const char** pszVoiceType, const char** szVoice ) = 0;
+    virtual void            SetVoice( short sVoiceType, short sVoice ) = 0;
+    virtual void            SetVoice( const char* szVoiceType, const char* szVoice ) = 0;
 
 	// Custom collision related functions
-	virtual void			SetCustomModel          ( RpClump* pClump ) = 0;
-	virtual void			RestoreOriginalModel    ( void ) = 0;
-	virtual void			SetColModel	            ( CColModel* pColModel ) = 0;
-	virtual void			RestoreColModel	        ( void ) = 0;
+	virtual void			SetCustomModel( RpClump* pClump ) = 0;
+	virtual void			RestoreOriginalModel( void ) = 0;
+	virtual void			SetColModel( CColModel* pColModel ) = 0;
+	virtual void			RestoreColModel( void ) = 0;
 
     // Call this to make sure the custom vehicle models are being used after a load.
-    virtual void            MakeCustomModel         ( void ) = 0;
-    virtual RwObject*       GetRwObject             ( void ) = 0;
+    virtual void            MakeCustomModel( void ) = 0;
+    virtual RwObject*       GetRwObject( void ) = 0;
 };
 
 #endif

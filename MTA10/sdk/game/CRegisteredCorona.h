@@ -21,22 +21,29 @@
 class CRegisteredCorona
 {
 public:
-	virtual CVector		* GetPosition()=0;
-	virtual void			SetPosition(CVector * vector)=0;
-	virtual FLOAT			GetSize()=0;
-	virtual void			SetSize(FLOAT fSize)=0;
-	virtual FLOAT			GetRange()=0;
-	virtual void			SetRange(FLOAT fRange)=0;
-	virtual FLOAT			GetPullTowardsCamera()=0;
-	virtual void			SetPullTowardsCamera(FLOAT fPullTowardsCamera)=0;
-	virtual void			SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)=0;
-	virtual void			SetTexture(RwTexture * texture)=0;
-	virtual void			SetTexture(eCoronaType texture)=0;
-	virtual BYTE			GetFlareType()=0;
-	virtual void			SetFlareType(BYTE fFlareType)=0;
-	virtual DWORD			GetIdentifier()=0;
-	virtual DWORD			GetID()=0;
-	virtual void			Refresh()=0;
-	virtual void			Disable()=0;
+	virtual const CVector	GetPosition( void ) = 0;
+	virtual void			SetPosition( const CVector& vector ) = 0;
+
+	virtual FLOAT			GetSize( void ) = 0;
+	virtual void			SetSize( FLOAT fSize ) = 0;
+
+	virtual FLOAT			GetRange( void ) = 0;
+	virtual void			SetRange( FLOAT fRange ) = 0;
+
+	virtual FLOAT			GetPullTowardsCamera( void ) = 0;
+	virtual void			SetPullTowardsCamera( FLOAT fPullTowardsCamera ) = 0;
+
+	virtual void			SetColor( BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha ) = 0;
+	virtual void			SetTexture( RwTexture * texture ) = 0;
+	virtual void			SetTexture( eCoronaType texture ) = 0;
+
+	virtual BYTE			GetFlareType( void ) = 0;
+	virtual void			SetFlareType( BYTE fFlareType ) = 0;
+
+	virtual DWORD			GetIdentifier( void ) = 0;
+	virtual DWORD			GetID( void ) = 0;
+
+	virtual void			Refresh( void ) = 0;
+	virtual void			Disable( void ) = 0;
 };
 #endif

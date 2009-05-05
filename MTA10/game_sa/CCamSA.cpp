@@ -14,40 +14,33 @@
 
 #include "StdInc.h"
 
-CVector * CCamSA::GetFront()
+const CVector CCamSA::GetFront( void )
 {
-	DEBUG_TRACE("CVector * CCamSA::GetFront()");
-	return &this->GetInterface()->Front;
+	return CVectorGTA::unwrap( this->GetInterface()->Front );
 }
 
-CVector * CCamSA::GetUp()
+const CVector CCamSA::GetUp( void )
 {
-	DEBUG_TRACE("CVector * CCamSA::GetUp()");
-	return &this->GetInterface()->Up;
+	return CVectorGTA::unwrap( this->GetInterface()->Up );
 }
 
-CVector * CCamSA::GetSource()
+const CVector CCamSA::GetSource( void )
 {
-	DEBUG_TRACE("CVector * CCamSA::GetSource()");
+	return CVectorGTA::unwrap( this->GetInterface()->Source );
+}
+
+const CVector CCamSA::GetFixedModeSource( void )
+{
 	CCamSAInterface * pCamInterface = this->GetInterface();
-	return &pCamInterface->Source;
+	return CVectorGTA::unwrap( pCamInterface->m_cvecCamFixedModeSource );
 }
 
-CVector	* CCamSA::GetFixedModeSource()
+const CVector CCamSA::GetFixedModeVector( void )
 {
-	DEBUG_TRACE("CVector * CCamSA::GetFixedModeSource()");
-	CCamSAInterface * pCamInterface = this->GetInterface();
-	return &pCamInterface->m_cvecCamFixedModeSource;
+	return CVectorGTA::unwrap( this->GetInterface()->m_cvecCamFixedModeVector );
 }
 
-CVector	* CCamSA::GetFixedModeVector()
-{
-	DEBUG_TRACE("CVector * CCamSA::GetFixedModeVector()");
-	return &this->GetInterface()->m_cvecCamFixedModeVector;
-}
-
-
-CEntity * CCamSA::GetTargetEntity ( void )
+CEntity* CCamSA::GetTargetEntity( void )
 {
     CEntitySAInterface * pInterface = this->internalInterface->CamTargetEntity;
     CPoolsSA * pPools = ((CPoolsSA *)pGame->GetPools());

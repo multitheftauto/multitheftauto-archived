@@ -57,8 +57,7 @@ CEntity * CEventSA::GetCommittedBy (  )
 	return internalInterface->m_pCommitedBy;
 }
 
-CVector * CEventSA::GetPosition (  )
+const CVector CEventSA::GetPosition( void )
 {
-	DEBUG_TRACE("CVector * CEventSA::GetPosition (  )");
-	return &internalInterface->m_vecEventPosition;
+	return CVectorGTA::unwrap( internalInterface->m_vecEventPosition );
 }

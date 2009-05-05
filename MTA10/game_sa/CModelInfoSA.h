@@ -256,7 +256,7 @@ public:
 	void			                Request                 ( bool bAndLoad = false, bool bWaitForLoad = false );
 	void			                Remove                  ( void );
 	void			                LoadAllRequestedModels  ( void );
-	BYTE			                GetLevelFromPosition    ( CVector * vecPosition );
+	BYTE			                GetLevelFromPosition    ( const CVector& vecPosition );
 	bool			                IsLoaded                ( void );
 	BYTE			                GetFlags                ( void );
 	CBoundingBox *                  GetBoundingBox          ( void );

@@ -190,13 +190,15 @@ void CEntitySA::FixBoatOrientation ( void )
 	pGame->GetWorld()->Add ( this );
 }
 
-CVector& CEntitySA::GetPosition( CVector& position )
+const CVector CEntitySA::GetPosition( void )
 {
-	DEBUG_TRACE("CVector& CEntitySA::GetPosition( CVector& vector )");
+	CVector position;
+
     if ( m_pInterface->Placeable.matrix )
 	    position = m_pInterface->Placeable.matrix->getTranslation();
     else
-        position = m_pInterface->Placeable.m_transform.m_translate;
+		position = CVectorGTA::unwrap( m_pInterface->Placeable.m_transform.m_translate );
+
 	return position;
 }
 

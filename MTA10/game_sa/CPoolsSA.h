@@ -27,91 +27,93 @@
 class CEntryInfoNodePoolSA : public CEntryInfoNodePool
 {
 public:
-    int             GetNumberOfUsedSpaces       ( );
+    int             GetNumberOfUsedSpaces( void );
 };
 
 class CPointerNodeDoubleLinkPoolSA : public CPointerNodeDoubleLinkPool
 {
 public:
-    int             GetNumberOfUsedSpaces       ( );
+    int             GetNumberOfUsedSpaces( void );
 };
 
 class CPointerNodeSingleLinkPoolSA : public CPointerNodeSingleLinkPool
 {
 public:
-    int             GetNumberOfUsedSpaces       ( );
+    int             GetNumberOfUsedSpaces( void );
 };
 
 class CPoolsSA : public CPools
 {
-public:
-                            CPoolsSA            ( );
-                            ~CPoolsSA           ( );
+    bool                    AddVehicleToPool( CVehicleSA* pVehicle );
+    bool                    AddObjectToPool( CObjectSA* pObject );
+    bool                    AddPedToPool( CPedSA* pPed );
 
+public:
+                            CPoolsSA( void );
+                            ~CPoolsSA( void );
     
     // Vehicles pool
-    CVehicle*               AddVehicle          ( eVehicleTypes eVehicleType );
-    CVehicle*               AddVehicle          ( DWORD* pGameInterface );
-private:
-    bool                    AddVehicleToPool    ( CVehicleSA* pVehicle );
-public:
-    void                    RemoveVehicle       ( CVehicle* pVehicle, bool bDelete = true );
-    void                    RemoveVehicle       ( unsigned long ulID, bool bDelete = true );
-    CVehicle*               GetVehicle          ( unsigned long ulID );
-    CVehicle*               GetVehicle          ( DWORD* pGameInterface );
-    DWORD                   GetVehicleRef       ( CVehicle* pVehicle );
-    DWORD                   GetVehicleRef       ( DWORD* pGameInterface );
-    CVehicle*               GetVehicleFromRef   ( DWORD dwGameRef );
-    inline unsigned long    GetVehicleCount     ( ) { return m_vehiclePool.ulCount;; }
-    void                    DeleteAllVehicles   ( );
+    CVehicle*               AddVehicle( eVehicleTypes eVehicleType );
+    CVehicle*               AddVehicle( DWORD* pGameInterface );
+
+	void                    RemoveVehicle( CVehicle* pVehicle, bool bDelete = true );
+    void                    RemoveVehicle( unsigned long ulID, bool bDelete = true );
+
+    CVehicle*               GetVehicle( unsigned long ulID );
+    CVehicle*               GetVehicle( DWORD* pGameInterface );
+    DWORD                   GetVehicleRef( CVehicle* pVehicle );
+    DWORD                   GetVehicleRef( DWORD* pGameInterface );
+    CVehicle*               GetVehicleFromRef( DWORD dwGameRef );
+    inline unsigned long    GetVehicleCount( void ) { return m_vehiclePool.ulCount;; }
+
+    void                    DeleteAllVehicles( void );
 
     // Objects pool
-    CObject*                AddObject           ( DWORD dwModelID );
-    CObject*                AddObject           ( DWORD* pGameInterface );
-private:
-    bool                    AddObjectToPool     ( CObjectSA* pObject );
-public:
-    void                    RemoveObject        ( CObject* pObject, bool bDelete = true );
-    void                    RemoveObject        ( unsigned long ulID, bool bDelete = true );
-    CObject*                GetObject           ( unsigned long ulID );
-    CObject*                GetObject           ( DWORD* pGameInterface );
-    DWORD                   GetObjectRef        ( CObject* pObject );
-    DWORD                   GetObjectRef        ( DWORD* pGameInterface );
-    CObject*                GetObjectFromRef    ( DWORD dwGameRef );
-    inline unsigned long    GetObjectCount      ( ) { return m_objectPool.ulCount; }
-    void                    DeleteAllObjects    ( );
+    CObject*                AddObject( DWORD dwModelID );
+    CObject*                AddObject( DWORD* pGameInterface );
+
+	void                    RemoveObject( CObject* pObject, bool bDelete = true );
+    void                    RemoveObject( unsigned long ulID, bool bDelete = true );
+
+	CObject*                GetObject( unsigned long ulID );
+    CObject*                GetObject( DWORD* pGameInterface );
+    DWORD                   GetObjectRef( CObject* pObject );
+    DWORD                   GetObjectRef( DWORD* pGameInterface );
+    CObject*                GetObjectFromRef( DWORD dwGameRef );
+    inline unsigned long    GetObjectCount( void ) { return m_objectPool.ulCount; }
+
+	void                    DeleteAllObjects( void );
 
     // Peds pool
-    CPed*                   AddPed              ( ePedModel ePedType );
-    CPed*                   AddPed              ( DWORD* pGameInterface );
-    CPed*                   AddCivilianPed      ( DWORD* pGameInterface );
-private:
-    bool                    AddPedToPool        ( CPedSA* pPed );
-public:
-    void                    RemovePed           ( CPed* ped, bool bDelete = true );
-    void                    RemovePed           ( unsigned long ulID, bool bDelete = true);
-    CPed*                   GetPed              ( unsigned long ulID );
-    CPed*                   GetPed              ( DWORD* pGameInterface );
-    DWORD                   GetPedRef           ( CPed* pPed );
-    DWORD                   GetPedRef           ( DWORD* pGameInterface );
-    CPed*                   GetPedFromRef       ( DWORD dwGameRef );
-    CPedSAInterface*        GetPedInterface     ( DWORD dwGameRef ); // game_sa specific
-    inline unsigned long    GetPedCount         ( ) { return m_pedPool.ulCount; }
-    void                    DeleteAllPeds       ( );
+    CPed*                   AddPed( ePedModel ePedType );
+    CPed*                   AddPed( DWORD* pGameInterface );
+    CPed*                   AddCivilianPed( DWORD* pGameInterface );
+
+	void                    RemovePed( CPed* ped, bool bDelete = true );
+    void                    RemovePed( unsigned long ulID, bool bDelete = true);
+
+    CPed*                   GetPed( unsigned long ulID );
+    CPed*                   GetPed( DWORD* pGameInterface );
+    DWORD                   GetPedRef( CPed* pPed );
+    DWORD                   GetPedRef( DWORD* pGameInterface );
+    CPed*                   GetPedFromRef( DWORD dwGameRef );
+    CPedSAInterface*        GetPedInterface( DWORD dwGameRef ); // game_sa specific
+    inline unsigned long    GetPedCount( void ) { return m_pedPool.ulCount; }
+
+    void                    DeleteAllPeds( void );
 
     // Others
-    CBuilding*              AddBuilding         ( DWORD dwModelID );
-    void                    DeleteAllBuildings  ( );
-    CVehicle*               AddTrain            ( CVector* vecPosition, DWORD dwModels[], int iSize, bool bDirection );
+    CBuilding*              AddBuilding( DWORD dwModelID );
+    void                    DeleteAllBuildings( void );
+    CVehicle*               AddTrain( const CVector& vecPosition, DWORD dwModels[], int iSize, bool bDirection );
 
-    int                     GetNumberOfUsedSpaces   ( ePools pools );
-    void                    DumpPoolsStatus         ( );
+    int                     GetNumberOfUsedSpaces( ePools pools );
+    void                    DumpPoolsStatus( void );
 
     // stuff that really maybe should be elsewhere or not, perhaps
     CEntryInfoNodePool*             GetEntryInfoNodePool            ( );
     CPointerNodeSingleLinkPool*     GetPointerNodeSingleLinkPool    ( );
     CPointerNodeDoubleLinkPool*     GetPointerNodeDoubleLinkPool    ( );
-
 
 private:
     // Generic container for pools

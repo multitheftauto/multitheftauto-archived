@@ -70,11 +70,11 @@ public:
 class CTrainCamNode
 {
 	public:
-	CVector m_cvecCamPosition;
-	CVector m_cvecPointToLookAt;
-	CVector m_cvecMinPointInRange;//this is the minimum required distance the train has to be to the camera to 
+	CVectorGTA m_cvecCamPosition;
+	CVectorGTA m_cvecPointToLookAt;
+	CVectorGTA m_cvecMinPointInRange;//this is the minimum required distance the train has to be to the camera to 
 	//allow a switch to the node cam 
-	CVector m_cvecMaxPointInRange;//this is the minimum required distance the train has to be to from the camera 
+	CVectorGTA m_cvecMaxPointInRange;//this is the minimum required distance the train has to be to from the camera 
 	FLOAT m_fDesiredFOV;
 	FLOAT m_fNearClip;
 	//to switch from the  the node cam
@@ -290,33 +290,33 @@ public:
 	// for the sniper mode and rocket launcher mode.
 	// This one overwrites the m_PlayerMode above.
 	CQueuedMode PlayerWeaponMode;
-	CVector m_PreviousCameraPosition; //needed to work out speed
-	CVector m_RealPreviousCameraPosition; // This cane be used by stuff outside the camera code. The one above is the same as the current coordinates outwidth the camera code.
+	CVectorGTA m_PreviousCameraPosition; //needed to work out speed
+	CVectorGTA m_RealPreviousCameraPosition; // This cane be used by stuff outside the camera code. The one above is the same as the current coordinates outwidth the camera code.
 										// an active camera for range finding etc
-	CVector m_cvecAimingTargetCoors;		// Coors to look at with Gordons aiming thing
+	CVectorGTA m_cvecAimingTargetCoors;		// Coors to look at with Gordons aiming thing
 	// The player camera that is waiting to be used
 	// This camera can replace the default camera where this is
 	// needed (in tricky situations like tunnels for instance)
-	CVector m_vecFixedModeVector;
-	CVector m_vecFixedModeSource;
-	CVector m_vecFixedModeUpOffSet;
-	CVector m_vecCutSceneOffset;
-	CVector m_cvecStartingSourceForInterPol;
-	CVector m_cvecStartingTargetForInterPol;
-	CVector m_cvecStartingUpForInterPol;
-	CVector m_cvecSourceSpeedAtStartInter;
-	CVector m_cvecTargetSpeedAtStartInter;
-	CVector m_cvecUpSpeedAtStartInter;
-	CVector m_vecSourceWhenInterPol;
-	CVector m_vecTargetWhenInterPol;
-	CVector m_vecUpWhenInterPol;
-	CVector m_vecClearGeometryVec;
-	CVector m_vecGameCamPos;
-	CVector SourceDuringInter, TargetDuringInter, UpDuringInter;
+	CVectorGTA m_vecFixedModeVector;
+	CVectorGTA m_vecFixedModeSource;
+	CVectorGTA m_vecFixedModeUpOffSet;
+	CVectorGTA m_vecCutSceneOffset;
+	CVectorGTA m_cvecStartingSourceForInterPol;
+	CVectorGTA m_cvecStartingTargetForInterPol;
+	CVectorGTA m_cvecStartingUpForInterPol;
+	CVectorGTA m_cvecSourceSpeedAtStartInter;
+	CVectorGTA m_cvecTargetSpeedAtStartInter;
+	CVectorGTA m_cvecUpSpeedAtStartInter;
+	CVectorGTA m_vecSourceWhenInterPol;
+	CVectorGTA m_vecTargetWhenInterPol;
+	CVectorGTA m_vecUpWhenInterPol;
+	CVectorGTA m_vecClearGeometryVec;
+	CVectorGTA m_vecGameCamPos;
+	CVectorGTA SourceDuringInter, TargetDuringInter, UpDuringInter;
 
 
-	CVector m_vecAttachedCamOffset; // for attaching the camera to a ped or vehicle (set by level designers for use in cutscenes)
-	CVector m_vecAttachedCamLookAt;	
+	CVectorGTA m_vecAttachedCamOffset; // for attaching the camera to a ped or vehicle (set by level designers for use in cutscenes)
+	CVectorGTA m_vecAttachedCamLookAt;	
 	FLOAT m_fAttachedCamAngle; // for giving the attached camera a tilt.
 
 	// RenderWare camera pointer
@@ -324,7 +324,7 @@ public:
 	///stuff for cut scenes
 	CEntitySAInterface *pTargetEntity;
 	CEntitySAInterface *pAttachedEntity;
-	//CVector CutScene; 
+	//CVectorGTA CutScene; 
 	CCamPathSplines m_arrPathArray[MAX_NUM_OF_SPLINETYPES]; //These only get created when the script calls the load splines function
 	// maybe this shouldn't be here depends if GTA_TRAIN is defined (its not)
 	//CTrainCamNode 	m_arrTrainCamNode[MAX_NUM_OF_NODES];
@@ -340,20 +340,20 @@ public:
 	CMatrix4 m_matMirrorInverse;
 	CMatrix4 m_matMirror;
 
-	CVector m_vecFrustumNormals[4];
-	CVector m_vecFrustumWorldNormals[4];
-	CVector m_vecFrustumWorldNormals_Mirror[4];
+	CVectorGTA m_vecFrustumNormals[4];
+	CVectorGTA m_vecFrustumWorldNormals[4];
+	CVectorGTA m_vecFrustumWorldNormals_Mirror[4];
 
 	FLOAT m_fFrustumPlaneOffsets[4];
 	FLOAT m_fFrustumPlaneOffsets_Mirror[4];
 
-	CVector m_vecRightFrustumNormal;
-	CVector m_vecBottomFrustumNormal;
-	CVector m_vecTopFrustumNormal;
+	CVectorGTA m_vecRightFrustumNormal;
+	CVectorGTA m_vecBottomFrustumNormal;
+	CVectorGTA m_vecTopFrustumNormal;
 
-	CVector m_vecOldSourceForInter;
-	CVector m_vecOldFrontForInter;
-	CVector m_vecOldUpForInter;
+	CVectorGTA m_vecOldSourceForInter;
+	CVectorGTA m_vecOldFrontForInter;
+	CVectorGTA m_vecOldUpForInter;
 	FLOAT 	m_vecOldFOVForInter;
 	FLOAT 	m_fFLOATingFade;//variable representing the FLOAT version of CDraw::Fade. Necessary to stop loss of precision
 	FLOAT 	m_fFLOATingFadeMusic;

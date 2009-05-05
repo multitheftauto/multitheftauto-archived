@@ -13,10 +13,9 @@
 
 #include "StdInc.h"
 
-CCoronasSA::CCoronasSA()
+CCoronasSA::CCoronasSA( void )
 {
-	DEBUG_TRACE("CCoronasSA::CCoronasSA()");
-	for(int i =0;i < MAX_CORONAS;i++)
+	for( int i = 0; i < MAX_CORONAS; i++ )
 	{
 		Coronas[i] = new CRegisteredCoronaSA((CRegisteredCoronaSAInterface *)(ARRAY_CORONAS + i * sizeof(CRegisteredCoronaSAInterface)));
 	}
@@ -24,26 +23,24 @@ CCoronasSA::CCoronasSA()
 
 CCoronasSA::~CCoronasSA ()
 {
-    for ( int i = 0; i < MAX_CORONAS; i++ )
+    for( int i = 0; i < MAX_CORONAS; i++ )
     {
-        delete Coronas [i];
+        delete Coronas[i];
     }
 }
 
 
-CRegisteredCorona * CCoronasSA::GetCorona(DWORD ID)
+CRegisteredCorona * CCoronasSA::GetCorona( DWORD ID )
 {
-	DEBUG_TRACE("CRegisteredCorona * CCoronasSA::GetCorona(DWORD ID)");
 	return (CRegisteredCorona *)this->Coronas[ID];
 }
 
-CRegisteredCorona * CCoronasSA::CreateCorona(DWORD Identifier, CVector * position)
+CRegisteredCorona * CCoronasSA::CreateCorona( DWORD Identifier, const CVector& vecPosition )
 {
-	DEBUG_TRACE("CRegisteredCorona * CCoronasSA::CreateCorona(DWORD Identifier, CVector * position)");
 	CRegisteredCoronaSA * corona;
 	corona = (CRegisteredCoronaSA *)this->FindCorona(Identifier);
 
-	if(!corona)
+	if( !corona )
 		corona = (CRegisteredCoronaSA *)this->FindFreeCorona();
 
     if ( corona )
@@ -52,9 +49,9 @@ CRegisteredCorona * CCoronasSA::CreateCorona(DWORD Identifier, CVector * positio
         RwTexture * texture = this->GetTexture((eCoronaType)CORONATYPE_SHINYSTAR);
 	    if(texture)
 	    {
-		    corona->Init(Identifier);
-		    corona->SetPosition(position);
-		    corona->SetTexture (texture);
+		    corona->Init( Identifier );
+		    corona->SetPosition( vecPosition );
+		    corona->SetTexture( texture );
 		    return (CRegisteredCorona *)corona;
 	    }
     }
@@ -62,10 +59,9 @@ CRegisteredCorona * CCoronasSA::CreateCorona(DWORD Identifier, CVector * positio
 	return (CRegisteredCorona *)NULL;
 }
 
-CRegisteredCorona * CCoronasSA::FindFreeCorona()
+CRegisteredCorona * CCoronasSA::FindFreeCorona( void )
 {
-	DEBUG_TRACE("CRegisteredCorona * CCoronasSA::FindFreeCorona()");
-	for(int i=2;i< MAX_CORONAS;i++)
+	for( int i = 2; i< MAX_CORONAS; i++ )
 	{
 		if(Coronas[i]->GetIdentifier() == 0)
 		{
@@ -75,11 +71,9 @@ CRegisteredCorona * CCoronasSA::FindFreeCorona()
 	return (CRegisteredCorona *)NULL;
 }
 
-CRegisteredCorona * CCoronasSA::FindCorona(DWORD Identifier)
+CRegisteredCorona * CCoronasSA::FindCorona( DWORD Identifier )
 {
-	DEBUG_TRACE("CRegisteredCorona * CCoronasSA::FindCorona(DWORD Identifier)");
-	
-	for(int i=0;i< MAX_CORONAS;i++)
+	for( int i = 0; i < MAX_CORONAS; i++ )
 	{
 		if(Coronas[i]->GetIdentifier() == Identifier)
 		{
@@ -89,7 +83,7 @@ CRegisteredCorona * CCoronasSA::FindCorona(DWORD Identifier)
 	return (CRegisteredCorona *)NULL;
 }
 
-RwTexture * CCoronasSA::GetTexture(eCoronaType type)
+RwTexture * CCoronasSA::GetTexture( eCoronaType type )
 {
 	DEBUG_TRACE("RwTexture * CCoronasSA::GetTexture(eCoronaType type)");
 	if(type < MAX_CORONA_TEXTURES)
@@ -98,7 +92,7 @@ RwTexture * CCoronasSA::GetTexture(eCoronaType type)
 		return NULL;
 }
 
-void CCoronasSA::DisableSunAndMoon ( bool bDisabled )
+void CCoronasSA::DisableSunAndMoon( bool bDisabled )
 {
     static BYTE byteOriginal = 0;
     if ( bDisabled && !byteOriginal )

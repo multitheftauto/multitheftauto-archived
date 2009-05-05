@@ -100,7 +100,7 @@ public:
     virtual float           GetMass                         ( void ) const = 0;
     virtual float           GetTurnMass                     ( void ) const = 0;
     virtual float           GetDragCoeff                    ( void ) const = 0;
-    virtual const CVector&  GetCenterOfMass                 ( void ) const = 0;
+    virtual const CVector   GetCenterOfMass                 ( void ) const = 0;
 
     virtual unsigned int    GetPercentSubmerged             ( void ) const = 0;
     virtual float           GetTractionMultiplier           ( void ) const = 0;

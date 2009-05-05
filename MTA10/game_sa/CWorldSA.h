@@ -46,23 +46,26 @@
 class CWorldSA : public CWorld
 {
 public:
-	void		Add                       ( CEntity * entity );
-	void		Add                       ( CEntitySAInterface * entityInterface );
-	void		Remove                    ( CEntity * entity );
-	void		Remove                    ( CEntitySAInterface * entityInterface );
-    void        RemoveReferencesToDeletedObject ( CEntitySAInterface * entity );
-	bool		ProcessLineOfSight        ( CVector * vecStart, CVector * vecEnd, CColPoint ** colCollision, CEntity ** CollisionEntity = NULL, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, bool bShootThroughStuff = false );
-    bool        TestLineSphere            ( CVector * vecStart, CVector * vecEnd, CVector * vecSphereCenter, float fSphereRadius, CColPoint ** colCollision );
-	//bool		ProcessLineOfSight        ( CVector * vecStart, CVector * vecEnd, CColPoint * colCollision, CEntity * CollisionEntity );
-	void		IgnoreEntity              ( CEntity * entity );
-	BYTE		GetLevelFromPosition      ( CVector * vecPosition );
-	float		FindGroundZForPosition    ( float fX, float fY );
-	float		FindGroundZFor3DPosition  ( CVector * vecPosition );
-	void        LoadMapAroundPoint        ( CVector * vecPosition, float fRadius );
-	bool		IsLineOfSightClear        ( CVector * vecStart, CVector * vecEnd, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false );
-    bool        HasCollisionBeenLoaded    ( CVector * vecPosition );
-    DWORD       GetCurrentArea            ( void );
-    void        SetCurrentArea            ( DWORD dwArea );
+	void		Add( CEntity * entity );
+	void		Add( CEntitySAInterface * entityInterface );
+	void		Remove( CEntity * entity );
+	void		Remove( CEntitySAInterface * entityInterface );
+    void        RemoveReferencesToDeletedObject( CEntitySAInterface * entity );
+	void		IgnoreEntity( CEntity * entity );
+
+	bool		ProcessLineOfSight( const CVector& vecStart, const CVector& vecEnd, CColPoint ** colCollision, CEntity ** CollisionEntity = NULL, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, bool bShootThroughStuff = false );
+    bool        TestLineSphere( const CVector& vecStart, const CVector& vecEnd, const CVector& vecSphereCenter, float fSphereRadius, CColPoint ** colCollision );
+	bool		IsLineOfSightClear( const CVector& vecStart, const CVector& vecEnd, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false );
+
+	float		FindGroundZForPosition( float fX, float fY );
+	float		FindGroundZFor3DPosition( const CVector& vecPosition );
+	BYTE		GetLevelFromPosition( const CVector& vecPosition );
+
+	void        LoadMapAroundPoint( const CVector& vecPosition, float fRadius );
+    bool        HasCollisionBeenLoaded( const CVector& vecPosition );
+
+    DWORD       GetCurrentArea( void );
+    void        SetCurrentArea( DWORD dwArea );
 
 	/**
 	 * \todo Add FindObjectsKindaColliding (see 0x430577)
@@ -82,7 +85,6 @@ public:
 
 	 * \todo One Day: ClearPedsFromArea, SetCarsOnFire, SetPedsChoking, SetPedsOnFire, SetWorldOnFire
 	 * StopAllLawEnforcersInTheirTracks
-
 	 */
 };
 

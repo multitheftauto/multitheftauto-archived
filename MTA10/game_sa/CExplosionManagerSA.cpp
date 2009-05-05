@@ -34,9 +34,8 @@ CExplosionManagerSA::~CExplosionManagerSA()
 /**
  * \todo Test this, replace with CExplosion::AddExplosion code if possible in order to ensure correct pointer
  */
-CExplosion * CExplosionManagerSA::AddExplosion ( eExplosionType explosiontype, CVector * vecPosition, CEntity * creator, bool bMakeSound, float fCamShake, bool bNoDamage )
+CExplosion* CExplosionManagerSA::AddExplosion ( eExplosionType explosiontype, const CVector& vecPosition, CEntity * creator, bool bMakeSound, float fCamShake, bool bNoDamage )
 {
-	DEBUG_TRACE("CExplosion * CExplosionManagerSA::AddExplosion ( eExplosionType explosiontype, CVector * vecPosition, CEntity * creator = NULL)");
 	CEntitySAInterface * entityInterface  = 0;
 	DWORD dwFunction = FUNC_AddExplosion;
 	CExplosion * explosion = CExplosionManagerSA::FindFreeExplosion();
@@ -54,9 +53,9 @@ CExplosion * CExplosionManagerSA::AddExplosion ( eExplosionType explosiontype, C
 	unsigned char bMakeSound = true, float fCamShake=-1.0f, unsigned char noDamage=false);
 	*/
 
-	FLOAT fX = vecPosition->getX();
-	FLOAT fY = vecPosition->getY();
-	FLOAT fZ = vecPosition->getZ();
+	FLOAT fX = vecPosition.getX();
+	FLOAT fY = vecPosition.getY();
+	FLOAT fZ = vecPosition.getZ();
 
 	_asm
 	{
@@ -93,10 +92,8 @@ returnhere:
 /**
  * \todo Need to simulate this manually (loop and IsNear...)
  */
-void CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLOAT fRadius )
+void CExplosionManagerSA::RemoveAllExplosionsInArea( const CVector& vecPosition, FLOAT fRadius )
 {
-	DEBUG_TRACE("void CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLOAT fRadius )");
-	
 /*	DWORD dwFunction = FUNC_RemoveAllExplosionsInArea;
 	CVector * vecPos = (CVector *)vecPosition;
 	FLOAT fX = vecPos->getX();

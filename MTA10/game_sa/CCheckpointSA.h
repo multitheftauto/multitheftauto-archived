@@ -26,8 +26,8 @@ public:
 	RGBA		rwColour;
 	WORD 		m_nPulsePeriod;
 	short		m_nRotateRate;	// deg per frame (in either direction)
-	CVector		m_pos;
-	CVector		m_pointDir;
+	CVectorGTA	m_pos;
+	CVectorGTA	m_pointDir;
 	FLOAT 		m_fPulseFraction;
 	FLOAT 		m_fSize;
 	FLOAT 		m_fCameraRange;
@@ -37,33 +37,34 @@ public:
 class CCheckpointSA : public CCheckpoint
 {
 private:
-	CCheckpointSAInterface		* internalInterface;
+	CCheckpointSAInterface*	internalInterface;
 public:
+	CCheckpointSAInterface*	GetInterface( void ) { return internalInterface; }
+
 	// constructor
-	CCheckpointSA(CCheckpointSAInterface * checkpointInterface) { internalInterface = checkpointInterface; };
+					CCheckpointSA( CCheckpointSAInterface * checkpointInterface )
+					{ internalInterface = checkpointInterface; };
 
-	CCheckpointSAInterface	* GetInterface() { return internalInterface; }
-
-	void			SetPosition(CVector * vecPosition);
-	CVector		* GetPosition();
-	void			SetPointDirection(CVector * vecPointDirection);
-	CVector		* GetPointDirection();
-	DWORD			GetType(); // need enum?
-	void			SetType(WORD wType); // doesn't work propperly (not virtualed)
-	bool			IsActive();
-	void			Activate();
-	DWORD			GetIdentifier();
-	void			SetIdentifier(DWORD dwIdentifier);
-	RGBA			GetColor();
-	void			SetColor(RGBA color);
-	void			SetPulsePeriod(WORD wPulsePeriod);
-	void			SetRotateRate(short RotateRate);
-	FLOAT			GetSize();
-	void			SetSize(FLOAT fSize);
-	void			SetCameraRange(FLOAT fCameraRange);
-	void			SetPulseFraction(FLOAT fPulseFraction); // doesn't work propperly (not virtualed)
-	FLOAT			GetPulseFraction();
-	void			Remove();
+	void			SetPosition( const CVector& vecPosition );
+	const CVector	GetPosition( void );
+	void			SetPointDirection( const CVector& vecPointDirection );
+	const CVector	GetPointDirection( void );
+	DWORD			GetType( void ); // TODO: use enum
+	void			SetType( WORD wType ); // TODO: doesn't work properly (not virtual)
+	bool			IsActive( void );
+	void			Activate( void );
+	DWORD			GetIdentifier( void );
+	void			SetIdentifier( DWORD dwIdentifier );
+	RGBA			GetColor( void );
+	void			SetColor( RGBA color );
+	void			SetPulsePeriod( WORD wPulsePeriod );
+	void			SetRotateRate( short RotateRate );
+	FLOAT			GetSize( void );
+	void			SetSize( FLOAT fSize );
+	void			SetCameraRange( FLOAT fCameraRange );
+	void			SetPulseFraction( FLOAT fPulseFraction ); // TODO: doesn't work properly (not virtual)
+	FLOAT			GetPulseFraction( void );
+	void			Remove( void );
 };
 
 #endif

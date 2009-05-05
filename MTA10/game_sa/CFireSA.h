@@ -29,48 +29,49 @@ class FxSystem_c; // we don't actually define this anywhere
 class CFireSAInterface : public CFireInterface
 {
 public:
-	BYTE					bActive:1;
-	BYTE					bCreatedByScript:1;
-	BYTE					bMakesNoise:1;
+	BYTE					bActive : 1;
+	BYTE					bCreatedByScript : 1;
+	BYTE					bMakesNoise : 1;
 	BYTE					bBeingExtinguished : 1;
 	BYTE					bFirstGeneration : 1;
 	WORD                    ScriptReferenceIndex;
-	CVector                 vecPosition; 
-	CEntitySAInterface		* entityTarget; 
-	CEntitySAInterface		* entityCreator;	
+	CVectorGTA              vecPosition; 
+	CEntitySAInterface*		entityTarget; 
+	CEntitySAInterface*		entityCreator;	
 	DWORD					nTimeToBurn; 
 	FLOAT					Strength;
 	signed char				nNumGenerationsAllowed; 
 	BYTE					RemovalDist;
 
-	FxSystem_c				* m_fxSysPtr;
+	FxSystem_c*				m_fxSysPtr;
 };
 
 class CFireSA : public CFire
 {
-private:
-	CFireSAInterface		* internalInterface;
+	CFireSAInterface*		internalInterface;
+
 public:
 	// constructor
-	CFireSA(CFireSAInterface * fireInterface) { this->internalInterface = fireInterface; }
+							CFireSA( CFireSAInterface * fireInterface )
+							{ this->internalInterface = fireInterface; }
 
-	void					Extinguish (  );
-	CVector				    * GetPosition ( );
-	void					SetPosition ( CVector & vecPosition );
-	void					SetTimeToBurnOut ( DWORD dwTime );
-	DWORD					GetTimeToBurnOut (  );
-	CEntity					* GetCreator (  );
-	CEntity					* GetEntityOnFire (  );
-	void					SetTarget ( CEntity * entity );
-	bool					IsIgnited (  );
-	bool					IsFree (  );
-	void					SetSilent ( bool bSilent );
-	bool					IsBeingExtinguished ();
-	void					Ignite( );
-	FLOAT					GetStrength (  );
-	void					SetStrength ( FLOAT fStrength );
-    void                    SetNumGenerationsAllowed ( char generations );
-    inline CFireInterface*  GetInterface ( ) { return this->internalInterface; }
+	void					Extinguish( void );
+	const CVector			GetPosition( void );
+	void					SetPosition( const CVector& vecPosition );
+	void					SetTimeToBurnOut( DWORD dwTime );
+	DWORD					GetTimeToBurnOut( void );
+	CEntity*				GetCreator( void );
+	CEntity*				GetEntityOnFire( void );
+	void					SetTarget( CEntity * entity );
+	bool					IsIgnited( void );
+	bool					IsFree( void );
+	void					SetSilent( bool bSilent );
+	bool					IsBeingExtinguished( void );
+	void					Ignite( void );
+	FLOAT					GetStrength( void );
+	void					SetStrength( float fStrength );
+    void                    SetNumGenerationsAllowed( char nGenerations );
+    inline CFireInterface*  GetInterface( void ) { return this->internalInterface; }
 };
 
 #endif

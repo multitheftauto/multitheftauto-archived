@@ -43,7 +43,7 @@ public:
 	/////////////////////////////////
 	short		m_nAmmo;				// ammo in one clip
 	short		m_nDamage;				// damage inflicted per hit
-	CVector	m_vecFireOffset;		// offset from weapon origin to projectile starting point
+	CVectorGTA	m_vecFireOffset;		// offset from weapon origin to projectile starting point
 	
 	// skill settings
 	eWeaponSkill m_SkillLevel;		    // what's the skill level of this weapontype
@@ -78,49 +78,52 @@ public:
 
 class CWeaponInfoSA : public CWeaponInfo
 {
-private:
 	eWeaponType					weaponType;
-	CWeaponInfoSAInterface		* internalInterface;
+	CWeaponInfoSAInterface*		internalInterface;
+
 public:
 	// constructor
-	CWeaponInfoSA(CWeaponInfoSAInterface * weaponInfoInterface, eWeaponType weaponType) { this->internalInterface = weaponInfoInterface;  this->weaponType  = weaponType; };
+								CWeaponInfoSA( CWeaponInfoSAInterface * weaponInfoInterface, eWeaponType weaponType )
+								{ this->internalInterface = weaponInfoInterface; this->weaponType = weaponType; };
 
-	// stolen from R*'s CPedIK :)
-	void SetFlag(DWORD flag)		{this->internalInterface->m_nFlags |= flag;}
-	void ClearFlag(DWORD flag)		{this->internalInterface->m_nFlags &= ~flag;}
-    bool IsFlagSet(DWORD flag)		{return ((this->internalInterface->m_nFlags & flag) > 0 ? 1 : 0);}	
+	// copied from CPedIK
+	void						SetFlag( DWORD flag )						{ this->internalInterface->m_nFlags |= flag; }
+	void						ClearFlag( DWORD flag )						{ this->internalInterface->m_nFlags &= ~flag; }
+    bool						IsFlagSet( DWORD flag )						{ return ((this->internalInterface->m_nFlags & flag) > 0 ? 1 : 0); }	
 
-    eWeaponModel				GetModel() { return  (eWeaponModel)this->internalInterface->m_modelId; }
-	CWeaponInfoSAInterface		* GetInterface() { return this->internalInterface; };
-	FLOAT						GetWeaponRange() { return GetInterface()->m_fWeaponRange; };
-	void						SetWeaponRange ( FLOAT fRange ) { GetInterface()->m_fWeaponRange = fRange; };
-	FLOAT						GetTargetRange() { return GetInterface()->m_fTargetRange; };
-	void						SetTargetRange ( FLOAT fRange ) { GetInterface()->m_fTargetRange = fRange; };
-	CVector					    * GetFireOffset() { return &GetInterface()->m_vecFireOffset; };
-	void						SetFireOffset ( CVector * vecFireOffset ) { memcpy(&GetInterface()->m_vecFireOffset, vecFireOffset, sizeof(CVector)); };
-	short						GetDamagePerHit() { return GetInterface()->m_nDamage; };
-	void						SetDamagePerHit ( short sDamagePerHit ) { GetInterface()->m_nDamage = sDamagePerHit; };
-    float                       GetAccuracy ( void )                        { return internalInterface->m_fAccuracy; };
-    void                        SetAccuracy ( float fAccuracy )             { internalInterface->m_fAccuracy = fAccuracy; };
+    eWeaponModel				GetModel( void )							{ return (eWeaponModel)this->internalInterface->m_modelId; }
+	CWeaponInfoSAInterface*		GetInterface( void )						{ return this->internalInterface; };
+	FLOAT						GetWeaponRange( void )						{ return GetInterface()->m_fWeaponRange; };
+	void						SetWeaponRange( FLOAT fRange )				{ GetInterface()->m_fWeaponRange = fRange; };
+	FLOAT						GetTargetRange( void )						{ return GetInterface()->m_fTargetRange; };
+	void						SetTargetRange( FLOAT fRange )				{ GetInterface()->m_fTargetRange = fRange; };
+	const CVector				GetFireOffset( void )							{ return CVectorGTA::unwrap( GetInterface()->m_vecFireOffset ); };
+	void						SetFireOffset( const CVector& vecFireOffset )	{ GetInterface()->m_vecFireOffset = vecFireOffset; };
+	short						GetDamagePerHit( void )						{ return GetInterface()->m_nDamage; };
+	void						SetDamagePerHit( short sDamagePerHit )		{ GetInterface()->m_nDamage = sDamagePerHit; };
+    float                       GetAccuracy( void )							{ return internalInterface->m_fAccuracy; };
+    void                        SetAccuracy( float fAccuracy )				{ internalInterface->m_fAccuracy = fAccuracy; };
+
 	// projectile/areaeffect only
-	FLOAT						GetFiringSpeed() { return GetInterface()->m_fSpeed; };
-	void						SetFiringSpeed ( FLOAT fFiringSpeed ) { GetInterface()->m_fSpeed = fFiringSpeed; };
+	FLOAT						GetFiringSpeed( void )						{ return GetInterface()->m_fSpeed; };
+	void						SetFiringSpeed( FLOAT fFiringSpeed )		{ GetInterface()->m_fSpeed = fFiringSpeed; };
+
 	// area effect only
-	FLOAT						GetRadius() { return GetInterface()->m_fRadius; };
-	void						SetRadius ( FLOAT fRadius ) { GetInterface()->m_fRadius = fRadius; };
-	FLOAT						GetLifeSpan() { return GetInterface()->m_fLifeSpan; };
-	void						SetLifeSpan ( FLOAT fLifeSpan ) { GetInterface()->m_fLifeSpan = fLifeSpan; };
-	FLOAT						GetSpread() { return GetInterface()->m_fSpread; };
-	void						SetSpread ( FLOAT fSpread ) { GetInterface()->m_fSpread = fSpread; };
-	FLOAT						GetAnimBreakoutTime() { return GetInterface()->m_animBreakoutTime; };
-	void						SetAnimBreakoutTime ( FLOAT fBreakoutTime ) { GetInterface()->m_animBreakoutTime = fBreakoutTime; };
-	eWeaponSlot					GetSlot() { return (eWeaponSlot)GetInterface()->m_nWeaponSlot; };
-	void						SetSlot ( eWeaponSlot dwSlot ) { GetInterface()->m_nWeaponSlot = (eWeaponSlot)dwSlot; };
-    eWeaponSkill                GetSkill() { return GetInterface()->m_SkillLevel; }
-    void                        SetSkill ( eWeaponSkill weaponSkill ) { GetInterface ()->m_SkillLevel = weaponSkill; }
-    int                         GetRequiredStatLevel () { return GetInterface()->m_nReqStatLevel; }
-    void                        SetRequiredStatLevel ( int iStatLevel ) { GetInterface()->m_nReqStatLevel = iStatLevel; }
-    eFireType                   GetFireType () { return GetInterface()->m_eFireType; }
+	FLOAT						GetRadius( void )							{ return GetInterface()->m_fRadius; };
+	void						SetRadius( FLOAT fRadius )					{ GetInterface()->m_fRadius = fRadius; };
+	FLOAT						GetLifeSpan( void )							{ return GetInterface()->m_fLifeSpan; };
+	void						SetLifeSpan( FLOAT fLifeSpan )				{ GetInterface()->m_fLifeSpan = fLifeSpan; };
+	FLOAT						GetSpread( void )							{ return GetInterface()->m_fSpread; };
+	void						SetSpread( FLOAT fSpread )					{ GetInterface()->m_fSpread = fSpread; };
+	FLOAT						GetAnimBreakoutTime( void )					{ return GetInterface()->m_animBreakoutTime; };
+	void						SetAnimBreakoutTime( FLOAT fBreakoutTime )	{ GetInterface()->m_animBreakoutTime = fBreakoutTime; };
+	eWeaponSlot					GetSlot( void )								{ return (eWeaponSlot)GetInterface()->m_nWeaponSlot; };
+	void						SetSlot( eWeaponSlot dwSlot )				{ GetInterface()->m_nWeaponSlot = (eWeaponSlot)dwSlot; };
+    eWeaponSkill                GetSkill( void )							{ return GetInterface()->m_SkillLevel; }
+    void                        SetSkill( eWeaponSkill weaponSkill )		{ GetInterface ()->m_SkillLevel = weaponSkill; }
+    int                         GetRequiredStatLevel( void )				{ return GetInterface()->m_nReqStatLevel; }
+    void                        SetRequiredStatLevel( int iStatLevel )		{ GetInterface()->m_nReqStatLevel = iStatLevel; }
+    eFireType                   GetFireType( void )							{ return GetInterface()->m_eFireType; }
 };
 
 #endif

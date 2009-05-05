@@ -439,7 +439,7 @@ public:
     // Override of CPhysicalSA::SetMoveSpeed to take trains into account
     void                        SetMoveSpeed                    ( const CVector& vecMoveSpeed );
 
-    bool                        AddProjectile                   ( eWeaponType eWeapon, CVector vecOrigin, float fForce, CVector * target, CEntity * targetEntity );
+    bool                        AddProjectile                   ( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity * targetEntity );
 
     CVehicleSAInterface *       GetNextCarriageInTrain          ();
     CVehicle *                  GetNextTrainCarriage            ();
@@ -483,12 +483,12 @@ public:
     //GetIsHandbrakeOn    Use CVehicleSAInterface value
     float                       GetHeightAboveRoad              ();
     float                       GetSteerAngle                   ();
-    bool                        GetTowBarPos                    ( CVector* pVector );
-    bool                        GetTowHitchPos                  ( CVector* pVector );
+    bool                        GetTowBarPos                    ( CVector& pVector );
+    bool                        GetTowHitchPos                  ( CVector& pVector );
     bool                        IsOnItsSide                     ();
     bool                        IsLawEnforcementVehicle         ();
     bool                        IsPassenger                     ( CPed* pPed );
-    bool                        IsSphereTouchingVehicle         ( CVector * vecOrigin, float fRadius );
+    bool                        IsSphereTouchingVehicle         ( const CVector& vecOrigin, float fRadius );
     bool                        IsUpsideDown                    ();
     void                        MakeDirty                       ( CColPoint* pPoint );
 

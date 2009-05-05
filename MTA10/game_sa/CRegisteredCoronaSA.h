@@ -22,7 +22,7 @@ class CEntitySAInterface;
 class CRegisteredCoronaSAInterface // coronas are 104 bytes long, and theres 56 of them
 {
 public:
-	CVector		Coordinates;			// Where is it exactly.
+	CVectorGTA	Coordinates;			// Where is it exactly.
 	DWORD		Identifier;				// Should be unique for each corona. Address or something (0 = empty)
 	RwTexture	* pTex;					// Pointer to the actual texture to be rendered
 	FLOAT		Size;					// How big is this fellow
@@ -55,28 +55,35 @@ public:
  */
 class CRegisteredCoronaSA : public CRegisteredCorona
 {
-private:
-	CRegisteredCoronaSAInterface * internalInterface;
+	CRegisteredCoronaSAInterface*	internalInterface;
 public:
-					CRegisteredCoronaSA(CRegisteredCoronaSAInterface * coronaInterface);
-	CVector			* GetPosition();
-	void			SetPosition(CVector * vector);
-	FLOAT			GetSize();
-	void			SetSize(FLOAT fSize);
-	FLOAT			GetRange();
-	void			SetRange(FLOAT fRange);
-	FLOAT			GetPullTowardsCamera();
-	void			SetPullTowardsCamera(FLOAT fPullTowardsCamera);
-	void			SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha);
-	void			SetTexture(RwTexture * texture);
-	void			SetTexture(eCoronaType texture);
-	BYTE			GetFlareType();
-	void			SetFlareType(BYTE fFlareType);
-    inline DWORD	GetIdentifier() { return internalInterface->Identifier; }
-	DWORD			GetID();
-	void			Init(DWORD Identifier);
-	void			Disable();
-	void			Refresh();
+					CRegisteredCoronaSA( CRegisteredCoronaSAInterface* coronaInterface );
+
+	const CVector	GetPosition( void );
+	void			SetPosition( const CVector& vector );
+
+	FLOAT			GetSize( void );
+	void			SetSize( FLOAT fSize );
+
+	FLOAT			GetRange( void );
+	void			SetRange( FLOAT fRange );
+
+	FLOAT			GetPullTowardsCamera( void );
+	void			SetPullTowardsCamera( FLOAT fPullTowardsCamera );
+
+	void			SetColor( BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha );
+	void			SetTexture( RwTexture * texture );
+	void			SetTexture( eCoronaType texture );
+
+	BYTE			GetFlareType( void );
+	void			SetFlareType( BYTE fFlareType );
+
+    inline DWORD	GetIdentifier( void ) { return internalInterface->Identifier; }
+	DWORD			GetID( void );
+
+	void			Init( DWORD Identifier );
+	void			Disable( void );
+	void			Refresh( void );
 };
 
 #endif

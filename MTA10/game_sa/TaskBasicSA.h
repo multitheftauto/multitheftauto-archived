@@ -115,7 +115,7 @@ public:
     CAnimBlendHierarchy*    m_pAnimHierarchy;
     int                     m_iTime;
     CTaskTimer              m_timer;
-    CVector                 m_offsetAtEnd;
+    CVectorGTA              m_offsetAtEnd;
     int                   m_flags;    
     short                   m_animID;	
 };

@@ -20,18 +20,21 @@ class CWorld
 public:
 	virtual void		Add                         ( CEntity * entity ) = 0;
 	virtual void		Remove                      ( CEntity * entity ) = 0;
-	//virtual bool		ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoint * colCollision, CEntity * CollisionEntity)=0;
-	virtual bool		ProcessLineOfSight          ( CVector * vecStart, CVector * vecEnd, CColPoint ** colCollision, CEntity ** CollisionEntity, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, bool bShootThroughStuff = false ) = 0;
-    // THIS FUNCTION IS INCOMPLETE AND SHOULD NOT BE USED ----------v
-    virtual bool        TestLineSphere              ( CVector * vecStart, CVector * vecEnd, CVector * vecSphereCenter, float fSphereRadius, CColPoint ** colCollision ) = 0;
 	virtual void		IgnoreEntity                ( CEntity * entity ) = 0;
-	virtual BYTE		GetLevelFromPosition        ( CVector * vecPosition ) = 0;
+
+	virtual bool		ProcessLineOfSight          ( const CVector& vecStart, const CVector& vecEnd, CColPoint ** colCollision, CEntity ** CollisionEntity, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, bool bShootThroughStuff = false ) = 0;
+    // THIS FUNCTION IS INCOMPLETE AND SHOULD NOT BE USED ----------v
+    virtual bool        TestLineSphere              ( const CVector& vecStart, const CVector& vecEnd, const CVector& vecSphereCenter, float fSphereRadius, CColPoint ** colCollision ) = 0;
+	virtual bool		IsLineOfSightClear          ( const CVector& vecStart, const CVector& vecEnd, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false ) = 0;
+
 	virtual float		FindGroundZForPosition      ( float fX, float fY ) = 0;
-	virtual float		FindGroundZFor3DPosition    ( CVector * vecPosition ) = 0;
-	virtual void		LoadMapAroundPoint          ( CVector * vecPosition, float fRadius ) = 0;
-	virtual bool		IsLineOfSightClear          ( CVector * vecStart, CVector * vecEnd, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false ) = 0;
-    virtual bool        HasCollisionBeenLoaded      ( CVector * vecPosition ) = 0;
-    virtual DWORD       GetCurrentArea              ( void ) = 0;
+	virtual float		FindGroundZFor3DPosition    ( const CVector& vecPosition ) = 0;
+	virtual BYTE		GetLevelFromPosition        ( const CVector& vecPosition ) = 0;
+
+	virtual void		LoadMapAroundPoint          ( const CVector& vecPosition, float fRadius ) = 0;
+    virtual bool        HasCollisionBeenLoaded      ( const CVector& vecPosition ) = 0;
+
+	virtual DWORD       GetCurrentArea              ( void ) = 0;
     virtual void        SetCurrentArea              ( DWORD dwArea ) = 0;
 };
 

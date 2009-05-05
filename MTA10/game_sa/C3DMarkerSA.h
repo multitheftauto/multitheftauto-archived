@@ -42,13 +42,13 @@ public:
 	FLOAT			m_fBrightness; // 112
 	FLOAT			m_fCameraRange; // 116
 
-	CVector		m_normal;			// Normal of the object point at             // 120
+	CVectorGTA		m_normal;			// Normal of the object point at             // 120
 	// the following variables remember the last time we read the heigh of the
 	// map. Using this we don't have to do this every frame and we can still have moving markers.
 	WORD			m_LastMapReadX, m_LastMapReadY; // 132 / 134
 	FLOAT			m_LastMapReadResultZ; // 136
 	FLOAT			m_roofHeight; // 140
-	CVector			m_lastPosition; // 144
+	CVectorGTA		m_lastPosition; // 144
 	DWORD			m_OnScreenTestTime;		// time last screen check was done // 156
 };
 

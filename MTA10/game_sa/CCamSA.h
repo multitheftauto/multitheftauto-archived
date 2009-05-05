@@ -126,26 +126,26 @@ public:
 	static float CAM_BUMPED_DAMP_RATE;
 	static float CAM_BUMPED_MOVE_MULT;
 
-	CVector m_cvecSourceSpeedOverOneFrame; // 324
-	CVector m_cvecTargetSpeedOverOneFrame; // 336
-	CVector m_cvecUpOverOneFrame; // 348
+	CVectorGTA m_cvecSourceSpeedOverOneFrame; // 324
+	CVectorGTA m_cvecTargetSpeedOverOneFrame; // 336
+	CVectorGTA m_cvecUpOverOneFrame; // 348
 	
-	CVector m_cvecTargetCoorsForFudgeInter; // 360
-	CVector m_cvecCamFixedModeVector; // 372
-	CVector m_cvecCamFixedModeSource; // 384
-  	CVector m_cvecCamFixedModeUpOffSet; // 396
-	CVector m_vecLastAboveWaterCamPosition; //408  //helper for when the player has gone under the water
+	CVectorGTA m_cvecTargetCoorsForFudgeInter; // 360
+	CVectorGTA m_cvecCamFixedModeVector; // 372
+	CVectorGTA m_cvecCamFixedModeSource; // 384
+  	CVectorGTA m_cvecCamFixedModeUpOffSet; // 396
+	CVectorGTA m_vecLastAboveWaterCamPosition; //408  //helper for when the player has gone under the water
 
-	CVector m_vecBufferedPlayerBodyOffset; // 420
+	CVectorGTA m_vecBufferedPlayerBodyOffset; // 420
 
 	// The three vectors that determine this camera for this frame
-	CVector	Front;	// 432												// Direction of looking in
-	CVector	Source;													// Coors in world space
-	CVector	SourceBeforeLookBehind;
-	CVector	Up;														// Just that
-	CVector	m_arrPreviousVectors[NUMBER_OF_VECTORS_FOR_AVERAGE];	// used to average stuff
+	CVectorGTA	Front;	// 432												// Direction of looking in
+	CVectorGTA	Source;													// Coors in world space
+	CVectorGTA	SourceBeforeLookBehind;
+	CVectorGTA	Up;														// Just that
+	CVectorGTA	m_arrPreviousVectors[NUMBER_OF_VECTORS_FOR_AVERAGE];	// used to average stuff
 
-	CVector m_aTargetHistoryPos[CAM_NUM_TARGET_HISTORY];
+	CVectorGTA m_aTargetHistoryPos[CAM_NUM_TARGET_HISTORY];
 	DWORD m_nTargetHistoryTime[CAM_NUM_TARGET_HISTORY];
 	DWORD m_nCurrentHistoryPoints;
 
@@ -154,7 +154,7 @@ protected:
 	float 		m_fCameraDistance;
 	float 		m_fIdealAlpha;
 	float 		m_fPlayerVelocity;
-	//CVector TempRight;
+	//CVectorGTA TempRight;
 	CAutomobileSAInterface	*m_pLastCarEntered; // So interpolation works
 	CPedSAInterface			*m_pLastPedLookedAt;// So interpolation works 
 	bool		m_bFirstPersonRunAboutActive;
@@ -162,20 +162,21 @@ protected:
 
 class CCamSA : public CCam
 {
-private:
-	CCamSAInterface			* internalInterface;
+	CCamSAInterface *	internalInterface;
+
 public:
-	CCamSA(CCamSAInterface	* camInterface)     { this->internalInterface = camInterface; }
-	CCamSAInterface			* GetInterface()    { return this->internalInterface;};
-	CVector				* GetFront();
-	CVector				* GetUp();
-	CVector				* GetSource();
-    unsigned int        GetMode()               { return this->internalInterface->Mode; }
+						CCamSA( CCamSAInterface	* camInterface )	{ this->internalInterface = camInterface; }
+	CCamSAInterface *	GetInterface( void )						{ return this->internalInterface;};
+    unsigned int        GetMode( void )								{ return this->internalInterface->Mode; }
 
-	CVector				* GetFixedModeSource();
-	CVector				* GetFixedModeVector();
+	const CVector		GetFront( void );
+	const CVector		GetUp( void );
+	const CVector		GetSource( void );
 
-    CEntity *           GetTargetEntity();
+	const CVector		GetFixedModeSource( void );
+	const CVector		GetFixedModeVector( void );
+
+    CEntity *           GetTargetEntity( void );
 };
 
 #endif

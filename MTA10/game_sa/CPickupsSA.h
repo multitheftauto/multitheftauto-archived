@@ -29,15 +29,15 @@ class CPickupSA;
 
 class CPickupsSA : public CPickups
 {
-private:
 	CPickupSA			* Pickups[MAX_PICKUPS];
-public:
-						CPickupsSA  ( void );
-                        ~CPickupsSA ( void );
 
-	CPickup				* GetPickup(DWORD ID);
-	CPickup				* CreatePickup(CVector * position, DWORD ModelIndex, ePickupType Type, DWORD dwMonetaryValue, DWORD dwMoneyPerDay, BYTE bPingOutOfPlayer);
-    void                DisablePickupProcessing ( bool bDisabled );
+public:
+						CPickupsSA( void );
+                        ~CPickupsSA( void );
+
+	CPickup*			GetPickup( DWORD ID );
+	CPickup*			CreatePickup( const CVector& position, DWORD ModelIndex, ePickupType Type, DWORD dwMonetaryValue, DWORD dwMoneyPerDay, BYTE bPingOutOfPlayer );
+    void                DisablePickupProcessing( bool bDisabled );
 };
 
 #endif

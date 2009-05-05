@@ -24,7 +24,48 @@
 typedef Vectormath::Aos::Vector3	CVector3;
 typedef Vectormath::Aos::Vector4	CVector4;
 
-typedef CVector3					CVector;
+typedef CVector3 CVector;
+
+/*
+	Internal 3D vector wrapper
+
+	Unaligned 12-byte vector representation used for storage purposes. Do
+	not use outside of the game layer.
+*/
+
+class CVectorGTA {
+	float	m_fX;
+	float	m_fY;
+	float	m_fZ;
+
+public:
+	inline CVectorGTA( void ) : m_fX( 0 ), m_fY( 0 ), m_fZ( 0 ) {};
+
+	/*
+	inline CVector( const CVector& vector ) {
+		m_fX = vector.m_fX;
+		m_fY = vector.m_fY;
+		m_fZ = vector.m_fZ;
+	}
+
+	inline CVector( const CVector3& vector ) {
+		m_fX = vector.getX();
+		m_fY = vector.getY();
+		m_fZ = vector.getZ();
+	}
+	*/
+
+	inline const CVectorGTA& operator =( const CVector3& vector ) {
+		m_fX = vector.getX();
+		m_fY = vector.getY();
+		m_fZ = vector.getZ();
+		return *this;
+	}
+
+	static CVector3 unwrap( const CVectorGTA& vector ) {
+		return CVector3( vector.m_fX, vector.m_fY, vector.m_fZ );
+	}
+};
 
 #endif
 

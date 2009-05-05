@@ -41,10 +41,10 @@ public:
     short		m_slotID;
     short 		m_pivotBoneTag;
     short 		m_effectorBoneTag;
-    CVector		m_effectorVec;
+    CVectorGTA	m_effectorVec;
     CEntity*	m_pEntity;
     int		m_offsetBoneTag;
-    CVector		m_offsetPos;
+    CVectorGTA	m_offsetPos;
     float 		m_speed;
     unsigned char		m_nonNullEntity;
     // blending info
@@ -64,11 +64,11 @@ public:
                 CTaskSimpleIKChainSA ( void ) {};
                 CTaskSimpleIKChainSA ( char* idString,
                                         int effectorBoneTag,
-                                        CVector effectorVec,
+                                        const CVector& effectorVec,
                                         int pivotBoneTag,
                                         CEntity* pEntity,
                                         int offsetBoneTag,
-                                        CVector offsetPos,
+                                        const CVector& offsetPos,
                                         float speed,
                                         int time=99999999,
                                         int blendTime=1000 );
@@ -95,7 +95,7 @@ public:
                             CEntity* pEntity,
                             int time,
                             int offsetBoneTag,
-                            CVector offsetPos,
+                            const CVector& offsetPos,
                             unsigned char useTorso=false,
                             float speed=0.25f,
                             int blendTime=1000,
@@ -179,7 +179,7 @@ public:
     CTaskSimpleTriggerLookAtSA ( CEntity* pEntity,
                                  int time,
                                  int offsetBoneTag,
-                                 CVector offsetPos,
+                                 const CVector& offsetPos,
                                  unsigned char useTorso=false,
                                  float speed=0.25f,
                                  int blendTime=1000,

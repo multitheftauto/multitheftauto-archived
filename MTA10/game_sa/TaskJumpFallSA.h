@@ -48,7 +48,7 @@ public:
     unsigned char m_nSurfaceType;
 	char m_nFallAfterVault;
     float m_fHandholdHeading;
-    CVector m_vecHandholdPos;
+    CVectorGTA m_vecHandholdPos;
     CEntity *m_pClimbEnt;
     
     short m_nGetToPosCounter;
@@ -58,8 +58,8 @@ public:
 class CTaskSimpleClimbSA : public virtual CTaskSimpleSA, public virtual CTaskSimpleClimb
 {
 public:
-    CTaskSimpleClimbSA ( void ) {};
-	CTaskSimpleClimbSA ( CEntity *pClimbEnt, const CVector &vecTarget, float fHeading, unsigned char nSurfaceType, char nHeight = CLIMB_GRAB, const bool bForceClimb = false );
+    CTaskSimpleClimbSA( void ) {};
+	CTaskSimpleClimbSA( CEntity *pClimbEnt, const CVector &vecTarget, float fHeading, unsigned char nSurfaceType, char nHeight = CLIMB_GRAB, const bool bForceClimb = false );
 };
 
 
@@ -91,13 +91,13 @@ public:
 	float m_fLegSwingSideSpeed;
 	float m_fLegTwistSpeed;
 	
-	CVector m_vecOldSpeed;
+	CVectorGTA m_vecOldSpeed;
 	float m_fOldHeading;
 
 	RpClump *m_pJetPackClump;
 	CAnimBlendAssociation* m_pAnim;
 
-	CVector m_vecTargetPos;
+	CVectorGTA m_vecTargetPos;
 	float m_fCruiseHeight;
 	int m_nHoverTime;
 	unsigned int m_nStartHover;
@@ -111,8 +111,8 @@ public:
 class CTaskSimpleJetPackSA : public virtual CTaskSimpleSA, public virtual CTaskSimpleJetPack
 {
 public:
-    CTaskSimpleJetPackSA ( void ) {};
-	CTaskSimpleJetPackSA ( const CVector *pVecTargetPos, float fCruiseHeight = 10.0f, int nHoverTime = 0 );
+    CTaskSimpleJetPackSA( void ) {};
+	CTaskSimpleJetPackSA( const CVector& pVecTargetPos, float fCruiseHeight = 10.0f, int nHoverTime = 0 );
 };
 
 #endif

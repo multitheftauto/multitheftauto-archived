@@ -314,111 +314,112 @@ public:
 class CPedSA : public virtual CPed, public virtual CPhysicalSA
 {
 	friend class CPoolsSA;
-private:
-	CWeaponSA			* m_pWeapons[WEAPONSLOT_MAX];
-	CPedIKSA			* m_pPedIK;
-	CPedIntelligenceSA	* m_pPedIntelligence;
-    CPedSAInterface     * m_pPedInterface;
+
+	CWeaponSA*			m_pWeapons[WEAPONSLOT_MAX];
+	CPedIKSA*			m_pPedIK;
+	CPedIntelligenceSA*	m_pPedIntelligence;
+    CPedSAInterface*	m_pPedInterface;
     CPedSoundSA         m_PedSound;
 
 	DWORD				m_dwType;
     unsigned char       m_ucOccupiedSeat;
 public:
-	                    CPedSA(  );
+	                    CPedSA( void );
 	                    CPedSA( CPedSAInterface * pedInterface );
-                        ~CPedSA();
+                        ~CPedSA( void );
 
     void                SetInterface( CEntitySAInterface * intInterface );
-    CPedSAInterface *   GetPedInterface ( void ) { return ( CPedSAInterface * ) GetInterface (); }
-	void				Init();
-	void				SetModelIndex ( DWORD dwModelIndex );
-	void				AttachPedToBike(CEntity * entity, CVector * vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType);
-	void				AttachPedToEntity(DWORD dwEntityInterface, CVector * vector, unsigned short sDirection, FLOAT fRotationLimit, eWeaponType weaponType, bool bChangeCamera);
-    void                DetachPedFromEntity ( void );
+    CPedSAInterface *   GetPedInterface( void ) { return ( CPedSAInterface * ) GetInterface (); }
+
+	void				Init( void );
+	void				SetModelIndex( DWORD dwModelIndex );
+	void				AttachPedToBike( CEntity * entity, const CVector& vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType );
+	void				AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, unsigned short sDirection, FLOAT fRotationLimit, eWeaponType weaponType, bool bChangeCamera );
+    void                DetachPedFromEntity( void );
 	
-	bool				CanSeeEntity(CEntity * entity, FLOAT fDistance);
-	CVehicle			* GetVehicle();
-	void				Respawn (CVector * position, bool bCameraCut);
-    bool                AddProjectile ( eWeaponType eWeapon, CVector vecOrigin, float fForce, CVector * target, CEntity * targetEntity );
+	bool				CanSeeEntity( CEntity * entity, FLOAT fDistance );
+	CVehicle*			GetVehicle( void );
+	void				Respawn( const CVector& position, bool bCameraCut );
+    bool                AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity * targetEntity );
 
-	FLOAT				GetHealth       ( void );
-    void				SetHealth       ( float fHealth );
+	FLOAT				GetHealth( void );
+    void				SetHealth( float fHealth );
 
-    float               GetArmor        ( void );
-    void                SetArmor        ( float fArmor );
+    float               GetArmor( void );
+    void                SetArmor( float fArmor );
 
-    CWeapon *           GiveWeapon      ( eWeaponType weaponType, unsigned int uiAmmo );
-    CWeapon *           GetWeapon       ( eWeaponSlot weaponSlot );
-    CWeapon *           GetWeapon       ( eWeaponType weaponType );
-    void                ClearWeapons    ( void );
-    void                RemoveWeaponModel ( int iModel );
-    void                ClearWeapon     ( eWeaponType weaponType );
+    CWeapon*			GiveWeapon( eWeaponType weaponType, unsigned int uiAmmo );
+    CWeapon*			GetWeapon( eWeaponSlot weaponSlot );
+    CWeapon*			GetWeapon( eWeaponType weaponType );
+    void                ClearWeapons( void );
+    void                RemoveWeaponModel( int iModel );
+    void                ClearWeapon( eWeaponType weaponType );
 
 	void				SetIsStanding( bool bStanding );
-	CPedIntelligence	* GetPedIntelligence ( void );
-	DWORD				GetType ( void );
-	void				SetType ( DWORD dwType );
-    DWORD               * GetMemoryValue ( DWORD dwOffset );
+	CPedIntelligence*	GetPedIntelligence( void );
+	DWORD				GetType( void );
+	void				SetType( DWORD dwType );
+    DWORD*				GetMemoryValue( DWORD dwOffset );
 
-	FLOAT		        GetCurrentRotation();
-	FLOAT		        GetTargetRotation();
-	void		        SetCurrentRotation(FLOAT fRotation);
-	void		        SetTargetRotation(FLOAT fRotation);
+	FLOAT		        GetCurrentRotation( void );
+	FLOAT		        GetTargetRotation( void );
+	void		        SetCurrentRotation( FLOAT fRotation );
+	void		        SetTargetRotation( FLOAT fRotation );
 
-    eWeaponSlot         GetCurrentWeaponSlot ();
-    void                SetCurrentWeaponSlot ( eWeaponSlot weaponSlot );
+    eWeaponSlot         GetCurrentWeaponSlot( void );
+    void                SetCurrentWeaponSlot( eWeaponSlot weaponSlot );
 
-    CVector *           GetBonePosition ( eBone bone, CVector * vecPosition );
-    CVector *           GetTransformedBonePosition ( eBone bone, CVector * vecPosition );
+    const CVector		GetBonePosition( eBone bone );
+    const CVector		GetTransformedBonePosition( eBone bone );
 
-    bool                IsDucking ( void );
-    void                SetDucking ( bool bDuck );
+    bool                IsDucking( void );
+    void                SetDucking( bool bDuck );
 
-	bool				IsInWater ( void );
+	bool				IsInWater( void );
 
-    int                 GetCantBeKnockedOffBike ( void );
-    void                SetCantBeKnockedOffBike ( int iCantBeKnockedOffBike );
-    void                QuitEnteringCar ( CVehicle * vehicle, int iSeat, bool bUnknown );
+    int                 GetCantBeKnockedOffBike( void );
+    void                SetCantBeKnockedOffBike( int iCantBeKnockedOffBike );
+    void                QuitEnteringCar( CVehicle * vehicle, int iSeat, bool bUnknown );
 
-    bool                IsWearingGoggles ( void );
-    void                SetGogglesState ( bool bIsWearingThem );
+    bool                IsWearingGoggles( void );
+    void                SetGogglesState( bool bIsWearingThem );
 
-	void			    SetClothesTextureAndModel ( char * szTexture, char * szModel, int textureType );
-	void			    RebuildPlayer ( void );
+	void			    SetClothesTextureAndModel( char * szTexture, char * szModel, int textureType );
+	void			    RebuildPlayer( void );
 
-    eFightingStyle      GetFightingStyle ( void );
-    void                SetFightingStyle ( eFightingStyle style, BYTE bStyleExtra = 6 );
+    eFightingStyle      GetFightingStyle( void );
+    void                SetFightingStyle( eFightingStyle style, BYTE bStyleExtra = 6 );
 
-    CEntity*            GetContactEntity ( void );
+    CEntity*            GetContactEntity( void );
     
-    unsigned char       GetRunState ( void );
+    unsigned char       GetRunState( void );
 
-    CEntity*            GetTargetedEntity ( void );
-    void                SetTargetedEntity ( CEntity* pEntity );
+    CEntity*            GetTargetedEntity( void );
+    void                SetTargetedEntity( CEntity* pEntity );
 
-    bool                GetCanBeShotInVehicle       ( void );
-    bool                GetTestForShotInVehicle     ( void );
+    bool                GetCanBeShotInVehicle( void );
+    bool                GetTestForShotInVehicle( void );
 
-    void                SetCanBeShotInVehicle       ( bool bShot );
-    void                SetTestForShotInVehicle     ( bool bTest );
+    void                SetCanBeShotInVehicle( bool bShot );
+    void                SetTestForShotInVehicle( bool bTest );
 
-    bool                InternalAttachEntityToEntity ( DWORD dwEntityInterface, const CVector * vecPosition, const CVector * vecRotation );
+    bool                InternalAttachEntityToEntity( DWORD dwEntityInterface, const CVector& vecPosition, const CVector& vecRotation );
 
-    inline BYTE         GetOccupiedSeat ( void )                { return m_ucOccupiedSeat; }
-    inline void         SetOccupiedSeat ( BYTE seat )           { m_ucOccupiedSeat = seat; }
+    inline BYTE         GetOccupiedSeat( void )                { return m_ucOccupiedSeat; }
+    inline void         SetOccupiedSeat( BYTE seat )           { m_ucOccupiedSeat = seat; }
 
-    void                RemoveBodyPart ( int i, char c );
+    void                RemoveBodyPart( int i, char c );
 
-    bool                IsOnFire ( void );
-    void                SetOnFire ( bool bOnFire );
+    bool                IsOnFire( void );
+    void                SetOnFire( bool bOnFire );
 
-    inline bool         GetStayInSamePlace ( void )             { return GetPedInterface ()->pedFlags.bStayInSamePlace; }
-    void                SetStayInSamePlace ( bool bStay );
+    inline bool         GetStayInSamePlace( void )             { return GetPedInterface ()->pedFlags.bStayInSamePlace; }
+    void                SetStayInSamePlace( bool bStay );
 
-    void                GetVoice                ( short* psVoiceType, short* psVoiceID );
-    void                GetVoice                ( const char** pszVoiceType, const char** pszVoice );
-    void                SetVoice                ( short sVoiceType, short sVoiceID );
-    void                SetVoice                ( const char* szVoiceType, const char* szVoice );
+    void                GetVoice( short* psVoiceType, short* psVoiceID );
+    void                GetVoice( const char** pszVoiceType, const char** pszVoice );
+    void                SetVoice( short sVoiceType, short sVoiceID );
+    void                SetVoice( const char* szVoiceType, const char* szVoice );
 };
 
 #endif

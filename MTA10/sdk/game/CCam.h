@@ -18,13 +18,13 @@
 class CCam
 {
 public:
-	virtual CVector				* GetFront()=0;
-	virtual CVector				* GetUp()=0;
-	virtual CVector				* GetSource()=0;
-	virtual CVector				* GetFixedModeSource()=0;
-	virtual CVector				* GetFixedModeVector()=0;
-    virtual unsigned int        GetMode()=0;
-    virtual CEntity *           GetTargetEntity()=0;
+	virtual const CVector	GetFront( void ) = 0;
+	virtual const CVector	GetUp( void ) = 0;
+	virtual const CVector	GetSource( void ) = 0;
+	virtual const CVector	GetFixedModeSource( void ) = 0;
+	virtual const CVector	GetFixedModeVector( void ) = 0;
+    virtual unsigned int	GetMode( void ) = 0;
+    virtual CEntity*		GetTargetEntity( void ) = 0;
 };
 
 #endif

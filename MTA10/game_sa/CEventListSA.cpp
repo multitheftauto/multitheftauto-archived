@@ -13,17 +13,14 @@
 
 #include "StdInc.h"
 
-CEvent * CEventListSA::FindClosestEvent ( eEventType eventtype, CVector * vecPosition )
+CEvent* CEventListSA::FindClosestEvent( eEventType eventtype, const CVector& vecPosition )
 {
-	DEBUG_TRACE("CEvent * CEventListSA::FindClosestEvent ( eEventType eventtype, CVector * vecPosition )");
 	CEventSA * event;
 
-	CVector * vecPos = (CVector *)vecPosition;
-		
 	DWORD dwFunction = FUNC_FindClosestEvent;
-	FLOAT fX = vecPos->getX();
-	FLOAT fY = vecPos->getY();
-	FLOAT fZ = vecPos->getZ();
+	FLOAT fX = vecPosition.getX();
+	FLOAT fY = vecPosition.getY();
+	FLOAT fZ = vecPosition.getZ();
 	DWORD dwReturn;
 	_asm
 	{

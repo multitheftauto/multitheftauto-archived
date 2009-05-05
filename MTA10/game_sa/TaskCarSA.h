@@ -57,7 +57,7 @@ public:
     unsigned char m_nNumGettingInSet;
     unsigned char m_nCamMovementChoice;
 
-    CVector m_vTargetDoorPos;
+    CVectorGTA m_vTargetDoorPos;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     bool m_bIsAborting;
     CPed* m_pDraggedPed;

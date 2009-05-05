@@ -26,9 +26,10 @@
 
 class CEventListSA : public CEventList
 {
-	CEvent			* FindClosestEvent ( eEventType eventtype, CVector * vecPosition );
-	CEvent			* GetEvent ( DWORD ID );
-	CEvent			* GetEvent ( eEventType eventtype );
+public:
+	CEvent*			FindClosestEvent( eEventType eventtype, const CVector& vecPosition );
+	CEvent*			GetEvent( DWORD ID );
+	CEvent*			GetEvent( eEventType eventtype );
 };
 
 #endif
