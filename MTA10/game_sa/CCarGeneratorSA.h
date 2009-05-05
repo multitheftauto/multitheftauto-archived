@@ -54,29 +54,29 @@ public:
 	CCarGeneratorSA(CCarGeneratorSAInterface * CarGeneratorInterface) { this->internalInterface = CarGeneratorInterface; }
 
 	DWORD		GetModelIndex();
-	VOID		SetModelIndex(DWORD dwModelIndex);
+	void		SetModelIndex(DWORD dwModelIndex);
 	CVector		* GetPosition(CVector * position);
-	VOID		SetPosition(CVector * position);
+	void		SetPosition(CVector * position);
 	BYTE		GetChanceOfCarAlarm();
-	VOID		SetChanceOfCarAlarm(BYTE bChance);
+	void		SetChanceOfCarAlarm(BYTE bChance);
 	BYTE		GetChanceOfCarLocked();
-	VOID		SetChanceOfCarLocked(BYTE bChance);
-	BOOL		GetWaitUntilFarFromPlayer();
-	VOID		SetWaitUntilFarFromPlayer(BOOL bWaitUntilFarFromPlayer);
-	BOOL		IsHighPriority();
-	VOID		SetHighPriority(BOOL bHighPriority);
-	BOOL		IsActive();
-	VOID		SetActive(BOOL bActive);
-	BOOL		HasPlayerAlreadyOwnedCar();
-	VOID		SetHasPlayerAlreadyOwnedCar(BOOL bAlreadyOwnedByPlayer);
-	BOOL		GetIgnorePopulationLimit();
-	VOID		SetIgnorePopulationLimit(BOOL bIgnorePopulationLimit);
+	void		SetChanceOfCarLocked(BYTE bChance);
+	bool		GetWaitUntilFarFromPlayer();
+	void		SetWaitUntilFarFromPlayer(bool bWaitUntilFarFromPlayer);
+	bool		IsHighPriority();
+	void		SetHighPriority(bool bHighPriority);
+	bool		IsActive();
+	void		SetActive(bool bActive);
+	bool		HasPlayerAlreadyOwnedCar();
+	void		SetHasPlayerAlreadyOwnedCar(bool bAlreadyOwnedByPlayer);
+	bool		GetIgnorePopulationLimit();
+	void		SetIgnorePopulationLimit(bool bIgnorePopulationLimit);
 	DWORD		GetMinimumDelay();
-	VOID		SetMinimumDelay(DWORD dwMinimumDelay);
+	void		SetMinimumDelay(DWORD dwMinimumDelay);
 	DWORD		GetMaximumDelay();
-	VOID		SetMaximumDelay(DWORD dwMaximumDelay);
+	void		SetMaximumDelay(DWORD dwMaximumDelay);
 	DWORD		GetNextGenTime();
-	VOID		SetNextGenTime(DWORD dwNextGenTime);
+	void		SetNextGenTime(DWORD dwNextGenTime);
 };
 
 #endif

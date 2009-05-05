@@ -328,7 +328,7 @@ public:
 	                    CPedSA( CPedSAInterface * pedInterface );
                         ~CPedSA();
 
-    VOID                SetInterface( CEntitySAInterface * intInterface );
+    void                SetInterface( CEntitySAInterface * intInterface );
     CPedSAInterface *   GetPedInterface ( void ) { return ( CPedSAInterface * ) GetInterface (); }
 	void				Init();
 	void				SetModelIndex ( DWORD dwModelIndex );

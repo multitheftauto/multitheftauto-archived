@@ -68,9 +68,9 @@ void CPlayerInfoSA::SetPlayerMoney ( long lMoney )
 /**
  *
  */
-VOID CPlayerInfoSA::GivePlayerParachute ( VOID )
+void CPlayerInfoSA::GivePlayerParachute ( void )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::GivePlayerParachute ( VOID )");
+	DEBUG_TRACE("void CPlayerInfoSA::GivePlayerParachute ( void )");
 	DWORD dwFunction = FUNC_GivePlayerParachute;
 	_asm {
 		call dwFunction
@@ -80,9 +80,9 @@ VOID CPlayerInfoSA::GivePlayerParachute ( VOID )
 /**
  *
  */
-VOID CPlayerInfoSA::StreamParachuteWeapon ( bool bAllowParachute )
+void CPlayerInfoSA::StreamParachuteWeapon ( bool bAllowParachute )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::StreamParachuteWeapon ( bool bAllowParachute )");
+	DEBUG_TRACE("void CPlayerInfoSA::StreamParachuteWeapon ( bool bAllowParachute )");
 	DWORD dwFunction = FUNC_StreamParachuteWeapon;
 	_asm {
 		push bAllowParachute
@@ -95,9 +95,9 @@ VOID CPlayerInfoSA::StreamParachuteWeapon ( bool bAllowParachute )
  * \todo Find out what this function actually does.
  * @param boolSafe TRUE if the player is to be made safe, FALSE to make them unsafe
  */
-VOID CPlayerInfoSA::MakePlayerSafe ( BOOL boolSafe )
+void CPlayerInfoSA::MakePlayerSafe ( bool boolSafe )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::MakePlayerSafe ( BOOL boolSafe )");
+	DEBUG_TRACE("void CPlayerInfoSA::MakePlayerSafe ( bool boolSafe )");
 	DWORD dwFunction = FUNC_MakePlayerSafe;
 	_asm
 	{
@@ -111,9 +111,9 @@ VOID CPlayerInfoSA::MakePlayerSafe ( BOOL boolSafe )
  * @param vehicle The vehicle you want to stop them entering
  * \todo Find out what this really does...
  */
-VOID CPlayerInfoSA::CancelPlayerEnteringCars ( CVehicle * vehicle )
+void CPlayerInfoSA::CancelPlayerEnteringCars ( CVehicle * vehicle )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::CancelPlayerEnteringCars ( CVehicle * vehicle )");
+	DEBUG_TRACE("void CPlayerInfoSA::CancelPlayerEnteringCars ( CVehicle * vehicle )");
 	DWORD dwFunction = FUNC_CancelPlayerEnteringCars;
 	_asm
 	{
@@ -127,9 +127,9 @@ VOID CPlayerInfoSA::CancelPlayerEnteringCars ( CVehicle * vehicle )
  * @see CRestartSA::OverrideNextRestart
  * @see CRestartSA::AddPoliceRestartPoint
  */
-VOID CPlayerInfoSA::ArrestPlayer (  )
+void CPlayerInfoSA::ArrestPlayer (  )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::ArrestPlayer (  )");
+	DEBUG_TRACE("void CPlayerInfoSA::ArrestPlayer (  )");
 	DWORD dwFunction = FUNC_ArrestPlayer;
 	_asm
 	{
@@ -142,9 +142,9 @@ VOID CPlayerInfoSA::ArrestPlayer (  )
  * @see CRestartSA::OverrideNextRestart
  * @see CRestartSA::AddHospitalRestartPoint
  */
-VOID CPlayerInfoSA::KillPlayer (  )
+void CPlayerInfoSA::KillPlayer (  )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::KillPlayer (  )");
+	DEBUG_TRACE("void CPlayerInfoSA::KillPlayer (  )");
 	DWORD dwFunction = FUNC_KillPlayer;
 	_asm
 	{
@@ -186,9 +186,9 @@ CVehicle * CPlayerInfoSA::GivePlayerRemoteControlledCar ( eVehicleTypes vehiclet
 /**
  * Stops the player from controlling an RC vehicle
  */
-VOID CPlayerInfoSA::TakeRemoteControlledCarFromPlayer (  )
+void CPlayerInfoSA::TakeRemoteControlledCarFromPlayer (  )
 {
-	DEBUG_TRACE("VOID CPlayerInfoSA::TakeRemoteControlledCarFromPlayer (  )");
+	DEBUG_TRACE("void CPlayerInfoSA::TakeRemoteControlledCarFromPlayer (  )");
 	DWORD dwFunction = FUNC_TakeRemoteControlledCarFromPlayer;
 	_asm
 	{

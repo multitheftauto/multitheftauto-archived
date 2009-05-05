@@ -268,19 +268,19 @@ public:
 
     void            GetCrossHair ( bool &bActivated, float &fTargetX, float &fTargetY );
 
-	VOID			GivePlayerParachute ( VOID );
-	VOID			StreamParachuteWeapon ( bool bAllowParachute );
+	void			GivePlayerParachute ( void );
+	void			StreamParachuteWeapon ( bool bAllowParachute );
 
 	short			GetLastTimeEaten ( void );
 	void			SetLastTimeEaten ( short sTime );
 
-	VOID			MakePlayerSafe ( BOOL boolSafe );
-	VOID			CancelPlayerEnteringCars ( CVehicle * vehicle );
-	VOID			ArrestPlayer (  );
-	VOID			KillPlayer (  );
+	void			MakePlayerSafe ( bool boolSafe );
+	void			CancelPlayerEnteringCars ( CVehicle * vehicle );
+	void			ArrestPlayer (  );
+	void			KillPlayer (  );
 
 	CVehicle		* GivePlayerRemoteControlledCar ( eVehicleTypes vehicletype );	// these are really members of CRemote, but they make more sense here
-	VOID			TakeRemoteControlledCarFromPlayer (  );
+	void			TakeRemoteControlledCarFromPlayer (  );
 	CVehicle		* GetPlayerRemoteControlledCar (  );
 
     float           GetFPSMoveHeading ( void );

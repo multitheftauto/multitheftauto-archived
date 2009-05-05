@@ -20,13 +20,13 @@ extern CGameSA * pGame;
 
 unsigned long CEntitySA::FUNC_CClumpModelInfo__GetFrameFromId;
 unsigned long CEntitySA::FUNC_RwFrameGetLTM;
-/*VOID CEntitySA::SetModelAlpha ( int iAlpha )
+/*void CEntitySA::SetModelAlpha ( int iAlpha )
 {
 	this->internalInterface->ModelClump->SetAlpha(iAlpha);
 }*/
-VOID CEntitySA::SetPosition( const CVector& vecPosition )
+void CEntitySA::SetPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("VOID CEntitySA::SetPosition( const CVector& vecPosition )");
+	DEBUG_TRACE("void CEntitySA::SetPosition( const CVector& vecPosition )");
 
 	if ( m_pInterface->Placeable.matrix )
     {
@@ -52,9 +52,9 @@ VOID CEntitySA::SetPosition( const CVector& vecPosition )
 }
 
 /*
-VOID CEntitySA::Teleport ( float fX, float fY, float fZ )
+void CEntitySA::Teleport ( float fX, float fY, float fZ )
 {
-    DEBUG_TRACE("VOID CEntitySA::Teleport ( float fX, float fY, float fZ )");
+    DEBUG_TRACE("void CEntitySA::Teleport ( float fX, float fY, float fZ )");
     if ( m_pInterface->Placeable.matrix )
     {
         SetPosition ( fX, fY, fZ );
@@ -78,9 +78,9 @@ VOID CEntitySA::Teleport ( float fX, float fY, float fZ )
 }
 */
 
-VOID CEntitySA::ProcessControl ( void )
+void CEntitySA::ProcessControl ( void )
 {
-    DEBUG_TRACE("VOID CEntitySA::ProcessControl ( void )");
+    DEBUG_TRACE("void CEntitySA::ProcessControl ( void )");
 	DWORD dwFunc = m_pInterface->vtbl->ProcessControl;
 	DWORD dwThis = (DWORD) m_pInterface;
 	if ( dwFunc )
@@ -93,9 +93,9 @@ VOID CEntitySA::ProcessControl ( void )
 	}
 }
 
-VOID CEntitySA::SetupLighting ( )
+void CEntitySA::SetupLighting ( )
 {
-    DEBUG_TRACE("VOID CEntitySA::SetupLighting ( )");
+    DEBUG_TRACE("void CEntitySA::SetupLighting ( )");
 	DWORD dwFunc = m_pInterface->vtbl->SetupLighting;
 	DWORD dwThis = (DWORD) m_pInterface;
 	if ( dwFunc )
@@ -108,9 +108,9 @@ VOID CEntitySA::SetupLighting ( )
 	}
 }
 
-VOID CEntitySA::Render ( )
+void CEntitySA::Render ( )
 {
-    DEBUG_TRACE("VOID CEntitySA::Render ( )");
+    DEBUG_TRACE("void CEntitySA::Render ( )");
 	DWORD dwFunc = 0x59F180; //m_pInterface->vtbl->Render;
 	DWORD dwThis = (DWORD) m_pInterface;
 	_asm
@@ -133,9 +133,9 @@ VOID CEntitySA::Render ( )
 }
 
 
-VOID CEntitySA::SetOrientation ( float fX, float fY, float fZ )
+void CEntitySA::SetOrientation ( float fX, float fY, float fZ )
 {
-    DEBUG_TRACE("VOID CEntitySA::SetOrientation ( float fX, float fY, float fZ )");
+    DEBUG_TRACE("void CEntitySA::SetOrientation ( float fX, float fY, float fZ )");
 	pGame->GetWorld()->Remove ( this );
 	DWORD dwThis = (DWORD) m_pInterface;
 	DWORD dwFunc = FUNC_SetOrientation;
@@ -168,9 +168,9 @@ VOID CEntitySA::SetOrientation ( float fX, float fY, float fZ )
 	pGame->GetWorld()->Add ( this );
 }
 
-VOID CEntitySA::FixBoatOrientation ( void )
+void CEntitySA::FixBoatOrientation ( void )
 {
-    DEBUG_TRACE("VOID CEntitySA::FixBoatOrientation ( void )");
+    DEBUG_TRACE("void CEntitySA::FixBoatOrientation ( void )");
 	pGame->GetWorld()->Remove ( this );
 	DWORD dwThis = (DWORD) m_pInterface;
 	DWORD dwFunc = 0x446F90;
@@ -210,9 +210,9 @@ CMatrix4& CEntitySA::GetMatrix ( CMatrix4& matrix )
 	return matrix;
 }
 
-VOID CEntitySA::SetMatrix ( const CMatrix4& matrix )
+void CEntitySA::SetMatrix ( const CMatrix4& matrix )
 {
-	DEBUG_TRACE("VOID CEntitySA::SetMatrix ( const CMatrix& matrix )");
+	DEBUG_TRACE("void CEntitySA::SetMatrix ( const CMatrix& matrix )");
     if ( m_pInterface->Placeable.matrix )
     {
 		*(m_pInterface->Placeable.matrix) = matrix;
@@ -280,9 +280,9 @@ FLOAT CEntitySA::GetDistanceFromCentreOfMassToBaseOfModel()
 	return fReturn;
 }	
 
-VOID CEntitySA::SetEntityStatus( eEntityStatus bStatus )
+void CEntitySA::SetEntityStatus( eEntityStatus bStatus )
 {
-	DEBUG_TRACE("VOID CEntitySA::SetEntityStatus( eEntityStatus bStatus )");
+	DEBUG_TRACE("void CEntitySA::SetEntityStatus( eEntityStatus bStatus )");
 	m_pInterface->nStatus = bStatus;
 }
 
@@ -326,9 +326,9 @@ RwMatrix * CEntitySA::GetLTMFromId ( int id )
     return (RwMatrix *)dwReturn;
 }
 
-VOID CEntitySA::SetAlpha(DWORD dwAlpha)
+void CEntitySA::SetAlpha(DWORD dwAlpha)
 {
-	DEBUG_TRACE("VOID CEntitySA::SetAlpha(DWORD dwAlpha)");
+	DEBUG_TRACE("void CEntitySA::SetAlpha(DWORD dwAlpha)");
 	DWORD dwFunc = FUNC_SetRwObjectAlpha;
 	DWORD dwThis = (DWORD) m_pInterface;
 	_asm

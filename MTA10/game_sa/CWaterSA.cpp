@@ -26,19 +26,19 @@ WORD CWaterVertexSA::GetID ()
 
 void CWaterVertexSA::GetPosition ( CVector& vec )
 {
-    vec.fX = (float)m_pInterface->m_sX;
-    vec.fY = (float)m_pInterface->m_sY;
-    vec.fZ = m_pInterface->m_fZ;
+    vec.setX( (float)m_pInterface->m_sX );
+    vec.setY( (float)m_pInterface->m_sY );
+    vec.setZ( m_pInterface->m_fZ );
 }
 
-bool CWaterVertexSA::SetPosition ( CVector& vec, void* pChangeSource )
+bool CWaterVertexSA::SetPosition ( const CVector& vec, void* pChangeSource )
 {
     if ( pChangeSource )
         g_pWaterManager->AddChange ( pChangeSource, this, new CWaterChangeVertexMove ( this ) );
     
-    m_pInterface->m_sX = ((short)vec.fX) & ~1;
-    m_pInterface->m_sY = ((short)vec.fY) & ~1;
-    m_pInterface->m_fZ = vec.fZ;
+    m_pInterface->m_sX = ((short)vec.getX()) & ~1;
+    m_pInterface->m_sY = ((short)vec.getY()) & ~1;
+    m_pInterface->m_fZ = vec.getZ();
     return true;
 }
 
@@ -101,8 +101,8 @@ bool CWaterPolySA::ContainsPoint ( float fX, float fY )
         pFrom->GetPosition ( vecFrom );
         pTo->GetPosition ( vecTo );
         
-        if ( (vecFrom.fY > fY) != (vecTo.fY > fY) &&
-             fX < vecFrom.fX + (vecTo.fX - vecFrom.fX) * (fY - vecFrom.fX) / (vecTo.fY - vecFrom.fY) )
+        if ( (vecFrom.getY() > fY) != (vecTo.getY() > fY) &&
+             fX < vecFrom.getX() + (vecTo.getX() - vecFrom.getX()) * (fY - vecFrom.getX()) / (vecTo.getY() - vecFrom.getY()) )
            bInside = !bInside;
     }
     return bInside;

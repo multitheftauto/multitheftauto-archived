@@ -48,11 +48,11 @@ public:
 	CMarker				* GetFreeMarker(  );
 	CMarker				* GetMarker( DWORD dwMarkerID );
 
-	VOID				ClearMarkerForEntity(CVehicle * vehicle);
-	VOID				ClearMarkerForEntity(CObject * object);
-	VOID				ClearMarkerForEntity(CPed * ped);
+	void				ClearMarkerForEntity(CVehicle * vehicle);
+	void				ClearMarkerForEntity(CObject * object);
+	void				ClearMarkerForEntity(CPed * ped);
 
-    VOID                DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD abgr );
+    void                DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD abgr );
 };
 
 #endif

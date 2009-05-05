@@ -146,18 +146,18 @@ CVehicleSA::~CVehicleSA()
 	}
 }
 
-VOID CVehicleSA::SetMoveSpeed ( CVector* vecMoveSpeed )
+void CVehicleSA::SetMoveSpeed ( const CVector& vecMoveSpeed )
 {
     DWORD dwFunc = FUNC_GetMoveSpeed;
     DWORD dwThis = (DWORD)this->GetInterface();
-    DWORD dwReturn = 0;
+    CVector *vecReturn = NULL;
     _asm
     {
         mov		ecx, dwThis
         call	dwFunc
-        mov		dwReturn, eax
+        mov		vecReturn, eax
     }
-    memcpy((void *)dwReturn, vecMoveSpeed, sizeof(CVector));
+	*vecReturn = vecMoveSpeed;
 
     // In case of train: calculate on-rail speed
     WORD wModelID = GetModelIndex();

@@ -17,7 +17,7 @@
 
 void CWorldSA::Add ( CEntity * pEntity )
 {
-	DEBUG_TRACE("VOID CWorldSA::Add ( CEntity * pEntity )");
+	DEBUG_TRACE("void CWorldSA::Add ( CEntity * pEntity )");
 
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( pEntity );
 
@@ -37,7 +37,7 @@ void CWorldSA::Add ( CEntity * pEntity )
 
 void CWorldSA::Add ( CEntitySAInterface * entityInterface )
 {
-	DEBUG_TRACE("VOID CWorldSA::Add ( CEntitySAInterface * entityInterface )");
+	DEBUG_TRACE("void CWorldSA::Add ( CEntitySAInterface * entityInterface )");
 	DWORD dwFunction = FUNC_Add;
 	_asm
 	{
@@ -49,7 +49,7 @@ void CWorldSA::Add ( CEntitySAInterface * entityInterface )
 
 void CWorldSA::Remove ( CEntity * pEntity )
 {
-	DEBUG_TRACE("VOID CWorldSA::Remove ( CEntity * entity )");
+	DEBUG_TRACE("void CWorldSA::Remove ( CEntity * entity )");
 
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( pEntity );
 
@@ -68,7 +68,7 @@ void CWorldSA::Remove ( CEntity * pEntity )
 
 void CWorldSA::Remove ( CEntitySAInterface * entityInterface )
 {
-	DEBUG_TRACE("VOID CWorldSA::Remove ( CEntitySAInterface * entityInterface )");
+	DEBUG_TRACE("void CWorldSA::Remove ( CEntitySAInterface * entityInterface )");
 	DWORD dwFunction = FUNC_Remove;
 	_asm
 	{
@@ -131,7 +131,7 @@ bool CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoin
 								  bool bSeeThroughStuff, bool bIgnoreSomeObjectsForCamera, 
 								  bool bShootThroughStuff )
 {
-	DEBUG_TRACE("VOID CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoint * colCollision, CEntity * CollisionEntity)");
+	DEBUG_TRACE("void CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoint * colCollision, CEntity * CollisionEntity)");
   	DWORD dwPadding[100]; // stops the function missbehaving and overwriting the return address
     dwPadding [0] = 0;  // prevent the warning and eventual compiler optimizations from removing it
 
@@ -217,7 +217,7 @@ bool CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoin
 
 void CWorldSA::IgnoreEntity(CEntity * pEntity)
 {
-	DEBUG_TRACE("VOID CWorldSA::IgnoreEntity(CEntity * entity)");
+	DEBUG_TRACE("void CWorldSA::IgnoreEntity(CEntity * entity)");
 
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( pEntity );
 
@@ -283,7 +283,7 @@ float CWorldSA::FindGroundZFor3DPosition(CVector * vecPosition)
 
 void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)
 {
-	DEBUG_TRACE("VOID CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)");
+	DEBUG_TRACE("void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)");
 	DWORD dwFunc = FUNC_CTimer_Stop;
 	_asm
 	{

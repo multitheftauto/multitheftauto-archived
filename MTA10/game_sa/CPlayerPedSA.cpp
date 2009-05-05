@@ -263,10 +263,10 @@ void CPlayerPedSA::SetMoveAnim ( eMoveAnim iAnimGroup )
 /**
  * Checks if the player is stationary on foot
  * \todo Does this duplicate?
- * @return BOOL TRUE if the player is stationary on foot, FALSE otherwise
+ * @return bool TRUE if the player is stationary on foot, FALSE otherwise
  */
 /*
-BOOL CPlayerPedSA::IsStationaryOnFoot (  )
+bool CPlayerPedSA::IsStationaryOnFoot (  )
 {
 	return internalInterface->StationaryOnFoot;
 }*/
@@ -276,7 +276,7 @@ BOOL CPlayerPedSA::IsStationaryOnFoot (  )
  * \note This also resets some global values, such as game speed
  */
 /*
-VOID CPlayerPedSA::ResetToInitialState (  )
+void CPlayerPedSA::ResetToInitialState (  )
 {
 	DWORD dwFunction = FUNC_SetInitialState;
 	DWORD dwThis = (DWORD)internalInterface;
@@ -291,7 +291,7 @@ VOID CPlayerPedSA::ResetToInitialState (  )
  * Clears information related to the player targeting
  */
 /*
-VOID CPlayerPedSA::ClearWeaponTarget (  )
+void CPlayerPedSA::ClearWeaponTarget (  )
 {
 	DWORD dwFunction = FUNC_ClearWeaponTarget;
 	DWORD dwThis = (DWORD)internalInterface;

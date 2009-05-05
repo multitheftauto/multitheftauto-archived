@@ -15,9 +15,9 @@
 /**
  * Prevent the next restart from being overridden and instead use the closest police or hospital restart point
  */
-VOID CRestartSA::CancelOverrideRestart (  )
+void CRestartSA::CancelOverrideRestart (  )
 {
-	DEBUG_TRACE("VOID CRestartSA::CancelOverrideRestart (  )");
+	DEBUG_TRACE("void CRestartSA::CancelOverrideRestart (  )");
 	*(BYTE *)VAR_OverrideNextRestart = 0;
 }
 
@@ -27,9 +27,9 @@ VOID CRestartSA::CancelOverrideRestart (  )
  * @param vecPosition CVector * containing the position to restart at
  * @param fRotation Rotation in radians to face once restarted
  */
-VOID CRestartSA::OverrideNextRestart ( CVector * vecPosition, FLOAT fRotation )
+void CRestartSA::OverrideNextRestart ( CVector * vecPosition, FLOAT fRotation )
 {
-	DEBUG_TRACE("VOID CRestartSA::OverrideNextRestart ( CVector * vecPosition, FLOAT fRotation )");
+	DEBUG_TRACE("void CRestartSA::OverrideNextRestart ( CVector * vecPosition, FLOAT fRotation )");
 	*(BYTE *)VAR_OverrideNextRestart = 1;
 	memcpy((void *)VAR_OverrideNextRestartPosition, vecPosition, sizeof(CVector));
 	*(FLOAT *)VAR_OverrideNextRestartRotation = fRotation;
@@ -41,9 +41,9 @@ VOID CRestartSA::OverrideNextRestart ( CVector * vecPosition, FLOAT fRotation )
  * @param vecClosestRestartPoint CVector * that returns the position of the closest restart point
  * @param fRotation FLOAT * that returns the rotation at which the restart point restarts the player
  */
-VOID CRestartSA::FindClosestPoliceRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )
+void CRestartSA::FindClosestPoliceRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )
 {
-	DEBUG_TRACE("VOID CRestartSA::FindClosestPoliceRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )");
+	DEBUG_TRACE("void CRestartSA::FindClosestPoliceRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )");
 	DWORD dwFunction = FUNC_FindClosestPoliceRestartPoint;
 	_asm
 	{
@@ -61,9 +61,9 @@ VOID CRestartSA::FindClosestPoliceRestartPoint ( CVector * vecClosestTo, CVector
  * @param vecClosestRestartPoint CVector * that returns the position of the closest restart point
  * @param fRotation FLOAT * that returns the rotation at which the restart point restarts the player
  */
-VOID CRestartSA::FindClosestHospitalRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )
+void CRestartSA::FindClosestHospitalRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )
 {
-	DEBUG_TRACE("VOID CRestartSA::FindClosestHospitalRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )");
+	DEBUG_TRACE("void CRestartSA::FindClosestHospitalRestartPoint ( CVector * vecClosestTo, CVector * vecClosestRestartPoint, FLOAT * fRotation )");
 	DWORD dwFunction = FUNC_FindClosestHospitalRestartPoint;
 	_asm
 	{
@@ -81,9 +81,9 @@ VOID CRestartSA::FindClosestHospitalRestartPoint ( CVector * vecClosestTo, CVect
  * @param vecPosition CVector * containing the desired position for the restart point
  * @param fRotation FLOAT containing the desired initial rotation for the player
  */
-VOID CRestartSA::AddPoliceRestartPoint ( CVector * vecPosition, FLOAT fRotation )
+void CRestartSA::AddPoliceRestartPoint ( CVector * vecPosition, FLOAT fRotation )
 {
-	DEBUG_TRACE("VOID CRestartSA::AddPoliceRestartPoint ( CVector * vecPosition, FLOAT fRotation )");
+	DEBUG_TRACE("void CRestartSA::AddPoliceRestartPoint ( CVector * vecPosition, FLOAT fRotation )");
 	DWORD dwFunction = FUNC_AddPoliceRestartPoint;
 	_asm
 	{
@@ -100,9 +100,9 @@ VOID CRestartSA::AddPoliceRestartPoint ( CVector * vecPosition, FLOAT fRotation 
  * @param vecPosition CVector * containing the desired position for the restart point
  * @param fRotation FLOAT containing the desired initial rotation for the player
  */
-VOID CRestartSA::AddHospitalRestartPoint ( CVector * vecPosition, FLOAT fRotation )
+void CRestartSA::AddHospitalRestartPoint ( CVector * vecPosition, FLOAT fRotation )
 {
-	DEBUG_TRACE("VOID CRestartSA::AddHospitalRestartPoint ( CVector * vecPosition, FLOAT fRotation )");
+	DEBUG_TRACE("void CRestartSA::AddHospitalRestartPoint ( CVector * vecPosition, FLOAT fRotation )");
 	DWORD dwFunction = FUNC_AddHospitalRestartPoint;
 	_asm
 	{
@@ -115,34 +115,34 @@ VOID CRestartSA::AddHospitalRestartPoint ( CVector * vecPosition, FLOAT fRotatio
 
 /**
  * Checks if the player is in the process of respawning after being arrested
- * @return BOOL TRUE if they have just been arested and not yet respawned, FALSE otherwise.
+ * @return bool TRUE if they have just been arested and not yet respawned, FALSE otherwise.
  */
-BOOL CRestartSA::IsRestartingAfterArrest  (  )
+bool CRestartSA::IsRestartingAfterArrest  (  )
 {
-	DEBUG_TRACE("BOOL CRestartSA::IsRestartingAfterArrest  (  )");
+	DEBUG_TRACE("bool CRestartSA::IsRestartingAfterArrest  (  )");
 	DWORD dwFunction = FUNC_IsRestartingAfterArrest;
-	DWORD dwReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		call	dwFunction
-		mov		dwReturn, eax
+		mov		bReturn, al
 	}
-	return dwReturn;
+	return bReturn;
 }
 
 /**
  * Checks if the player is in the process of respawning after dying
- * @return BOOL TRUE if they have just died and not yet respawned, FALSE otherwise.
+ * @return bool TRUE if they have just died and not yet respawned, FALSE otherwise.
  */
-BOOL CRestartSA::IsRestartingAfterDeath (  )
+bool CRestartSA::IsRestartingAfterDeath (  )
 {
-	DEBUG_TRACE("BOOL CRestartSA::IsRestartingAfterDeath (  )");
+	DEBUG_TRACE("bool CRestartSA::IsRestartingAfterDeath (  )");
 	DWORD dwFunction = FUNC_IsRestartingAfterDeath;
-	DWORD dwReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		call	dwFunction
-		mov		dwReturn, eax
+		mov		bReturn, al
 	}
-	return dwReturn;
+	return bReturn;
 }

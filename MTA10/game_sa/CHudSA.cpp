@@ -15,9 +15,9 @@
 char szVehicleName[50] = {'\0'};
 char szZoneName[50] = {'\0'};
 
-VOID CHudSA::SetHelpMessage( char * szMessage )
+void CHudSA::SetHelpMessage( char * szMessage )
 {
-	DEBUG_TRACE("VOID CHudSA::SetHelpMessage( char * szMessage )");
+	DEBUG_TRACE("void CHudSA::SetHelpMessage( char * szMessage )");
 	wchar_t szHelp[255] = {'\0'};
 	MultiByteToWideChar(CP_ACP, 0, szMessage, -1, szHelp, 255);
 
@@ -36,9 +36,9 @@ VOID CHudSA::SetHelpMessage( char * szMessage )
 /**
  * \todo Find out what param 2 is
  */
-VOID CHudSA::SetBigMessage( char * szBigMessage )
+void CHudSA::SetBigMessage( char * szBigMessage )
 {
-	DEBUG_TRACE("VOID CHudSA::SetBigMessage( char * szBigMessage )");
+	DEBUG_TRACE("void CHudSA::SetBigMessage( char * szBigMessage )");
 	wchar_t wszBigMessage[255] = {'\0'};
 	MultiByteToWideChar(CP_ACP, 0, szBigMessage, -1, wszBigMessage, 255);
 
@@ -56,9 +56,9 @@ VOID CHudSA::SetBigMessage( char * szBigMessage )
 /** 
  * \todo Fix: doesn't work
  */
-VOID CHudSA::SetVehicleName( char * szName )
+void CHudSA::SetVehicleName( char * szName )
 {
-	DEBUG_TRACE("VOID CHudSA::SetVehicleName( char * szName )");
+	DEBUG_TRACE("void CHudSA::SetVehicleName( char * szName )");
 	char * szVehicleNamePtr = (char *)VAR_VehicleNamePtr;
 	if(szName != 0)
 	{
@@ -79,9 +79,9 @@ VOID CHudSA::SetVehicleName( char * szName )
 /** 
  * \todo Fix: doesn't work
  */
-VOID CHudSA::SetZoneName( char * szName )
+void CHudSA::SetZoneName( char * szName )
 {
-	DEBUG_TRACE("VOID CHudSA::SetZoneName( char * szName )");
+	DEBUG_TRACE("void CHudSA::SetZoneName( char * szName )");
 	char * szZoneNamePtr = (char *)VAR_ZoneNamePtr;
 	if(szName != 0)
 	{
@@ -97,9 +97,9 @@ VOID CHudSA::SetZoneName( char * szName )
 	}
 }
 
-VOID CHudSA::Disable ( bool bDisabled )
+void CHudSA::Disable ( bool bDisabled )
 {
-	DEBUG_TRACE("VOID CHudSA::Disable ( bool bDisabled )");
+	DEBUG_TRACE("void CHudSA::Disable ( bool bDisabled )");
 	if ( bDisabled )
 		*(BYTE *)FUNC_Draw = 0xC3;
 	else
@@ -107,7 +107,7 @@ VOID CHudSA::Disable ( bool bDisabled )
 
 }
 
-VOID CHudSA::DrawBarChart ( float fX, float fY, DWORD dwWidth, DWORD dwHeight, float fPercentage, DWORD dwForeColor, DWORD dwBorderColor )
+void CHudSA::DrawBarChart ( float fX, float fY, DWORD dwWidth, DWORD dwHeight, float fPercentage, DWORD dwForeColor, DWORD dwBorderColor )
 {
     DWORD dwFunc= FUNC_DrawBarChart;
     _asm

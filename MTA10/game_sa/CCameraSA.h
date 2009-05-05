@@ -174,7 +174,7 @@ public:
 										// the active camera or the worldviewer camera
 	unsigned int	m_uiCamShakeStart;			// When did the camera shake start.
 	unsigned int 	m_uiFirstPersonCamLastInputTime;
- 	unsigned int 	m_uiLongestTimeInMill;
+ 	unsigned int 	m_uilongestTimeInMill;
   	unsigned int 	m_uiNumberOfTrainCamNodes;
     unsigned int 	m_uiTimeLastChange;
 	unsigned int 	m_uiTimeWeLeftIdle_StillNoInput;
@@ -393,26 +393,26 @@ public:
                                 ~CCameraSA ( void );
 
 	CCameraSAInterface			* GetInterface() { return internalInterface; };
-	VOID						TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchStyle);
-	VOID						TakeControl(CVector * position, int CamSwitchStyle);
-	VOID						TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * AttachEntity, 
+	void						TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchStyle);
+	void						TakeControl(CVector * position, int CamSwitchStyle);
+	void						TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * AttachEntity, 
 														  CVector * vecOffset, CVector * vecLookAt, 
 														  float fTilt, int CamSwitchStyle);
-	VOID						Restore();
-    VOID						RestoreWithJumpCut();
+	void						Restore();
+    void						RestoreWithJumpCut();
 	CMatrix4&					GetMatrix ( CMatrix4& matrix );
-	VOID						SetMatrix ( const CMatrix4& matrix );
-	VOID						SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset );
-	VOID						Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget );
+	void						SetMatrix ( const CMatrix4& matrix );
+	void						SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset );
+	void						Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget );
 	BYTE						GetActiveCam();
 
 	CCam						* GetCam(BYTE bCameraID);
     virtual CCam                * GetCam ( CCamSAInterface* camInterface );
 
-	VOID						SetWidescreen(BOOL bWidescreen);
-	BOOL						GetWidescreen();
+	void						SetWidescreen(bool bWidescreen);
+	bool						GetWidescreen();
 	FLOAT						GetCarZoom();
-	VOID						SetCarZoom(FLOAT fCarZoom);
+	void						SetCarZoom(FLOAT fCarZoom);
 	bool						TryToStartNewCamMode(DWORD dwCamMode);
 	bool						ConeCastCollisionResolve(CVector *pPos, CVector *pLookAt, CVector *pDest, float rad, float minDist, float *pDist);
 	void						VectorTrackLinear ( CVector * pTo, CVector * pFrom, float time, bool bSmoothEnds );

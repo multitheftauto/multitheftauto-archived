@@ -32,7 +32,7 @@ CPedSA::CPedSA( CPedSAInterface * pPedInterface ) :
 	DEBUG_TRACE("CPedSA::CPedSA( CPedSAInterface * pedInterface )");
 }
 
-VOID CPedSA::SetInterface( CEntitySAInterface * intInterface )
+void CPedSA::SetInterface( CEntitySAInterface * intInterface )
 {
     m_pInterface = intInterface;
     m_PedSound.SetPedSoundInterface ( &GetPedInterface ()->pedSound );

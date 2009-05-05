@@ -60,23 +60,23 @@ private:
 public:
 					CRegisteredCoronaSA(CRegisteredCoronaSAInterface * coronaInterface);
 	CVector			* GetPosition();
-	VOID			SetPosition(CVector * vector);
+	void			SetPosition(CVector * vector);
 	FLOAT			GetSize();
-	VOID			SetSize(FLOAT fSize);
+	void			SetSize(FLOAT fSize);
 	FLOAT			GetRange();
-	VOID			SetRange(FLOAT fRange);
+	void			SetRange(FLOAT fRange);
 	FLOAT			GetPullTowardsCamera();
-	VOID			SetPullTowardsCamera(FLOAT fPullTowardsCamera);
-	VOID			SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha);
-	VOID			SetTexture(RwTexture * texture);
-	VOID			SetTexture(eCoronaType texture);
+	void			SetPullTowardsCamera(FLOAT fPullTowardsCamera);
+	void			SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha);
+	void			SetTexture(RwTexture * texture);
+	void			SetTexture(eCoronaType texture);
 	BYTE			GetFlareType();
-	VOID			SetFlareType(BYTE fFlareType);
+	void			SetFlareType(BYTE fFlareType);
     inline DWORD	GetIdentifier() { return internalInterface->Identifier; }
 	DWORD			GetID();
-	VOID			Init(DWORD Identifier);
-	VOID			Disable();
-	VOID			Refresh();
+	void			Init(DWORD Identifier);
+	void			Disable();
+	void			Refresh();
 };
 
 #endif

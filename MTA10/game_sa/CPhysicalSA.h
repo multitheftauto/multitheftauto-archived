@@ -75,8 +75,8 @@ class CPhysicalSA : public virtual CPhysical, public virtual CEntitySA
 public:
 	CVector	*   GetMoveSpeed                ( CVector * vecMoveSpeed );
 	CVector	*   GetTurnSpeed                ( CVector * vecTurnSpeed );
-	VOID		SetMoveSpeed                ( CVector * vecMoveSpeed );
-	VOID		SetTurnSpeed                ( CVector * vecTurnSpeed );
+	void		SetMoveSpeed                ( CVector * vecMoveSpeed );
+	void		SetTurnSpeed                ( CVector * vecTurnSpeed );
 
     float       GetMass                     ( void );
     void        SetMass                     ( float fMass );
@@ -87,7 +87,7 @@ public:
     float       GetBuoyancyConstant         ( void );
     void        SetBuoyancyConstant         ( float fBuoyancyConstant );
 
-	VOID		ProcessCollision            ( void );
+	void		ProcessCollision            ( void );
 
     float       GetDamageImpulseMagnitude   ( void );
     void        SetDamageImpulseMagnitude   ( float fMagnitude );
@@ -105,25 +105,25 @@ public:
 
 	
     /*
-	VOID		SetMassMultiplier(FLOAT fMassMultiplier);
+	void		SetMassMultiplier(FLOAT fMassMultiplier);
 	FLOAT		GetMassMultiplier();
-	VOID		SetAirResistance(FLOAT fAirResistance);
+	void		SetAirResistance(FLOAT fAirResistance);
 	FLOAT		GetAirResistance();
-	VOID		SetCenterOfMass(CVector * vecCenterOfMass);
+	void		SetCenterOfMass(CVector * vecCenterOfMass);
 	CVector	* GetCenterOfMass();
 
-	BOOL		GetExtraHeavy();
-	VOID		SetExtraHeavy(BOOL bExtraHeavy);
-	BOOL		GetDoGravity();
-	VOID		SetDoGravity(BOOL bDoGravity);
-	BOOL		GetInfiniteMass();
-	VOID		SetInfiniteMass(BOOL bInfiniteMass);
-	BOOL		GetPositionFrozen();
-	VOID		SetPositionFrozen(BOOL bPositionFrozen);
+	bool		GetExtraHeavy();
+	void		SetExtraHeavy(bool bExtraHeavy);
+	bool		GetDoGravity();
+	void		SetDoGravity(bool bDoGravity);
+	bool		GetInfiniteMass();
+	void		SetInfiniteMass(bool bInfiniteMass);
+	bool		GetPositionFrozen();
+	void		SetPositionFrozen(bool bPositionFrozen);
 	BYTE		GetLastMaterialToHaveBeenStandingOn();
 
 	BYTE		GetLevel();
-	VOID		SetLevel(BYTE LivesInThisLevel);*/
+	void		SetLevel(BYTE LivesInThisLevel);*/
 
 };
 

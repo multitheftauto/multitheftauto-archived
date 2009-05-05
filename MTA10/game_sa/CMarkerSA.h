@@ -60,17 +60,17 @@ public:
 
     void                Init            ( void );
 
-	VOID				SetSprite ( eMarkerSprite Sprite );
-	VOID				SetDisplay ( eMarkerDisplay wDisplay );
-	VOID				SetScale ( WORD wScale );
-	VOID				SetColor ( eMarkerColor color );
-	VOID				SetColor ( RGBA color );
-	VOID				Remove ( );
-	BOOL				IsActive (  );
-	VOID				SetPosition ( CVector * vecPosition );
-	VOID				SetEntity ( CVehicle * vehicle );
-	VOID				SetEntity ( CPed * ped );
-	VOID				SetEntity ( CObject * object );
+	void				SetSprite ( eMarkerSprite Sprite );
+	void				SetDisplay ( eMarkerDisplay wDisplay );
+	void				SetScale ( WORD wScale );
+	void				SetColor ( eMarkerColor color );
+	void				SetColor ( RGBA color );
+	void				Remove ( );
+	bool				IsActive (  );
+	void				SetPosition ( CVector * vecPosition );
+	void				SetEntity ( CVehicle * vehicle );
+	void				SetEntity ( CPed * ped );
+	void				SetEntity ( CObject * object );
 	CEntity				* GetEntity (  );
 	CVector			* GetPosition (  );
 	CMarkerSAInterface	* GetInterface (  ) { return internalInterface; };

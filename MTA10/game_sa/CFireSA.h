@@ -54,22 +54,22 @@ public:
 	// constructor
 	CFireSA(CFireSAInterface * fireInterface) { this->internalInterface = fireInterface; }
 
-	VOID					Extinguish (  );
+	void					Extinguish (  );
 	CVector				    * GetPosition ( );
-	VOID					SetPosition ( CVector & vecPosition );
-	VOID					SetTimeToBurnOut ( DWORD dwTime );
+	void					SetPosition ( CVector & vecPosition );
+	void					SetTimeToBurnOut ( DWORD dwTime );
 	DWORD					GetTimeToBurnOut (  );
 	CEntity					* GetCreator (  );
 	CEntity					* GetEntityOnFire (  );
-	VOID					SetTarget ( CEntity * entity );
-	BOOL					IsIgnited (  );
-	BOOL					IsFree (  );
-	VOID					SetSilent ( BOOL bSilent );
-	BOOL					IsBeingExtinguished ();
-	VOID					Ignite( );
+	void					SetTarget ( CEntity * entity );
+	bool					IsIgnited (  );
+	bool					IsFree (  );
+	void					SetSilent ( bool bSilent );
+	bool					IsBeingExtinguished ();
+	void					Ignite( );
 	FLOAT					GetStrength (  );
-	VOID					SetStrength ( FLOAT fStrength );
-    VOID                    SetNumGenerationsAllowed ( char generations );
+	void					SetStrength ( FLOAT fStrength );
+    void                    SetNumGenerationsAllowed ( char generations );
     inline CFireInterface*  GetInterface ( ) { return this->internalInterface; }
 };
 

@@ -474,9 +474,9 @@ sTaskName TaskNames[1802] =
     {"TASK_COMPLEX_SMART_FLEE_POINT"},                                    {"TASK_COMPLEX_SMART_FLEE_ENTITY"},                                   /* 910 - 911*/
     {"TASK_COMPLEX_WANDER"},                                              {"TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION"},                          /* 912 - 913*/
     {"TASK_COMPLEX_FOLLOW_SEXY_PED"},                                     {"TASK_COMPLEX_GO_TO_ATTRACTOR"},                                     /* 914 - 915*/
-    {"TASK_COMPLEX_LEAVE_ATTRACTOR"},                                     {"TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING"},                     /* 916 - 917*/
+    {"TASK_COMPLEX_LEAVE_ATTRACTOR"},                                     {"TASK_COMPLEX_Avoid_OTHER_PED_WHILE_WANDERING"},                     /* 916 - 917*/
     {"TASK_COMPLEX_GO_TO_POINT_ANY_MEANS"},                               {"TASK_COMPLEX_WALK_ROUND_SHOP"},                                     /* 918 - 919*/
-    {"TASK_COMPLEX_TURN_TO_FACE_ENTITY"},                                 {"TASK_COMPLEX_AVOID_BUILDING"},                                      /* 920 - 921*/
+    {"TASK_COMPLEX_TURN_TO_FACE_ENTITY"},                                 {"TASK_COMPLEX_Avoid_BUILDING"},                                      /* 920 - 921*/
     {"TASK_COMPLEX_SEEK_ENTITY_ANY_MEANS"},                               {"TASK_COMPLEX_FOLLOW_LEADER_ANY_MEANS"},                             /* 922 - 923*/
     {"TASK_COMPLEX_GO_TO_POINT_AIMING"},                                  {"TASK_COMPLEX_TRACK_ENTITY"},                                        /* 924 - 925*/
     {"TASK_SIMPLE_GO_TO_POINT_FINE"},                                     {"TASK_COMPLEX_FLEE_ANY_MEANS"},                                      /* 926 - 927*/
@@ -485,7 +485,7 @@ sTaskName TaskNames[1802] =
     {"TASK_COMPLEX_GOTO_DOOR_AND_OPEN"},                                  {"TASK_COMPLEX_SEEK_ENTITY_AIMING"},                                  /* 932 - 933*/
     {"TASK_SIMPLE_SLIDE_TO_COORD"},                                       {"TASK_COMPLEX_INVESTIGATE_DISTURBANCE"},                             /* 934 - 935*/
     {"TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS"},                                {"TASK_COMPLEX_FOLLOW_NODE_ROUTE_SHOOTING"},                          /* 936 - 937*/
-    {"TASK_COMPLEX_USE_ENTRYEXIT"},                                       {"TASK_COMPLEX_AVOID_ENTITY"},                                        /* 938 - 939*/
+    {"TASK_COMPLEX_USE_ENTRYEXIT"},                                       {"TASK_COMPLEX_Avoid_ENTITY"},                                        /* 938 - 939*/
     {"TASK_SMART_FLEE_ENTITY_WALKING"},                                   {"[941]"},                                                            /* 940 - 941*/
     {"[942]"},                                                            {"[943]"},                                                            /* 942 - 943*/
     {"[944]"},                                                            {"[945]"},                                                            /* 944 - 945*/
@@ -620,7 +620,7 @@ sTaskName TaskNames[1802] =
     {"TASK_COMPLEX_PARTNER_DEAL"},                                        {"TASK_COMPLEX_PARTNER_GREET"},                                       /* 1202 - 1203*/
     {"TASK_COMPLEX_PARTNER_CHAT"},                                        {"TASK_COMPLEX_GANG_HASSLE_VEHICLE"},                                 /* 1204 - 1205*/
     {"TASK_COMPLEX_WALK_WITH_PED"},                                       {"TASK_COMPLEX_GANG_FOLLOWER"},                                       /* 1206 - 1207*/
-    {"TASK_COMPLEX_WALK_ALONGSIDE_PED"},                                  {"TASK_COMPLEX_PARTNER_SHOVE"},                                       /* 1208 - 1209*/
+    {"TASK_COMPLEX_WALK_AlongSIDE_PED"},                                  {"TASK_COMPLEX_PARTNER_SHOVE"},                                       /* 1208 - 1209*/
     {"TASK_COMPLEX_SIGNAL_AT_PED"},                                       {"TASK_COMPLEX_PASS_OBJECT"},                                         /* 1210 - 1211*/
     {"TASK_COMPLEX_GANG_HASSLE_PED"},                                     {"TASK_COMPLEX_WAIT_FOR_PED"},                                        /* 1212 - 1213*/
     {"TASK_SIMPLE_DO_HAND_SIGNAL"},                                       {"TASK_COMPLEX_BE_IN_COUPLE"},                                        /* 1214 - 1215*/

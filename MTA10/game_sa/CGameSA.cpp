@@ -38,7 +38,7 @@ CGameSA::CGameSA()
 {
     // Unprotect all of the GTASA code at once and leave it that way
     DWORD oldProt;
-    VirtualProtect((LPVOID)0x401000, 0x4A3000, PAGE_EXECUTE_READWRITE, &oldProt);
+    VirtualProtect((void*)0x401000, 0x4A3000, PAGE_EXECUTE_READWRITE, &oldProt);
 
     // Initialize the offsets
     eGameVersion version = FindGameVersion ();
@@ -168,7 +168,7 @@ CWeaponInfo	* CGameSA::GetWeaponInfo(eWeaponType weapon)
 		return NULL; 
 }
 
-VOID CGameSA::Pause ( bool bPaused )
+void CGameSA::Pause ( bool bPaused )
 {
 	*VAR_GamePaused = bPaused;
 }
@@ -213,9 +213,9 @@ CModelInfo	* CGameSA::GetModelInfo(DWORD dwModelID )
  * Starts the game
  * \todo make addresses into constants
  */
-VOID CGameSA::StartGame()
+void CGameSA::StartGame()
 {
-	DEBUG_TRACE("VOID CGameSA::StartGame()");
+	DEBUG_TRACE("void CGameSA::StartGame()");
 //	InitScriptInterface();
 	//*(BYTE *)VAR_StartGame = 1;
 	this->SetSystemState(GS_INIT_PLAYING_GAME);
@@ -227,9 +227,9 @@ VOID CGameSA::StartGame()
  * Sets the part of the game loading process the game is in.
  * @param dwState DWORD containing a valid state 0 - 9
  */
-VOID CGameSA::SetSystemState( eSystemState State )
+void CGameSA::SetSystemState( eSystemState State )
 {
-	DEBUG_TRACE("VOID CGameSA::SetSystemState( eSystemState State )");
+	DEBUG_TRACE("void CGameSA::SetSystemState( eSystemState State )");
 	*VAR_SystemState = (DWORD)State;
 }
 
@@ -241,11 +241,11 @@ eSystemState CGameSA::GetSystemState( )
 
 /**
  * This adds the local player to the ped pool, nothing else
- * @return BOOL TRUE if success, FALSE otherwise
+ * @return bool TRUE if success, FALSE otherwise
  */
-BOOL CGameSA::InitLocalPlayer(  )
+bool CGameSA::InitLocalPlayer(  )
 {
-	DEBUG_TRACE("BOOL CGameSA::InitLocalPlayer(  )");
+	DEBUG_TRACE("bool CGameSA::InitLocalPlayer(  )");
 
     // Added by ChrML - Looks like it isn't safe to call this more than once but mod code might do
     static bool bAlreadyInited = false;
@@ -293,7 +293,7 @@ void CGameSA::SetGameSpeed ( float fSpeed )
 }
 
 // this prevents some crashes (respawning mainly)
-VOID CGameSA::DisableRenderer( bool bDisabled )
+void CGameSA::DisableRenderer( bool bDisabled )
 {
 	// ENABLED:
 	// 0053DF40   D915 2C13C800    FST DWORD PTR DS:[C8132C]
@@ -310,7 +310,7 @@ VOID CGameSA::DisableRenderer( bool bDisabled )
 	}
 }
 
-VOID CGameSA::SetRenderHook ( InRenderer* pInRenderer )
+void CGameSA::SetRenderHook ( InRenderer* pInRenderer )
 {
 	if ( pInRenderer )
 		HookInstall ( (DWORD)FUNC_CDebug_DebugDisplayTextBuffer, (DWORD)pInRenderer, 6 );
@@ -321,7 +321,7 @@ VOID CGameSA::SetRenderHook ( InRenderer* pInRenderer )
 }
 
 
-VOID CGameSA::TakeScreenshot ( char * szFileName )
+void CGameSA::TakeScreenshot ( char * szFileName )
 {
     DWORD dwFunc = FUNC_JPegCompressScreenToFile;
     _asm

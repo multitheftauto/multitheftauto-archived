@@ -76,15 +76,15 @@ public:
 
 	CControllerState	* GetCurrentControllerState(CControllerState * ControllerState);
 	CControllerState	* GetLastControllerState(CControllerState * ControllerState);
-	VOID				SetCurrentControllerState(CControllerState * ControllerState);
-	VOID				SetLastControllerState(CControllerState * ControllerState);
-	VOID				Store();
-	VOID				Restore();
+	void				SetCurrentControllerState(CControllerState * ControllerState);
+	void				SetLastControllerState(CControllerState * ControllerState);
+	void				Store();
+	void				Restore();
     bool                IsEnabled ( void );
-	VOID				Disable( bool bDisable );
-	VOID				Clear ( void );
+	void				Disable( bool bDisable );
+	void				Clear ( void );
 	CPadSAInterface		* GetInterface() { return this->internalInterface; };
-    VOID                SetHornHistoryValue( bool value );
+    void                SetHornHistoryValue( bool value );
     long                GetAverageWeapon ( void );
     void                SetLastTimeTouched ( DWORD dwTime );
 };

@@ -33,10 +33,10 @@ public:
 	BYTE	GetCurrentRadioStationID();
 	BYTE	IsVehicleRadioActive();
 	char	* GetRadioStationName(BYTE bStationID);
-	BOOL	IsRadioOn();
-	VOID	SetBassSetting(DWORD dwBass);
-	VOID	Reset();
-	VOID	StartRadio(BYTE bStationID, BYTE bUnknown);
+	bool	IsRadioOn();
+	void	SetBassSetting(DWORD dwBass);
+	void	Reset();
+	void	StartRadio(BYTE bStationID, BYTE bUnknown);
 };
 
 #endif

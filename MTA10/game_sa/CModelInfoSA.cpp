@@ -43,12 +43,12 @@ CModelInfoSA::CModelInfoSA ( DWORD dwModelID )
 }
 
 
-BOOL CModelInfoSA::IsBoat ( )
+bool CModelInfoSA::IsBoat ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsBoat ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsBoat ( )");
 	DWORD dwFunction = FUNC_IsBoatModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -56,15 +56,15 @@ BOOL CModelInfoSA::IsBoat ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }
 
-BOOL CModelInfoSA::IsCar ( )
+bool CModelInfoSA::IsCar ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsCar ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsCar ( )");
 	DWORD dwFunction = FUNC_IsCarModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -72,15 +72,15 @@ BOOL CModelInfoSA::IsCar ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }
 
-BOOL CModelInfoSA::IsTrain ( )
+bool CModelInfoSA::IsTrain ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsTrain ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsTrain ( )");
 	DWORD dwFunction = FUNC_IsTrainModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -88,15 +88,15 @@ BOOL CModelInfoSA::IsTrain ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsHeli ( )
+bool CModelInfoSA::IsHeli ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsHeli ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsHeli ( )");
 	DWORD dwFunction = FUNC_IsHeliModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -104,15 +104,15 @@ BOOL CModelInfoSA::IsHeli ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsPlane ( )
+bool CModelInfoSA::IsPlane ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsPlane ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsPlane ( )");
 	DWORD dwFunction = FUNC_IsPlaneModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -120,15 +120,15 @@ BOOL CModelInfoSA::IsPlane ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsBike ( )
+bool CModelInfoSA::IsBike ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsBike ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsBike ( )");
 	DWORD dwFunction = FUNC_IsBikeModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -136,15 +136,15 @@ BOOL CModelInfoSA::IsBike ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }
 
-BOOL CModelInfoSA::IsFakePlane ( )
+bool CModelInfoSA::IsFakePlane ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsFakePlane ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsFakePlane ( )");
 	DWORD dwFunction = FUNC_IsFakePlaneModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -152,15 +152,15 @@ BOOL CModelInfoSA::IsFakePlane ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsMonsterTruck ( )
+bool CModelInfoSA::IsMonsterTruck ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsMonsterTruck ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsMonsterTruck ( )");
 	DWORD dwFunction = FUNC_IsMonsterTruckModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -168,15 +168,15 @@ BOOL CModelInfoSA::IsMonsterTruck ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }
 
-BOOL CModelInfoSA::IsQuadBike ( )
+bool CModelInfoSA::IsQuadBike ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsQuadBike ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsQuadBike ( )");
 	DWORD dwFunction = FUNC_IsQuadBikeModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -184,15 +184,15 @@ BOOL CModelInfoSA::IsQuadBike ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsBmx ( )
+bool CModelInfoSA::IsBmx ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsBmx ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsBmx ( )");
 	DWORD dwFunction = FUNC_IsBmxModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -200,15 +200,15 @@ BOOL CModelInfoSA::IsBmx ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsTrailer ( )
+bool CModelInfoSA::IsTrailer ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsTrailer ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsTrailer ( )");
 	DWORD dwFunction = FUNC_IsTrailerModel;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -216,16 +216,16 @@ BOOL CModelInfoSA::IsTrailer ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
 }	
 
-BOOL CModelInfoSA::IsVehicle ( )
+bool CModelInfoSA::IsVehicle ( )
 {
     /*
-	DEBUG_TRACE("BOOL CModelInfoSA::IsVehicle ( )");
+	DEBUG_TRACE("bool CModelInfoSA::IsVehicle ( )");
 	DWORD dwFunction = FUNC_IsVehicleModelType;
 	DWORD ModelID = m_dwModelID;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	ModelID
@@ -233,7 +233,7 @@ BOOL CModelInfoSA::IsVehicle ( )
 		mov		bReturn, al
 		add		esp, 4
 	}
-	return (BOOL)bReturn;
+	return bReturn;
     */
 
     // Above doesn't seem to work
@@ -277,9 +277,9 @@ char * CModelInfoSA::GetNameIfVehicle ( )
 //	return NULL;
 }
 
-VOID CModelInfoSA::Request( bool bAndLoad, bool bWaitForLoad )
+void CModelInfoSA::Request( bool bAndLoad, bool bWaitForLoad )
 {
-	DEBUG_TRACE("VOID CModelInfoSA::Request( BOOL bAndLoad, BOOL bWaitForLoad )");
+	DEBUG_TRACE("void CModelInfoSA::Request( bool bAndLoad, bool bWaitForLoad )");
 	// don't bother loading it if it already is
     if ( IsLoaded () )
         return;
@@ -319,9 +319,9 @@ VOID CModelInfoSA::Request( bool bAndLoad, bool bWaitForLoad )
 	}
 }
 
-VOID CModelInfoSA::Remove ( )
+void CModelInfoSA::Remove ( )
 {
-	DEBUG_TRACE("VOID CModelInfoSA::Remove ( )");
+	DEBUG_TRACE("void CModelInfoSA::Remove ( )");
 
 	// Don't remove if GTA refers to it somehow.
     // Or we'll screw up SA's map for example.
@@ -382,9 +382,9 @@ VOID CModelInfoSA::Remove ( )
     }
 }
 
-VOID CModelInfoSA::LoadAllRequestedModels ( )
+void CModelInfoSA::LoadAllRequestedModels ( )
 {
-	DEBUG_TRACE("VOID CModelInfoSA::LoadAllRequestedModels ( )");
+	DEBUG_TRACE("void CModelInfoSA::LoadAllRequestedModels ( )");
 
 	DWORD dwFunction = FUNC_LoadAllRequestedModels;
     DWORD dwSlot = 0;
@@ -402,7 +402,7 @@ BYTE CModelInfoSA::GetLevelFromPosition ( CVector * vecPosition )
 {
 	DEBUG_TRACE("BYTE CModelInfoSA::GetLevelFromPosition ( CVector * vecPosition )");
 	DWORD dwFunction = FUNC_GetLevelFromPosition;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		push	vecPosition
@@ -413,21 +413,20 @@ BYTE CModelInfoSA::GetLevelFromPosition ( CVector * vecPosition )
 	return bReturn;
 }
 
-BOOL CModelInfoSA::IsLoaded ( )
+bool CModelInfoSA::IsLoaded ( )
 {
-	DEBUG_TRACE("BOOL CModelInfoSA::IsLoaded ( )");
-	//return (BOOL)*(BYTE *)(ARRAY_ModelLoaded + 20*dwModelID);
+	DEBUG_TRACE("bool CModelInfoSA::IsLoaded ( )");
+	//return (bool)*(BYTE *)(ARRAY_ModelLoaded + 20*dwModelID);
 	DWORD dwFunc = FUNC_CStreaming__HasModelLoaded;
 	DWORD ModelID = m_dwModelID;
 
-	BOOL bReturn = 0;
+	bool bReturn = 0;
 	_asm
 	{
 		push	ModelID
 		call	dwFunc
-		movzx	eax, al
-		mov		bReturn, eax
-		pop		eax
+		add		esp, 4
+		mov		bReturn, al
 	}
 
     m_pInterface = ( bReturn ) ? m_pInterface = ppModelInfo [ m_dwModelID ] : NULL;

@@ -112,21 +112,21 @@ public:
 	CModelInfo				* GetModelInfo( DWORD dwModelID );
 
 	inline DWORD            GetSystemTime (  )		{ DEBUG_TRACE("DWORD     GetSystemTime (  )");return *VAR_SystemTime; };
-	inline BOOL             IsAtMenu (  )			{ DEBUG_TRACE("BOOL     IsAtMenu (  )");if(*VAR_IsAtMenu) return TRUE; else return FALSE; };
-	inline BOOL             IsGameLoaded (  )		{ DEBUG_TRACE("BOOL     IsGameLoaded (  )");if(*VAR_IsGameLoaded) return TRUE; else return FALSE; };
-	VOID					StartGame ( );
-	VOID					SetSystemState ( eSystemState State );
+	inline bool             IsAtMenu (  )			{ DEBUG_TRACE("bool     IsAtMenu (  )");if(*VAR_IsAtMenu) return TRUE; else return FALSE; };
+	inline bool             IsGameLoaded (  )		{ DEBUG_TRACE("bool     IsGameLoaded (  )");if(*VAR_IsGameLoaded) return TRUE; else return FALSE; };
+	void					StartGame ( );
+	void					SetSystemState ( eSystemState State );
 	eSystemState			GetSystemState ( );
-	inline BOOL             IsNastyGame (  )					{ DEBUG_TRACE("BOOL     IsNastyGame (  )"); return *VAR_IsNastyGame; };
-    inline VOID             SetNastyGame ( BOOL IsNasty )		{ DEBUG_TRACE("VOID     SetNastyGame ( BOOL IsNasty )"); *VAR_IsNastyGame = IsNasty?true:false; };
-	VOID					Pause ( bool bPaused );
+	inline bool             IsNastyGame (  )					{ DEBUG_TRACE("bool     IsNastyGame (  )"); return *VAR_IsNastyGame; };
+    inline void             SetNastyGame ( bool IsNasty )		{ DEBUG_TRACE("void     SetNastyGame ( bool IsNasty )"); *VAR_IsNastyGame = IsNasty?true:false; };
+	void					Pause ( bool bPaused );
 	bool					IsPaused ( );
     bool                    IsInForeground ( );
-	VOID					DisableRenderer( bool bDisabled );
-    VOID                    TakeScreenshot ( char * szFileName );
+	void					DisableRenderer( bool bDisabled );
+    void                    TakeScreenshot ( char * szFileName );
     DWORD                   * GetMemoryValue ( DWORD dwOffset );
 
-	VOID					SetRenderHook ( InRenderer* pInRenderer );
+	void					SetRenderHook ( InRenderer* pInRenderer );
 
     void                    Initialize  ( void );
     void                    Reset                       ( void );
@@ -144,7 +144,7 @@ public:
     unsigned long           GetFramelimiter         ( void );
     void                    SetFramelimiter         ( unsigned long ulFramelimiter );
 
-	BOOL					InitLocalPlayer(  );
+	bool					InitLocalPlayer(  );
 
     float                   GetGravity              ( void );
     void                    SetGravity              ( float fGravity );

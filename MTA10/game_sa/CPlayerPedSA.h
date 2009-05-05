@@ -67,9 +67,9 @@ public:
 
 /*	DWORD		        GetCurrentWeaponType        ( void );
 	DWORD		        GetLastShotTime             ( void );
-	BOOL		        IsStationaryOnFoot          ( void );
-	VOID		        ResetToInitialState         ( void );
-	VOID		        ClearWeaponTarget           ( void );*/
+	bool		        IsStationaryOnFoot          ( void );
+	void		        ResetToInitialState         ( void );
+	void		        ClearWeaponTarget           ( void );*/
 
     inline CPlayerPedSAInterface*   GetPlayerPedInterface   ( void )    { return static_cast < CPlayerPedSAInterface* > ( m_pInterface ); };
 };

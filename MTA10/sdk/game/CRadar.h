@@ -32,11 +32,11 @@ public:
 	virtual CMarker				* GetFreeMarker(  )=0;
 	virtual CMarker				* GetMarker( DWORD dwMarkerID )=0;
 
-	virtual VOID				ClearMarkerForEntity(CVehicle * vehicle)=0;
-	virtual VOID				ClearMarkerForEntity(CObject * object)=0;
-	virtual VOID				ClearMarkerForEntity(CPed * ped)=0;
+	virtual void				ClearMarkerForEntity(CVehicle * vehicle)=0;
+	virtual void				ClearMarkerForEntity(CObject * object)=0;
+	virtual void				ClearMarkerForEntity(CPed * ped)=0;
 
-    virtual VOID                DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD bgra )=0;
+    virtual void                DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD bgra )=0;
 };
 
 #endif

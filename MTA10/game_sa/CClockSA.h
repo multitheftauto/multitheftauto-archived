@@ -23,8 +23,8 @@
 class CClockSA : public CClock
 {
 public:
-	VOID			Set ( BYTE bHour, BYTE bMinute );
-	VOID			Get ( BYTE * bHour, BYTE * bMinute );
+	void			Set ( BYTE bHour, BYTE bMinute );
+	void			Get ( BYTE * bHour, BYTE * bMinute );
 };
 
 #endif

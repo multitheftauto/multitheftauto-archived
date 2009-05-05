@@ -118,10 +118,10 @@ CCivilianPedSA::CCivilianPedSA( CPedSAInterface * ped )
 /**
  * Checks if the player is stationary on foot
  * \todo Does this duplicate?
- * @return BOOL TRUE if the player is stationary on foot, FALSE otherwise
+ * @return bool TRUE if the player is stationary on foot, FALSE otherwise
  */
 /*
-BOOL CCivilianPedSA::IsStationaryOnFoot (  )
+bool CCivilianPedSA::IsStationaryOnFoot (  )
 {
 	return internalInterface->StationaryOnFoot;
 }*/
@@ -131,7 +131,7 @@ BOOL CCivilianPedSA::IsStationaryOnFoot (  )
  * \note This also resets some global values, such as game speed
  */
 /*
-VOID CCivilianPedSA::ResetToInitialState (  )
+void CCivilianPedSA::ResetToInitialState (  )
 {
 	DWORD dwFunction = FUNC_SetInitialState;
 	DWORD dwThis = (DWORD)internalInterface;
@@ -146,7 +146,7 @@ VOID CCivilianPedSA::ResetToInitialState (  )
  * Clears information related to the player targeting
  */
 /*
-VOID CCivilianPedSA::ClearWeaponTarget (  )
+void CCivilianPedSA::ClearWeaponTarget (  )
 {
 	DWORD dwFunction = FUNC_ClearWeaponTarget;
 	DWORD dwThis = (DWORD)internalInterface;

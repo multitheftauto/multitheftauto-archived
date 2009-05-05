@@ -14,7 +14,7 @@
 
 using namespace std;
 
-VOID HOOK_CText_Get();
+void HOOK_CText_Get();
 DWORD STORE_CText_Get = 0;
 char * szText;
 char * szReplacementText;
@@ -63,7 +63,7 @@ char * GetReplacementText(char * szKey)
 	return NULL;
 }
 
-VOID _declspec(naked) HOOK_CText_Get()
+void _declspec(naked) HOOK_CText_Get()
 {
 	_asm
 	{

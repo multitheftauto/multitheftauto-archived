@@ -207,7 +207,7 @@ enum eWeaponModel
 #define WEAPONTYPE_ANIM_RELOAD		(0x001000)	// weapon has reload anims
 #define WEAPONTYPE_ANIM_CROUCHFIRE	(0x002000)	// weapon has crouching anims
 #define WEAPONTYPE_RELOAD2LOOPSTART	(0x004000)	// loop from end of reload to fire loop start
-#define WEAPONTYPE_LONG_RELOAD_TIME (0x008000)	// force a longer reload time!
+#define WEAPONTYPE_long_RELOAD_TIME (0x008000)	// force a longer reload time!
 
 // these are area effect/shot options
 #define WEAPONTYPE_SLOWS_DOWN		(0x010000)	// 
@@ -220,33 +220,33 @@ class CWeaponInfo
 public:
 	virtual eWeaponModel				GetModel()=0;
 	virtual FLOAT						GetWeaponRange()=0;
-	virtual VOID						SetWeaponRange(FLOAT fRange)=0;
+	virtual void						SetWeaponRange(FLOAT fRange)=0;
 	virtual FLOAT						GetTargetRange()=0;
-	virtual VOID						SetTargetRange(FLOAT fRange)=0;
+	virtual void						SetTargetRange(FLOAT fRange)=0;
 	virtual CVector					    * GetFireOffset()=0;
-	virtual VOID						SetFireOffset(CVector * vecFireOffset)=0;
+	virtual void						SetFireOffset(CVector * vecFireOffset)=0;
 	virtual short						GetDamagePerHit()=0;
-	virtual VOID						SetDamagePerHit( short sDamagePerHit )=0;
+	virtual void						SetDamagePerHit( short sDamagePerHit )=0;
     virtual float                       GetAccuracy ( void ) = 0;
     virtual void                        SetAccuracy ( float fAccuracy ) = 0;
 	// projectile/areaeffect only
 	virtual FLOAT						GetFiringSpeed()=0;
-	virtual VOID						SetFiringSpeed( FLOAT fFiringSpeed )=0;
+	virtual void						SetFiringSpeed( FLOAT fFiringSpeed )=0;
 	// area effect only
 	virtual FLOAT						GetRadius()=0;
-	virtual VOID						SetRadius( FLOAT fRadius )=0;
+	virtual void						SetRadius( FLOAT fRadius )=0;
 	virtual FLOAT						GetLifeSpan()=0;
-	virtual VOID						SetLifeSpan( FLOAT fLifeSpan )=0;
+	virtual void						SetLifeSpan( FLOAT fLifeSpan )=0;
 	virtual FLOAT						GetSpread()=0;
-	virtual VOID						SetSpread( FLOAT fSpread )=0;
+	virtual void						SetSpread( FLOAT fSpread )=0;
 	virtual FLOAT						GetAnimBreakoutTime()=0;
-	virtual VOID						SetAnimBreakoutTime( FLOAT fBreakoutTime )=0;
+	virtual void						SetAnimBreakoutTime( FLOAT fBreakoutTime )=0;
 	virtual eWeaponSlot					GetSlot()=0;
-	virtual VOID						SetSlot( eWeaponSlot dwSlot )=0;
+	virtual void						SetSlot( eWeaponSlot dwSlot )=0;
     virtual eWeaponSkill                GetSkill()=0;
-    virtual VOID                        SetSkill( eWeaponSkill weaponSkill )=0;
+    virtual void                        SetSkill( eWeaponSkill weaponSkill )=0;
     virtual int                         GetRequiredStatLevel ()=0;
-    virtual VOID                        SetRequiredStatLevel ( int iStatLevel )=0;
+    virtual void                        SetRequiredStatLevel ( int iStatLevel )=0;
     virtual void                        SetFlag         (DWORD flag) = 0;
 	virtual void                        ClearFlag       (DWORD flag) = 0;
     virtual bool                        IsFlagSet       (DWORD flag) = 0;

@@ -55,7 +55,7 @@ typedef DWORD ABGR;
 #define WEAPONTYPE_ANIM_RELOAD		(0x001000)	// weapon has reload anims
 #define WEAPONTYPE_ANIM_CROUCHFIRE	(0x002000)	// weapon has crouching anims
 #define WEAPONTYPE_RELOAD2LOOPSTART	(0x004000)	// loop from end of reload to fire loop start
-#define WEAPONTYPE_LONG_RELOAD_TIME (0x008000)	// force a longer reload time!
+#define WEAPONTYPE_long_RELOAD_TIME (0x008000)	// force a longer reload time!
 
 // these are area effect/shot options
 #define WEAPONTYPE_SLOWS_DOWN		(0x010000)	// 

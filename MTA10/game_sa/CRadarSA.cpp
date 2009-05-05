@@ -132,9 +132,9 @@ CMarker	* CRadarSA::GetMarker( DWORD dwMarkerID )
 	return (CMarker *)Markers[dwMarkerID];
 }
 
-VOID CRadarSA::ClearMarkerForEntity(CVehicle * vehicle)
+void CRadarSA::ClearMarkerForEntity(CVehicle * vehicle)
 {
-	DEBUG_TRACE("VOID CRadarSA::ClearMarkerForEntity(CVehicle * vehicle)");
+	DEBUG_TRACE("void CRadarSA::ClearMarkerForEntity(CVehicle * vehicle)");
 	CMarkerSA * marker;
 
 	for(int i = 0; i < MAX_MARKERS; i++)
@@ -148,9 +148,9 @@ VOID CRadarSA::ClearMarkerForEntity(CVehicle * vehicle)
 }
 
 
-VOID CRadarSA::ClearMarkerForEntity(CObject * object)
+void CRadarSA::ClearMarkerForEntity(CObject * object)
 {
-	DEBUG_TRACE("VOID CRadarSA::ClearMarkerForEntity(CObject * object)");
+	DEBUG_TRACE("void CRadarSA::ClearMarkerForEntity(CObject * object)");
 	CMarkerSA * marker;
 
 	for(int i = 0; i < MAX_MARKERS; i++)
@@ -163,9 +163,9 @@ VOID CRadarSA::ClearMarkerForEntity(CObject * object)
 	}
 }
 
-VOID CRadarSA::ClearMarkerForEntity(CPed * ped)
+void CRadarSA::ClearMarkerForEntity(CPed * ped)
 {
-	DEBUG_TRACE("VOID CRadarSA::ClearMarkerForEntity(CPed * ped)");
+	DEBUG_TRACE("void CRadarSA::ClearMarkerForEntity(CPed * ped)");
 	CMarkerSA * marker;
 
 	for(int i = 0; i < MAX_MARKERS; i++)
@@ -182,7 +182,7 @@ struct CRect {
     float fX1, fY1, fX2, fY2;
 };
 
-VOID CRadarSA::DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD abgr )
+void CRadarSA::DrawAreaOnRadar(float fX1, float fY1, float fX2, float fY2, DWORD abgr )
 {
     CRect myRect;
     myRect.fX1 = fX1;

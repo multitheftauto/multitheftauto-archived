@@ -42,7 +42,7 @@ CTaskSimpleUseGunSA::CTaskSimpleUseGunSA ( CEntity *pTargetEntity, CVector vecTa
     DWORD dwFunc = FUNC_CTaskSimpleUseGun__Constructor;
     DWORD dwThisInterface = (DWORD)this->GetInterface ();
     DWORD dwTargetEntity = ( pTargetEntity ) ? ( DWORD ) pTargetEntity->GetInterface () : 0;
-    float fTargetX = vecTarget.fX, fTargetY = vecTarget.fY, fTargetZ = vecTarget.fZ;
+    float fTargetX = vecTarget.getX(), fTargetY = vecTarget.getY(), fTargetZ = vecTarget.getZ();
     DWORD dwBurstLength = nBurstLength;
     _asm
     {
@@ -101,7 +101,7 @@ void CTaskSimpleUseGunSA::Reset ( CPed *pPed, CEntity *pTargetEntity, CVector ve
     DWORD dwThisInterface = (DWORD)this->GetInterface ();
     DWORD dwPedInterface = ( DWORD ) pPed->GetInterface ();
     DWORD dwTargetEntity = ( pTargetEntity ) ? ( DWORD ) pTargetEntity->GetInterface () : 0;
-    float fTargetX = vecTarget.fX, fTargetY = vecTarget.fY, fTargetZ = vecTarget.fZ;
+    float fTargetX = vecTarget.getX(), fTargetY = vecTarget.getY(), fTargetZ = vecTarget.getZ();
     DWORD dwBurstLength = nBurstLength;    
     _asm
     {

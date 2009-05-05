@@ -22,8 +22,8 @@ CTaskSimpleIKChainSA::CTaskSimpleIKChainSA ( char* idString, int effectorBoneTag
     DWORD dwThisInterface = (DWORD)this->GetInterface();
     DWORD dwEntityInterface = 0;
     if ( pEntity ) dwEntityInterface = ( DWORD ) pEntity->GetInterface ();
-    float fEffectorX = effectorVec.fX, fEffectorY = effectorVec.fY, fEffectorZ = effectorVec.fZ;
-    float fX = offsetPos.fX, fY = offsetPos.fY, fZ = offsetPos.fZ;
+    float fEffectorX = effectorVec.getX(), fEffectorY = effectorVec.getY(), fEffectorZ = effectorVec.getZ();
+    float fX = offsetPos.getX(), fY = offsetPos.getY(), fZ = offsetPos.getZ();
     _asm
     {
         mov		ecx, dwThisInterface
@@ -53,7 +53,7 @@ CTaskSimpleIKLookAtSA::CTaskSimpleIKLookAtSA ( char* idString, CEntity* pEntity,
     DWORD dwThisInterface = (DWORD)this->GetInterface();
     DWORD dwEntityInterface = 0;
     if ( pEntity ) dwEntityInterface = ( DWORD ) pEntity->GetInterface ();
-    float fX = offsetPos.fX, fY = offsetPos.fY, fZ = offsetPos.fZ;
+    float fX = offsetPos.getX(), fY = offsetPos.getY(), fZ = offsetPos.getZ();
     _asm
     {
         mov		ecx, dwThisInterface
@@ -148,7 +148,7 @@ CTaskSimpleTriggerLookAtSA::CTaskSimpleTriggerLookAtSA ( CEntity* pEntity, int t
     DWORD dwThisInterface = (DWORD)this->GetInterface();
     DWORD dwEntityInterface = 0;
     if ( pEntity ) dwEntityInterface = ( DWORD ) pEntity->GetInterface ();
-    float fX = offsetPos.fX, fY = offsetPos.fY, fZ = offsetPos.fZ;
+    float fX = offsetPos.getX(), fY = offsetPos.getY(), fZ = offsetPos.getZ();
     _asm
     {
         mov		ecx, dwThisInterface

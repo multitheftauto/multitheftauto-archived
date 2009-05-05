@@ -40,20 +40,20 @@
 class CAudioSA : public CAudio
 {
 public:
-	VOID PlayFrontEndSound(DWORD dwSound);
-	VOID PlayBeatTrack ( short iTrack );
-	VOID SetEffectsMasterVolume ( BYTE bVolume );
-	VOID SetMusicMasterVolume ( BYTE bVolume );
-	VOID ClearMissionAudio ( int slot = 1);
-	VOID PreloadMissionAudio ( unsigned short usAudioEvent, int slot = 1 );
+	void PlayFrontEndSound(DWORD dwSound);
+	void PlayBeatTrack ( short iTrack );
+	void SetEffectsMasterVolume ( BYTE bVolume );
+	void SetMusicMasterVolume ( BYTE bVolume );
+	void ClearMissionAudio ( int slot = 1);
+	void PreloadMissionAudio ( unsigned short usAudioEvent, int slot = 1 );
 	unsigned char GetMissionAudioLoadingStatus ( int slot = 1 );
 	bool IsMissionAudioSampleFinished ( int slot = 1 );
-	VOID AttachMissionAudioToPhysical ( CPhysical * physical, int slot = 1 );
-	VOID SetMissionAudioPosition ( CVector * position, int slot = 1 );
+	void AttachMissionAudioToPhysical ( CPhysical * physical, int slot = 1 );
+	void SetMissionAudioPosition ( CVector * position, int slot = 1 );
 	bool PlayLoadedMissionAudio ( int slot = 1 );
-    VOID PauseAllSound ( bool bPaused );
-	VOID StopRadio();
-    VOID StartRadio( unsigned int station );
+    void PauseAllSound ( bool bPaused );
+	void StopRadio();
+    void StartRadio( unsigned int station );
 };
 
 #endif

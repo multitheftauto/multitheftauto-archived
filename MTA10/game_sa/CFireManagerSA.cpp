@@ -33,9 +33,9 @@ CFireManagerSA::~CFireManagerSA ( void )
 }
 
 
-VOID CFireManagerSA::ExtinguishPoint ( CVector & vecPosition, float fRadius )
+void CFireManagerSA::ExtinguishPoint ( CVector & vecPosition, float fRadius )
 {
-	DEBUG_TRACE("VOID CFireManagerSA::ExtinguishPoint ( CVector & vecPosition, float fRadius )");
+	DEBUG_TRACE("void CFireManagerSA::ExtinguishPoint ( CVector & vecPosition, float fRadius )");
 	FLOAT fX = vecPosition.getX();
 	FLOAT fY = vecPosition.getY();
 	FLOAT fZ = vecPosition.getZ();
@@ -108,9 +108,9 @@ CFire * CFireManagerSA::StartFire ( CVector & vecPosition, float fSize = DEFAULT
 	return (CFire *)dwReturn;*/
 }
 
-VOID CFireManagerSA::ExtinguishAllFires (  )
+void CFireManagerSA::ExtinguishAllFires (  )
 {
-	DEBUG_TRACE("VOID CFireManagerSA::ExtinguishAllFires (  )");
+	DEBUG_TRACE("void CFireManagerSA::ExtinguishAllFires (  )");
 	CFireSA * fire;
 	for(int i = 0;i < MAX_FIRES;i++)
 	{

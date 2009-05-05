@@ -13,7 +13,7 @@
 
 #include "StdInc.h"
 
-VOID CAudioSA::StopRadio()
+void CAudioSA::StopRadio()
 {
 	//DWORD dwFunc = FUNC_StopRadio;
     DWORD dwFunc = 0x4E9823; // Some function CAudio::StopRadio jumps to immediately
@@ -50,7 +50,7 @@ VOID CAudioSA::StopRadio()
 	}
 }
 
-VOID CAudioSA::StartRadio(unsigned int station)
+void CAudioSA::StartRadio(unsigned int station)
 {
 	DWORD dwFunc = 0x4DBEC3;
     DWORD dwFunc2 = 0x4EB3C3;
@@ -105,11 +105,11 @@ VOID CAudioSA::StartRadio(unsigned int station)
 // 43 = race one
 // 32 = help
 // 13 = camera take picture
-VOID CAudioSA::PlayFrontEndSound(DWORD dwSound)
+void CAudioSA::PlayFrontEndSound(DWORD dwSound)
 {
     if  ( *(DWORD *)VAR_AudioEventVolumes != 0 && dwSound <= 101 ) // may prevent a crash
     {
-	    DEBUG_TRACE("VOID CAudioSA::PlayFrontEndSound(DWORD dwSound)");
+	    DEBUG_TRACE("void CAudioSA::PlayFrontEndSound(DWORD dwSound)");
 	    DWORD dwFunc = FUNC_ReportFrontendAudioEvent;
 	    FLOAT fUnknown = 1.0f;
 	    _asm
@@ -142,7 +142,7 @@ VOID CAudioSA::PlayFrontEndSound(DWORD dwSound)
 	}*/
 }
 
-VOID CAudioSA::SetEffectsMasterVolume ( BYTE bVolume )
+void CAudioSA::SetEffectsMasterVolume ( BYTE bVolume )
 {
 	DWORD dwFunc = FUNC_SetEffectsMasterVolume;
 	DWORD dwVolume = bVolume;
@@ -154,7 +154,7 @@ VOID CAudioSA::SetEffectsMasterVolume ( BYTE bVolume )
 	}
 }
 
-VOID CAudioSA::SetMusicMasterVolume ( BYTE bVolume )
+void CAudioSA::SetMusicMasterVolume ( BYTE bVolume )
 {
 	DWORD dwFunc = FUNC_SetMusicMasterVolume;
 	DWORD dwVolume = bVolume;
@@ -166,11 +166,11 @@ VOID CAudioSA::SetMusicMasterVolume ( BYTE bVolume )
 	}
 }
 
-VOID CAudioSA::PlayBeatTrack ( short iTrack )
+void CAudioSA::PlayBeatTrack ( short iTrack )
 {
     if  ( *(DWORD *)VAR_AudioEventVolumes != 0 ) // may prevent a crash
     {
-	    DEBUG_TRACE("VOID CAudioSA::PlayBeatTrack ( short iTrack )");
+	    DEBUG_TRACE("void CAudioSA::PlayBeatTrack ( short iTrack )");
 	    DWORD dwFunc = FUNC_PreloadBeatTrack;
 	    DWORD dwTrack = iTrack;
 	    _asm
@@ -190,7 +190,7 @@ VOID CAudioSA::PlayBeatTrack ( short iTrack )
     }
 }
 
-VOID CAudioSA::ClearMissionAudio ( int slot )
+void CAudioSA::ClearMissionAudio ( int slot )
 {
 	DWORD dwFunc = 0x5072F0; // CAudioEngine::ClearMissionAudio(unsigned char)
 	_asm
@@ -215,7 +215,7 @@ bool CAudioSA::IsMissionAudioSampleFinished ( int slot )
 	return cret;
 }
 
-VOID CAudioSA::PreloadMissionAudio ( unsigned short usAudioEvent, int slot )
+void CAudioSA::PreloadMissionAudio ( unsigned short usAudioEvent, int slot )
 {
 	DWORD dwFunc = 0x507290; // CAudioEngine__PreloadMissionAudio
 	DWORD AudioEvent = usAudioEvent;
@@ -242,7 +242,7 @@ unsigned char CAudioSA::GetMissionAudioLoadingStatus ( int slot )
 	return cret;
 }
 
-VOID CAudioSA::AttachMissionAudioToPhysical ( CPhysical * physical, int slot )
+void CAudioSA::AttachMissionAudioToPhysical ( CPhysical * physical, int slot )
 {
 	CEntitySAInterface * entity = NULL;
 	if ( physical )
@@ -262,7 +262,7 @@ VOID CAudioSA::AttachMissionAudioToPhysical ( CPhysical * physical, int slot )
 	}
 }
 
-VOID CAudioSA::SetMissionAudioPosition ( CVector * position, int slot )
+void CAudioSA::SetMissionAudioPosition ( CVector * position, int slot )
 {
 	DWORD dwFunc = 0x507300; // CAudioEngine__SetMissionAudioPosition
 	_asm
@@ -290,7 +290,7 @@ bool CAudioSA::PlayLoadedMissionAudio ( int slot )
 	return false;
 }
 
-VOID CAudioSA::PauseAllSound ( bool bPaused )
+void CAudioSA::PauseAllSound ( bool bPaused )
 {
     if ( bPaused )
     {

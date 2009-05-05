@@ -107,7 +107,7 @@ public:
 	CAutomobileSAUnknownInterface UnknownData4;		// 1116
 	FLOAT 		WheelPositions[4];	// 1156
 	FLOAT 		WheelRelatedUnk[4];	// 1172
-	FLOAT 		WheelOnGroundRelated[4];	// 1188
+	FLOAT 		WheelongroundRelated[4];	// 1188
 	FLOAT 		Unknown215;	// 1204
 	FLOAT 		WheelsOnGround[4];	// 1208
 	FLOAT 		Unknown216;	// 1224

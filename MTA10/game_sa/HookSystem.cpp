@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-BOOL HookInstall( DWORD dwInstallAddress,
+bool HookInstall( DWORD dwInstallAddress,
 				  DWORD dwHookHandler,
 				  int iJmpCodeSize )
 {
@@ -22,7 +22,7 @@ BOOL HookInstall( DWORD dwInstallAddress,
 	memset ( JumpBytes, 0x90, MAX_JUMPCODE_SIZE );
 	if ( CreateJump ( dwInstallAddress, dwHookHandler, JumpBytes ) )
 	{
-		memcpy ( (PVOID)dwInstallAddress, JumpBytes, iJmpCodeSize );
+		memcpy ( (void*)dwInstallAddress, JumpBytes, iJmpCodeSize );
 		return TRUE;
 	}
 	else

@@ -133,17 +133,17 @@ public:
 	virtual CModelInfo			* GetModelInfo(DWORD dwModelID)=0;
 
 	virtual DWORD				GetSystemTime (  )=0;
-	virtual BOOL				IsAtMenu (  )=0;
-	virtual BOOL				IsGameLoaded (  )=0;
-	virtual VOID				StartGame (  )=0;
-	virtual VOID				SetSystemState ( eSystemState State )=0;
+	virtual bool				IsAtMenu (  )=0;
+	virtual bool				IsGameLoaded (  )=0;
+	virtual void				StartGame (  )=0;
+	virtual void				SetSystemState ( eSystemState State )=0;
 	virtual eSystemState		GetSystemState (  )=0;
-	virtual VOID				Pause ( bool bPaused )=0;
+	virtual void				Pause ( bool bPaused )=0;
 	virtual bool				IsPaused ( )=0;
     virtual bool                IsInForeground ( )=0;
-	virtual VOID				DisableRenderer( bool bDisabled )=0;
-	virtual VOID				SetRenderHook ( InRenderer* pInRenderer )=0;
-	virtual VOID                TakeScreenshot ( char * szFileName )=0;
+	virtual void				DisableRenderer( bool bDisabled )=0;
+	virtual void				SetRenderHook ( InRenderer* pInRenderer )=0;
+	virtual void                TakeScreenshot ( char * szFileName )=0;
     virtual DWORD               * GetMemoryValue ( DWORD dwOffset )=0;
     virtual void                SetTimeScale ( float fTimeScale )=0;
     virtual float               GetFPS ( void )=0;
@@ -158,7 +158,7 @@ public:
     virtual void                Reset               ( void ) = 0;
     virtual void                Terminate ( void ) = 0;
 
-	virtual BOOL				InitLocalPlayer(  )=0;
+	virtual bool				InitLocalPlayer(  )=0;
 
     virtual float               GetGravity ( void ) = 0;
     virtual void                SetGravity ( float fGravity ) = 0;

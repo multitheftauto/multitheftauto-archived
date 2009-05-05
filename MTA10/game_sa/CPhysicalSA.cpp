@@ -47,9 +47,9 @@ CVector * CPhysicalSA::GetTurnSpeed(CVector * vecTurnSpeed)
 	return vecTurnSpeed;
 }
 
-VOID CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)
+void CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)
 {
-	DEBUG_TRACE("VOID CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)");
+	DEBUG_TRACE("void CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)");
 	DWORD dwFunc = FUNC_GetMoveSpeed;
 	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
 	DWORD dwReturn = 0;
@@ -62,9 +62,9 @@ VOID CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)
 	memcpy((void *)dwReturn, vecMoveSpeed, sizeof(CVector));
 }
 
-VOID CPhysicalSA::SetTurnSpeed(CVector * vecTurnSpeed)
+void CPhysicalSA::SetTurnSpeed(CVector * vecTurnSpeed)
 {
-	DEBUG_TRACE("VOID CPhysicalSA::SetTurnSpeed(CVector * vecTurnSpeed)");
+	DEBUG_TRACE("void CPhysicalSA::SetTurnSpeed(CVector * vecTurnSpeed)");
 	DWORD dwFunc = FUNC_GetTurnSpeed;
 	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
 	DWORD dwReturn = 0;
@@ -125,9 +125,9 @@ void CPhysicalSA::SetBuoyancyConstant ( float fBuoyancyConstant )
 }
 
 
-VOID CPhysicalSA::ProcessCollision()
+void CPhysicalSA::ProcessCollision()
 {
-	DEBUG_TRACE("VOID CPhysicalSA::ProcessCollision()");
+	DEBUG_TRACE("void CPhysicalSA::ProcessCollision()");
 	DWORD dwFunc = FUNC_ProcessCollision;
 	DWORD dwThis = (DWORD)this->GetInterface();
 
@@ -284,7 +284,7 @@ void CPhysicalSA::SetAttachedOffsets ( CVector & vecPosition, CVector & vecRotat
 
 
 /*
-VOID CPhysicalSA::SetMassMultiplier(FLOAT fMassMultiplier)
+void CPhysicalSA::SetMassMultiplier(FLOAT fMassMultiplier)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->MassMultiplier = fMassMultiplier;
 }
@@ -294,7 +294,7 @@ FLOAT CPhysicalSA::GetMassMultiplier()
 	return ((CPhysicalSAInterface *)this->GetInterface())->MassMultiplier;
 }
 
-VOID CPhysicalSA::SetAirResistance(FLOAT fAirResistance)
+void CPhysicalSA::SetAirResistance(FLOAT fAirResistance)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->AirResistance = fAirResistance;
 }
@@ -304,7 +304,7 @@ FLOAT CPhysicalSA::GetAirResistance()
 	return ((CPhysicalSAInterface *)this->GetInterface())->AirResistance;
 }
 
-VOID CPhysicalSA::SetCenterOfMass(CVector * vecCenterOfMass)
+void CPhysicalSA::SetCenterOfMass(CVector * vecCenterOfMass)
 {
 	memcpy(&((CPhysicalSAInterface *)this->GetInterface())->vecCenterOfMass, vecCenterOfMass, sizeof(CVector));
 }
@@ -314,42 +314,42 @@ CVector * CPhysicalSA::GetCenterOfMass()
 	return &((CPhysicalSAInterface *)this->GetInterface())->vecCenterOfMass;
 }
 
-BOOL CPhysicalSA::GetExtraHeavy()
+bool CPhysicalSA::GetExtraHeavy()
 {
 	return ((CPhysicalSAInterface *)this->GetInterface())->ExtraHeavy;
 }
 
-VOID CPhysicalSA::SetExtraHeavy(BOOL bExtraHeavy)
+void CPhysicalSA::SetExtraHeavy(bool bExtraHeavy)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->ExtraHeavy = bExtraHeavy;
 }
 
-BOOL CPhysicalSA::GetDoGravity()
+bool CPhysicalSA::GetDoGravity()
 {
 	return ((CPhysicalSAInterface *)this->GetInterface())->DoGravity;
 }
 
-VOID CPhysicalSA::SetDoGravity(BOOL bDoGravity)
+void CPhysicalSA::SetDoGravity(bool bDoGravity)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->DoGravity = bDoGravity;
 }
 
-BOOL CPhysicalSA::GetInfiniteMass()
+bool CPhysicalSA::GetInfiniteMass()
 {
 	return ((CPhysicalSAInterface *)this->GetInterface())->InfiniteMass;
 }
 
-VOID CPhysicalSA::SetInfiniteMass(BOOL bInfiniteMass)
+void CPhysicalSA::SetInfiniteMass(bool bInfiniteMass)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->InfiniteMass = bInfiniteMass;
 }
 
-BOOL CPhysicalSA::GetPositionFrozen()
+bool CPhysicalSA::GetPositionFrozen()
 {
 	return ((CPhysicalSAInterface *)this->GetInterface())->CoorsFrozenByScript;
 }
 
-VOID CPhysicalSA::SetPositionFrozen(BOOL bPositionFrozen)
+void CPhysicalSA::SetPositionFrozen(bool bPositionFrozen)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->CoorsFrozenByScript = bPositionFrozen;
 }
@@ -364,7 +364,7 @@ BYTE CPhysicalSA::GetLevel()
 	return ((CPhysicalSAInterface *)this->GetInterface())->LivesInThisLevel;
 }
 
-VOID CPhysicalSA::SetLevel(BYTE LivesInThisLevel)
+void CPhysicalSA::SetLevel(BYTE LivesInThisLevel)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->LivesInThisLevel = LivesInThisLevel;
 }*/

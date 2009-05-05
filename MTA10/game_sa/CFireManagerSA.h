@@ -39,10 +39,10 @@ public:
 	CFireManagerSA();
     ~CFireManagerSA ( void );
 
-	VOID					ExtinguishPoint ( CVector & vecPosition, float fRadius );
+	void					ExtinguishPoint ( CVector & vecPosition, float fRadius );
 	CFire					* StartFire ( CEntity * entityTarget, CEntity * entityCreator, float fSize );
 	CFire					* StartFire ( CVector & vecPosition, float fSize );
-	VOID					ExtinguishAllFires (  );
+	void					ExtinguishAllFires (  );
 	CFire					* GetFire ( DWORD ID );
 	DWORD					GetFireCount (  ); 
 	CFire					* FindFreeFire (  );

@@ -180,24 +180,24 @@ public:
 	CEntitySAInterface*         m_pInterface;
 
 	DWORD						internalID;
-//	VOID						SetModelAlpha ( int iAlpha );
+//	void						SetModelAlpha ( int iAlpha );
 
 	inline CEntitySAInterface * GetInterface() { return m_pInterface; };
-	VOID						SetInterface( CEntitySAInterface * intInterface ) { m_pInterface = intInterface; };
+	void						SetInterface( CEntitySAInterface * intInterface ) { m_pInterface = intInterface; };
 
-	VOID						SetPosition ( const CVector& vecPosition );
-	VOID						ProcessControl ( void );
-	VOID						SetupLighting ( );
-	VOID						Render ( );
-	VOID						SetOrientation ( float fX, float fY, float fZ );
-    VOID                        FixBoatOrientation ( void );        // eAi you might want to rename this
+	void						SetPosition ( const CVector& vecPosition );
+	void						ProcessControl ( void );
+	void						SetupLighting ( );
+	void						Render ( );
+	void						SetOrientation ( float fX, float fY, float fZ );
+    void                        FixBoatOrientation ( void );        // eAi you might want to rename this
 
 	void						SetUnderwater ( bool bUnderwater );
 	bool						GetUnderwater ( void );
 
 	CVector&					GetPosition ( CVector& vector );
 	CMatrix4&					GetMatrix ( CMatrix4& matrix );
-	VOID						SetMatrix ( const CMatrix4& matrix );
+	void						SetMatrix ( const CMatrix4& matrix );
 	WORD						GetModelIndex ();
 	eEntityType					GetEntityType ();
 	bool						IsOnScreen ();
@@ -212,7 +212,7 @@ public:
 	/**
 	 * \todo Find enum for SetEntityStatus
 	 */
-	VOID						SetEntityStatus( eEntityStatus bStatus );
+	void						SetEntityStatus( eEntityStatus bStatus );
 	eEntityStatus				GetEntityStatus( );
 
     RwFrame *                   GetFrameFromId ( int id );
@@ -221,17 +221,14 @@ public:
 	RpClump *					GetRpClump ();
 
 
-	BOOL						BeingDeleted; // to prevent it trying to delete twice
-	BOOL						DoNotRemoveFromGame; // when deleted, if this is true, it won't be removed from the game
+	bool						BeingDeleted; // to prevent it trying to delete twice
+	bool						DoNotRemoveFromGame; // when deleted, if this is true, it won't be removed from the game
 
-	VOID						SetDoNotRemoveFromGameWhenDeleted ( bool bDoNotRemoveFromGame ) { DoNotRemoveFromGame = bDoNotRemoveFromGame; };
-    BOOL                        IsStatic(VOID)                          { return m_pInterface->bIsStatic; }
-    VOID						SetStatic(BOOL bStatic)					{ m_pInterface->bIsStatic		= bStatic; };
-	VOID						SetUsesCollision(BOOL bUsesCollision)	{ m_pInterface->bUsesCollision	= bUsesCollision;};
-	VOID						SetAlpha(DWORD dwAlpha);
-
-    VOID                        MatrixConvertFromEulerAngles ( float fX, float fY, float fZ, int iUnknown );
-    VOID                        MatrixConvertToEulerAngles ( float * fX, float * fY, float * fZ, int iUnknown );
+	void						SetDoNotRemoveFromGameWhenDeleted ( bool bDoNotRemoveFromGame ) { DoNotRemoveFromGame = bDoNotRemoveFromGame; };
+    bool                        IsStatic(void)                          { return m_pInterface->bIsStatic; }
+    void						SetStatic(bool bStatic)					{ m_pInterface->bIsStatic		= bStatic; };
+	void						SetUsesCollision(bool bUsesCollision)	{ m_pInterface->bUsesCollision	= bUsesCollision;};
+	void						SetAlpha(DWORD dwAlpha);
 
     bool                        IsPlayingAnimation ( char * szAnimName );
 
@@ -252,7 +249,7 @@ private:
 
     unsigned long               m_ulArrayID;
 
-/*	VOID						InitFlags()
+/*	void						InitFlags()
 	{
 		//this->GetInterface()->bIsStaticWaitingForCollision = true;
 		this->GetInterface()->nStatus = 4;

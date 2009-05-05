@@ -55,26 +55,26 @@ class CModelInfo
 public:
     virtual class CBaseModelInfoSAInterface *     GetInterface            ( void ) = 0;
 
-	virtual BOOL			IsBoat                  () = 0;
-	virtual BOOL			IsCar                   () = 0;
-	virtual BOOL			IsTrain                 () = 0;
-	virtual BOOL			IsHeli                  () = 0;
-	virtual BOOL			IsPlane                 () = 0;
-	virtual BOOL			IsBike                  () = 0;
-	virtual BOOL			IsFakePlane             () = 0;
-	virtual BOOL			IsMonsterTruck          () = 0;
-	virtual BOOL			IsQuadBike              () = 0;
-	virtual BOOL			IsBmx                   () = 0;
-	virtual BOOL			IsTrailer               () = 0;
-	virtual BOOL			IsVehicle               () = 0;
+	virtual bool			IsBoat                  () = 0;
+	virtual bool			IsCar                   () = 0;
+	virtual bool			IsTrain                 () = 0;
+	virtual bool			IsHeli                  () = 0;
+	virtual bool			IsPlane                 () = 0;
+	virtual bool			IsBike                  () = 0;
+	virtual bool			IsFakePlane             () = 0;
+	virtual bool			IsMonsterTruck          () = 0;
+	virtual bool			IsQuadBike              () = 0;
+	virtual bool			IsBmx                   () = 0;
+	virtual bool			IsTrailer               () = 0;
+	virtual bool			IsVehicle               () = 0;
 
 	virtual char			* GetNameIfVehicle      () = 0;
 
-	virtual VOID			Request                 ( bool bAndLoad = false, bool bWaitForLoad = false ) = 0;
-	virtual VOID			Remove                  () = 0;
-	virtual VOID			LoadAllRequestedModels  () = 0;
+	virtual void			Request                 ( bool bAndLoad = false, bool bWaitForLoad = false ) = 0;
+	virtual void			Remove                  () = 0;
+	virtual void			LoadAllRequestedModels  () = 0;
 	virtual BYTE			GetLevelFromPosition    ( CVector * vecPosition ) = 0;
-	virtual BOOL			IsLoaded                () = 0;
+	virtual bool			IsLoaded                () = 0;
 	virtual BYTE			GetFlags                () = 0;
 	virtual CBoundingBox	* GetBoundingBox        () = 0;
 	virtual bool			IsValid                 () = 0;

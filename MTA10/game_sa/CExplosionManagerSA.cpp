@@ -93,9 +93,9 @@ returnhere:
 /**
  * \todo Need to simulate this manually (loop and IsNear...)
  */
-VOID CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLOAT fRadius )
+void CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLOAT fRadius )
 {
-	DEBUG_TRACE("VOID CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLOAT fRadius )");
+	DEBUG_TRACE("void CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLOAT fRadius )");
 	
 /*	DWORD dwFunction = FUNC_RemoveAllExplosionsInArea;
 	CVector * vecPos = (CVector *)vecPosition;
@@ -114,9 +114,9 @@ VOID CExplosionManagerSA::RemoveAllExplosionsInArea ( CVector * vecPosition, FLO
 	}*/
 }
 
-VOID CExplosionManagerSA::RemoveAllExplosions (  )
+void CExplosionManagerSA::RemoveAllExplosions (  )
 {
-	DEBUG_TRACE("VOID CExplosionManagerSA::RemoveAllExplosions (  )");
+	DEBUG_TRACE("void CExplosionManagerSA::RemoveAllExplosions (  )");
 	for(int i = 0; i < MAX_EXPLOSIONS; i++)
 		if(Explosions[i]->IsActive()) Explosions[i]->Remove();
 }

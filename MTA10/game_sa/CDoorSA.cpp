@@ -33,14 +33,14 @@ FLOAT CDoorSA::GetAngleOpenRatio ( )
 
 /**
  * Checks if the door is closed
- * @return BOOL TRUE if the door is closed, FALSE otherwise
+ * @return bool TRUE if the door is closed, FALSE otherwise
  */
-BOOL CDoorSA::IsClosed (  )
+bool CDoorSA::IsClosed (  )
 {
-	DEBUG_TRACE("BOOL CDoorSA::IsClosed (  )");
+	DEBUG_TRACE("bool CDoorSA::IsClosed (  )");
 	DWORD dwFunction = FUNC_IsClosed;
 	DWORD dwPointer = (DWORD)this;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		mov		ecx, dwPointer
@@ -52,15 +52,15 @@ BOOL CDoorSA::IsClosed (  )
 
 /**
  * Checks if the door is completely open
- * @return BOOL TRUE if the door is fully opened, FALSE if it is opening, is closed or is missing.
+ * @return bool TRUE if the door is fully opened, FALSE if it is opening, is closed or is missing.
  * \todo Check what this returns if the door has been ripped off
  */
-BOOL CDoorSA::IsFullyOpen (  )
+bool CDoorSA::IsFullyOpen (  )
 {
-	DEBUG_TRACE("BOOL CDoorSA::IsFullyOpen (  )");
+	DEBUG_TRACE("bool CDoorSA::IsFullyOpen (  )");
 	DWORD dwFunction = FUNC_IsFullyOpen;
 	DWORD dwPointer = (DWORD)this;
-	BYTE bReturn = 0;
+	bool bReturn = false;
 	_asm
 	{
 		mov		ecx, dwPointer
@@ -75,9 +75,9 @@ BOOL CDoorSA::IsFullyOpen (  )
  * @param fUnknown Not sure...
  * \todo Check what the parameter for Open does
  */
-VOID CDoorSA::Open ( float fUnknown )
+void CDoorSA::Open ( float fUnknown )
 {
-	DEBUG_TRACE("VOID CDoorSA::Open ( float fUnknown )");
+	DEBUG_TRACE("void CDoorSA::Open ( float fUnknown )");
 	DWORD dwFunction = FUNC_Open;
 	DWORD dwPointer = (DWORD)this;
 	_asm

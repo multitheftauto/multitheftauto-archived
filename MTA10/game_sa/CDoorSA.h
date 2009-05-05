@@ -56,9 +56,9 @@ public:
 
 	CDoorSAInterface	* GetInterface() { return internalInterface; };
 	FLOAT			GetAngleOpenRatio ( );
-	BOOL			IsClosed (  );
-	BOOL			IsFullyOpen (  );
-	VOID			Open ( FLOAT fUnknown );
+	bool			IsClosed (  );
+	bool			IsFullyOpen (  );
+	void			Open ( FLOAT fUnknown );
 	eDoorState		GetDoorState() { return (eDoorState)this->GetInterface()->m_nDoorState; };
 };
 

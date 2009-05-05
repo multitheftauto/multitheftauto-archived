@@ -24,9 +24,9 @@ CVector * CRegisteredCoronaSA::GetPosition()
 	return &internalInterface->Coordinates;
 }
 
-VOID CRegisteredCoronaSA::SetPosition(CVector * vector)
+void CRegisteredCoronaSA::SetPosition(CVector * vector)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetPosition(CVector * vector)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetPosition(CVector * vector)");
 	memcpy(&internalInterface->Coordinates, vector, sizeof(CVector));
 }
 
@@ -36,9 +36,9 @@ FLOAT CRegisteredCoronaSA::GetSize()
 	return internalInterface->Size;
 }
 
-VOID CRegisteredCoronaSA::SetSize(FLOAT fSize)
+void CRegisteredCoronaSA::SetSize(FLOAT fSize)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetSize(FLOAT fSize)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetSize(FLOAT fSize)");
 	internalInterface->Size = fSize;
 }
 
@@ -48,9 +48,9 @@ FLOAT CRegisteredCoronaSA::GetRange()
 	return internalInterface->Range;
 }
 
-VOID CRegisteredCoronaSA::SetRange(FLOAT fRange)
+void CRegisteredCoronaSA::SetRange(FLOAT fRange)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetRange(FLOAT fRange)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetRange(FLOAT fRange)");
 	internalInterface->Range = fRange;
 }
 
@@ -60,16 +60,16 @@ FLOAT CRegisteredCoronaSA::GetPullTowardsCamera()
 	return internalInterface->PullTowardsCam;
 }
 
-VOID CRegisteredCoronaSA::SetPullTowardsCamera(FLOAT fPullTowardsCamera)
+void CRegisteredCoronaSA::SetPullTowardsCamera(FLOAT fPullTowardsCamera)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetPullTowardsCamera(FLOAT fPullTowardsCamera)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetPullTowardsCamera(FLOAT fPullTowardsCamera)");
 	internalInterface->PullTowardsCam = fPullTowardsCamera;
 }
 
 
-VOID CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)
+void CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)");
 	internalInterface->Red = Red;
 	internalInterface->Green = Green;
 	internalInterface->Blue = Blue;
@@ -77,15 +77,15 @@ VOID CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)
 	internalInterface->FadedIntensity = Alpha;
 }
 
-VOID CRegisteredCoronaSA::SetTexture(RwTexture * texture)
+void CRegisteredCoronaSA::SetTexture(RwTexture * texture)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetTexture(RwTexture * texture)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetTexture(RwTexture * texture)");
 	internalInterface->pTex = texture;
 }
 
-VOID CRegisteredCoronaSA::SetTexture(eCoronaType texture)
+void CRegisteredCoronaSA::SetTexture(eCoronaType texture)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetTexture(eCoronaType texture)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetTexture(eCoronaType texture)");
 	CCoronasSA * coronas = ((CCoronasSA *)pGame->GetCoronas());
 	RwTexture * tex =  coronas->GetTexture(texture);
 	if(tex)
@@ -102,9 +102,9 @@ BYTE CRegisteredCoronaSA::GetFlareType()
 	return internalInterface->FlareType;
 }
 
-VOID CRegisteredCoronaSA::SetFlareType(BYTE fFlareType)
+void CRegisteredCoronaSA::SetFlareType(BYTE fFlareType)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::SetFlareType(BYTE fFlareType)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::SetFlareType(BYTE fFlareType)");
 	internalInterface->FlareType = fFlareType;
 }
 
@@ -114,9 +114,9 @@ DWORD CRegisteredCoronaSA::GetID()
 	return ((DWORD)internalInterface - ARRAY_CORONAS) / sizeof(CRegisteredCoronaSAInterface);
 }
 
-VOID CRegisteredCoronaSA::Init(DWORD Identifier)
+void CRegisteredCoronaSA::Init(DWORD Identifier)
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::Init(DWORD Identifier)");
+	DEBUG_TRACE("void CRegisteredCoronaSA::Init(DWORD Identifier)");
 	internalInterface->Identifier = Identifier;
 	this->SetSize(2.5f);
 	internalInterface->NormalAngle = 0.0f;
@@ -133,13 +133,13 @@ VOID CRegisteredCoronaSA::Init(DWORD Identifier)
 	internalInterface->RegisteredThisFrame = 1; // won't appear in-game without this
 }
 
-VOID CRegisteredCoronaSA::Refresh()
+void CRegisteredCoronaSA::Refresh()
 {
-	DEBUG_TRACE("VOID CRegisteredCoronaSA::Refresh()");
+	DEBUG_TRACE("void CRegisteredCoronaSA::Refresh()");
 	internalInterface->JustCreated = 1;
 }
 
-VOID CRegisteredCoronaSA::Disable()
+void CRegisteredCoronaSA::Disable()
 {
 	internalInterface->Identifier = 0;
    // internalInterface->Intensity = 0; // wasn't working before?

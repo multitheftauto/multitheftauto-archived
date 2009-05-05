@@ -36,9 +36,9 @@ CCameraSA::~CCameraSA ( void )
     }
 }
 
-VOID CCameraSA::Restore()
+void CCameraSA::Restore()
 {
-	DEBUG_TRACE("VOID CCameraSA::Restore()");    
+	DEBUG_TRACE("void CCameraSA::Restore()");    
     DWORD dwFunc = FUNC_Restore;
 	CCameraSAInterface * cameraInterface = this->GetInterface();
 	_asm
@@ -48,9 +48,9 @@ VOID CCameraSA::Restore()
 	}
 }
 
-VOID CCameraSA::RestoreWithJumpCut()
+void CCameraSA::RestoreWithJumpCut()
 {
-	DEBUG_TRACE("VOID CCameraSA::RestoreWithJumpCut()");
+	DEBUG_TRACE("void CCameraSA::RestoreWithJumpCut()");
 	CCameraSAInterface * cameraInterface = this->GetInterface();
     DWORD dwFunc = 0x50BD40;
 	_asm
@@ -69,9 +69,9 @@ VOID CCameraSA::RestoreWithJumpCut()
 /**
  * \todo Find out what the last two paramters are
  */
-VOID CCameraSA::TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchStyle)
+void CCameraSA::TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchStyle)
 {
-	DEBUG_TRACE("VOID CCameraSA::TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchStyle)");
+	DEBUG_TRACE("void CCameraSA::TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchStyle)");
 
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( entity );
 	if ( !pEntitySA ) return;
@@ -92,9 +92,9 @@ VOID CCameraSA::TakeControl(CEntity * entity, eCamMode CamMode, int CamSwitchSty
 	}
 }
 
-VOID CCameraSA::TakeControl(CVector * position, int CamSwitchStyle)
+void CCameraSA::TakeControl(CVector * position, int CamSwitchStyle)
 {
-	DEBUG_TRACE("VOID CCameraSA::TakeControl(CVector * position, int CamSwitchStyle)");
+	DEBUG_TRACE("void CCameraSA::TakeControl(CVector * position, int CamSwitchStyle)");
 	CCameraSAInterface * cameraInterface = this->GetInterface();
 	// __thiscall
 	CVector vecOffset;
@@ -136,11 +136,11 @@ VOID CCameraSA::TakeControl(CVector * position, int CamSwitchStyle)
 // vecOffset: an offset from 0,0,0
 // vecLookAt: an offset from 0,0,0
 
-VOID CCameraSA::TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * AttachEntity, 
+void CCameraSA::TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * AttachEntity, 
 										  CVector * vecOffset, CVector * vecLookAt, 
 										  float fTilt, int CamSwitchStyle)
 {
-	DEBUG_TRACE("VOID CCameraSA::TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * AttachEntity, CVector * vecOffset, CVector * vecLookAt, float fTilt, int CamSwitchStyle)");
+	DEBUG_TRACE("void CCameraSA::TakeControlAttachToEntity(CEntity * TargetEntity, CEntity * AttachEntity, CVector * vecOffset, CVector * vecLookAt, float fTilt, int CamSwitchStyle)");
 	char szDebug[255] = {'\0'};
 	CEntitySAInterface * targetEntityInterface = 0;
 	CEntitySAInterface * attachEntityInterface = 0;
@@ -192,15 +192,15 @@ CMatrix4& CCameraSA::GetMatrix ( CMatrix4& matrix )
 	return matrix;
 }
 
-VOID CCameraSA::SetMatrix ( const CMatrix4& matrix )
+void CCameraSA::SetMatrix ( const CMatrix4& matrix )
 {
-	DEBUG_TRACE("VOID CCameraSA::SetMatrix ( const CMatrix4& matrix )");
+	DEBUG_TRACE("void CCameraSA::SetMatrix ( const CMatrix4& matrix )");
 	if( this->GetInterface()->Placeable.matrix ) {
 		*(this->GetInterface()->Placeable.matrix) = matrix;
 	}
 }
 
-VOID CCameraSA::SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset )
+void CCameraSA::SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset )
 {
 	DWORD dwFunc = FUNC_SetCamPositionForFixedMode;
 	CCameraSAInterface * cameraInterface = this->GetInterface();
@@ -213,9 +213,9 @@ VOID CCameraSA::SetCamPositionForFixedMode ( CVector * vecPosition, CVector * ve
 	}
 }
 
-VOID CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )
+void CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )
 {
-	DEBUG_TRACE("VOID CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )");
+	DEBUG_TRACE("void CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )");
 	FLOAT fOriginX = vecGunMuzzle->getX();
 	FLOAT fOriginY = vecGunMuzzle->getY();
 	FLOAT fOriginZ = vecGunMuzzle->getZ();
@@ -266,9 +266,9 @@ CCam* CCameraSA::GetCam ( CCamSAInterface* camInterface )
 }
 
 
-VOID CCameraSA::SetWidescreen(BOOL bWidescreen)
+void CCameraSA::SetWidescreen(bool bWidescreen)
 {
-	DEBUG_TRACE("VOID CCameraSA::SetWidescreen(BOOL bWidescreen)");
+	DEBUG_TRACE("void CCameraSA::SetWidescreen(bool bWidescreen)");
 	CCameraSAInterface * cameraInterface = this->GetInterface();
 	if(bWidescreen == FALSE)
 		cameraInterface->m_WideScreenOn = false;
@@ -276,9 +276,9 @@ VOID CCameraSA::SetWidescreen(BOOL bWidescreen)
 		cameraInterface->m_WideScreenOn = true;
 }
 
-BOOL CCameraSA::GetWidescreen()
+bool CCameraSA::GetWidescreen()
 {
-	DEBUG_TRACE("BOOL CCameraSA::GetWidescreen()");
+	DEBUG_TRACE("bool CCameraSA::GetWidescreen()");
 	CCameraSAInterface * cameraInterface = this->GetInterface();
 	return cameraInterface->m_WideScreenOn;
 }
@@ -298,9 +298,9 @@ float CCameraSA::GetCarZoom()
 /**
  * \todo Check if this ever works?
  */
-VOID CCameraSA::SetCarZoom(float fCarZoom)
+void CCameraSA::SetCarZoom(float fCarZoom)
 {
-	DEBUG_TRACE("VOID CCameraSA::SetCarZoom(float fCarZoom)");
+	DEBUG_TRACE("void CCameraSA::SetCarZoom(float fCarZoom)");
 	/*CCameraSAInterface * cameraInterface = this->GetInterface();
 	cameraInterface->CarZoomIndicator = fCarZoom;	*/
 }
@@ -311,7 +311,7 @@ VOID CCameraSA::SetCarZoom(float fCarZoom)
  */
 bool CCameraSA::TryToStartNewCamMode(DWORD dwCamMode)
 {
-	DEBUG_TRACE("VOID CCameraSA::TryToStartNewCamMode(DWORD dwCamMode)");
+	DEBUG_TRACE("void CCameraSA::TryToStartNewCamMode(DWORD dwCamMode)");
 	DWORD dwFunc = FUNC_TryToStartNewCamMode;
 	bool bReturn = false;
 	CCameraSAInterface * cameraInterface = this->GetInterface();

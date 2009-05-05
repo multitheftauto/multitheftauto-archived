@@ -29,9 +29,9 @@ eWeaponType	CWeaponSA::GetType(  )
 	return this->internalInterface->m_eWeaponType;
 };
 
-VOID CWeaponSA::SetType( eWeaponType type )
+void CWeaponSA::SetType( eWeaponType type )
 {
-	DEBUG_TRACE("VOID CWeaponSA::SetType( eWeaponType type )");
+	DEBUG_TRACE("void CWeaponSA::SetType( eWeaponType type )");
 	this->internalInterface->m_eWeaponType = type;
 }
 
@@ -53,9 +53,9 @@ DWORD CWeaponSA::GetAmmoInClip(  )
 	return this->internalInterface->m_nAmmoInClip;
 }
 
-VOID CWeaponSA::SetAmmoInClip( DWORD dwAmmoInClip )
+void CWeaponSA::SetAmmoInClip( DWORD dwAmmoInClip )
 {
-	DEBUG_TRACE("VOID CWeaponSA::SetAmmoInClip( DWORD dwAmmoInClip )");
+	DEBUG_TRACE("void CWeaponSA::SetAmmoInClip( DWORD dwAmmoInClip )");
 	this->internalInterface->m_nAmmoInClip = dwAmmoInClip;
 }
 
@@ -65,9 +65,9 @@ DWORD CWeaponSA::GetAmmoTotal(  )
 	return this->internalInterface->m_nAmmoTotal;
 }
 
-VOID CWeaponSA::SetAmmoTotal( DWORD dwAmmoTotal )
+void CWeaponSA::SetAmmoTotal( DWORD dwAmmoTotal )
 {
-	DEBUG_TRACE("VOID CWeaponSA::SetAmmoTotal( DWORD dwAmmoTotal )");
+	DEBUG_TRACE("void CWeaponSA::SetAmmoTotal( DWORD dwAmmoTotal )");
 	this->internalInterface->m_nAmmoTotal = dwAmmoTotal;
 }
 
@@ -83,9 +83,9 @@ eWeaponSlot	CWeaponSA::GetSlot()
 	return m_weaponSlot;
 }
 
-VOID CWeaponSA::SetAsCurrentWeapon()
+void CWeaponSA::SetAsCurrentWeapon()
 {
-	DEBUG_TRACE("VOID CWeaponSA::SetAsCurrentWeapon()");
+	DEBUG_TRACE("void CWeaponSA::SetAsCurrentWeapon()");
 	owner->SetCurrentWeaponSlot( m_weaponSlot );
 }
 

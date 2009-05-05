@@ -1028,7 +1028,7 @@ CVehicle* CPoolsSA::AddTrain ( CVector * vecPosition, DWORD dwModels[], int iSiz
 
 	// Stops the train from moving at ludacrist speeds right after creation
 	// due to some glitch in the node finding in CreateMissionTrain
-	trainHead->SetMoveSpeed ( &CVector ( 0, 0, 0 ) );
+	trainHead->SetMoveSpeed ( CVector ( 0, 0, 0 ) );
 
     return trainHead;
 }

@@ -12,9 +12,9 @@
 
 #include "StdInc.h"
 
-VOID CCheckpointSA::SetPosition(CVector * vecPosition)
+void CCheckpointSA::SetPosition(CVector * vecPosition)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetPosition(CVector * vecPosition)");
+	DEBUG_TRACE("void CCheckpointSA::SetPosition(CVector * vecPosition)");
 	memcpy(&this->GetInterface()->m_pos, vecPosition, sizeof(CVector));
 }
 
@@ -24,9 +24,9 @@ CVector * CCheckpointSA::GetPosition()
 	return &this->GetInterface()->m_pos;
 }
 
-VOID CCheckpointSA::SetPointDirection(CVector * vecPointDirection)
+void CCheckpointSA::SetPointDirection(CVector * vecPointDirection)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetPointDirection(CVector * vecPointDirection)");
+	DEBUG_TRACE("void CCheckpointSA::SetPointDirection(CVector * vecPointDirection)");
 	memcpy(&this->GetInterface()->m_pointDir, vecPointDirection, sizeof(CVector));
 }
 
@@ -42,21 +42,21 @@ DWORD CCheckpointSA::GetType()
 	return this->GetInterface()->m_nType;
 }
 
-VOID CCheckpointSA::SetType(WORD wType)
+void CCheckpointSA::SetType(WORD wType)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetType(DWORD dwType)");
+	DEBUG_TRACE("void CCheckpointSA::SetType(DWORD dwType)");
 	this->GetInterface()->m_nType = wType;
 }
 
-BOOL CCheckpointSA::IsActive()
+bool CCheckpointSA::IsActive()
 {
-	DEBUG_TRACE("BOOL CCheckpointSA::IsActive()");
-	return (BOOL)this->GetInterface()->m_bIsUsed;
+	DEBUG_TRACE("bool CCheckpointSA::IsActive()");
+	return (bool)this->GetInterface()->m_bIsUsed;
 }
 
-VOID CCheckpointSA::Activate()
+void CCheckpointSA::Activate()
 {
-	DEBUG_TRACE("VOID CCheckpointSA::Activate()");
+	DEBUG_TRACE("void CCheckpointSA::Activate()");
 	this->GetInterface()->m_bIsUsed = true;
 }
 
@@ -66,9 +66,9 @@ DWORD CCheckpointSA::GetIdentifier()
 	return this->GetInterface()->m_nIdentifier;
 }
 
-VOID CCheckpointSA::SetIdentifier(DWORD dwIdentifier)
+void CCheckpointSA::SetIdentifier(DWORD dwIdentifier)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetIdentifier(DWORD dwIdentifier)");
+	DEBUG_TRACE("void CCheckpointSA::SetIdentifier(DWORD dwIdentifier)");
 	this->GetInterface()->m_nIdentifier = dwIdentifier;
 }
 
@@ -78,21 +78,21 @@ RGBA CCheckpointSA::GetColor()
 	return this->GetInterface()->rwColour;
 }
 
-VOID CCheckpointSA::SetColor(RGBA color)
+void CCheckpointSA::SetColor(RGBA color)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetColor(RGBA color)");
+	DEBUG_TRACE("void CCheckpointSA::SetColor(RGBA color)");
 	this->GetInterface()->rwColour = color;
 }
 
-VOID CCheckpointSA::SetPulsePeriod(WORD wPulsePeriod)
+void CCheckpointSA::SetPulsePeriod(WORD wPulsePeriod)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetPulsePeriod(WORD wPulsePeriod)");
+	DEBUG_TRACE("void CCheckpointSA::SetPulsePeriod(WORD wPulsePeriod)");
 	this->GetInterface()->m_nPulsePeriod = wPulsePeriod;
 }
 
-VOID CCheckpointSA::SetRotateRate(short RotateRate)
+void CCheckpointSA::SetRotateRate(short RotateRate)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetRotateRate(short RotateRate)");
+	DEBUG_TRACE("void CCheckpointSA::SetRotateRate(short RotateRate)");
 	this->GetInterface()->m_nRotateRate = RotateRate;
 
 	if ( RotateRate == 0 )
@@ -111,21 +111,21 @@ FLOAT CCheckpointSA::GetSize()
 	return this->GetInterface()->m_fSize;
 }
 
-VOID CCheckpointSA::SetSize(FLOAT fSize)
+void CCheckpointSA::SetSize(FLOAT fSize)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetSize(FLOAT fSize)");
+	DEBUG_TRACE("void CCheckpointSA::SetSize(FLOAT fSize)");
 	this->GetInterface()->m_fSize = fSize;
 }
 
-VOID CCheckpointSA::SetCameraRange(FLOAT fCameraRange)
+void CCheckpointSA::SetCameraRange(FLOAT fCameraRange)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetCameraRange(FLOAT fCameraRange)");
+	DEBUG_TRACE("void CCheckpointSA::SetCameraRange(FLOAT fCameraRange)");
 	this->GetInterface()->m_fCameraRange = fCameraRange;
 }
 
-VOID CCheckpointSA::SetPulseFraction(FLOAT fPulseFraction)
+void CCheckpointSA::SetPulseFraction(FLOAT fPulseFraction)
 {
-	DEBUG_TRACE("VOID CCheckpointSA::SetPulseFraction(FLOAT fPulseFraction)");
+	DEBUG_TRACE("void CCheckpointSA::SetPulseFraction(FLOAT fPulseFraction)");
 	this->GetInterface()->m_fPulseFraction = fPulseFraction;
 }
 
@@ -135,9 +135,9 @@ FLOAT CCheckpointSA::GetPulseFraction()
 	return this->GetInterface()->m_fPulseFraction;
 }
 
-VOID CCheckpointSA::Remove()
+void CCheckpointSA::Remove()
 {
-	DEBUG_TRACE("VOID CCheckpointSA::Remove()");
+	DEBUG_TRACE("void CCheckpointSA::Remove()");
 	this->GetInterface()->m_bIsUsed = false;
 	this->GetInterface()->m_nType = 257;	
 	this->GetInterface()->rwColour = 0;

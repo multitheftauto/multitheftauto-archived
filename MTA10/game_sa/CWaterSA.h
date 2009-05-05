@@ -63,7 +63,7 @@ public:
     WORD                             GetID             ();
 
     void                             GetPosition       ( CVector& vec );
-    bool                             SetPosition       ( CVector& vec, void* pChangeSource = NULL );
+    bool                             SetPosition       ( const CVector& vec, void* pChangeSource = NULL );
 
 protected:
     CWaterVertexSAInterface*         m_pInterface;

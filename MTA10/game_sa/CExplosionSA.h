@@ -56,8 +56,8 @@ public:
 	void                    SetExplosionPosition        ( const CVector* vecPosition );
 	CEntity*                GetExplosionCreator         ( void );
 	CEntity*                GetExplodingEntity          ( void );
-	BOOL					IsActive                    ( void );
-	VOID					Remove                      ( void );
+	bool					IsActive                    ( void );
+	void					Remove                      ( void );
 	float                   GetExplosionForce           ( void );
 	void                    SetExplosionForce           ( float fForce );
 	void                    SetSilent                   ( bool bSilent );

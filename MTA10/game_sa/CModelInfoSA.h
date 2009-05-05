@@ -238,26 +238,26 @@ public:
     CBaseModelInfoSAInterface *     GetInterface             ( void )              { return m_pInterface; }
     CPedModelInfoSAInterface *      GetPedModelInfoInterface ( void )              { return reinterpret_cast < CPedModelInfoSAInterface * > ( GetInterface () ); }
 
-	BOOL			                IsBoat                  ( void );
-	BOOL			                IsCar                   ( void );
-	BOOL			                IsTrain                 ( void );
-	BOOL			                IsHeli                  ( void );
-	BOOL			                IsPlane                 ( void );
-	BOOL			                IsBike                  ( void );
-	BOOL			                IsFakePlane             ( void );
-	BOOL			                IsMonsterTruck          ( void );
-	BOOL			                IsQuadBike              ( void );
-	BOOL			                IsBmx                   ( void );
-	BOOL			                IsTrailer               ( void );
-	BOOL			                IsVehicle               ( void );
+	bool			                IsBoat                  ( void );
+	bool			                IsCar                   ( void );
+	bool			                IsTrain                 ( void );
+	bool			                IsHeli                  ( void );
+	bool			                IsPlane                 ( void );
+	bool			                IsBike                  ( void );
+	bool			                IsFakePlane             ( void );
+	bool			                IsMonsterTruck          ( void );
+	bool			                IsQuadBike              ( void );
+	bool			                IsBmx                   ( void );
+	bool			                IsTrailer               ( void );
+	bool			                IsVehicle               ( void );
 
 	char *                          GetNameIfVehicle        ( void );
 
-	VOID			                Request                 ( bool bAndLoad = false, bool bWaitForLoad = false );
-	VOID			                Remove                  ( void );
-	VOID			                LoadAllRequestedModels  ( void );
+	void			                Request                 ( bool bAndLoad = false, bool bWaitForLoad = false );
+	void			                Remove                  ( void );
+	void			                LoadAllRequestedModels  ( void );
 	BYTE			                GetLevelFromPosition    ( CVector * vecPosition );
-	BOOL			                IsLoaded                ( void );
+	bool			                IsLoaded                ( void );
 	BYTE			                GetFlags                ( void );
 	CBoundingBox *                  GetBoundingBox          ( void );
 	bool			                IsValid                 ( void );

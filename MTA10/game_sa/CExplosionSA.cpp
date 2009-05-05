@@ -64,15 +64,15 @@ CEntity* CExplosionSA::GetExplodingEntity ( void )
     return NULL;
 }
 
-BOOL CExplosionSA::IsActive ( void )
+bool CExplosionSA::IsActive ( void )
 {
-	DEBUG_TRACE("BOOL CExplosionSA::IsActive (  )");
-	return internalInterface->m_cExplosionActive;
+	DEBUG_TRACE("bool CExplosionSA::IsActive (  )");
+	return internalInterface->m_cExplosionActive ? true : false;
 }
 
-VOID CExplosionSA::Remove ( void )
+void CExplosionSA::Remove ( void )
 {
-	DEBUG_TRACE("VOID CExplosionSA::Remove (  )");
+	DEBUG_TRACE("void CExplosionSA::Remove (  )");
 	internalInterface->m_cExplosionActive = 0;
 }
 
@@ -84,13 +84,13 @@ float CExplosionSA::GetExplosionForce ( void )
 
 void CExplosionSA::SetExplosionForce ( float fForce )
 {
-	DEBUG_TRACE("VOID CExplosionSA::SetExplosionForce(FLOAT fForce)");
+	DEBUG_TRACE("void CExplosionSA::SetExplosionForce(FLOAT fForce)");
 	this->GetInterface()->m_fExplosionForce = fForce;
 }
 
 void CExplosionSA::SetSilent ( bool bSilent )
 {
-	DEBUG_TRACE("VOID CExplosionSA::SetSilent(BOOL bSilent)");
+	DEBUG_TRACE("void CExplosionSA::SetSilent(bool bSilent)");
 	this->GetInterface()->m_bMakeSound = !bSilent;
 }
 
@@ -102,7 +102,7 @@ unsigned long CExplosionSA::GetActivationTimer()
 
 void CExplosionSA::SetActivationTimer ( unsigned long ulActivationTime )
 {
-	DEBUG_TRACE("VOID CExplosionSA::SetActivationTimer( DWORD dwActivationTime )");
+	DEBUG_TRACE("void CExplosionSA::SetActivationTimer( DWORD dwActivationTime )");
 	this->GetInterface()->m_ActivationTime = ulActivationTime;
 }
 
@@ -114,7 +114,7 @@ DWORD CExplosionSA::GetExpiryTime ( void )
 
 void CExplosionSA::SetExpiryTime ( DWORD dwExpiryTime )
 {
-	DEBUG_TRACE("VOID CExplosionSA::SetExpiryTime( DWORD dwExpiryTime )");
+	DEBUG_TRACE("void CExplosionSA::SetExpiryTime( DWORD dwExpiryTime )");
 	this->GetInterface()->m_TimeExpires = dwExpiryTime;
 }
 
@@ -126,6 +126,6 @@ float CExplosionSA::GetExplosionRadius ( void )
 
 void CExplosionSA::SetExplosionRadius ( float fRadius )
 {
-	DEBUG_TRACE("VOID CExplosionSA::SetExplosionRadius( FLOAT fRadius )");
+	DEBUG_TRACE("void CExplosionSA::SetExplosionRadius( FLOAT fRadius )");
 	this->GetInterface()->m_fExplosionRadius = fRadius;
 }
