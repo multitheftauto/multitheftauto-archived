@@ -52,7 +52,9 @@ class CPickupSA : public CPickup
 public:
 	// constructor	
 						CPickupSA( CPickupSAInterface * pickupInterface );
+
 	CPickupSAInterface*	GetInterface( void ) { return internalInterface; }; // not to be exported
+
     CObject*			GetObject( void ) { return object; };
 
 	void				SetPosition( const CVector& vecPosition );

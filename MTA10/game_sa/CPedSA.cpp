@@ -128,7 +128,7 @@ void CPedSA::AttachPedToBike( CEntity* entity, const CVector& vector, unsigned s
 	}	
 }
 
-bool CPedSA::AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity* targetEntity )
+bool CPedSA::AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, CVector* target, CEntity* targetEntity )
 {
     return ((CProjectileInfoSA*)pGame->GetProjectileInfo())->AddProjectile( (CEntitySA*)this, eWeapon, vecOrigin, fForce, target, targetEntity );
 }

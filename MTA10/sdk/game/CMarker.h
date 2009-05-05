@@ -36,8 +36,8 @@ public:
 	virtual void			Remove( void ) = 0;
 	virtual bool			IsActive( void ) = 0;
 
-	virtual void			SetPosition( CVector* vecPosition ) = 0;
 	virtual const CVector	GetPosition( void ) = 0;
+	virtual void			SetPosition( const CVector& vecPosition ) = 0;
 
 	virtual void			SetEntity( CVehicle* vehicle ) = 0;
 	virtual void			SetEntity( CPed* ped ) = 0;

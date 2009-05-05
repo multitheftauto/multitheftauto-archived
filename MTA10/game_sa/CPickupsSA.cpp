@@ -14,44 +14,28 @@
 
 #include "StdInc.h"
 
-CPickupsSA::CPickupsSA()
+CPickupsSA::CPickupsSA( void )
 {
-	DEBUG_TRACE("CPickupsSA::CPickupsSA()");
-	for(int i = 0;i<MAX_PICKUPS;i++)
+	for( int i = 0; i < MAX_PICKUPS; i++ )
 		Pickups[i] = new CPickupSA((CPickupSAInterface *)(ARRAY_PICKUPS + i * sizeof(CPickupSAInterface)));
 }
 
-CPickupsSA::~CPickupsSA ( void )
+CPickupsSA::~CPickupsSA( void )
 {
-	for ( int i = 0; i < MAX_PICKUPS; i++ )
-    {
+	for( int i = 0; i < MAX_PICKUPS; i++ )
 		delete Pickups [i];
-    }
 }
 
-CPickup	* CPickupsSA::GetPickup(DWORD ID)
+CPickup* CPickupsSA::GetPickup( DWORD ID )
 {
-	DEBUG_TRACE("CPickup * CPickupsSA::GetPickup(DWORD ID)");
 	return (CPickup *)Pickups[ID];
 }
 
-CPickup * CPickupsSA::CreatePickup(CVector * position, DWORD ModelIndex, ePickupType Type, DWORD dwMonetaryValue, DWORD dwMoneyPerDay, BYTE bPingOutOfPlayer)
+CPickup* CPickupsSA::CreatePickup( const CVector& position, DWORD ModelIndex, ePickupType Type, DWORD dwMonetaryValue, DWORD dwMoneyPerDay, BYTE bPingOutOfPlayer )
 {
-	DEBUG_TRACE("CPickup * CPickupsSA::CreatePickup(CVector * position, DWORD ModelIndex, ePickupType Type, DWORD dwMonetaryValue, DWORD dwMoneyPerDay, BYTE bPingOutOfPlayer)");
-	DWORD FreeSlot=0;
-	bool bFoundFreeSlot=false;
-	CPickupSA * pickup;
-
-	/*if (Type == PICKUP_FLOATINGPACKAGE || Type == PICKUP_NAUTICAL_MINE_INACTIVE || bPingOutOfPlayer)
-	{
-	  FreeSlot = MAX_PICKUPS + MAX_PICKUPS_ALWAYS_UPDATED - 1;
-	  while (FreeSlot >= 0 && Pickups[FreeSlot]->GetInterface()->Type != PICKUP_NONE)
-	  {
-		 FreeSlot--;
-	  }
-
-	  if (FreeSlot >= 0) bFoundFreeSlot = true;
-	}*/
+	DWORD FreeSlot = 0;
+	bool bFoundFreeSlot = false;
+	CPickupSA* pickup;
 
 	if (!bFoundFreeSlot)
 	{
@@ -134,7 +118,7 @@ CPickup * CPickupsSA::CreatePickup(CVector * position, DWORD ModelIndex, ePickup
 
 	// All pickups get generated at the coordinates that we get in from the
 	// script. This way the level designers can create them floating in mid-air
-	pickup->SetPosition(position);
+	pickup->SetPosition( position );
 	//memcpy(&Pickups[FreeSlot]->GetInterface()->position,position, sizeof(CVector));
 	// Pickups[FreeSlot]->GetInterface()->PUCoors = CVector(Coors.x, Coors.y, 0.7f + CWorld::FindGroundZFor3DCoord(Coors.x, Coors.y, Coors.z + 1.0f));
 
@@ -146,7 +130,7 @@ CPickup * CPickupsSA::CreatePickup(CVector * position, DWORD ModelIndex, ePickup
 	return pickup;
 }
 
-void CPickupsSA::DisablePickupProcessing ( bool bDisabled )
+void CPickupsSA::DisablePickupProcessing( bool bDisabled )
 {
     static BYTE byteOriginal = 0;
     if ( bDisabled && !byteOriginal )

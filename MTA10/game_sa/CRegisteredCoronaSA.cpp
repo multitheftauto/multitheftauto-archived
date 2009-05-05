@@ -12,64 +12,53 @@
 
 #include "StdInc.h"
 
-CRegisteredCoronaSA::CRegisteredCoronaSA(CRegisteredCoronaSAInterface * coronaInterface)
+CRegisteredCoronaSA::CRegisteredCoronaSA( CRegisteredCoronaSAInterface* coronaInterface )
 {
-	DEBUG_TRACE("CRegisteredCoronaSA::CRegisteredCoronaSA(CRegisteredCoronaSAInterface * coronaInterface)");
 	internalInterface = coronaInterface;
 }
 
-CVector * CRegisteredCoronaSA::GetPosition()
+const CVector CRegisteredCoronaSA::GetPosition( void )
 {
-	DEBUG_TRACE("CVector * CRegisteredCoronaSA::GetPosition()");
-	return &internalInterface->Coordinates;
+	return CVectorGTA::unwrap( internalInterface->Coordinates );
 }
 
-void CRegisteredCoronaSA::SetPosition(CVector * vector)
+void CRegisteredCoronaSA::SetPosition( const CVector& vector )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetPosition(CVector * vector)");
-	memcpy(&internalInterface->Coordinates, vector, sizeof(CVector));
+	internalInterface->Coordinates = vector;
 }
 
-FLOAT CRegisteredCoronaSA::GetSize()
+FLOAT CRegisteredCoronaSA::GetSize( void )
 {
-	DEBUG_TRACE("FLOAT CRegisteredCoronaSA::GetSize()");
 	return internalInterface->Size;
 }
 
-void CRegisteredCoronaSA::SetSize(FLOAT fSize)
+void CRegisteredCoronaSA::SetSize( FLOAT fSize )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetSize(FLOAT fSize)");
 	internalInterface->Size = fSize;
 }
 
-FLOAT CRegisteredCoronaSA::GetRange()
+FLOAT CRegisteredCoronaSA::GetRange( void )
 {
-	DEBUG_TRACE("FLOAT CRegisteredCoronaSA::GetRange()");
 	return internalInterface->Range;
 }
 
-void CRegisteredCoronaSA::SetRange(FLOAT fRange)
+void CRegisteredCoronaSA::SetRange( FLOAT fRange )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetRange(FLOAT fRange)");
 	internalInterface->Range = fRange;
 }
 
-FLOAT CRegisteredCoronaSA::GetPullTowardsCamera()
+FLOAT CRegisteredCoronaSA::GetPullTowardsCamera( void )
 {
-	DEBUG_TRACE("FLOAT CRegisteredCoronaSA::GetPullTowardsCamera()");
 	return internalInterface->PullTowardsCam;
 }
 
-void CRegisteredCoronaSA::SetPullTowardsCamera(FLOAT fPullTowardsCamera)
+void CRegisteredCoronaSA::SetPullTowardsCamera( FLOAT fPullTowardsCamera )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetPullTowardsCamera(FLOAT fPullTowardsCamera)");
 	internalInterface->PullTowardsCam = fPullTowardsCamera;
 }
 
-
-void CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)
+void CRegisteredCoronaSA::SetColor( BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)");
 	internalInterface->Red = Red;
 	internalInterface->Green = Green;
 	internalInterface->Blue = Blue;
@@ -77,46 +66,37 @@ void CRegisteredCoronaSA::SetColor(BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha)
 	internalInterface->FadedIntensity = Alpha;
 }
 
-void CRegisteredCoronaSA::SetTexture(RwTexture * texture)
+void CRegisteredCoronaSA::SetTexture( RwTexture* texture )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetTexture(RwTexture * texture)");
 	internalInterface->pTex = texture;
 }
 
-void CRegisteredCoronaSA::SetTexture(eCoronaType texture)
+void CRegisteredCoronaSA::SetTexture( eCoronaType texture )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetTexture(eCoronaType texture)");
 	CCoronasSA * coronas = ((CCoronasSA *)pGame->GetCoronas());
 	RwTexture * tex =  coronas->GetTexture(texture);
 	if(tex)
 		internalInterface->pTex = tex;
 }
 
-/**
- * Lens flare
- * \todo Test what the types are
- */
-BYTE CRegisteredCoronaSA::GetFlareType()
+// TODO: Test what the types are
+BYTE CRegisteredCoronaSA::GetFlareType( void )
 {
-	DEBUG_TRACE("BYTE CRegisteredCoronaSA::GetFlareType()");
 	return internalInterface->FlareType;
 }
 
-void CRegisteredCoronaSA::SetFlareType(BYTE fFlareType)
+void CRegisteredCoronaSA::SetFlareType( BYTE fFlareType )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::SetFlareType(BYTE fFlareType)");
 	internalInterface->FlareType = fFlareType;
 }
 
-DWORD CRegisteredCoronaSA::GetID()
+DWORD CRegisteredCoronaSA::GetID( void )
 {
-	DEBUG_TRACE("DWORD CRegisteredCoronaSA::GetID()");
 	return ((DWORD)internalInterface - ARRAY_CORONAS) / sizeof(CRegisteredCoronaSAInterface);
 }
 
-void CRegisteredCoronaSA::Init(DWORD Identifier)
+void CRegisteredCoronaSA::Init( DWORD Identifier )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::Init(DWORD Identifier)");
 	internalInterface->Identifier = Identifier;
 	this->SetSize(2.5f);
 	internalInterface->NormalAngle = 0.0f;
@@ -133,13 +113,12 @@ void CRegisteredCoronaSA::Init(DWORD Identifier)
 	internalInterface->RegisteredThisFrame = 1; // won't appear in-game without this
 }
 
-void CRegisteredCoronaSA::Refresh()
+void CRegisteredCoronaSA::Refresh( void )
 {
-	DEBUG_TRACE("void CRegisteredCoronaSA::Refresh()");
 	internalInterface->JustCreated = 1;
 }
 
-void CRegisteredCoronaSA::Disable()
+void CRegisteredCoronaSA::Disable( void )
 {
 	internalInterface->Identifier = 0;
    // internalInterface->Intensity = 0; // wasn't working before?

@@ -340,7 +340,7 @@ public:
 	bool				CanSeeEntity( CEntity * entity, FLOAT fDistance );
 	CVehicle*			GetVehicle( void );
 	void				Respawn( const CVector& position, bool bCameraCut );
-    bool                AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity * targetEntity );
+    bool                AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, CVector* target, CEntity * targetEntity );
 
 	FLOAT				GetHealth( void );
     void				SetHealth( float fHealth );

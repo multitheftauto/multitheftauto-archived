@@ -68,7 +68,7 @@ public:
         internalInterface = projectileInfoInterface;
     }
 
-	bool					AddProjectile( CEntity * creator, eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity * targetEntity );
+	bool					AddProjectile( CEntity * creator, eWeaponType eWeapon, const CVector& vecOrigin, float fForce, CVector* target, CEntity * targetEntity );
     CProjectile *           GetProjectile( void * projectilePointer );
     void                    RemoveProjectile( CProjectileInfo * pProjectileInfo, CProjectile * pProjectile );
 	void					RemoveAllProjectiles( void );
