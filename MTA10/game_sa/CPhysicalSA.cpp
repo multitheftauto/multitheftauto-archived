@@ -15,9 +15,37 @@
 
 #include "StdInc.h"
 
-CVector * CPhysicalSA::GetMoveSpeed(CVector * vecMoveSpeed)
+const CVector CPhysicalSA::GetMoveSpeed( void )
 {
-	DEBUG_TRACE("CVector * CPhysicalSA::GetMoveSpeed(CVector * vecMoveSpeed)");
+	CVectorGTA *vec;
+	DWORD dwFunc = FUNC_GetMoveSpeed;
+	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
+	_asm
+	{
+		mov		ecx, dwThis
+		call	dwFunc
+		mov		vec, eax
+	}
+	return CVectorGTA::unwrap( *vec );
+}
+
+const CVector CPhysicalSA::GetTurnSpeed( void )
+{
+	CVectorGTA *vec;
+	DWORD dwFunc = FUNC_GetTurnSpeed;
+	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
+	_asm
+	{
+		mov		ecx, dwThis
+		call	dwFunc
+		mov		vec, eax
+	}
+	return CVectorGTA::unwrap( *vec );
+}
+
+void CPhysicalSA::SetMoveSpeed( const CVector& vecMoveSpeed )
+{
+	CVectorGTA *vec;
 	DWORD dwFunc = FUNC_GetMoveSpeed;
 	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
 	DWORD dwReturn = 0;
@@ -27,54 +55,21 @@ CVector * CPhysicalSA::GetMoveSpeed(CVector * vecMoveSpeed)
 		call	dwFunc
 		mov		dwReturn, eax
 	}
-	memcpy(vecMoveSpeed, (void *)dwReturn, sizeof(CVector));
-	return vecMoveSpeed;
+	*vec = vecMoveSpeed;
 }
 
-CVector * CPhysicalSA::GetTurnSpeed(CVector * vecTurnSpeed)
+void CPhysicalSA::SetTurnSpeed( const CVector& vecTurnSpeed )
 {
-	DEBUG_TRACE("CVector * CPhysicalSA::GetTurnSpeed(CVector * vecTurnSpeed)");
+	CVectorGTA *vec;
 	DWORD dwFunc = FUNC_GetTurnSpeed;
 	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
-	DWORD dwReturn = 0;
 	_asm
 	{
 		mov		ecx, dwThis
 		call	dwFunc
-		mov		dwReturn, eax
+		mov		vec, eax
 	}
-	memcpy(vecTurnSpeed, (void *)dwReturn, sizeof(CVector));
-	return vecTurnSpeed;
-}
-
-void CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)
-{
-	DEBUG_TRACE("void CPhysicalSA::SetMoveSpeed(CVector * vecMoveSpeed)");
-	DWORD dwFunc = FUNC_GetMoveSpeed;
-	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
-	DWORD dwReturn = 0;
-	_asm
-	{
-		mov		ecx, dwThis
-		call	dwFunc
-		mov		dwReturn, eax
-	}
-	memcpy((void *)dwReturn, vecMoveSpeed, sizeof(CVector));
-}
-
-void CPhysicalSA::SetTurnSpeed(CVector * vecTurnSpeed)
-{
-	DEBUG_TRACE("void CPhysicalSA::SetTurnSpeed(CVector * vecTurnSpeed)");
-	DWORD dwFunc = FUNC_GetTurnSpeed;
-	DWORD dwThis = (DWORD)((CPhysicalSAInterface *)this->GetInterface());
-	DWORD dwReturn = 0;
-	_asm
-	{
-		mov		ecx, dwThis
-		call	dwFunc
-		mov		dwReturn, eax
-	}
-	memcpy((void *)dwReturn, vecTurnSpeed, sizeof(CVector));
+	*vec = vecTurnSpeed;
 }
 
 float CPhysicalSA::GetMass ( void )
@@ -197,15 +192,13 @@ CEntity * CPhysicalSA::GetAttachedEntity ( void )
 	return pReturn;
 }
 
-void CPhysicalSA::AttachEntityToEntity ( CPhysical& Entity, const CVector& vecPosition, const CVector& vecRotation )
+void CPhysicalSA::AttachEntityToEntity( CPhysical& Entity, const CVector& vecPosition, const CVector& vecRotation )
 {
-	DEBUG_TRACE("void CPhysicalSA::AttachEntityToEntity(CPhysical& Entity, const CVector& vecPosition, const CVector& vecRotation)");
-
 	try {
 		CPhysicalSA& EntitySA = dynamic_cast < CPhysicalSA& > ( Entity );
 		DWORD dwEntityInterface = (DWORD) EntitySA.GetInterface ();
 
-		InternalAttachEntityToEntity ( dwEntityInterface, &vecPosition, &vecRotation );
+		InternalAttachEntityToEntity( dwEntityInterface, vecPosition, vecRotation );
 	} catch ( ... ) {
 		DEBUG_TRACE ( "Invalid Entity argument detected");
 	}
@@ -234,22 +227,26 @@ void CPhysicalSA::DetachEntityFromEntity(float fUnkX, float fUnkY, float fUnkZ, 
 }
 
 
-bool CPhysicalSA::InternalAttachEntityToEntity(DWORD dwEntityInterface, const CVector * vecPosition, const CVector * vecRotation)
+bool CPhysicalSA::InternalAttachEntityToEntity( DWORD dwEntityInterface, const CVector& vecPosition, const CVector& vecRotation )
 {
-    DEBUG_TRACE("bool CPhysicalSA::AttachEntityToEntity(CPhysical * entityToAttach, CVector * vecPosition, CVector * vecRotation)");
+	float fRX = vecRotation.getX();
+	float fRY = vecRotation.getY();
+	float fRZ = vecRotation.getZ();
+	float fPX = vecPosition.getX();
+	float fPY = vecPosition.getY();
+	float fPZ = vecPosition.getZ();
+
 	DWORD dwFunc = FUNC_AttachEntityToEntity;
 	DWORD dwThis = (DWORD)this->GetInterface();
     DWORD dwReturn = 0;
 	_asm
 	{
-        mov     ecx, vecRotation
-        push    [ecx+8]
-        push    [ecx+4]
-        push    [ecx]
-        mov     ecx, vecPosition
-        push    [ecx+8]
-        push    [ecx+4]
-        push    [ecx]
+        push    fRZ
+        push    fRY
+        push    fRX
+        push    fPZ
+        push    fPY
+        push    fPX
         push    dwEntityInterface
 		mov		ecx, dwThis
 		call	dwFunc
@@ -259,18 +256,18 @@ bool CPhysicalSA::InternalAttachEntityToEntity(DWORD dwEntityInterface, const CV
 }
 
 
-void CPhysicalSA::GetAttachedOffsets ( CVector & vecPosition, CVector & vecRotation )
+void CPhysicalSA::GetAttachedOffsets( CVector& vecPosition, CVector& vecRotation )
 {
-    CPhysicalSAInterface * pInterface = (CPhysicalSAInterface *)this->GetInterface();
+    CPhysicalSAInterface *pInterface = (CPhysicalSAInterface *)this->GetInterface();
     if ( pInterface->pAttachedEntity )
     {
-        vecPosition = pInterface->vecAttachedPosition;
-        vecRotation = pInterface->vecAttachedRotation;
+		vecPosition = CVectorGTA::unwrap( pInterface->vecAttachedPosition );
+		vecRotation = CVectorGTA::unwrap( pInterface->vecAttachedRotation );
     }
 }
 
 
-void CPhysicalSA::SetAttachedOffsets ( CVector & vecPosition, CVector & vecRotation )
+void CPhysicalSA::SetAttachedOffsets( const CVector& vecPosition, const CVector& vecRotation )
 {
     CPhysicalSAInterface * pInterface = (CPhysicalSAInterface *)this->GetInterface();
     if ( pInterface->pAttachedEntity )

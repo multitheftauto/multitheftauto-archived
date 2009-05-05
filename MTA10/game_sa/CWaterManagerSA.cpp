@@ -721,13 +721,13 @@ void CWaterManagerSA::SetWaveLevel ( float fWaveLevel )
     }
 }
 
-bool CWaterManagerSA::TestLineAgainstWater ( CVector& vecStart, CVector& vecEnd, CVector* vecCollision )
+bool CWaterManagerSA::TestLineAgainstWater( const CVector& vecStart, const CVector& vecEnd, CVector* vecCollision )
 {
     return ( (TestLineAgainstWater_t) FUNC_TestLineAgainstWater )
         ( vecEnd.getX(), vecEnd.getY(), vecEnd.getZ(), vecStart.getX(), vecStart.getY(), vecStart.getZ(), vecCollision );
 }
 
-void CWaterManagerSA::AddChange ( void *pChangeSource, void* pChangedObject, CWaterChange* pChange )
+void CWaterManagerSA::AddChange( void *pChangeSource, void* pChangedObject, CWaterChange* pChange )
 {
     if ( !pChangeSource )
     {

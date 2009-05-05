@@ -13,23 +13,22 @@
 
 #include "StdInc.h"
 
-CGarageSA::CGarageSA ( CGarageSAInterface * pInterface )
+CGarageSA::CGarageSA( CGarageSAInterface * pInterface )
 {
     internalInterface = pInterface;
 }
 
-void CGarageSA::SetType ( BYTE type )
+void CGarageSA::SetType( BYTE type )
 {
     internalInterface->Type = type;
 }
 
-void CGarageSA::GetPosition ( CVector& vecPosition ) const
+void CGarageSA::GetPosition( CVector& vecPosition ) const
 {
-    const CVector& internalPosition = internalInterface->vecPosition;
-    vecPosition = internalPosition;
+	vecPosition = CVectorGTA::unwrap( internalInterface->vecPosition );
 }
 
-void CGarageSA::GetDirection ( float& x1, float& y1, float& x2, float& y2 ) const
+void CGarageSA::GetDirection( float& x1, float& y1, float& x2, float& y2 ) const
 {
     x1 = internalInterface->DirectionA_X;
     y1 = internalInterface->DirectionA_Y;
@@ -37,7 +36,7 @@ void CGarageSA::GetDirection ( float& x1, float& y1, float& x2, float& y2 ) cons
     y2 = internalInterface->DirectionB_Y;
 }
 
-void CGarageSA::GetSize ( float& height, float& width, float& depth ) const
+void CGarageSA::GetSize( float& height, float& width, float& depth ) const
 {
     height = internalInterface->Height;
     width = internalInterface->Width;

@@ -47,7 +47,7 @@ public:
     void                        SetType				( BYTE type );
     inline BYTE                 GetType				( void ) const   { return this->internalInterface->Type; }
 
-    const CVector				GetPosition         ( void );
+    void						GetPosition         ( CVector& vecPosition ) const;
     void                        GetDirection        ( float& x1, float& y1, float& x2, float& y2 ) const;
     void                        GetSize             ( float& height, float& width, float& depth ) const;
     void                        GetBoundingBox      ( float& left, float& right, float& front, float& back ) const;

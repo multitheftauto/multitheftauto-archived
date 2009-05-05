@@ -98,7 +98,7 @@ public:
     CEntity*		GetAttachedEntity( void );
     void			AttachEntityToEntity( CPhysical& Entity, const CVector& vecPosition, const CVector& vecRotation );
     void			DetachEntityFromEntity( float fUnkX, float fUnkY, float fUnkZ, bool bUnk );
-    void			GetAttachedOffsets( const CVector& vecPosition, const CVector& vecRotation );
+    void			GetAttachedOffsets( CVector& vecPosition, CVector& vecRotation );
     void			SetAttachedOffsets( const CVector& vecPosition, const CVector& vecRotation );
 
     virtual bool	InternalAttachEntityToEntity( DWORD dwEntityInterface, const CVector& vecPosition, const CVector& vecRotation );

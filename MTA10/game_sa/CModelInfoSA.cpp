@@ -398,14 +398,16 @@ void CModelInfoSA::LoadAllRequestedModels ( )
 	}
 }
 
-BYTE CModelInfoSA::GetLevelFromPosition ( CVector * vecPosition )
+BYTE CModelInfoSA::GetLevelFromPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("BYTE CModelInfoSA::GetLevelFromPosition ( CVector * vecPosition )");
+	CVectorGTA vec = vecPosition;
+	CVectorGTA* pvec = &vec;
+
 	DWORD dwFunction = FUNC_GetLevelFromPosition;
 	bool bReturn = false;
 	_asm
 	{
-		push	vecPosition
+		push	pvec
 		call	dwFunction
 		add		esp, 4
 		mov		bReturn, al

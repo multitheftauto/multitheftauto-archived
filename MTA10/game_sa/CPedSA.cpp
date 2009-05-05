@@ -96,25 +96,22 @@ void CPedSA::SetModelIndex ( DWORD dwModelIndex )
     }
 }
 
-bool CPedSA::IsInWater ( void )
+bool CPedSA::IsInWater( void )
 {
-	DEBUG_TRACE("bool CPedSA::IsInWater ()");
 	CTask *pTask = this->m_pPedIntelligence->GetTaskManager ()->GetTask ( TASK_PRIORITY_EVENT_RESPONSE_NONTEMP );
 	return ( pTask && ( pTask->GetTaskType () == TASK_COMPLEX_IN_WATER ) );
 }
 
-void CPedSA::AttachPedToBike(CEntity * entity, CVector * vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType)
+void CPedSA::AttachPedToBike( CEntity* entity, const CVector& vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType )
 {
-	DEBUG_TRACE("void CPedSA::AttachPedToBike(CEntity * entity, CVector * vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType)");
-
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( entity );
 	if ( !pEntitySA ) return;
 
 	DWORD dwEntityInterface = (DWORD)pEntitySA->GetInterface();
 	DWORD dwFunc = FUNC_AttachPedToBike;
-	FLOAT fX = vector->getX();
-	FLOAT fY = vector->getY();
-	FLOAT fZ = vector->getZ();
+	FLOAT fX = vector.getX();
+	FLOAT fY = vector.getY();
+	FLOAT fZ = vector.getZ();
     DWORD dwThis = (DWORD)this->GetInterface();
 	_asm
 	{
@@ -131,13 +128,12 @@ void CPedSA::AttachPedToBike(CEntity * entity, CVector * vector, unsigned short 
 	}	
 }
 
-bool CPedSA::AddProjectile ( eWeaponType eWeapon, CVector vecOrigin, float fForce, CVector * target, CEntity * targetEntity )
+bool CPedSA::AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity* targetEntity )
 {
-    return ((CProjectileInfoSA*)pGame->GetProjectileInfo())->AddProjectile ( (CEntitySA*)this, eWeapon, vecOrigin, fForce, target, targetEntity );
+    return ((CProjectileInfoSA*)pGame->GetProjectileInfo())->AddProjectile( (CEntitySA*)this, eWeapon, vecOrigin, fForce, target, targetEntity );
 }
 
-
-void CPedSA::DetachPedFromEntity ( void )
+void CPedSA::DetachPedFromEntity( void )
 {
     DWORD dwFunc = FUNC_DetachPedFromEntity;
     DWORD dwThis = (DWORD)this->GetInterface();
@@ -148,21 +144,20 @@ void CPedSA::DetachPedFromEntity ( void )
     }
 }
 
-bool CPedSA::InternalAttachEntityToEntity(DWORD dwEntityInterface, const CVector * vecPosition, const CVector * vecRotation)
+bool CPedSA::InternalAttachEntityToEntity( DWORD dwEntityInterface, const CVector& vecPosition, const CVector& vecRotation )
 {
-    AttachPedToEntity ( dwEntityInterface, const_cast < CVector * > ( vecPosition ), 0, 0.0f, WEAPONTYPE_UNARMED, FALSE );
+    AttachPedToEntity( dwEntityInterface, vecPosition, 0, 0.0f, WEAPONTYPE_UNARMED, FALSE );
     return true;
 }
 
-void CPedSA::AttachPedToEntity(DWORD dwEntityInterface, CVector * vector, unsigned short sDirection, FLOAT fRotationLimit, eWeaponType weaponType, bool bChangeCamera)
+void CPedSA::AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, unsigned short sDirection, FLOAT fRotationLimit, eWeaponType weaponType, bool bChangeCamera )
 {
     // sDirection and fRotationLimit only apply to first-person shooting (bChangeCamera)
-	DEBUG_TRACE("void CPedSA::AttachPedToEntity(CVehicle * entity, CVector * vector, unsigned short sUnk, FLOAT fUnk, eWeaponType weaponType)");
 	DWORD dwFunc = FUNC_AttachPedToEntity;
     DWORD dwThis = (DWORD)this->GetInterface();
-	FLOAT fX = vector->getX();
-	FLOAT fY = vector->getY();
-	FLOAT fZ = vector->getZ();
+	FLOAT fX = vector.getX();
+	FLOAT fY = vector.getY();
+	FLOAT fZ = vector.getZ();
 	BYTE bPedType = ((CPedSAInterface*)GetInterface())->bPedType;
 
 	// Hack the CPed type(?) to non-player so the camera doesn't get changed
@@ -188,10 +183,8 @@ void CPedSA::AttachPedToEntity(DWORD dwEntityInterface, CVector * vector, unsign
 		((CPedSAInterface*)GetInterface())->bPedType = bPedType;
 }
 
-bool CPedSA::CanSeeEntity(CEntity * entity, FLOAT fDistance)
+bool CPedSA::CanSeeEntity( CEntity* entity, FLOAT fDistance )
 {
-	DEBUG_TRACE("bool CPedSA::CanSeeEntity(CEntity * entity, FLOAT fDistance)");
-
 	DWORD dwFunc = FUNC_CanSeeEntity;
 	bool bReturn = false;
 
@@ -211,9 +204,8 @@ bool CPedSA::CanSeeEntity(CEntity * entity, FLOAT fDistance)
 	return bReturn;
 }
 
-CVehicle * CPedSA::GetVehicle()
+CVehicle* CPedSA::GetVehicle( void )
 {
-    DEBUG_TRACE("CVehicle * CPedSA::GetVehicle()");
     if ( ((CPedSAInterface *)this->GetInterface())->pedFlags.bInVehicle )
     {
 	    CVehicleSAInterface * vehicle = (CVehicleSAInterface *)(((CPedSAInterface *)this->GetInterface())->CurrentObjective);
@@ -223,7 +215,7 @@ CVehicle * CPedSA::GetVehicle()
     return NULL;
 }
 
-void CPedSA::Respawn(CVector * position, bool bCameraCut)
+void CPedSA::Respawn( const CVector& position, bool bCameraCut )
 {
     CPed * pLocalPlayer = pGame->GetPools()->GetPedFromRef ( (DWORD)1 );
 
@@ -233,10 +225,9 @@ void CPedSA::Respawn(CVector * position, bool bCameraCut)
         memset( (void*)0x4422EA, 0x90, 20 );
     }
 
-	DEBUG_TRACE("void CPedSA::Respawn(CVector * position)");
-	FLOAT fX = position->getX();
-	FLOAT fY = position->getY();
-	FLOAT fZ = position->getZ();
+	FLOAT fX = position.getX();
+	FLOAT fY = position.getY();
+	FLOAT fZ = position.getZ();
 	FLOAT fUnk = 1.0f; 
 	DWORD dwFunc = FUNC_RestorePlayerStuffDuringResurrection;
 	DWORD dwThis = (DWORD)this->GetInterface();
@@ -277,19 +268,19 @@ void CPedSA::Respawn(CVector * position, bool bCameraCut)
     //OutputDebugString ( "Respawn!!!!" );
 }
 
-FLOAT CPedSA::GetHealth()
+FLOAT CPedSA::GetHealth( void )
 {
-	return GetPedInterface ()->fHealth;
+	return GetPedInterface()->fHealth;
 }
 
-void CPedSA::SetHealth ( float fHealth )
+void CPedSA::SetHealth( float fHealth )
 {
-    GetPedInterface ()->fHealth = fHealth;
+    GetPedInterface()->fHealth = fHealth;
 }
 
-float CPedSA::GetArmor ( void )
+float CPedSA::GetArmor( void )
 {
-    return GetPedInterface ()->fArmor;
+    return GetPedInterface()->fArmor;
 }
 
 void CPedSA::SetArmor ( float fArmor )
@@ -309,22 +300,22 @@ void CPedSA::SetIsStanding( bool bStanding )
 	}
 }
 
-CPedIntelligence * CPedSA::GetPedIntelligence ( void )
+CPedIntelligence * CPedSA::GetPedIntelligence( void )
 {
 	return m_pPedIntelligence;
 }
 
-DWORD CPedSA::GetType ( void )
+DWORD CPedSA::GetType( void )
 {
 	return m_dwType;
 }
 
-void CPedSA::SetType ( DWORD m_dwType )
+void CPedSA::SetType( DWORD m_dwType )
 {
 	this->m_dwType = m_dwType;
 }
 
-DWORD * CPedSA::GetMemoryValue ( DWORD dwOffset )
+DWORD * CPedSA::GetMemoryValue( DWORD dwOffset )
 {
     if ( dwOffset <= SIZEOF_CPLAYERPED )
         return (DWORD *)((DWORD)(this->GetInterface()) + dwOffset);
@@ -332,7 +323,7 @@ DWORD * CPedSA::GetMemoryValue ( DWORD dwOffset )
         return NULL;
 }
 
-void CPedSA::RemoveWeaponModel ( int iModel )
+void CPedSA::RemoveWeaponModel( int iModel )
 {
     DWORD dwFunc = FUNC_RemoveWeaponModel;
     DWORD dwThis = (DWORD)this->GetInterface();
@@ -344,7 +335,7 @@ void CPedSA::RemoveWeaponModel ( int iModel )
     }
 }
 
-void CPedSA::ClearWeapon ( eWeaponType weaponType )
+void CPedSA::ClearWeapon( eWeaponType weaponType )
 {
     DWORD dwFunc = FUNC_ClearWeapon;
     DWORD dwThis = (DWORD)this->GetInterface();
@@ -356,7 +347,7 @@ void CPedSA::ClearWeapon ( eWeaponType weaponType )
     }
 }
 
-CWeapon * CPedSA::GiveWeapon ( eWeaponType weaponType, unsigned int uiAmmo )
+CWeapon * CPedSA::GiveWeapon( eWeaponType weaponType, unsigned int uiAmmo )
 {
     if ( weaponType != WEAPONTYPE_UNARMED )
     {
@@ -508,36 +499,38 @@ void CPedSA::SetCurrentWeaponSlot ( eWeaponSlot weaponSlot )
     }
 }
 
-CVector * CPedSA::GetBonePosition ( eBone bone, CVector * vecPosition )
+const CVector CPedSA::GetBonePosition( eBone bone )
 {
+	CVectorGTA vec;
+
     DWORD dwFunc = FUNC_GetBonePosition;
     DWORD dwThis = (DWORD)this->GetInterface();
     _asm
     {
         push    1
         push    bone
-        push    vecPosition
+        push    vec
         mov     ecx, dwThis
         call    dwFunc
     }
 
-    return vecPosition;
+	return CVectorGTA::unwrap( vec );
 }
 
-CVector * CPedSA::GetTransformedBonePosition ( eBone bone, CVector * vecPosition )
+const CVector CPedSA::GetTransformedBonePosition( eBone bone )
 {
+	CVectorGTA vec;
     DWORD dwFunc = FUNC_GetTransformedBonePosition;
     DWORD dwThis = (DWORD)this->GetInterface();
     _asm
     {
         push    1
         push    bone
-        push    vecPosition
+        push    vec
         mov     ecx, dwThis
         call    dwFunc
     }
-
-    return vecPosition;
+	return CVectorGTA::unwrap( vec );
 }
 
 bool CPedSA::IsDucking ( void )

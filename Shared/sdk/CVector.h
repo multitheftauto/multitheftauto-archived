@@ -47,13 +47,13 @@ public:
 		m_fY = vector.m_fY;
 		m_fZ = vector.m_fZ;
 	}
+	*/
 
-	inline CVector( const CVector3& vector ) {
+	inline CVectorGTA( const CVector3& vector ) {
 		m_fX = vector.getX();
 		m_fY = vector.getY();
 		m_fZ = vector.getZ();
 	}
-	*/
 
 	inline const CVectorGTA& operator =( const CVector3& vector ) {
 		m_fX = vector.getX();

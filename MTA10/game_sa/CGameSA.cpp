@@ -80,17 +80,17 @@ CGameSA::CGameSA()
     this->m_pControllerConfigManager = new CControllerConfigManagerSA();
     this->m_pProjectileInfo         = new CProjectileInfoSA();
 	this->m_pRenderWare				= new CRenderWareSA( version );
-    this->m_pHandlingManager        = new CHandlingManagerSA ();
+    this->m_pHandlingManager        = new CHandlingManagerSA();
     this->m_pEventList              = new CEventListSA();
-    this->m_pGarages                = new CGaragesSA ( (CGaragesSAInterface *)CLASS_CGarages);
-    this->m_pTasks                  = new CTasksSA ( (CTaskManagementSystemSA*)m_pTaskManagementSystem );
+    this->m_pGarages                = new CGaragesSA( (CGaragesSAInterface *)CLASS_CGarages);
+    this->m_pTasks                  = new CTasksSA( (CTaskManagementSystemSA*)m_pTaskManagementSystem );
     this->m_pAnimManager            = new CAnimManagerSA;
     this->m_pStreaming              = new CStreamingSA;
     this->m_pVisibilityPlugins      = new CVisibilityPluginsSA;
     this->m_pKeyGen                 = new CKeyGenSA;
     this->m_pRopes                  = new CRopesSA;
-    this->m_pFx                     = new CFxSA ( (CFxSAInterface *)CLASS_CFx );
-    this->m_pWaterManager           = new CWaterManagerSA ();
+    this->m_pFx                     = new CFxSA( (CFxSAInterface *)CLASS_CFx );
+    this->m_pWaterManager           = new CWaterManagerSA();
 
 	for ( int i = 0;i < WEAPONTYPE_LAST_WEAPONTYPE;i++)
 		WeaponInfos[i] = new CWeaponInfoSA((CWeaponInfoSAInterface *)(ARRAY_WeaponInfo + i * CLASSSIZE_WeaponInfo), (eWeaponType)i);

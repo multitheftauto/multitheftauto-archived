@@ -12,8 +12,10 @@
 
 #include "StdInc.h"
 
-CNodeAddress * CPathFindSA::FindNthNodeClosestToCoors ( CVector * vecCoors, int iNodeNumber, int iType, CNodeAddress * pNodeAddress, float fDistance )
+CNodeAddress* CPathFindSA::FindNthNodeClosestToCoors( const CVector& vecCoors, int iNodeNumber, int iType, CNodeAddress * pNodeAddress, float fDistance )
 {
+	CVectorGTA vec = vecCoors;
+
 	DWORD dwFunc = FUNC_FindNthNodeClosestToCoors;
 	
 	CNodeAddress node;
@@ -30,7 +32,7 @@ CNodeAddress * CPathFindSA::FindNthNodeClosestToCoors ( CVector * vecCoors, int 
 		push	0
 		push	fDistance
 		push	0
-		mov		eax, vecCoors
+		mov		eax, vec
 		push	[eax+8]
 		push	[eax+4]
 		push	[eax]
@@ -44,7 +46,7 @@ CNodeAddress * CPathFindSA::FindNthNodeClosestToCoors ( CVector * vecCoors, int 
 	return pNodeAddress;
 }
 
-CPathNode * CPathFindSA::GetPathNode ( CNodeAddress * node )
+CPathNode * CPathFindSA::GetPathNode( CNodeAddress * node )
 {
 	DWORD dwFunc = FUNC_FindNodePointer;
 	if ( node->sRegion >= 0 && node->sIndex >= 0 )
@@ -62,38 +64,39 @@ CPathNode * CPathFindSA::GetPathNode ( CNodeAddress * node )
 	return NULL;
 }
 
-CVector * CPathFindSA::GetNodePosition ( CPathNode * pNode, CVector * pPosition)
+const CVector CPathFindSA::GetNodePosition( CPathNode * pNode )
 {
+	CVectorGTA vec;
+
 	DWORD dwFunc = FUNC_CPathNode_GetCoors;
 	_asm
 	{
-		push	pPosition
+		push	vec
 		mov		ecx, pNode
 		call	dwFunc
 	}
-	return pPosition;
+	return CVectorGTA::unwrap( vec );
 }
 
-CVector * CPathFindSA::GetNodePosition ( CNodeAddress * pNode, CVector * pPosition )
+const CVector CPathFindSA::GetNodePosition( CNodeAddress * pNode )
 {
 	CPathNode * pPathNode = GetPathNode ( pNode );
-	return GetNodePosition ( pPathNode, pPosition );
+	return GetNodePosition( pPathNode );
 }
 
-void CPathFindSA::SwitchRoadsOffInArea ( CVector * vecAreaCorner1, CVector * vecAreaCorner2, bool bEnable )
+void CPathFindSA::SwitchRoadsOffInArea( const CVector& vecAreaCorner1, const CVector& vecAreaCorner2, bool bEnable )
 {
-    float fX1 = vecAreaCorner1->getX();
-    float fY1 = vecAreaCorner1->getY();
-    float fZ1 = vecAreaCorner1->getZ();
+    float fX1 = vecAreaCorner1.getX();
+    float fY1 = vecAreaCorner1.getY();
+    float fZ1 = vecAreaCorner1.getZ();
 
-    float fX2 = vecAreaCorner2->getX();
-    float fY2 = vecAreaCorner2->getY();
-    float fZ2 = vecAreaCorner2->getZ();
+    float fX2 = vecAreaCorner2.getX();
+    float fY2 = vecAreaCorner2.getY();
+    float fZ2 = vecAreaCorner2.getZ();
 
     DWORD dwEnable = !bEnable;
 
     DWORD dwFunc = FUNC_SwitchRoadsOffInArea;
-
     _asm
     {
         mov     ecx, CLASS_CPathFind
@@ -110,20 +113,19 @@ void CPathFindSA::SwitchRoadsOffInArea ( CVector * vecAreaCorner1, CVector * vec
     }
 }
 
-void CPathFindSA::SwitchPedRoadsOffInArea ( CVector * vecAreaCorner1, CVector * vecAreaCorner2, bool bEnable )
+void CPathFindSA::SwitchPedRoadsOffInArea( const CVector& vecAreaCorner1, const CVector& vecAreaCorner2, bool bEnable )
 {
-    float fX1 = vecAreaCorner1->getX();
-    float fY1 = vecAreaCorner1->getY();
-    float fZ1 = vecAreaCorner1->getZ();
+    float fX1 = vecAreaCorner1.getX();
+    float fY1 = vecAreaCorner1.getY();
+    float fZ1 = vecAreaCorner1.getZ();
 
-    float fX2 = vecAreaCorner2->getX();
-    float fY2 = vecAreaCorner2->getY();
-    float fZ2 = vecAreaCorner2->getZ();
+    float fX2 = vecAreaCorner2.getX();
+    float fY2 = vecAreaCorner2.getY();
+    float fZ2 = vecAreaCorner2.getZ();
 
     DWORD dwEnable = !bEnable;
 
     DWORD dwFunc = FUNC_SwitchPedRoadsOffInArea;
-
     _asm
     {
         mov     ecx, CLASS_CPathFind
@@ -139,32 +141,32 @@ void CPathFindSA::SwitchPedRoadsOffInArea ( CVector * vecAreaCorner1, CVector * 
     }
 }
 
-void CPathFindSA::SetPedDensity ( float fPedDensity )
+void CPathFindSA::SetPedDensity( float fPedDensity )
 {
     *(float *)VAR_PedDensityMultiplier = fPedDensity;
 }
 
-void CPathFindSA::SetVehicleDensity ( float fVehicleDensity )
+void CPathFindSA::SetVehicleDensity( float fVehicleDensity )
 {
     *(float *)VAR_CarDensityMultiplier = fVehicleDensity;
 }
 
-void CPathFindSA::SetMaxPeds ( int iMaxPeds )
+void CPathFindSA::SetMaxPeds( int iMaxPeds )
 {
     *(int *)VAR_MaxNumberOfPedsInUse = iMaxPeds;
 }
 
-void CPathFindSA::SetMaxPedsInterior ( int iMaxPeds )
+void CPathFindSA::SetMaxPedsInterior( int iMaxPeds )
 {
      *(int *)VAR_NumberOfPedsInUseInterior = iMaxPeds;
 }
 
-void CPathFindSA::SetMaxVehicles ( int iMaxVehicles )
+void CPathFindSA::SetMaxVehicles( int iMaxVehicles )
 {
     *(int *)VAR_MaxNumberOfCarsInUse = iMaxVehicles;
 }
 
-void CPathFindSA::SetAllRandomPedsThisType ( int iType )
+void CPathFindSA::SetAllRandomPedsThisType( int iType )
 {
     *(int *)VAR_m_AllRandomPedsThisType = iType;
 }

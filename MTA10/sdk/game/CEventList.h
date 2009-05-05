@@ -19,9 +19,9 @@
 class CEventList
 {
 public:
-    virtual CEvent			* FindClosestEvent ( eEventType eventtype, CVector * vecPosition ) = 0;
-	virtual CEvent			* GetEvent ( DWORD ID ) = 0;
-	virtual CEvent			* GetEvent ( eEventType eventtype ) = 0;
+    virtual CEvent*	FindClosestEvent( eEventType eventtype, const CVector& vecPosition ) = 0;
+	virtual CEvent*	GetEvent( DWORD ID ) = 0;
+	virtual CEvent*	GetEvent( eEventType eventtype ) = 0;
 };
 
 #endif
