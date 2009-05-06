@@ -15,10 +15,8 @@
 
 #include "StdInc.h"
 
-void CWorldSA::Add ( CEntity * pEntity )
+void CWorldSA::Add( CEntity * pEntity )
 {
-	DEBUG_TRACE("void CWorldSA::Add ( CEntity * pEntity )");
-
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( pEntity );
 
 	if ( pEntitySA )
@@ -35,9 +33,8 @@ void CWorldSA::Add ( CEntity * pEntity )
 }
 
 
-void CWorldSA::Add ( CEntitySAInterface * entityInterface )
+void CWorldSA::Add( CEntitySAInterface * entityInterface )
 {
-	DEBUG_TRACE("void CWorldSA::Add ( CEntitySAInterface * entityInterface )");
 	DWORD dwFunction = FUNC_Add;
 	_asm
 	{
@@ -47,10 +44,8 @@ void CWorldSA::Add ( CEntitySAInterface * entityInterface )
 	}
 }
 
-void CWorldSA::Remove ( CEntity * pEntity )
+void CWorldSA::Remove( CEntity* pEntity )
 {
-	DEBUG_TRACE("void CWorldSA::Remove ( CEntity * entity )");
-
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( pEntity );
 
 	if ( pEntitySA )
@@ -66,9 +61,8 @@ void CWorldSA::Remove ( CEntity * pEntity )
 	}
 }
 
-void CWorldSA::Remove ( CEntitySAInterface * entityInterface )
+void CWorldSA::Remove( CEntitySAInterface* entityInterface )
 {
-	DEBUG_TRACE("void CWorldSA::Remove ( CEntitySAInterface * entityInterface )");
 	DWORD dwFunction = FUNC_Remove;
 	_asm
 	{
@@ -83,7 +77,7 @@ void CWorldSA::Remove ( CEntitySAInterface * entityInterface )
 	}
 }
 
-void CWorldSA::RemoveReferencesToDeletedObject ( CEntitySAInterface * entity )
+void CWorldSA::RemoveReferencesToDeletedObject( CEntitySAInterface* entity )
 {
     DWORD dwFunc = FUNC_RemoveReferencesToDeletedObject;
     DWORD dwEntity = (DWORD)entity;
@@ -95,17 +89,21 @@ void CWorldSA::RemoveReferencesToDeletedObject ( CEntitySAInterface * entity )
     }
 }
 
-bool CWorldSA::TestLineSphere(CVector * vecStart, CVector * vecEnd, CVector * vecSphereCenter, float fSphereRadius, CColPoint ** colCollision )
+bool CWorldSA::TestLineSphere( const CVector& vecStart, const CVector& vecEnd, const CVector& vecSphereCenter, float fSphereRadius, CColPoint ** colCollision )
 {
-    // THIS FUNCTION IS INCOMPLETE AND SHOULD NOT BE USED
+    // TODO: THIS FUNCTION IS INCOMPLETE AND SHOULD NOT BE USED
+	CVectorGTA vecE = vecEnd;
+	CVectorGTA vecS = vecStart;
+	CVectorGTA vecC = vecSphereCenter;
+
     // Create a CColLine for us
     DWORD dwFunc = FUNC_CColLine_Constructor;
     DWORD dwCColLine[10]; // I don't know how big CColLine is, so we'll just be safe
     _asm
     {
         lea     ecx, dwCColLine
-        push    vecEnd
-        push    vecStart
+        push    vecE
+        push    vecS
         call    dwFunc
     }
 
@@ -118,20 +116,19 @@ bool CWorldSA::TestLineSphere(CVector * vecStart, CVector * vecEnd, CVector * ve
         push    255
         push    0
         push    0
-        push    vecSphereCenter
+        push    vecC
         push    fSphereRadius
         call    dwFunc
     }
 }
 
-bool CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoint ** colCollision, 
-								  CEntity ** CollisionEntity, bool bCheckBuildings, 
-								  bool bCheckVehicles, bool bCheckPeds, 
-								  bool bCheckObjects, bool bCheckDummies , 
-								  bool bSeeThroughStuff, bool bIgnoreSomeObjectsForCamera, 
-								  bool bShootThroughStuff )
+bool CWorldSA::ProcessLineOfSight( const CVector& vecStart, const CVector& vecEnd, CColPoint ** colCollision, 
+								   CEntity ** CollisionEntity, bool bCheckBuildings, 
+								   bool bCheckVehicles, bool bCheckPeds, 
+								   bool bCheckObjects, bool bCheckDummies , 
+								   bool bSeeThroughStuff, bool bIgnoreSomeObjectsForCamera, 
+								   bool bShootThroughStuff )
 {
-	DEBUG_TRACE("void CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoint * colCollision, CEntity * CollisionEntity)");
   	DWORD dwPadding[100]; // stops the function missbehaving and overwriting the return address
     dwPadding [0] = 0;  // prevent the warning and eventual compiler optimizations from removing it
 
@@ -147,6 +144,9 @@ bool CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoin
 	// bool bCheckObjects = true,					bool bCheckDummies = true,		bool bSeeThroughStuff = false, 
 	// bool bIgnoreSomeObjectsForCamera = false,	bool bShootThroughStuff = false
 
+	CVectorGTA vecS = vecStart;
+	CVectorGTA vecE = vecEnd;
+
 	_asm
 	{
 		push	bShootThroughStuff
@@ -160,8 +160,8 @@ bool CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoin
 		lea		eax, targetEntity
 		push	eax
 		push	pColPointSAInterface	
-		push	vecEnd
-		push	vecStart	
+		push	vecE
+		push	vecS
 		call	dwFunc
 		mov		bReturn, al
 		add		esp, 0x30
@@ -215,10 +215,8 @@ bool CWorldSA::ProcessLineOfSight(CVector * vecStart, CVector * vecEnd, CColPoin
 }
 
 
-void CWorldSA::IgnoreEntity(CEntity * pEntity)
+void CWorldSA::IgnoreEntity( CEntity* pEntity )
 {
-	DEBUG_TRACE("void CWorldSA::IgnoreEntity(CEntity * entity)");
-
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( pEntity );
 
 	if ( pEntitySA )
@@ -227,15 +225,15 @@ void CWorldSA::IgnoreEntity(CEntity * pEntity)
 		*(DWORD *)VAR_IgnoredEntity = 0;
 }
 
-// technically this is in CTheZones
-BYTE CWorldSA::GetLevelFromPosition(CVector * vecPosition)
+// Technically this is in CTheZones
+BYTE CWorldSA::GetLevelFromPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("BYTE CWorldSA::GetLevelFromPosition(CVector * vecPosition)");
+	CVectorGTA vec = vecPosition;
 	DWORD dwFunc = FUNC_GetLevelFromPosition;
 	BYTE bReturn = 0;
 	_asm
 	{
-		push	vecPosition
+		push	vec
 		call	dwFunc
 		mov		bReturn, al
 		pop		eax
@@ -243,9 +241,8 @@ BYTE CWorldSA::GetLevelFromPosition(CVector * vecPosition)
 	return bReturn;
 }
 
-float CWorldSA::FindGroundZForPosition(float fX, float fY)
+float CWorldSA::FindGroundZForPosition( float fX, float fY )
 {
-	DEBUG_TRACE("FLOAT CWorldSA::FindGroundZForPosition(FLOAT fX, FLOAT fY)");
 	DWORD dwFunc = FUNC_FindGroundZFor3DCoord;
 	FLOAT fReturn = 0;
 	_asm
@@ -259,14 +256,13 @@ float CWorldSA::FindGroundZForPosition(float fX, float fY)
 	return fReturn;
 }
 
-float CWorldSA::FindGroundZFor3DPosition(CVector * vecPosition)
+float CWorldSA::FindGroundZFor3DPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("FLOAT CWorldSA::FindGroundZFor3DPosition(CVector * vecPosition)");
 	DWORD dwFunc = FUNC_FindGroundZFor3DCoord;
 	FLOAT fReturn = 0;
-	FLOAT fX = vecPosition->getX();
-	FLOAT fY = vecPosition->getY();
-	FLOAT fZ = vecPosition->getZ();
+	FLOAT fX = vecPosition.getX();
+	FLOAT fY = vecPosition.getY();
+	FLOAT fZ = vecPosition.getZ();
 	_asm
 	{
 		push	0
@@ -281,9 +277,10 @@ float CWorldSA::FindGroundZFor3DPosition(CVector * vecPosition)
 	return fReturn;
 }
 
-void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)
+void CWorldSA::LoadMapAroundPoint( const CVector& vecPosition, FLOAT fRadius )
 {
-	DEBUG_TRACE("void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)");
+	CVectorGTA vec = vecPosition;
+
 	DWORD dwFunc = FUNC_CTimer_Stop;
 	_asm
 	{
@@ -295,7 +292,7 @@ void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)
 	{
 		push	32
 		push	fRadius
-		push	vecPosition
+		push	vec
 		call	dwFunc
 		add		esp, 12
 	}
@@ -304,7 +301,7 @@ void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)
 	dwFunc = FUNC_CStreaming_LoadScene;
 	_asm
 	{
-		push	vecPosition
+		push	vec
 		call	dwFunc
 		add		esp, 4
 	}
@@ -317,10 +314,12 @@ void CWorldSA::LoadMapAroundPoint(CVector * vecPosition, FLOAT fRadius)
 
 }
 
-bool CWorldSA::IsLineOfSightClear ( CVector * vecStart, CVector * vecEnd, bool bCheckBuildings,
+bool CWorldSA::IsLineOfSightClear( const CVector& vecStart, const CVector& vecEnd, bool bCheckBuildings,
 								   bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects,
 								   bool bCheckDummies, bool bSeeThroughStuff, bool bIgnoreSomeObjectsForCamera )
 {
+	CVectorGTA vecS = vecStart;
+	CVectorGTA vecE = vecEnd;
 	DWORD dwFunc = FUNC_IsLineOfSightClear;
 	bool bReturn = false;
 	// bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, 
@@ -336,8 +335,8 @@ bool CWorldSA::IsLineOfSightClear ( CVector * vecStart, CVector * vecEnd, bool b
 		push	bCheckPeds
 		push	bCheckVehicles
 		push	bCheckBuildings
-		push	vecEnd
-		push	vecStart	
+		push	vecE
+		push	vecS
 		call	dwFunc
 		mov		bReturn, al
 		add		esp, 0x24
@@ -345,14 +344,15 @@ bool CWorldSA::IsLineOfSightClear ( CVector * vecStart, CVector * vecEnd, bool b
 	return bReturn;
 }
 
-bool CWorldSA::HasCollisionBeenLoaded ( CVector * vecPosition )
+bool CWorldSA::HasCollisionBeenLoaded( const CVector& vecPosition )
 {
+	CVectorGTA vec = vecPosition;
     DWORD dwFunc = FUNC_HasCollisionBeenLoaded;
     bool bRet = false;
     _asm
     {
         push    0
-        push    vecPosition
+        push    vec
         call    dwFunc
         mov     bRet, al
         add     esp, 8
@@ -360,12 +360,12 @@ bool CWorldSA::HasCollisionBeenLoaded ( CVector * vecPosition )
     return bRet;
 }
 
-DWORD CWorldSA::GetCurrentArea ( void )
+DWORD CWorldSA::GetCurrentArea( void )
 {
     return *(DWORD *)VAR_currArea;
 }
 
-void CWorldSA::SetCurrentArea ( DWORD dwArea )
+void CWorldSA::SetCurrentArea( DWORD dwArea )
 {
     *(DWORD *)VAR_currArea = dwArea;
 

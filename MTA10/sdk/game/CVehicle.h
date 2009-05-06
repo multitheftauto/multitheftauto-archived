@@ -39,7 +39,7 @@ class CVehicle : public virtual CPhysical
 public:
     virtual                     ~CVehicle( void ) {};
 
-    virtual bool                AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, const CVector& target, CEntity* targetEntity ) = 0;
+    virtual bool                AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, CVector* target, CEntity* targetEntity ) = 0;
     
  	virtual CPed*               GetDriver( void ) = 0;
     virtual CPed*               GetPassenger( unsigned char ucSlot ) = 0;

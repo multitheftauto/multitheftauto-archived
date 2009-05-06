@@ -14,7 +14,7 @@
 
 extern CGameSA* pGame;
 
-CTaskSimpleIKChainSA::CTaskSimpleIKChainSA ( char* idString, int effectorBoneTag, CVector effectorVec, int pivotBoneTag, CEntity* pEntity, int offsetBoneTag, CVector offsetPos, float speed, int time, int blendTime )
+CTaskSimpleIKChainSA::CTaskSimpleIKChainSA( char* idString, int effectorBoneTag, const CVector& effectorVec, int pivotBoneTag, CEntity* pEntity, int offsetBoneTag, const CVector& offsetPos, float speed, int time, int blendTime )
 {
     DWORD dwFunc = FUNC_CTaskSimpleIKChain__Constructor;
     // TODO: Find out the real size
@@ -44,8 +44,7 @@ CTaskSimpleIKChainSA::CTaskSimpleIKChainSA ( char* idString, int effectorBoneTag
     }
 }
 
-
-CTaskSimpleIKLookAtSA::CTaskSimpleIKLookAtSA ( char* idString, CEntity* pEntity, int time, int offsetBoneTag, CVector offsetPos, unsigned char useTorso, float speed, int blendTime, int m_priority )
+CTaskSimpleIKLookAtSA::CTaskSimpleIKLookAtSA( char* idString, CEntity* pEntity, int time, int offsetBoneTag, const CVector& offsetPos, unsigned char useTorso, float speed, int blendTime, int m_priority )
 {
     DWORD dwFunc = FUNC_CTaskSimpleIKLookAt__Constructor;
     // TODO: Find out the real size
@@ -72,14 +71,12 @@ CTaskSimpleIKLookAtSA::CTaskSimpleIKLookAtSA ( char* idString, CEntity* pEntity,
     }
 }
 
-
-CTaskSimpleIKManagerSA::CTaskSimpleIKManagerSA ( void )
+CTaskSimpleIKManagerSA::CTaskSimpleIKManagerSA( void )
 {
     this->m_pTaskManagementSystem = (CTaskManagementSystemSA *)(pGame->GetTaskManagementSystem());
 }
 
-
-int CTaskSimpleIKManagerSA::AddIKChainTask ( CTaskSimpleIKChain * pIKChainTask, int slotID )
+int CTaskSimpleIKManagerSA::AddIKChainTask( CTaskSimpleIKChain * pIKChainTask, int slotID )
 {
     CTaskSimpleIKManagerSAInterface * pInterface = ( CTaskSimpleIKManagerSAInterface * ) this->GetInterface ();
     if ( !pInterface->m_pIKChainTasks [ slotID ] )
@@ -98,8 +95,7 @@ int CTaskSimpleIKManagerSA::AddIKChainTask ( CTaskSimpleIKChain * pIKChainTask, 
     return -1;
 }
 
-
-void CTaskSimpleIKManagerSA::RemoveIKChainTask ( int slotID )
+void CTaskSimpleIKManagerSA::RemoveIKChainTask( int slotID )
 {
     CTaskSimpleIKManagerSAInterface * pInterface = ( CTaskSimpleIKManagerSAInterface * ) this->GetInterface ();
     if ( pInterface->m_pIKChainTasks [ slotID ] )
@@ -112,21 +108,18 @@ void CTaskSimpleIKManagerSA::RemoveIKChainTask ( int slotID )
     }
 }
 
-
-void CTaskSimpleIKManagerSA::BlendOut ( int slotID, int blendOutTime )
+void CTaskSimpleIKManagerSA::BlendOut( int slotID, int blendOutTime )
 {
     // TODO: fill me
 }
 
-
-unsigned char CTaskSimpleIKManagerSA::IsSlotEmpty ( int slotID )
+unsigned char CTaskSimpleIKManagerSA::IsSlotEmpty( int slotID )
 {
     CTaskSimpleIKManagerSAInterface * pInterface = ( CTaskSimpleIKManagerSAInterface * ) this->GetInterface ();
     return ( !pInterface->m_pIKChainTasks [ slotID ] );
 }
 
-
-CTaskSimpleIKChain * CTaskSimpleIKManagerSA::GetTaskAtSlot ( int slotID )
+CTaskSimpleIKChain* CTaskSimpleIKManagerSA::GetTaskAtSlot( int slotID )
 {
     CTaskSimpleIKManagerSAInterface * pInterface = ( CTaskSimpleIKManagerSAInterface * ) this->GetInterface ();
     if ( pInterface->m_pIKChainTasks [ slotID ] )
@@ -139,8 +132,7 @@ CTaskSimpleIKChain * CTaskSimpleIKManagerSA::GetTaskAtSlot ( int slotID )
     return NULL;
 }
 
-
-CTaskSimpleTriggerLookAtSA::CTaskSimpleTriggerLookAtSA ( CEntity* pEntity, int time, int offsetBoneTag, CVector offsetPos, unsigned char useTorso, float speed, int blendTime, int priority )
+CTaskSimpleTriggerLookAtSA::CTaskSimpleTriggerLookAtSA( CEntity* pEntity, int time, int offsetBoneTag, const CVector& offsetPos, unsigned char useTorso, float speed, int blendTime, int priority )
 {
     DWORD dwFunc = FUNC_CTaskSimpleTriggerLookAt__Constructor;
     // TODO: Find out the real size

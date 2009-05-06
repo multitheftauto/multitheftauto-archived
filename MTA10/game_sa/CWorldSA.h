@@ -54,6 +54,7 @@ public:
 	void		IgnoreEntity( CEntity * entity );
 
 	bool		ProcessLineOfSight( const CVector& vecStart, const CVector& vecEnd, CColPoint ** colCollision, CEntity ** CollisionEntity = NULL, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false, bool bShootThroughStuff = false );
+				// TODO: This function is incomplete and should not be used
     bool        TestLineSphere( const CVector& vecStart, const CVector& vecEnd, const CVector& vecSphereCenter, float fSphereRadius, CColPoint ** colCollision );
 	bool		IsLineOfSightClear( const CVector& vecStart, const CVector& vecEnd, bool bCheckBuildings = true, bool bCheckVehicles = true, bool bCheckPeds = true, bool bCheckObjects = true, bool bCheckDummies = true, bool bSeeThroughStuff = false, bool bIgnoreSomeObjectsForCamera = false );
 

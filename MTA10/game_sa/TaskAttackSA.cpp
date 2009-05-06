@@ -12,9 +12,9 @@
 
 #include "StdInc.h"
 
-CTaskSimpleGangDriveBySA::CTaskSimpleGangDriveBySA ( CEntity *pTargetEntity, const CVector *pVecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS )
+CTaskSimpleGangDriveBySA::CTaskSimpleGangDriveBySA( CEntity* pTargetEntity, const CVector& vecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS )
 {
-	DEBUG_TRACE("CTaskSimpleGangDriveBySA::CTaskSimpleGangDriveBySA ( CEntity *pTargetEntity, const CVector *pVecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS )");
+	CVectorGTA vec = vecTarget;
 
 	this->CreateTaskInterface ( sizeof ( CTaskSimpleGangDriveBySAInterface ) );
 	DWORD dwFunc = FUNC_CTaskSimpleGangDriveBy__Constructor;
@@ -27,17 +27,15 @@ CTaskSimpleGangDriveBySA::CTaskSimpleGangDriveBySA ( CEntity *pTargetEntity, con
         push    nDrivebyStyle
         push    FrequencyPercentage
         push    fAbortRange
-        push    pVecTarget
+        push    vec
         push    dwTargetEntity
 		call	dwFunc
 	}
 }
 
 
-CTaskSimpleUseGunSA::CTaskSimpleUseGunSA ( CEntity *pTargetEntity, CVector vecTarget, char nCommand, short nBurstLength, unsigned char bAimImmediate )
+CTaskSimpleUseGunSA::CTaskSimpleUseGunSA( CEntity* pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength, unsigned char bAimImmediate )
 {
-    DEBUG_TRACE("CTaskSimpleUseGunSA::CTaskSimpleUseGunSA ( CEntity *pTargetEntity, CVector vecTarget, char nCommand, short nBurstLength, unsigned char bAimImmediate )");
-
     this->CreateTaskInterface ( sizeof ( CTaskSimpleUseGunSAInterface ) );
     DWORD dwFunc = FUNC_CTaskSimpleUseGun__Constructor;
     DWORD dwThisInterface = (DWORD)this->GetInterface ();
@@ -59,7 +57,7 @@ CTaskSimpleUseGunSA::CTaskSimpleUseGunSA ( CEntity *pTargetEntity, CVector vecTa
 }
 
 
-bool CTaskSimpleUseGunSA::ControlGun ( CPed * pPed, CEntity * pTargetEntity, char nCommand )
+bool CTaskSimpleUseGunSA::ControlGun( CPed* pPed, CEntity* pTargetEntity, char nCommand )
 {
     bool bReturn;
     DWORD dwFunc = FUNC_CTaskSimpleUseGun_ControlGun;
@@ -79,7 +77,7 @@ bool CTaskSimpleUseGunSA::ControlGun ( CPed * pPed, CEntity * pTargetEntity, cha
 }
 
 
-bool CTaskSimpleUseGunSA::ControlGunMove ( CVector2D * pMoveVec )
+bool CTaskSimpleUseGunSA::ControlGunMove( const CVector2D& vecMove )
 {
     bool bReturn;
     DWORD dwFunc = FUNC_CTaskSimpleUseGun_ControlGunMove;
@@ -87,7 +85,7 @@ bool CTaskSimpleUseGunSA::ControlGunMove ( CVector2D * pMoveVec )
     _asm
     {
         mov     ecx, dwThisInterface
-        push    pMoveVec
+        push    vecMove
         call    dwFunc
         mov     bReturn, al
     }
@@ -95,12 +93,12 @@ bool CTaskSimpleUseGunSA::ControlGunMove ( CVector2D * pMoveVec )
 }
 
 
-void CTaskSimpleUseGunSA::Reset ( CPed *pPed, CEntity *pTargetEntity, CVector vecTarget, char nCommand, short nBurstLength )
+void CTaskSimpleUseGunSA::Reset( CPed* pPed, CEntity* pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength )
 {
     DWORD dwFunc = FUNC_CTaskSimpleUseGun_Reset;
-    DWORD dwThisInterface = (DWORD)this->GetInterface ();
-    DWORD dwPedInterface = ( DWORD ) pPed->GetInterface ();
-    DWORD dwTargetEntity = ( pTargetEntity ) ? ( DWORD ) pTargetEntity->GetInterface () : 0;
+    DWORD dwThisInterface = ( DWORD )this->GetInterface();
+    DWORD dwPedInterface = ( DWORD )pPed->GetInterface();
+    DWORD dwTargetEntity = ( pTargetEntity ) ? ( DWORD ) pTargetEntity->GetInterface() : 0;
     float fTargetX = vecTarget.getX(), fTargetY = vecTarget.getY(), fTargetZ = vecTarget.getZ();
     DWORD dwBurstLength = nBurstLength;    
     _asm

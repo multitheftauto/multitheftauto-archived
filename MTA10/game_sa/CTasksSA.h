@@ -58,7 +58,7 @@ public:
     CTaskSimpleChoking*                 CreateTaskSimpleChoking                 ( CPed* pAttacker, bool bIsTearGas );
 
     CTaskSimpleClimb*                   CreateTaskSimpleClimb                   ( CEntity *pClimbEnt, const CVector &vecTarget, float fHeading, unsigned char nSurfaceType, char nHeight = CLIMB_GRAB, const bool bForceClimb = false );
-    CTaskSimpleJetPack*                 CreateTaskSimpleJetpack                 ( const CVector *pVecTargetPos = NULL, float fCruiseHeight = 10.0f, int nHoverTime = 0 );
+    CTaskSimpleJetPack*                 CreateTaskSimpleJetpack                 ( const CVector* vecTargetPos = NULL, float fCruiseHeight = 10.0f, int nHoverTime = 0 );
 
     CTaskSimpleRunAnim*                 CreateTaskSimpleRunAnim                 ( const AssocGroupId animGroup, const AnimationId animID, const float fBlendDelta, const int iTaskType, const char* pTaskName, const bool bHoldLastFrame = false );
     CTaskSimpleRunNamedAnim*            CreateTaskSimpleRunNamedAnim            ( const char* pAnimName, const char* pAnimGroupName, const int flags, const float fBlendDelta, const int iTime = -1, const bool bDontInterrupt = false, const bool bRunInSequence = false, const bool bOffsetPed = false, const bool bHoldLastFrame = false );
@@ -69,13 +69,13 @@ public:
     CTaskComplexSunbathe*               CreateTaskComplexSunbathe               ( class CObject* pTowel, const bool bStartStanding );
 
     // IK
-    CTaskSimpleIKChain*                 CreateTaskSimpleIKChain                 ( char* idString, int effectorBoneTag, CVector effectorVec, int pivotBoneTag, CEntity* pEntity, int offsetBoneTag, CVector offsetPos, float speed, int time=99999999, int blendTime=1000 );
-    CTaskSimpleIKLookAt*                CreateTaskSimpleIKLookAt                ( char* idString, CEntity* pEntity, int time, int offsetBoneTag, CVector offsetPos, unsigned char useTorso=false, float speed=0.25f, int blendTime=1000, int m_priority=3 );
-    CTaskSimpleTriggerLookAt*           CreateTaskSimpleTriggerLookAt           ( CEntity* pEntity, int time, int offsetBoneTag, CVector offsetPos, unsigned char useTorso=false, float speed=0.25f, int blendTime=1000, int priority=3 );
+    CTaskSimpleIKChain*                 CreateTaskSimpleIKChain                 ( char* idString, int effectorBoneTag, const CVector& effectorVec, int pivotBoneTag, CEntity* pEntity, int offsetBoneTag, const CVector& offsetPos, float speed, int time=99999999, int blendTime=1000 );
+    CTaskSimpleIKLookAt*                CreateTaskSimpleIKLookAt                ( char* idString, CEntity* pEntity, int time, int offsetBoneTag, const CVector& offsetPos, unsigned char useTorso=false, float speed=0.25f, int blendTime=1000, int m_priority=3 );
+    CTaskSimpleTriggerLookAt*           CreateTaskSimpleTriggerLookAt           ( CEntity* pEntity, int time, int offsetBoneTag, const CVector& offsetPos, unsigned char useTorso=false, float speed=0.25f, int blendTime=1000, int priority=3 );
 
     // Attack
-    CTaskSimpleGangDriveBy*             CreateTaskSimpleGangDriveBy             ( CEntity *pTargetEntity, const CVector *pVecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS );
-    CTaskSimpleUseGun*                  CreateTaskSimpleUseGun                  ( CEntity *pTargetEntity, CVector vecTarget, char nCommand, short nBurstLength=1, unsigned char bAimImmediate=false );
+    CTaskSimpleGangDriveBy*             CreateTaskSimpleGangDriveBy             ( CEntity *pTargetEntity, const CVector& vecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS );
+    CTaskSimpleUseGun*                  CreateTaskSimpleUseGun                  ( CEntity *pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength=1, unsigned char bAimImmediate=false );
     CTaskSimpleFight*                   CreateTaskSimpleFight                   ( CEntity *pTargetEntity, int nCommand, unsigned int nIdlePeriod = 10000 );
 };
 

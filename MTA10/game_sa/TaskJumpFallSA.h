@@ -112,7 +112,7 @@ class CTaskSimpleJetPackSA : public virtual CTaskSimpleSA, public virtual CTaskS
 {
 public:
     CTaskSimpleJetPackSA( void ) {};
-	CTaskSimpleJetPackSA( const CVector& pVecTargetPos, float fCruiseHeight = 10.0f, int nHoverTime = 0 );
+	CTaskSimpleJetPackSA( const CVector* pVecTargetPos, float fCruiseHeight = 10.0f, int nHoverTime = 0 );
 };
 
 #endif

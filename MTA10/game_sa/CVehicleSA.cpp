@@ -201,7 +201,7 @@ CVehicle * CVehicleSA::GetNextTrainCarriage ( void )
         return NULL;
 }
 
-bool CVehicleSA::AddProjectile ( eWeaponType eWeapon, CVector vecOrigin, float fForce, CVector * target, CEntity * targetEntity )
+bool CVehicleSA::AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, CVector* target, CEntity* targetEntity )
 {
     return ((CProjectileInfoSA*)pGame->GetProjectileInfo())->AddProjectile ( (CEntitySA*)this, eWeapon, vecOrigin, fForce, target, targetEntity );
 }
@@ -624,16 +624,15 @@ float CVehicleSA::GetHeightAboveRoad ( void )
 }
 
 
-float CVehicleSA::GetSteerAngle ( void )
+float CVehicleSA::GetSteerAngle( void )
 {
-	DEBUG_TRACE("float CVehicleSA::GetSteerAngle ( void )");
-    return GetVehicleInterface ()->m_fSteerAngle;
+    return GetVehicleInterface()->m_fSteerAngle;
 }
 
-
-bool CVehicleSA::GetTowBarPos ( CVector* pVector )
+bool CVehicleSA::GetTowBarPos( CVector& vecPosition )
 {
-	DEBUG_TRACE("bool CVehicleSA::GetTowBarPos ( CVector* pVector )");
+	CVectorGTA vec;
+
     CVehicleSAInterfaceVTBL * vehicleVTBL = (CVehicleSAInterfaceVTBL *)(m_pInterface->vtbl);
     DWORD dwThis = (DWORD) m_pInterface;
     DWORD dwFunc = vehicleVTBL->GetTowbarPos;
@@ -644,18 +643,20 @@ bool CVehicleSA::GetTowBarPos ( CVector* pVector )
         mov     ecx, dwThis
         push    0
         push    1
-        push    pVector
+        push    vec
         call    dwFunc
     	mov		bReturn, al
     }
+	vecPosition = CVectorGTA::unwrap( vec );
 
 	return bReturn;
 }
 
 
-bool CVehicleSA::GetTowHitchPos ( CVector* pVector )
+bool CVehicleSA::GetTowHitchPos( CVector& vecPosition )
 {
-	DEBUG_TRACE("bool CVehicleSA::GetTowHitchPos ( CVector* pVector )");
+	CVectorGTA vec;
+
     CVehicleSAInterfaceVTBL * vehicleVTBL = (CVehicleSAInterfaceVTBL *)(m_pInterface->vtbl);
     DWORD dwThis = (DWORD) m_pInterface;
     DWORD dwFunc = vehicleVTBL->GetTowHitchPos;
@@ -666,10 +667,11 @@ bool CVehicleSA::GetTowHitchPos ( CVector* pVector )
         mov     ecx, dwThis
         push    0
         push    1
-        push    pVector
+        push    vec
         call    dwFunc
 		mov		bReturn, al
     }
+	vecPosition = CVectorGTA::unwrap( vec );
 
 	return bReturn;
 }
@@ -727,19 +729,20 @@ bool CVehicleSA::IsPassenger ( CPed* pPed )
 }
 
 
-bool CVehicleSA::IsSphereTouchingVehicle ( CVector * vecOrigin, float fRadius )
+bool CVehicleSA::IsSphereTouchingVehicle( const CVector& vecOrigin, float fRadius )
 {
-	DEBUG_TRACE("bool CVehicleSA::IsSphereTouchingVehicle ( CVector * vecOrigin, float fRadius )");
     DWORD dwThis = (DWORD) m_pInterface;
     DWORD dwFunc = FUNC_CVehicle_IsSphereTouchingVehicle;
 	bool bReturn = false;
+
+	CVectorGTA vec = vecOrigin;
 
     _asm
     {
 		push	eax
 
         mov     ecx, dwThis
-		mov		eax, vecOrigin
+		mov		eax, vec
 		push	fRadius
         push    dword ptr [eax]
         push    dword ptr [eax + 4]

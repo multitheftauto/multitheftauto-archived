@@ -65,14 +65,14 @@ CWaterManagerSA* g_pWaterManager = NULL;
 // -----------------------------------------------------
 // Water zone iterator (iterates over polys in a zone)
 
-CWaterZoneSA::iterator::iterator ()
+CWaterZoneSA::iterator::iterator( void )
 {
     m_pCurrent = NULL;
     m_pFirst = NULL;
     m_bSinglePoly = false;
 }
 
-CWaterZoneSA::iterator::iterator ( CWaterZoneSA* pZone )
+CWaterZoneSA::iterator::iterator( CWaterZoneSA* pZone )
 {
     if ( POLYENTRY_TYPE ( pZone->GetInterface () ) == WATER_POLY_LIST )
     {
@@ -87,12 +87,12 @@ CWaterZoneSA::iterator::iterator ( CWaterZoneSA* pZone )
     m_pFirst = m_pCurrent;
 }
 
-CWaterZoneSA::iterator::iterator ( CWaterZoneSA::iterator& other )
+CWaterZoneSA::iterator::iterator( CWaterZoneSA::iterator& other )
 {
     operator= ( other );
 }
 
-CWaterZoneSA::iterator& CWaterZoneSA::iterator::operator= ( CWaterZoneSA::iterator& other )
+CWaterZoneSA::iterator& CWaterZoneSA::iterator::operator =( CWaterZoneSA::iterator& other )
 {
     m_pCurrent = other.m_pCurrent;
     m_pFirst = other.m_pFirst;
@@ -100,46 +100,46 @@ CWaterZoneSA::iterator& CWaterZoneSA::iterator::operator= ( CWaterZoneSA::iterat
     return *this;
 }
 
-void CWaterZoneSA::iterator::operator++ ()
+void CWaterZoneSA::iterator::operator ++( void )
 {
     m_pCurrent++;
 }
 
-void CWaterZoneSA::iterator::operator-- ()
+void CWaterZoneSA::iterator::operator --( void )
 {
     m_pCurrent--;
 }
 
-CWaterZoneSA::iterator CWaterZoneSA::iterator::operator+ ( int n )
+CWaterZoneSA::iterator CWaterZoneSA::iterator::operator +( int n )
 {
     iterator it ( *this );
     it.m_pCurrent += n;
     return it;
 }
 
-CWaterZoneSA::iterator CWaterZoneSA::iterator::operator- ( int n )
+CWaterZoneSA::iterator CWaterZoneSA::iterator::operator -( int n )
 {
     iterator it ( *this );
     it.m_pCurrent -= n;
     return it;
 }
 
-int CWaterZoneSA::iterator::operator- ( CWaterZoneSA::iterator& other )
+int CWaterZoneSA::iterator::operator -( CWaterZoneSA::iterator& other )
 {
     return other.m_pCurrent - m_pCurrent;
 }
 
-bool CWaterZoneSA::iterator::operator== ( CWaterZoneSA::iterator& other )
+bool CWaterZoneSA::iterator::operator ==( CWaterZoneSA::iterator& other )
 {
     return m_pCurrent == other.m_pCurrent;
 }
 
-bool CWaterZoneSA::iterator::operator!= ( CWaterZoneSA::iterator& other )
+bool CWaterZoneSA::iterator::operator !=( CWaterZoneSA::iterator& other )
 {
     return m_pCurrent != other.m_pCurrent;
 }
 
-CWaterPolySA* CWaterZoneSA::iterator::operator* ()
+CWaterPolySA* CWaterZoneSA::iterator::operator *( void )
 {
     if ( (m_bSinglePoly && m_pCurrent != m_pFirst) || m_pCurrent->m_wValue == 0 )
         return NULL;
@@ -155,17 +155,17 @@ CWaterPolySA* CWaterZoneSA::iterator::operator* ()
     return NULL;
 }
 
-CWaterZoneSA::iterator::operator CWaterPolyEntrySAInterface* ()
+CWaterZoneSA::iterator::operator CWaterPolyEntrySAInterface*( void )
 {
     return m_pCurrent;
 }
 
-CWaterZoneSA::iterator CWaterZoneSA::begin ()
+CWaterZoneSA::iterator CWaterZoneSA::begin( void )
 {
     return iterator ( this );
 }
 
-CWaterZoneSA::iterator CWaterZoneSA::end ()
+CWaterZoneSA::iterator CWaterZoneSA::end( void )
 {
     iterator it ( this );
     while ( *it )
@@ -176,12 +176,12 @@ CWaterZoneSA::iterator CWaterZoneSA::end ()
 // -----------------------------------------------------
 // Water zones
 
-CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly ( CWaterPoly* pPoly )
+CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( CWaterPoly* pPoly )
 {
     return AddPoly ( pPoly->GetType (), pPoly->GetID () );
 }
 
-CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly ( EWaterPolyType type, WORD wID )
+CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( EWaterPolyType type, WORD wID )
 {
     if ( m_pInterface->m_wValue == 0 )
     {
@@ -230,12 +230,12 @@ CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly ( EWaterPolyType type, WORD wI
     }
 }
 
-bool CWaterZoneSA::RemovePoly ( CWaterPoly* pPoly )
+bool CWaterZoneSA::RemovePoly( CWaterPoly* pPoly )
 {
     return RemovePoly ( pPoly->GetType (), pPoly->GetID () );
 }
 
-bool CWaterZoneSA::RemovePoly ( EWaterPolyType type, WORD wID )
+bool CWaterZoneSA::RemovePoly( EWaterPolyType type, WORD wID )
 {
     if ( m_pInterface->m_wValue == 0 )
     {
@@ -316,7 +316,7 @@ bool CWaterZoneSA::RemovePoly ( EWaterPolyType type, WORD wID )
 // -----------------------------------------------------
 // Change trackkeepers
 
-void CWaterChangeVertexMove::Undo ( void* pChangedObject )
+void CWaterChangeVertexMove::Undo( void* pChangedObject )
 {
     ((CWaterVertexSA *)pChangedObject)->SetPosition ( m_vecOriginalPosition );
 }
@@ -324,7 +324,7 @@ void CWaterChangeVertexMove::Undo ( void* pChangedObject )
 // -----------------------------------------------------
 // Manager
 
-CWaterManagerSA::CWaterManagerSA ()
+CWaterManagerSA::CWaterManagerSA( void )
 {
     g_pWaterManager = this;
     RelocatePools ();
@@ -343,13 +343,13 @@ CWaterManagerSA::CWaterManagerSA ()
         m_Triangles [ i ].SetInterface ( &m_TrianglePool [ i ] );
 }
 
-CWaterManagerSA::~CWaterManagerSA ()
+CWaterManagerSA::~CWaterManagerSA( void )
 {
     UndoChanges ();
     g_pWaterManager = NULL;
 }
 
-void CWaterManagerSA::RelocatePools ()
+void CWaterManagerSA::RelocatePools( void )
 {
     DWORD* pXrefGroups[] = { m_VertexXrefs, m_QuadXrefs, m_TriangleXrefs, m_ZonePolyXrefs, 0 };
     void* pNewPools[] = { m_VertexPool, m_QuadPool, m_TrianglePool, m_ZonePolyPool, 0 };
@@ -368,7 +368,7 @@ void CWaterManagerSA::RelocatePools ()
 }
 
 DWORD dwHook6E9E23continue = 0x6E9E29;
-void __declspec(naked) Hook6E9E23 ()
+void __declspec(naked) Hook6E9E23( void )
 {
     __asm
     {
@@ -387,7 +387,7 @@ cont:
 
 DWORD dwHook6EFCD7continue = 0x6EFCDD;
 DWORD dwHook6EFCD7skip = 0x6EFE5E;
-void __declspec(naked) Hook6EFCD7 ()
+void __declspec(naked) Hook6EFCD7( void )
 {
     __asm
     {
@@ -405,7 +405,7 @@ check:
 }
 
 DWORD dwHook6EFBD8continue = 0x6EFBDE;
-void __declspec(naked) Hook6EFBD8 ()
+void __declspec(naked) Hook6EFBD8( void )
 {
     __asm
     {
@@ -422,7 +422,7 @@ cont:
     }
 }
 
-void CWaterManagerSA::InstallHooks ()
+void CWaterManagerSA::InstallHooks( void )
 {
     HookInstall ( 0x6E9E23, (DWORD)Hook6E9E23, 6 );
     
@@ -443,7 +443,7 @@ void CWaterManagerSA::InstallHooks ()
     *(BYTE *)0x6EFCB7 = 0x14;
 }
 
-CWaterZoneSA* CWaterManagerSA::GetZoneContaining ( float fX, float fY )
+CWaterZoneSA* CWaterManagerSA::GetZoneContaining( float fX, float fY )
 {
     if ( fX < -3000.0f || fX > 3000.0f || fY < -3000.0f || fY > 3000.0f )
         return NULL;
@@ -457,7 +457,7 @@ CWaterZoneSA* CWaterManagerSA::GetZoneContaining ( float fX, float fY )
     return &m_Zones [ zoneID ];
 }
 
-void CWaterManagerSA::GetZonesContaining ( CWaterPoly* pPoly, std::vector < CWaterZoneSA* >& out )
+void CWaterManagerSA::GetZonesContaining( CWaterPoly* pPoly, std::vector < CWaterZoneSA* >& out )
 {
     CVector v1;
     CVector v2;
@@ -470,7 +470,7 @@ void CWaterManagerSA::GetZonesContaining ( CWaterPoly* pPoly, std::vector < CWat
     GetZonesContaining ( v1, v2, v3, out );
 }
 
-void CWaterManagerSA::GetZonesContaining ( CVector& v1, CVector& v2, CVector& v3, std::vector < CWaterZoneSA* >& out )
+void CWaterManagerSA::GetZonesContaining( const CVector& v1, const CVector& v2, const CVector& v3, std::vector < CWaterZoneSA* >& out )
 {
     out.clear ();
     float fColumnLeft = -3000.0f;
@@ -492,13 +492,13 @@ void CWaterManagerSA::GetZonesContaining ( CVector& v1, CVector& v2, CVector& v3
     }
 }
 
-CWaterVertex* CWaterManagerSA::CreateVertex ( CVector& vecPosition )
+CWaterVertex* CWaterManagerSA::CreateVertex( const CVector& vecPosition )
 {
     WORD wID = ( (CreateWaterVertex_t) FUNC_CreateWaterVertex )( ((short)vecPosition.getX()) & ~1, ((short)vecPosition.getY()) & ~1, vecPosition.getZ(), 0.2f, 0.1f, 0 );
     return &m_Vertices [ wID ];
 }
 
-CWaterPoly* CWaterManagerSA::GetPolyAtPoint ( CVector& vecPosition )
+CWaterPoly* CWaterManagerSA::GetPolyAtPoint ( const CVector& vecPosition )
 {
     if ( vecPosition.getX() < -3000.0f || vecPosition.getX() > 3000.0f || vecPosition.getY() < -3000.0f || vecPosition.getY() > 3000.0f )
         return NULL;
@@ -518,7 +518,7 @@ CWaterPoly* CWaterManagerSA::GetPolyAtPoint ( CVector& vecPosition )
     return NULL;
 }
 
-CWaterPoly* CWaterManagerSA::CreateQuad ( CVector& vecBL, CVector& vecBR, CVector& vecTL, CVector& vecTR, bool bShallow )
+CWaterPoly* CWaterManagerSA::CreateQuad( const CVector& vecBL, const CVector& vecBR, const CVector& vecTL, const CVector& vecTR, bool bShallow )
 {
     if ( *(DWORD *)VAR_NumWaterQuads >= NUM_NewWaterQuads )
         return NULL;
@@ -567,7 +567,7 @@ CWaterPoly* CWaterManagerSA::CreateQuad ( CVector& vecBL, CVector& vecBR, CVecto
     return pPoly;
 }
 
-CWaterPoly* CWaterManagerSA::CreateTriangle ( CVector& vec1, CVector& vec2, CVector& vec3, bool bShallow )
+CWaterPoly* CWaterManagerSA::CreateTriangle ( const CVector& vec1, const CVector& vec2, const CVector& vec3, bool bShallow )
 {
     if ( *(DWORD *)VAR_NumWaterVertices >= NUM_NewWaterVertices )
         return NULL;
@@ -637,13 +637,20 @@ bool CWaterManagerSA::DeletePoly ( CWaterPoly* pPoly )
     return true;
 }
 
-bool CWaterManagerSA::GetWaterLevel ( CVector& vecPosition, float* pfLevel, bool bCheckWaves, CVector* pvecUnknown )
+bool CWaterManagerSA::GetWaterLevel( CVector& vecPosition, float* pfLevel, bool bCheckWaves, CVector* pvecUnknown )
 {
-    return ( (GetWaterLevel_t) FUNC_GetWaterLevel )
-        ( vecPosition.getX(), vecPosition.getY(), vecPosition.getZ(), pfLevel, bCheckWaves, pvecUnknown );
+	CVectorGTA vec;
+	
+	if( pvecUnknown )
+		vec = *pvecUnknown;
+
+    bool bRet = ( (GetWaterLevel_t) FUNC_GetWaterLevel )
+        ( vecPosition.getX(), vecPosition.getY(), vecPosition.getZ(), pfLevel, bCheckWaves, &vec );
+
+	return bRet;
 }
 
-bool CWaterManagerSA::SetWaterLevel ( CVector* pvecPosition, float fLevel, void* pChangeSource )
+bool CWaterManagerSA::SetWaterLevel( CVector* pvecPosition, float fLevel, void* pChangeSource )
 {
     if ( pvecPosition )
     {
@@ -721,10 +728,15 @@ void CWaterManagerSA::SetWaveLevel ( float fWaveLevel )
     }
 }
 
-bool CWaterManagerSA::TestLineAgainstWater( const CVector& vecStart, const CVector& vecEnd, CVector* vecCollision )
+bool CWaterManagerSA::TestLineAgainstWater( const CVector& vecStart, const CVector& vecEnd, CVector& vecCollision )
 {
-    return ( (TestLineAgainstWater_t) FUNC_TestLineAgainstWater )
-        ( vecEnd.getX(), vecEnd.getY(), vecEnd.getZ(), vecStart.getX(), vecStart.getY(), vecStart.getZ(), vecCollision );
+	CVectorGTA vec = vecCollision;
+
+    bool bRet = ( (TestLineAgainstWater_t) FUNC_TestLineAgainstWater )
+        ( vecEnd.getX(), vecEnd.getY(), vecEnd.getZ(), vecStart.getX(), vecStart.getY(), vecStart.getZ(), &vec );
+
+	vecCollision = CVectorGTA::unwrap( vec );
+	return bRet;
 }
 
 void CWaterManagerSA::AddChange( void *pChangeSource, void* pChangedObject, CWaterChange* pChange )

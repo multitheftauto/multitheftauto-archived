@@ -29,8 +29,8 @@
 typedef void (__cdecl *ReadWaterConfiguration_t)();
 typedef WORD (__cdecl *CreateWaterVertex_t)(short sX, short sY, float fZ, float fUnknown, float fHeight, WORD wFlow);
 typedef void (__cdecl *BuildWaterIndex_t)();
-typedef bool (__cdecl *TestLineAgainstWater_t)(float fStartX, float fStartY, float fStartZ, float fEndX, float fEndY, float fEndZ, CVector* pvecCollision);
-typedef bool (__cdecl *GetWaterLevel_t)(float fX, float fY, float fZ, float* pfLevel, bool bCheckWaves, CVector* pvecUnknown);
+typedef bool (__cdecl *TestLineAgainstWater_t)(float fStartX, float fStartY, float fStartZ, float fEndX, float fEndY, float fEndZ, CVectorGTA* pvecCollision);
+typedef bool (__cdecl *GetWaterLevel_t)(float fX, float fY, float fZ, float* pfLevel, bool bCheckWaves, CVectorGTA* pvecUnknown);
 
 #define VAR_NumWaterVertices               0xC2288C
 #define VAR_NumWaterQuads                  0xC22888
@@ -153,7 +153,7 @@ public:
     bool                             DeletePoly( CWaterPoly* pPoly );
 
     bool                             GetWaterLevel( CVector& vecPosition, float* pfLevel, bool bCheckWaves, CVector* pVecUnknown );
-    bool                             SetWaterLevel( const CVector& vecPosition, float fLevel, void* pChangeSource = NULL );
+    bool                             SetWaterLevel( CVector* vecPosition, float fLevel, void* pChangeSource = NULL );
     bool                             SetWaterLevel( CWaterPoly* pPoly, float fLevel, void* pChangeSource = NULL );
     float                            GetWaveLevel( void );
     void                             SetWaveLevel( float fWaveLevel );

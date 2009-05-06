@@ -73,7 +73,7 @@ class CTaskSimpleGangDriveBySA : public virtual CTaskSimpleSA, public virtual CT
 {
 public:
     CTaskSimpleGangDriveBySA( void ) {};
-	CTaskSimpleGangDriveBySA( CEntity *pTargetEntity, const CVector& pVecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS );
+	CTaskSimpleGangDriveBySA( CEntity *pTargetEntity, const CVector& vecTarget, float fAbortRange, char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS );
 };
 
 class CTaskSimpleUseGunSAInterface : public CTaskSimpleSAInterface
@@ -114,7 +114,7 @@ public:
 	            CTaskSimpleUseGunSA ( CEntity *pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength = 1, unsigned char bAimImmediate = false );
 
     bool        ControlGun          ( CPed* pPed, CEntity* pTargetEntity, char nCommand );
-    bool        ControlGunMove      ( const CVector2D& pMoveVec );
+    bool        ControlGunMove      ( const CVector2D& vecMove );
     void        Reset               ( CPed* pPed, CEntity* pTargetEntity, const CVector& vecTarget, char nCommand, short nBurstLength = 1 );
 };
 
