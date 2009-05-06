@@ -9,10 +9,21 @@
 *
 *****************************************************************************/
 
-class CQuat;
-
 #ifndef __CQUAT_H
 #define __CQUAT_H
+
+/*
+	Vector Math library for 3-D linear algebra (vector, matrix, quaternion)
+	SIMD support for SSE, PowerPC (PPU) and the SPU.
+	Also includes generic multi-platform scalar version. 
+
+	Copyright (C) 2006, 2007 Sony Computer Entertainment Inc. 
+	All rights reserved.
+*/
+#include <vectormath/cpp/vectormath_aos.h>
+typedef Vectormath::Aos::Quat	CQuat;
+
+#if 0
 
 #include "CMatrix4.h"
 
@@ -125,5 +136,7 @@ public:
 private:
 	float x, y, z, w;
 };
+
+#endif
 
 #endif
