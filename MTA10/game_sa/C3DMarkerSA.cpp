@@ -143,5 +143,5 @@ void C3DMarkerSA::DeleteMarkerObject ()
 
 void C3DMarkerSA::Reset()
 {
-    this->internalInterface->m_mat.setTranslation( this->internalInterface->m_lastPosition );
+	this->internalInterface->m_mat.setTranslation( CVectorGTA::unwrap( this->internalInterface->m_lastPosition ) );
 }
