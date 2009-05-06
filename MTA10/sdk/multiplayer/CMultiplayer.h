@@ -20,15 +20,15 @@
 
 #define DEFAULT_WAVES -1.0f
 
-typedef bool ( ExplosionHandler ) ( class CEntity* pExplodingEntity, class CEntity* pCreator, const CVector& vecPosition, enum eExplosionType ExplosionType );
+typedef bool ( ExplosionHandler ) ( class CEntity* pExplodingEntity, class CEntity* pCreator, const CVectorGTA& vecPosition, enum eExplosionType ExplosionType );
 typedef void ( PreContextSwitchHandler ) ( class CPlayerPed* pPlayer );
 typedef void ( PostContextSwitchHandler ) ( void );
 typedef void ( PreWeaponFireHandler ) ( class CPlayerPed* pPlayer );
 typedef void ( PostWeaponFireHandler ) ( void );
 typedef bool ( DamageHandler ) ( class CPed* pDamagePed, class CEventDamage * pEvent );
 typedef void ( FireHandler ) ( class CFire* pFire );
-typedef bool ( ProjectileStopHandler ) ( class CEntity * owner, enum eWeaponType weaponType, class CVector * origin, float fForce, class CVector * target, class CEntity * targetEntity );
-typedef void ( ProjectileHandler ) ( class CEntity * owner, class CProjectile* projectile, class CProjectileInfo* projectileInfo, enum eWeaponType weaponType, class CVector * origin, float fForce, class CVector * target, class CEntity * targetEntity );
+typedef bool ( ProjectileStopHandler ) ( class CEntity * owner, enum eWeaponType weaponType, class CVectorGTA * origin, float fForce, class CVectorGTA * target, class CEntity * targetEntity );
+typedef void ( ProjectileHandler ) ( class CEntity * owner, class CProjectile* projectile, class CProjectileInfo* projectileInfo, enum eWeaponType weaponType, class CVectorGTA * origin, float fForce, class CVectorGTA * target, class CEntity * targetEntity );
 typedef bool ( BreakTowLinkHandler ) ( class CVehicle * towingVehicle );
 typedef void ( ProcessCamHandler ) ( class CCam* pCam );
 typedef void ( DrawRadarAreasHandler ) ( void );
@@ -41,8 +41,8 @@ typedef void ( GameProcessHandler ) ( void );
 class CShotSyncData
 {
 public:
-    CVector m_vecShotTarget;
-    CVector m_vecShotOrigin;
+    CVectorGTA m_vecShotTarget;
+    CVectorGTA m_vecShotOrigin;
     // so we can make the arm move vertically (mainly while on foot) and horizontally (mainly while in vehicles)
     float m_fArmDirectionX; 
     float m_fArmDirectionY;
@@ -63,18 +63,18 @@ public:
 class CRemoteDataStorage
 {
 public:
-    virtual class CControllerState *    CurrentControllerState ( void ) = 0;
-    virtual class CControllerState *    LastControllerState ( void ) = 0;
-    virtual class CShotSyncData *       ShotSyncData ( void ) = 0;
-    virtual class CStatsData *          Stats ( void ) = 0;
-    virtual float                       GetCameraRotation ( void ) = 0;
-    virtual void                        SetCameraRotation ( float fCameraRotation ) = 0;
-    virtual void                        SetGravity ( float fGravity ) = 0;
-    virtual void                        SetProcessPlayerWeapon ( bool bProcess ) = 0;
-    virtual CVector&                    GetAkimboTarget     ( void ) = 0;
-    virtual bool                        GetAkimboTargetUp   ( void ) = 0;
-    virtual void                        SetAkimboTarget     ( const CVector& vecTarget ) = 0;
-    virtual void                        SetAkimboTargetUp   ( bool bUp ) = 0;
+    virtual class CControllerState*     CurrentControllerState( void ) = 0;
+    virtual class CControllerState*     LastControllerState( void ) = 0;
+    virtual class CShotSyncData*        ShotSyncData( void ) = 0;
+    virtual class CStatsData*           Stats( void ) = 0;
+    virtual float                       GetCameraRotation( void ) = 0;
+    virtual void                        SetCameraRotation( float fCameraRotation ) = 0;
+    virtual void                        SetGravity( float fGravity ) = 0;
+    virtual void                        SetProcessPlayerWeapon( bool bProcess ) = 0;
+    virtual const CVector               GetAkimboTarget( void ) = 0;
+    virtual bool                        GetAkimboTargetUp( void ) = 0;
+    virtual void                        SetAkimboTarget( const CVector& vecTarget ) = 0;
+    virtual void                        SetAkimboTargetUp( bool bUp ) = 0;
 };
 
 /**
@@ -93,7 +93,7 @@ public:
 	virtual class CPopulationMP         * GetPopulationMP           () = 0;
 	virtual void						PreventLeavingVehicles      () = 0;
 	virtual void						HideRadar                   ( bool bHide ) = 0;
-	virtual void						SetCenterOfWorld            ( class CEntity * entity, class CVector * vecPosition, FLOAT fHeading ) = 0;
+	virtual void						SetCenterOfWorld            ( class CEntity * entity, const CVector& vecPosition, FLOAT fHeading ) = 0;
 	virtual void						DisablePadHandler           ( bool bDisabled ) = 0;
 	virtual void						DisableHeatHazeEffect       ( bool bDisable ) = 0;
     virtual void                        DisableAllVehicleWeapons    ( bool bDisable ) = 0;
@@ -136,9 +136,6 @@ public:
 
     virtual void                        Reset                       () = 0;
 
-    virtual void                        ConvertEulerAnglesToMatrix  ( CMatrix& Matrix, float fX, float fY, float fZ ) = 0;
-    virtual void                        ConvertMatrixToEulerAngles  ( const CMatrix& Matrix, float& fX, float& fY, float& fZ ) = 0;
-
     virtual float                       GetGlobalGravity            () = 0;
     virtual void                        SetGlobalGravity            ( float fGravity ) = 0;
 
@@ -154,8 +151,8 @@ public:
 
     virtual void                        SetDebugVars                ( float f1, float f2, float f3 ) = 0;
 
-    virtual CVector&                    GetAkimboTarget             () = 0;
-    virtual bool                        GetAkimboTargetUp           () = 0;
+    virtual const CVector               GetAkimboTarget             ( void ) = 0;
+    virtual bool                        GetAkimboTargetUp           ( void ) = 0;
 
     virtual void                        SetAkimboTarget             ( const CVector& vecTarget ) = 0;
     virtual void                        SetAkimboTargetUp           ( bool bUp ) = 0;

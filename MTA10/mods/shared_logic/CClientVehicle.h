@@ -115,21 +115,16 @@ public:
 
     void                        GetPosition             ( CVector& vecPosition ) const;
     void                        SetPosition             ( const CVector& vecPosition );
-    void                        SetRoll                 ( const CVector& vecRoll );
-    void                        SetDirection            ( const CVector& vecDir );
-    void                        SetWas                  ( const CVector& vecWas );
 
-    void                        GetRotationDegrees      ( CVector& vecRotation ) const;
-    void                        GetRotationRadians      ( CVector& vecRotation ) const;
-    void                        SetRotationDegrees      ( const CVector& vecRotation );
-    void                        SetRotationRadians      ( const CVector& vecRotation );
+    void                        GetRotation				( CQuat& qRotation ) const;
+    void                        SetRotation				( const CQuat& qRotation );
     
 	void                        AttachTo                ( CClientEntity * pEntity );
 
     float                       GetDistanceFromCentreOfMassToBaseOfModel ( void );
 
-    bool                        GetMatrix               ( CMatrix& Matrix ) const;
-    bool                        SetMatrix               ( const CMatrix& Matrix );
+    bool                        GetMatrix               ( CMatrix4& Matrix ) const;
+    bool                        SetMatrix               ( const CMatrix4& Matrix );
 
    	void                        GetMoveSpeed            ( CVector& vecMoveSpeed ) const;
 	void						GetMoveSpeedMeters		( CVector& vecMoveSpeed ) const;
@@ -309,16 +304,16 @@ public:
 
     void                        GetInitialDoorStates    ( unsigned char * pucDoorStates );
 
-	void						AddMatrix				( CMatrix& Matrix, double dTime, unsigned short usTickRate );
-	void						AddVelocity				( CVector& vecVelocity );
+	void						AddMatrix				( const CMatrix4& Matrix, double dTime, unsigned short usTickRate );
+	void						AddVelocity				( const CVector& vecVelocity );
 
-    inline void                 GetTargetPosition       ( CVector& vecPosition )            { vecPosition = m_vecTargetPosition; }
-    void                        SetTargetPosition       ( CVector& vecPosition );
+    inline void                 GetTargetPosition       ( CVector& vecPosition ) const      { vecPosition = m_vecTargetPosition; }
+    void                        SetTargetPosition       ( const CVector& vecPosition );
     void                        RemoveTargetPosition    ( void );
     inline bool                 HasTargetPosition       ( void )                            { return m_bHasTargetPosition; }
 
-    inline void                 GetTargetRotation       ( CVector& vecRotation )            { vecRotation = m_vecTargetRotation; }
-    void                        SetTargetRotation       ( CVector& vecRotation );
+    inline void                 GetTargetRotation       ( CVector& vecRotation ) const      { vecRotation = m_vecTargetRotation; }
+    void                        SetTargetRotation       ( const CVector& vecRotation );
     void                        RemoveTargetRotation    ( void );
     inline bool                 HasTargetRotation       ( void )                            { return m_bHasTargetRotation; }
 
@@ -379,9 +374,9 @@ protected:
 
     CClientVehicle*             m_pPreviousLink;
     CClientVehicle*             m_pNextLink;
-    CMatrix                     m_Matrix;
-	CMatrix						m_MatrixLast;
-	CMatrix						m_MatrixPure;	
+    CMatrix4					m_Matrix;
+	CMatrix4					m_MatrixLast;
+	CMatrix4					m_MatrixPure;	
 	CQuat						m_QuatA;
 	CQuat						m_QuatB;
 	CQuat						m_QuatLERP;
@@ -423,7 +418,7 @@ protected:
     unsigned char               m_ucColor4;
     bool                        m_bIsFrozen;
     bool                        m_bScriptFrozen;
-    CMatrix                     m_matFrozen;
+    CMatrix4					m_matFrozen;
 	CVehicleUpgrades*			m_pUpgrades;
     unsigned char               m_ucOverrideLights;
     CClientVehicle*             m_pTowedVehicle;

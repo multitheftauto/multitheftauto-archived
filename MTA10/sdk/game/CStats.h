@@ -133,7 +133,7 @@ enum {
 
 	GAMBLING,
 
-	MAX_float_STATS  // must be last
+	MAX_FLOAT_STATS  // must be last
 };
 
 

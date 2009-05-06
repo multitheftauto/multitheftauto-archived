@@ -118,18 +118,16 @@ public:
 
     inline bool                 IsLocalPlayer               ( void )                                    { return m_bIsLocalPlayer; }
 
-    bool                        GetMatrix                   ( CMatrix& Matrix ) const;
-    bool                        SetMatrix                   ( const CMatrix& Matrix );
+    bool                        GetMatrix                   ( CMatrix4& Matrix ) const;
+    bool                        SetMatrix                   ( const CMatrix4& Matrix );
 
     void                        GetPosition                 ( CVector& vecPosition ) const;
     void                        SetPosition                 ( const CVector& vecPosition );
 
     void                        SetInterior                 ( unsigned char ucInterior );
 
-    void                        GetRotationDegrees          ( CVector& vecRotation ) const;
-    void                        GetRotationRadians          ( CVector& vecRotation ) const;
-    void                        SetRotationDegrees          ( const CVector& vecRotation );
-    void                        SetRotationRadians          ( const CVector& vecRotation );
+	void						GetRotation					( CQuat& qRotation ) const;
+	void						SetRotation					( const CQuat& qRotation );
 
     void                        Teleport                    ( const CVector& vecPosition );
 
@@ -238,12 +236,12 @@ public:
     bool                        KillTask                    ( int iTaskPriority, bool bGracefully = true );
     bool                        KillTaskSecondary           ( int iTaskPriority, bool bGracefully = true );
 
-    CVector*                    GetBonePosition             ( eBone bone, CVector& vecPosition ) const;
-    CVector*                    GetTransformedBonePosition  ( eBone bone, CVector& vecPosition ) const;
+    const CVector               GetBonePosition             ( eBone bone ) const;
+    const CVector               GetTransformedBonePosition  ( eBone bone ) const;
 
     inline void                 GetAim                      ( float& fDirectionX, float& fDirectionY )  { if ( m_shotSyncData ) { fDirectionX = m_shotSyncData->m_fArmDirectionX; fDirectionY = m_shotSyncData->m_fArmDirectionY; } };
-    inline const CVector&       GetAimSource                ( void )                                    { return m_shotSyncData->m_vecShotOrigin; };
-    inline const CVector&       GetAimTarget                ( void )                                    { return m_shotSyncData->m_vecShotTarget; };
+	inline const CVector        GetAimSource                ( void )                                    { return CVectorGTA::unwrap( m_shotSyncData->m_vecShotOrigin ); };
+    inline const CVector        GetAimTarget                ( void )                                    { return CVectorGTA::unwrap( m_shotSyncData->m_vecShotTarget ); };
     inline unsigned char        GetVehicleAimAnim           ( void )                                    { return m_shotSyncData->m_cInVehicleAimDirection; };
     void                        SetAim                      ( float fArmDirectionX, float fArmDirectionY, unsigned char cInVehicleAimAnim );
     void                        SetAimInterpolated          ( unsigned long ulDelay, float fArmDirectionX, float fArmDirectionY, bool bAkimboAimUp, unsigned char cInVehicleAimAnim );
@@ -330,7 +328,7 @@ public:
 
     inline bool                 HasTargetPosition       ( void )                                        { return m_bHasTargetPosition; }
     inline CClientEntity *      GetTargetOriginSource   ( void )                                        { return m_pTargetOriginSource; }
-    void                        GetTargetPosition       ( CVector & vecPosition );
+    const CVector				GetTargetPosition       ( void );
     void                        SetTargetPosition       ( CVector& vecPosition, CClientEntity* pOriginSource = NULL );
     void                        RemoveTargetPosition    ( void );
 	void						UpdateTargetPosition	( void );
@@ -343,9 +341,9 @@ public:
     bool                        IsSunbathing            ( void );
     void                        SetSunbathing           ( bool bSunbathing, bool bStartStanding = true );
 
-    bool                        LookAt                  ( CVector vecOffset, int iTime = 1000, CClientEntity * pEntity = NULL );
+    bool                        LookAt                  ( const CVector& vecOffset, int iTime = 1000, CClientEntity * pEntity = NULL );
 
-    bool                        IsAttachToable            ( void );
+    bool                        IsAttachToable          ( void );
 	static char*				GetBodyPartName			( unsigned char ucID );
 
     bool                        IsDoingGangDriveby      ( void );
@@ -409,8 +407,8 @@ public:
 
     void                        Respawn                     ( CVector * pvecPosition = NULL, bool bRestoreState = false, bool bCameraCut = false );
 
-    void                        NotifyCreate            ( void );
-    void                        NotifyDestroy           ( void );
+    void                        NotifyCreate( void );
+    void                        NotifyDestroy( void );
 
     CClientModelRequestManager* m_pRequester;
     CPlayerPed*                 m_pPlayerPed;
@@ -481,7 +479,7 @@ public:
     float                       m_fCurrentRotation;
     float                       m_fMoveSpeed;
     bool                        m_bCanBeKnockedOffBike;
-    CMatrix                     m_Matrix;
+    CMatrix4                    m_Matrix;
     CVector                     m_vecMoveSpeed;
     CVector                     m_vecTurnSpeed;
     eWeaponSlot                 m_CurrentWeaponSlot;

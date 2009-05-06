@@ -38,7 +38,7 @@ public:
     inline void                 GetPosition                 ( CVector2D& vecPosition ) const    { vecPosition = m_vecPosition; };
     inline void                 GetPosition                 ( CVector& vecPosition ) const      { vecPosition = CVector ( m_vecPosition.fX, m_vecPosition.fY, 0.0f ); };
     inline void                 SetPosition                 ( const CVector2D& vecPosition )    { m_vecPosition = vecPosition; };
-    inline void                 SetPosition                 ( const CVector& vecPosition )      { m_vecPosition = CVector2D ( vecPosition.fX, vecPosition.fY ); };
+    inline void                 SetPosition                 ( const CVector& vecPosition )      { m_vecPosition = CVector2D ( vecPosition.getX(), vecPosition.getY() ); };
 
     inline const CVector2D&     GetSize                     ( void ) const                      { return m_vecSize; };
     inline void                 GetSize                     ( CVector2D& vecSize )              { vecSize = m_vecSize; };

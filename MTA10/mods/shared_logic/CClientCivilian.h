@@ -39,8 +39,8 @@ public:
 
 	inline CCivilianPed*		    GetGameCivilian			( void )							{ return m_pCivilianPed; }
 
-    inline void                     GetPosition             ( CVector& vecPosition ) const      { vecPosition = *m_pCivilianPed->GetPosition (); };
-    inline void                     SetPosition             ( const CVector& vecPosition )      { m_pCivilianPed->SetPosition ( const_cast < CVector* > ( &vecPosition ) ); };
+    inline void                     GetPosition             ( CVector& vecPosition ) const      { vecPosition = m_pCivilianPed->GetPosition (); };
+    inline void                     SetPosition             ( const CVector& vecPosition )      { m_pCivilianPed->SetPosition ( vecPosition ); };
     int                             GetRotation             ( void );
     void                            GetRotation             ( CVector& vecRotation ) const;
     void                            SetRotation             ( const CVector& vecRotation );
@@ -50,8 +50,8 @@ public:
 
     float                           GetDistanceFromCentreOfMassToBaseOfModel ( void );
 
-    bool                            GetMatrix               ( CMatrix& Matrix ) const;
-    bool                            SetMatrix               ( const CMatrix& Matrix );
+    bool                            GetMatrix               ( CMatrix4& Matrix ) const;
+    bool                            SetMatrix               ( const CMatrix4& Matrix );
 
    	void                            GetMoveSpeed            ( CVector& vecMoveSpeed ) const;
     void                            SetMoveSpeed            ( const CVector& vecMoveSpeed );

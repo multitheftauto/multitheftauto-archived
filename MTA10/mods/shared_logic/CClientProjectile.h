@@ -21,7 +21,6 @@ class CClientProjectile;
 class CProjectile;
 class CProjectileInfo;
 class CClientEntity;
-class CVector;
 enum eWeaponType;
 class CClientProjectileManager;
 class CClientPed;
@@ -76,23 +75,21 @@ public:
     void                                Destroy                 ( void );
 
     bool                                IsActive                ( void );
-    bool                                GetMatrix               ( CMatrix & matrix );
-    bool                                SetMatrix               ( const CMatrix & matrix );
+    bool                                GetMatrix               ( CMatrix4& matrix );
+    bool                                SetMatrix               ( const CMatrix4& matrix );
     void                                GetPosition             ( CVector & vecPosition ) const;
-    void                                SetPosition             ( const CVector & vecPosition );
-    void                                GetRotation             ( CVector & vecRotation );
-    void                                GetRotationDegrees      ( CVector & vecRotation );
-    void                                SetRotation             ( CVector & vecRotation );
-    void                                SetRotationDegrees      ( CVector & vecRotation );
-    void                                GetVelocity             ( CVector & vecVelocity );
-    void                                SetVelocity             ( CVector & vecVelocity );
+    void                                SetPosition             ( const CVector& vecPosition );
+    void                                GetRotation             ( CQuat& qRotation ) const;
+    void                                SetRotation             ( const CQuat& qRotation );
+    void                                GetVelocity             ( CVector& vecVelocity ) const;
+    void                                SetVelocity             ( const CVector& vecVelocity );
     void                                SetModel                ( unsigned short usModel );
 
     inline CClientEntity *              GetCreator              ( void )        { return m_pCreator; }
     inline CClientEntity *              GetTargetEntity         ( void )        { return m_pTarget; }
     inline eWeaponType                  GetWeaponType           ( void )        { return m_weaponType; }
-    inline CVector *                    GetOrigin               ( void )        { return m_pvecOrigin; }
-    inline CVector *                    GetTarget               ( void )        { return m_pvecTarget; }
+    inline const CVector                GetOrigin               ( void )        { return m_vecOrigin; }
+    inline const CVector                GetTarget               ( void )        { return m_vecTarget; }
     inline float                        GetForce                ( void )        { return m_fForce; }
     inline bool                         IsLocal                 ( void )        { return m_bLocal; }
     
@@ -106,8 +103,8 @@ protected:
     CClientEntity *                     m_pCreator;
     CClientEntity *                     m_pTarget;
     eWeaponType                         m_weaponType;
-    CVector *                           m_pvecOrigin;
-    CVector *                           m_pvecTarget;
+    CVector                             m_vecOrigin;
+    CVector                             m_vecTarget;
     float                               m_fForce;
     bool                                m_bLocal;
 
