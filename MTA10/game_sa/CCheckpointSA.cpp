@@ -37,7 +37,7 @@ DWORD CCheckpointSA::GetType( void )
 	return this->GetInterface()->m_nType;
 }
 
-void CCheckpointSA::SetType( WORD wType )
+void CCheckpointSA::SetType( short wType )
 {
 	this->GetInterface()->m_nType = wType;
 }
@@ -73,9 +73,9 @@ void CCheckpointSA::SetColor( RGBA color )
 	this->GetInterface()->rwColour = color;
 }
 
-void CCheckpointSA::SetPulsePeriod(WORD wPulsePeriod)
+void CCheckpointSA::SetPulsePeriod(short wPulsePeriod)
 {
-	DEBUG_TRACE("void CCheckpointSA::SetPulsePeriod(WORD wPulsePeriod)");
+	DEBUG_TRACE("void CCheckpointSA::SetPulsePeriod(short wPulsePeriod)");
 	this->GetInterface()->m_nPulsePeriod = wPulsePeriod;
 }
 
@@ -94,33 +94,33 @@ void CCheckpointSA::SetRotateRate(short RotateRate)
 	}
 }
 
-FLOAT CCheckpointSA::GetSize()
+float CCheckpointSA::GetSize()
 {
-	DEBUG_TRACE("FLOAT CCheckpointSA::GetSize()");
+	DEBUG_TRACE("float CCheckpointSA::GetSize()");
 	return this->GetInterface()->m_fSize;
 }
 
-void CCheckpointSA::SetSize(FLOAT fSize)
+void CCheckpointSA::SetSize(float fSize)
 {
-	DEBUG_TRACE("void CCheckpointSA::SetSize(FLOAT fSize)");
+	DEBUG_TRACE("void CCheckpointSA::SetSize(float fSize)");
 	this->GetInterface()->m_fSize = fSize;
 }
 
-void CCheckpointSA::SetCameraRange(FLOAT fCameraRange)
+void CCheckpointSA::SetCameraRange(float fCameraRange)
 {
-	DEBUG_TRACE("void CCheckpointSA::SetCameraRange(FLOAT fCameraRange)");
+	DEBUG_TRACE("void CCheckpointSA::SetCameraRange(float fCameraRange)");
 	this->GetInterface()->m_fCameraRange = fCameraRange;
 }
 
-void CCheckpointSA::SetPulseFraction(FLOAT fPulseFraction)
+void CCheckpointSA::SetPulseFraction(float fPulseFraction)
 {
-	DEBUG_TRACE("void CCheckpointSA::SetPulseFraction(FLOAT fPulseFraction)");
+	DEBUG_TRACE("void CCheckpointSA::SetPulseFraction(float fPulseFraction)");
 	this->GetInterface()->m_fPulseFraction = fPulseFraction;
 }
 
-FLOAT CCheckpointSA::GetPulseFraction()
+float CCheckpointSA::GetPulseFraction()
 {
-	DEBUG_TRACE("FLOAT CCheckpointSA::GetPulseFraction()");
+	DEBUG_TRACE("float CCheckpointSA::GetPulseFraction()");
 	return this->GetInterface()->m_fPulseFraction;
 }
 

@@ -175,10 +175,10 @@ enum eSystemState
 typedef struct eControlStatesSA
 {
 	DWORD dwFrontPad;
-	WORD wKeys1[19];
+	short wKeys1[19];
 	DWORD dwFrontPad2;
-	WORD wKeys2[19];
-	WORD wTurnLeftRightAnalog[10];
+	short wKeys2[19];
+	short wTurnLeftRightAnalog[10];
 	BYTE bytePadding1[138];
 	BYTE byteCrouchAnalog[5];
 	BYTE byteIncrementer;
@@ -780,8 +780,8 @@ enum ePickupType
 	PICKUP_MINE_ARMED,
 	PICKUP_NAUTICAL_MINE_INACTIVE, 
 	PICKUP_NAUTICAL_MINE_ARMED, 
-	PICKUP_FLOATINGPACKAGE, 
-	PICKUP_FLOATINGPACKAGE_FLOATING, 
+	PICKUP_floatINGPACKAGE, 
+	PICKUP_floatINGPACKAGE_floatING, 
 	PICKUP_ON_STREET_SLOW, 
 	PICKUP_ASSET_REVENUE, 
 	PICKUP_PROPERTY_LOCKED, 

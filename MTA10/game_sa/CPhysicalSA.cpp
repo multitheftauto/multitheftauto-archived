@@ -281,22 +281,22 @@ void CPhysicalSA::SetAttachedOffsets( const CVector& vecPosition, const CVector&
 
 
 /*
-void CPhysicalSA::SetMassMultiplier(FLOAT fMassMultiplier)
+void CPhysicalSA::SetMassMultiplier(float fMassMultiplier)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->MassMultiplier = fMassMultiplier;
 }
 
-FLOAT CPhysicalSA::GetMassMultiplier()
+float CPhysicalSA::GetMassMultiplier()
 {
 	return ((CPhysicalSAInterface *)this->GetInterface())->MassMultiplier;
 }
 
-void CPhysicalSA::SetAirResistance(FLOAT fAirResistance)
+void CPhysicalSA::SetAirResistance(float fAirResistance)
 {
 	((CPhysicalSAInterface *)this->GetInterface())->AirResistance = fAirResistance;
 }
 
-FLOAT CPhysicalSA::GetAirResistance()
+float CPhysicalSA::GetAirResistance()
 {
 	return ((CPhysicalSAInterface *)this->GetInterface())->AirResistance;
 }

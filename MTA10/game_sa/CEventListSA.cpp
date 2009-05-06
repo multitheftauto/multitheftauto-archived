@@ -18,9 +18,9 @@ CEvent* CEventListSA::FindClosestEvent( eEventType eventtype, const CVector& vec
 	CEventSA * event;
 
 	DWORD dwFunction = FUNC_FindClosestEvent;
-	FLOAT fX = vecPosition.getX();
-	FLOAT fY = vecPosition.getY();
-	FLOAT fZ = vecPosition.getZ();
+	float fX = vecPosition.getX();
+	float fY = vecPosition.getY();
+	float fZ = vecPosition.getZ();
 	DWORD dwReturn;
 	_asm
 	{

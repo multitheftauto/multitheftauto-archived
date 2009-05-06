@@ -160,7 +160,7 @@ void CVehicleSA::SetMoveSpeed ( const CVector& vecMoveSpeed )
 	*vecReturn = vecMoveSpeed;
 
     // In case of train: calculate on-rail speed
-    WORD wModelID = GetModelIndex();
+    short wModelID = GetModelIndex();
     if ( wModelID == 537 || wModelID == 538 || wModelID == 569 || wModelID == 570 || wModelID == 590 || wModelID == 449 )
     {
         if ( !IsDerailed () )
@@ -267,7 +267,7 @@ bool CVehicleSA::IsDerailed ( void )
 
 void CVehicleSA::SetDerailed ( bool bDerailed )
 {
-    WORD wModelID = GetModelIndex();
+    short wModelID = GetModelIndex();
     if ( wModelID == 537 || wModelID == 538 || wModelID == 569 || wModelID == 570 || wModelID == 590 || wModelID == 449 )
     {
         DWORD dwThis = (DWORD) GetInterface ();
@@ -949,7 +949,7 @@ DWORD * CVehicleSA::GetMemoryValue ( DWORD dwOffset )
 
 /*
 
-bool CVehicleSA::isInRect(FLOAT fX1, FLOAT fY1, FLOAT fX2, FLOAT fY2, bool bShowHotspot)
+bool CVehicleSA::isInRect(float fX1, float fY1, float fX2, float fY2, bool bShowHotspot)
 {
 	return (bool)CallScriptFunction(GTAVC_SCM_IS_CAR_IN_RECT_STILL,&this->internalID,&fX1,&fY1,&fX2,&fY2,&bShowHotspot);
 }
@@ -963,14 +963,14 @@ bool CVehicleSA::isInCube(CVector * v3dCorner1, CVector * v3dCorner2, bool bShow
 
 //-----------------------------------------------------------
 
-bool CVehicleSA::isNearPoint(FLOAT fX, FLOAT fY, FLOAT fRadiusX, FLOAT fRadiusY, bool bShowHotspot, bool bStill)
+bool CVehicleSA::isNearPoint(float fX, float fY, float fRadiusX, float fRadiusY, bool bShowHotspot, bool bStill)
 {
 	return (bool)CallScriptFunction(GTAVC_SCM_IS_CAR_NEAR_POINT,&this->internalID,&fX,&fY,&fRadiusX,&fRadiusY,&bShowHotspot,&bStill);
 }
 
 //-----------------------------------------------------------
 
-bool CVehicleSA::isNearPoint3D(FLOAT fX, FLOAT fY, FLOAT fZ, FLOAT fRadiusX, FLOAT fRadiusY, FLOAT fRadiusZ, bool bShowHotspot, bool bStill)
+bool CVehicleSA::isNearPoint3D(float fX, float fY, float fZ, float fRadiusX, float fRadiusY, float fRadiusZ, bool bShowHotspot, bool bStill)
 {
 	return (bool)CallScriptFunction(GTAVC_SCM_IS_CAR_NEAR_POINT_3D,&this->internalID,&fX,&fY,&fZ,&fRadiusX,&fRadiusY,&fRadiusZ,&bShowHotspot,&bStill);
 }
@@ -1115,23 +1115,23 @@ void CVehicleSA::setTaxiLight(bool bOn)
 
 //-----------------------------------------------------------
 
-void CVehicleSA::setSpeed(FLOAT fSpeed)
+void CVehicleSA::setSpeed(float fSpeed)
 {
 	CallScriptFunction(GTAVC_SCM_SET_CAR_SPEED,&this->internalID,&fSpeed);
 }
 
 //-----------------------------------------------------------
 
-FLOAT CVehicleSA::getSpeed()
+float CVehicleSA::getSpeed()
 {
-	FLOAT fReturn;
+	float fReturn;
 	CallScriptFunction(GTAVC_SCM_GET_CAR_SPEED,&this->internalID, &fReturn);
 	return fReturn;
 }
 
 //-----------------------------------------------------------
 
-void CVehicleSA::setSpeedInstantly(FLOAT fSpeed)
+void CVehicleSA::setSpeedInstantly(float fSpeed)
 {
 	CallScriptFunction(GTAVC_SCM_SET_CAR_SPEED_INSTANTLY,&this->internalID,&fSpeed);
 }
@@ -1144,13 +1144,13 @@ void CVehicleSA::setImmunities(bool bBullet, bool bFire, bool bExplosion, bool b
 */
 
 //-----------------------------------------------------------
-FLOAT CVehicleSA::GetHealth()
+float CVehicleSA::GetHealth()
 {
 	CVehicleSAInterface * vehicle = (CVehicleSAInterface *)this->GetInterface();
 	return vehicle->m_nHealth;
 }
 //-----------------------------------------------------------
-void CVehicleSA::SetHealth( FLOAT fHealth )
+void CVehicleSA::SetHealth( float fHealth )
 {
 	CVehicleSAInterface * vehicle = (CVehicleSAInterface *)this->GetInterface();
 	vehicle->m_nHealth = fHealth;

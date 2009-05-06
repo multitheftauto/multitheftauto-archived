@@ -155,8 +155,8 @@ typedef struct
     short sX;               // x coordinate times 8
     short sY;               // y coordinate times 8
     short sZ;               // z coordinate times 8
-    WORD  sRailDistance;    // on-rail distance times 3
-    WORD  padding;
+    short  sRailDistance;    // on-rail distance times 3
+    short  padding;
 } SRailNodeSA;
 
 class CVehicleSAInterfaceVTBL : public CEntitySAInterfaceVTBL
@@ -324,7 +324,7 @@ class CVehicleSAInterface : public CPhysicalSAInterface
 {
 public:
     //char        pad [1158];     /* IMPORTANT: KEEP THIS UP-TO-DATE */
-    //FLOAT       fDamage;
+    //float       fDamage;
 	CAEVehicleAudioEntity m_VehicleAudioEntity; // 312
 
     int padaudio[108];

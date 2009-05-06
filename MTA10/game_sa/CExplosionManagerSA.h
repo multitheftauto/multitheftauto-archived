@@ -34,7 +34,7 @@ public:
     ~CExplosionManagerSA( void );
 
 	CExplosion*		AddExplosion( eExplosionType explosiontype, const CVector& vecPosition, CEntity * creator = NULL, bool bMakeSound = true, float fCamShake = -1.0f, bool bNoDamage = false );
-	void			RemoveAllExplosionsInArea( const CVector& vecPosition, FLOAT fRadius );
+	void			RemoveAllExplosionsInArea( const CVector& vecPosition, float fRadius );
 	void			RemoveAllExplosions( void );
 	CExplosion*		GetExplosion( DWORD ID );
 	CExplosion*		FindFreeExplosion( void );

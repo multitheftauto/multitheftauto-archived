@@ -38,11 +38,11 @@
 class CRestartSA : public CRestart
 {
 	void			CancelOverrideRestart( void );
-	void			OverrideNextRestart( const CVector& vecPosition, FLOAT fRotation );
-	void			FindClosestPoliceRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, FLOAT& fRotation );
-	void			FindClosestHospitalRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, FLOAT& fRotation );
-	void			AddPoliceRestartPoint( const CVector& vecPosition, FLOAT fRotation );
-	void			AddHospitalRestartPoint( const CVector& vecPosition, FLOAT fRotation );
+	void			OverrideNextRestart( const CVector& vecPosition, float fRotation );
+	void			FindClosestPoliceRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, float& fRotation );
+	void			FindClosestHospitalRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, float& fRotation );
+	void			AddPoliceRestartPoint( const CVector& vecPosition, float fRotation );
+	void			AddHospitalRestartPoint( const CVector& vecPosition, float fRotation );
 
 	// these really belong in CPlayerInfo, but make more sense here
 	bool			IsRestartingAfterArrest( void );

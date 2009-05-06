@@ -27,32 +27,32 @@ void CRegisteredCoronaSA::SetPosition( const CVector& vector )
 	internalInterface->Coordinates = vector;
 }
 
-FLOAT CRegisteredCoronaSA::GetSize( void )
+float CRegisteredCoronaSA::GetSize( void )
 {
 	return internalInterface->Size;
 }
 
-void CRegisteredCoronaSA::SetSize( FLOAT fSize )
+void CRegisteredCoronaSA::SetSize( float fSize )
 {
 	internalInterface->Size = fSize;
 }
 
-FLOAT CRegisteredCoronaSA::GetRange( void )
+float CRegisteredCoronaSA::GetRange( void )
 {
 	return internalInterface->Range;
 }
 
-void CRegisteredCoronaSA::SetRange( FLOAT fRange )
+void CRegisteredCoronaSA::SetRange( float fRange )
 {
 	internalInterface->Range = fRange;
 }
 
-FLOAT CRegisteredCoronaSA::GetPullTowardsCamera( void )
+float CRegisteredCoronaSA::GetPullTowardsCamera( void )
 {
 	return internalInterface->PullTowardsCam;
 }
 
-void CRegisteredCoronaSA::SetPullTowardsCamera( FLOAT fPullTowardsCamera )
+void CRegisteredCoronaSA::SetPullTowardsCamera( float fPullTowardsCamera )
 {
 	internalInterface->PullTowardsCam = fPullTowardsCamera;
 }

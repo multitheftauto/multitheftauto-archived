@@ -165,12 +165,12 @@ void CFireSA::Ignite( void )
 	this->internalInterface->nNumGenerationsAllowed = 100;
 }
 
-FLOAT CFireSA::GetStrength( void )
+float CFireSA::GetStrength( void )
 {
 	return this->internalInterface->Strength;
 }
 
-void CFireSA::SetStrength( FLOAT fStrength )
+void CFireSA::SetStrength( float fStrength )
 {
 	this->internalInterface->Strength = fStrength;
 }

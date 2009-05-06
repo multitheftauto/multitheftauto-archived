@@ -220,10 +220,10 @@ class CWeaponInfo
 public:
 	virtual eWeaponModel				GetModel( void ) = 0;
 
-	virtual FLOAT						GetWeaponRange( void ) = 0;
-	virtual void						SetWeaponRange( FLOAT fRange ) = 0;
-	virtual FLOAT						GetTargetRange( void ) = 0;
-	virtual void						SetTargetRange( FLOAT fRange ) = 0;
+	virtual float						GetWeaponRange( void ) = 0;
+	virtual void						SetWeaponRange( float fRange ) = 0;
+	virtual float						GetTargetRange( void ) = 0;
+	virtual void						SetTargetRange( float fRange ) = 0;
 	virtual const CVector				GetFireOffset( void ) = 0;
 	virtual void						SetFireOffset( const CVector& vecFireOffset ) = 0;
 	virtual short						GetDamagePerHit( void ) = 0;
@@ -232,18 +232,18 @@ public:
     virtual void                        SetAccuracy( float fAccuracy ) = 0;
 
 	// projectile/areaeffect only
-	virtual FLOAT						GetFiringSpeed( void ) = 0;
-	virtual void						SetFiringSpeed( FLOAT fFiringSpeed ) = 0;
+	virtual float						GetFiringSpeed( void ) = 0;
+	virtual void						SetFiringSpeed( float fFiringSpeed ) = 0;
 
 	// area effect only
-	virtual FLOAT						GetRadius( void ) = 0;
-	virtual void						SetRadius( FLOAT fRadius ) = 0;
-	virtual FLOAT						GetLifeSpan( void ) = 0;
-	virtual void						SetLifeSpan( FLOAT fLifeSpan ) = 0;
-	virtual FLOAT						GetSpread( void ) = 0;
-	virtual void						SetSpread( FLOAT fSpread ) = 0;
-	virtual FLOAT						GetAnimBreakoutTime( void ) = 0;
-	virtual void						SetAnimBreakoutTime( FLOAT fBreakoutTime ) = 0;
+	virtual float						GetRadius( void ) = 0;
+	virtual void						SetRadius( float fRadius ) = 0;
+	virtual float						GetLifeSpan( void ) = 0;
+	virtual void						SetLifeSpan( float fLifeSpan ) = 0;
+	virtual float						GetSpread( void ) = 0;
+	virtual void						SetSpread( float fSpread ) = 0;
+	virtual float						GetAnimBreakoutTime( void ) = 0;
+	virtual void						SetAnimBreakoutTime( float fBreakoutTime ) = 0;
 	virtual eWeaponSlot					GetSlot( void ) = 0;
 	virtual void						SetSlot( eWeaponSlot dwSlot ) = 0;
     virtual eWeaponSkill                GetSkill( void ) = 0;

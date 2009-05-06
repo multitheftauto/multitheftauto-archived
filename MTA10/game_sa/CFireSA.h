@@ -34,12 +34,12 @@ public:
 	BYTE					bMakesNoise : 1;
 	BYTE					bBeingExtinguished : 1;
 	BYTE					bFirstGeneration : 1;
-	WORD                    ScriptReferenceIndex;
+	short                    ScriptReferenceIndex;
 	CVectorGTA              vecPosition; 
 	CEntitySAInterface*		entityTarget; 
 	CEntitySAInterface*		entityCreator;	
 	DWORD					nTimeToBurn; 
-	FLOAT					Strength;
+	float					Strength;
 	signed char				nNumGenerationsAllowed; 
 	BYTE					RemovalDist;
 
@@ -68,7 +68,7 @@ public:
 	void					SetSilent( bool bSilent );
 	bool					IsBeingExtinguished( void );
 	void					Ignite( void );
-	FLOAT					GetStrength( void );
+	float					GetStrength( void );
 	void					SetStrength( float fStrength );
     void                    SetNumGenerationsAllowed( char nGenerations );
     inline CFireInterface*  GetInterface( void ) { return this->internalInterface; }

@@ -33,9 +33,9 @@ public:
 	long	MonetaryValue;  // 8
 	DWORD	RegenerationTime; // 12
 	short	CoorsX, CoorsY, CoorsZ; //16 // 18 // 20
-	WORD	MoneyPerDay; //22
-	WORD	MI; // 24
-	WORD	ReferenceIndex; // 26
+	short	MoneyPerDay; //22
+	short	MI; // 24
+	short	ReferenceIndex; // 26
 	BYTE	Type; // 28
 	BYTE	State : 1; //29
 	BYTE	bNoAmmo : 1;
@@ -62,13 +62,13 @@ public:
 	
 	ePickupType			GetType( void );
 	void				SetType( ePickupType type );
-	FLOAT				GetCurrentValue( void );
-	void				SetCurrentValue( FLOAT fCurrentValue );
+	float				GetCurrentValue( void );
+	void				SetCurrentValue( float fCurrentValue );
 	void				SetRegenerationTime( DWORD dwTime );
-	WORD				GetMoneyPerDay( void );
-	void				SetMoneyPerDay( WORD wMoneyPerDay );
-	WORD				GetModel( void );
-	void				SetModel( WORD wModelIndex ); // do not export
+	short				GetMoneyPerDay( void );
+	void				SetMoneyPerDay( short wMoneyPerDay );
+	short				GetModel( void );
+	void				SetModel( short wModelIndex ); // do not export
 	ePickupState		GetState( void );
 	void				SetState( ePickupState bState );
 	BYTE				GetAmmo( void );

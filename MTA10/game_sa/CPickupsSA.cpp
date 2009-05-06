@@ -87,7 +87,7 @@ CPickup* CPickupsSA::CreatePickup( const CVector& position, DWORD ModelIndex, eP
 	pickup->SetType(Type);
 	pickup->SetState(PUSTATE_ON);
 	pickup->SetMonetaryValue(dwMonetaryValue);
-	pickup->SetMoneyPerDay((WORD)dwMoneyPerDay);
+	pickup->SetMoneyPerDay((short)dwMoneyPerDay);
 	pickup->SetCurrentValue(0.0f);
 	pickup->SetRegenerationTime(pGame->GetSystemTime());
 	pickup->SetAmmo(bPingOutOfPlayer);
@@ -114,7 +114,7 @@ CPickup* CPickupsSA::CreatePickup( const CVector& position, DWORD ModelIndex, eP
 	  pickup->SetType(PICKUP_NAUTICAL_MINE_INACTIVE);
 	  pickup->GetInterface()->RegenerationTime = pGame->GetSystemTime() + 1500; // Mines get activated after 2 secs
 	}
-	pickup->SetModel((WORD)ModelIndex);
+	pickup->SetModel((short)ModelIndex);
 
 	// All pickups get generated at the coordinates that we get in from the
 	// script. This way the level designers can create them floating in mid-air

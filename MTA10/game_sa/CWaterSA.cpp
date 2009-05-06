@@ -17,11 +17,11 @@ extern CWaterManagerSA* g_pWaterManager;
 // -----------------------------------------------------
 // Vertices
 
-WORD CWaterVertexSA::GetID ()
+short CWaterVertexSA::GetID ()
 {
     if ( !m_pInterface )
         return ~0;
-    return (WORD)(m_pInterface - g_pWaterManager->m_VertexPool);
+    return (short)(m_pInterface - g_pWaterManager->m_VertexPool);
 }
 
 void CWaterVertexSA::GetPosition ( CVector& vec )
@@ -48,13 +48,13 @@ bool CWaterVertexSA::SetPosition ( const CVector& vec, void* pChangeSource )
 void CWaterQuadSA::SetInterface ( CWaterPolySAInterface* pInterface )
 {
     m_pInterface = pInterface;
-    m_wID = (WORD)(pInterface - g_pWaterManager->m_QuadPool);
+    m_wID = (short)(pInterface - g_pWaterManager->m_QuadPool);
 }
 
 void CWaterTriangleSA::SetInterface ( CWaterPolySAInterface* pInterface )
 {
     m_pInterface = pInterface;
-    m_wID = (WORD)(pInterface - g_pWaterManager->m_TrianglePool);
+    m_wID = (short)(pInterface - g_pWaterManager->m_TrianglePool);
 }
 
 CWaterVertex* CWaterPolySA::GetVertex ( int index )
@@ -72,7 +72,7 @@ bool CWaterPolySA::ContainsPoint ( float fX, float fY )
 {
     bool bInside = false;
     int numVertices = GetNumVertices ();
-    WORD* pwVertexIDs =
+    short* pwVertexIDs =
         GetType () == WATER_POLY_QUAD ? ((CWaterQuadSA *)this)->GetInterface ()->m_wVertexIDs
                                   : ((CWaterTriangleSA *)this)->GetInterface ()->m_wVertexIDs;
     

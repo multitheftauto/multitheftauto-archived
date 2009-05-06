@@ -26,7 +26,7 @@ enum EWaterPolyType
 class CWaterVertex
 {
 public:
-    virtual WORD                GetID             () = 0;
+    virtual short                GetID             () = 0;
     virtual void                GetPosition       ( CVector& vec ) = 0;
     virtual bool                SetPosition       ( const CVector& vec, void* pChangeSource = NULL ) = 0;
 };
@@ -35,7 +35,7 @@ class CWaterPoly
 {
 public:
     virtual EWaterPolyType      GetType           () = 0;
-    virtual WORD                GetID             () = 0;
+    virtual short                GetID             () = 0;
     virtual int                 GetNumVertices    () = 0;
     virtual CWaterVertex*       GetVertex         ( int index ) = 0;
     virtual bool                ContainsPoint     ( float fX, float fY ) = 0;

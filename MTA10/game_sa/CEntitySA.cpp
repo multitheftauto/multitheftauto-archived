@@ -37,7 +37,7 @@ void CEntitySA::SetPosition( const CVector& vecPosition )
         m_pInterface->Placeable.m_transform.m_translate = vecPosition;
     }
 
-    WORD wModelID = GetModelIndex();
+    short wModelID = GetModelIndex();
     if ( wModelID == 537 || wModelID == 538 || wModelID == 569 || wModelID == 570 || wModelID == 590 || wModelID == 449 )
     {
         // If it's a train, recalculate its rail position parameter (does not affect derailed state)
@@ -221,7 +221,7 @@ void CEntitySA::SetMatrix ( const CMatrix4& matrix )
 		m_pInterface->Placeable.m_transform.m_translate = matrix.getTranslation();
 
         /*
-        WORD wModelID = GetModelIndex();
+        short wModelID = GetModelIndex();
         if ( wModelID == 537 || wModelID == 538 || wModelID == 569 || wModelID == 570 || wModelID == 590 || wModelID == 449 )
         {
             DWORD dwThis = (DWORD) m_pInterface;
@@ -255,9 +255,9 @@ void CEntitySA::SetMatrix ( const CMatrix4& matrix )
     }
 }
 
-WORD CEntitySA::GetModelIndex ()
+short CEntitySA::GetModelIndex ()
 {
-	DEBUG_TRACE("WORD CEntitySA::GetModelIndex ()");
+	DEBUG_TRACE("short CEntitySA::GetModelIndex ()");
 	return m_pInterface->m_nModelIndex;
 }
 
@@ -267,12 +267,12 @@ eEntityType CEntitySA::GetEntityType ()
     return (eEntityType)m_pInterface->nType;
 }
 
-FLOAT CEntitySA::GetDistanceFromCentreOfMassToBaseOfModel()
+float CEntitySA::GetDistanceFromCentreOfMassToBaseOfModel()
 {
-	DEBUG_TRACE("FLOAT CEntitySA::GetDistanceFromCentreOfMassToBaseOfModel()");
+	DEBUG_TRACE("float CEntitySA::GetDistanceFromCentreOfMassToBaseOfModel()");
 	DWORD dwFunc = FUNC_GetDistanceFromCentreOfMassToBaseOfModel;
 	DWORD dwThis = (DWORD) m_pInterface;
-	FLOAT fReturn;
+	float fReturn;
 	_asm
 	{
 		mov		ecx, dwThis

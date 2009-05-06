@@ -18,7 +18,7 @@
 class CCheckpoints
 {
 public:
-	virtual CCheckpoint*	CreateCheckpoint( DWORD Identifier, WORD wType, const CVector& vecPosition, const CVector& vecPointDir, FLOAT fSize, FLOAT fPulseFraction, RGBA Color ) = 0;
+	virtual CCheckpoint*	CreateCheckpoint( DWORD Identifier, short wType, const CVector& vecPosition, const CVector& vecPointDir, float fSize, float fPulseFraction, RGBA Color ) = 0;
 	virtual CCheckpoint*	FindFreeMarker( void ) = 0;
 };
 

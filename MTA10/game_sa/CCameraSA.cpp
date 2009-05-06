@@ -213,12 +213,12 @@ void CCameraSA::SetCamPositionForFixedMode ( CVector * vecPosition, CVector * ve
 	}
 }
 
-void CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )
+void CCameraSA::Find3rdPersonCamTargetVector ( float fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )
 {
-	DEBUG_TRACE("void CCameraSA::Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )");
-	FLOAT fOriginX = vecGunMuzzle->getX();
-	FLOAT fOriginY = vecGunMuzzle->getY();
-	FLOAT fOriginZ = vecGunMuzzle->getZ();
+	DEBUG_TRACE("void CCameraSA::Find3rdPersonCamTargetVector ( float fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )");
+	float fOriginX = vecGunMuzzle->getX();
+	float fOriginY = vecGunMuzzle->getY();
+	float fOriginZ = vecGunMuzzle->getZ();
 	DWORD dwFunc = FUNC_Find3rdPersonCamTargetVector;
 	CCameraSAInterface * cameraInterface = this->GetInterface();
 	_asm

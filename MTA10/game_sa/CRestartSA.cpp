@@ -26,24 +26,24 @@ void CRestartSA::CancelOverrideRestart( void )
  * @param vecPosition CVector containing the position to restart at
  * @param fRotation Rotation in radians to face once restarted
  */
-void CRestartSA::OverrideNextRestart( const CVector& vecPosition, FLOAT fRotation )
+void CRestartSA::OverrideNextRestart( const CVector& vecPosition, float fRotation )
 {
 	CVectorGTA vec = vecPosition;
 
 	*(BYTE *)VAR_OverrideNextRestart = 1;
 	memcpy((void *)VAR_OverrideNextRestartPosition, &vec, sizeof(CVectorGTA));
-	*(FLOAT *)VAR_OverrideNextRestartRotation = fRotation;
+	*(float *)VAR_OverrideNextRestartRotation = fRotation;
 }
 
 /**
  * Find the closest police restart point to a specific point
  * @param vecClosestTo CVector containing the position you want to find the closest restart point to
  * @param vecClosestRestartPoint CVector that returns the position of the closest restart point
- * @param fRotation FLOAT that returns the rotation at which the restart point restarts the player
+ * @param fRotation float that returns the rotation at which the restart point restarts the player
  */
-void CRestartSA::FindClosestPoliceRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, FLOAT& fRotation )
+void CRestartSA::FindClosestPoliceRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, float& fRotation )
 {
-	FLOAT *rot = &fRotation;
+	float *rot = &fRotation;
 
 	DWORD dwFunction = FUNC_FindClosestPoliceRestartPoint;
 	_asm
@@ -60,9 +60,9 @@ void CRestartSA::FindClosestPoliceRestartPoint( const CVector& vecClosestTo, CVe
  * Find the closest hospital restart point to a specific point
  * @param vecClosestTo CVector containing the position you want to find the closest restart point to
  * @param vecClosestRestartPoint CVector that returns the position of the closest restart point
- * @param fRotation FLOAT that returns the rotation at which the restart point restarts the player
+ * @param fRotation float that returns the rotation at which the restart point restarts the player
  */
-void CRestartSA::FindClosestHospitalRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, FLOAT& fRotation )
+void CRestartSA::FindClosestHospitalRestartPoint( const CVector& vecClosestTo, CVector& vecClosestRestartPoint, float& fRotation )
 {
 	DWORD dwFunction = FUNC_FindClosestHospitalRestartPoint;
 	_asm
@@ -79,9 +79,9 @@ void CRestartSA::FindClosestHospitalRestartPoint( const CVector& vecClosestTo, C
  * Add a police restart point so that the player restarts here (if its their nearest restart point) when they've
  * been "busted".
  * @param vecPosition CVector containing the desired position for the restart point
- * @param fRotation FLOAT containing the desired initial rotation for the player
+ * @param fRotation float containing the desired initial rotation for the player
  */
-void CRestartSA::AddPoliceRestartPoint( const CVector& vecPosition, FLOAT fRotation )
+void CRestartSA::AddPoliceRestartPoint( const CVector& vecPosition, float fRotation )
 {
 	DWORD dwFunction = FUNC_AddPoliceRestartPoint;
 	_asm
@@ -97,9 +97,9 @@ void CRestartSA::AddPoliceRestartPoint( const CVector& vecPosition, FLOAT fRotat
  * Add a hospital restart point so that the player restarts here (if its their nearest restart point) when they've
  * been "wasted".
  * @param vecPosition CVector containing the desired position for the restart point
- * @param fRotation FLOAT containing the desired initial rotation for the player
+ * @param fRotation float containing the desired initial rotation for the player
  */
-void CRestartSA::AddHospitalRestartPoint( const CVector& vecPosition, FLOAT fRotation )
+void CRestartSA::AddHospitalRestartPoint( const CVector& vecPosition, float fRotation )
 {
 	DWORD dwFunction = FUNC_AddHospitalRestartPoint;
 	_asm

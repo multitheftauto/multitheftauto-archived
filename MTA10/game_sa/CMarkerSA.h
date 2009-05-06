@@ -32,10 +32,10 @@ public:
 	// The following parameter is used when Blip Type is COORDS	
 	CVectorGTA position;//vec2DBlip;
 
-	WORD ReferenceIndex;
+	short ReferenceIndex;
 
-	FLOAT fBlipMarkerScale;
-	WORD nBlipScale;
+	float fBlipMarkerScale;
+	short nBlipScale;
 	CEntryExit* pEntryExit;
 
 	BYTE nBlipSprite;
@@ -62,7 +62,7 @@ public:
 
 	void				SetSprite( eMarkerSprite Sprite );
 	void				SetDisplay( eMarkerDisplay wDisplay );
-	void				SetScale( WORD wScale );
+	void				SetScale( short wScale );
 	void				SetColor( eMarkerColor color );
 	void				SetColor( RGBA color );
 	void				Remove( void );

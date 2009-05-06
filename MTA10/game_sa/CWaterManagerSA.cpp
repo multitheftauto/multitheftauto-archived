@@ -16,7 +16,7 @@ using namespace std;
 
 #define POLYENTRY_TYPE(entry) ( (entry)->m_wValue >> 14 )
 #define POLYENTRY_ID(entry) ( (entry)->m_wValue & 0x3FFF )
-#define MAKE_POLYENTRY(type, id) (WORD)( ((type) << 14) | (id) )
+#define MAKE_POLYENTRY(type, id) (short)( ((type) << 14) | (id) )
 
 DWORD CWaterManagerSA::m_VertexXrefs[] = {
     0x6E5B6E, 0x6E5BC3, 0x6E5BF7, 0x6E5EA3, 0x6E5ED7, 0x6E5F84, 0x6E5F8B, 0x6E6487,
@@ -181,7 +181,7 @@ CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( CWaterPoly* pPoly )
     return AddPoly ( pPoly->GetType (), pPoly->GetID () );
 }
 
-CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( EWaterPolyType type, WORD wID )
+CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( EWaterPolyType type, short wID )
 {
     if ( m_pInterface->m_wValue == 0 )
     {
@@ -193,7 +193,7 @@ CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( EWaterPolyType type, WORD wID
         if ( *(DWORD *)VAR_NumWaterZonePolys + 3 > NUM_NewWaterZonePolys )
             return NULL;
         
-        WORD wOffset = *(WORD *)VAR_NumWaterZonePolys;
+        short wOffset = *(short *)VAR_NumWaterZonePolys;
         g_pWaterManager->m_ZonePolyPool [ wOffset ].m_wValue = MAKE_POLYENTRY ( type, wID );
         g_pWaterManager->m_ZonePolyPool [ wOffset + 1 ].m_wValue = m_pInterface->m_wValue;
         g_pWaterManager->m_ZonePolyPool [ wOffset + 2 ].m_wValue = 0;
@@ -216,7 +216,7 @@ CWaterPolyEntrySAInterface* CWaterZoneSA::AddPoly( EWaterPolyType type, WORD wID
         }
         pZoneStart->m_wValue = MAKE_POLYENTRY ( type, wID );
 
-        WORD wZoneStartOffset = pZoneStart - g_pWaterManager->m_ZonePolyPool;
+        short wZoneStartOffset = pZoneStart - g_pWaterManager->m_ZonePolyPool;
         CWaterPolyEntrySAInterface* pZoneInterface = (CWaterPolyEntrySAInterface *)ARRAY_WaterZones;
         for ( ; pZoneInterface != &((CWaterPolyEntrySAInterface *)ARRAY_WaterZones) [ NUM_WaterZones ]; pZoneInterface++ )
         {
@@ -235,7 +235,7 @@ bool CWaterZoneSA::RemovePoly( CWaterPoly* pPoly )
     return RemovePoly ( pPoly->GetType (), pPoly->GetID () );
 }
 
-bool CWaterZoneSA::RemovePoly( EWaterPolyType type, WORD wID )
+bool CWaterZoneSA::RemovePoly( EWaterPolyType type, short wID )
 {
     if ( m_pInterface->m_wValue == 0 )
     {
@@ -257,7 +257,7 @@ bool CWaterZoneSA::RemovePoly( EWaterPolyType type, WORD wID )
     {
         CWaterPolyEntrySAInterface* pEntries = (CWaterPolyEntrySAInterface *)begin ();
         CWaterPolyEntrySAInterface* pEnd = &g_pWaterManager->m_ZonePolyPool [ *(DWORD *)VAR_NumWaterZonePolys ];
-        WORD wOffset = pEntries - g_pWaterManager->m_ZonePolyPool;
+        short wOffset = pEntries - g_pWaterManager->m_ZonePolyPool;
         if ( end () - begin () == 2 )
         {
             if ( pEntries [ 0 ].m_wValue == MAKE_POLYENTRY ( type, wID ) ||
@@ -494,7 +494,7 @@ void CWaterManagerSA::GetZonesContaining( const CVector& v1, const CVector& v2, 
 
 CWaterVertex* CWaterManagerSA::CreateVertex( const CVector& vecPosition )
 {
-    WORD wID = ( (CreateWaterVertex_t) FUNC_CreateWaterVertex )( ((short)vecPosition.getX()) & ~1, ((short)vecPosition.getY()) & ~1, vecPosition.getZ(), 0.2f, 0.1f, 0 );
+    short wID = ( (CreateWaterVertex_t) FUNC_CreateWaterVertex )( ((short)vecPosition.getX()) & ~1, ((short)vecPosition.getY()) & ~1, vecPosition.getZ(), 0.2f, 0.1f, 0 );
     return &m_Vertices [ wID ];
 }
 
@@ -557,7 +557,7 @@ CWaterPoly* CWaterManagerSA::CreateQuad( const CVector& vecBL, const CVector& ve
     if ( bShallow )
         pInterface->m_wFlags |= WATER_SHALLOW;
 
-    WORD wID = (WORD)(pInterface - g_pWaterManager->m_QuadPool);
+    short wID = (short)(pInterface - g_pWaterManager->m_QuadPool);
     std::vector < CWaterZoneSA* >::iterator it;
     for ( it = zones.begin (); it != zones.end (); it++)
         (*it)->AddPoly ( WATER_POLY_QUAD, wID );
@@ -603,7 +603,7 @@ CWaterPoly* CWaterManagerSA::CreateTriangle ( const CVector& vec1, const CVector
     if ( bShallow )
         pInterface->m_wFlags |= WATER_SHALLOW;
 
-    WORD wID = (WORD)(pInterface - g_pWaterManager->m_TrianglePool);
+    short wID = (short)(pInterface - g_pWaterManager->m_TrianglePool);
     std::vector < CWaterZoneSA* >::iterator it;
     for ( it = zones.begin (); it != zones.end (); it++)
         (*it)->AddPoly ( WATER_POLY_TRIANGLE, wID );

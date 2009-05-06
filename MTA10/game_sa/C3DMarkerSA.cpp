@@ -16,112 +16,95 @@
 
 void C3DMarkerSA::SetPosition( const CVector& vecPosition )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetPosition( const CVector& vecPosition )");
     this->GetInterface()->m_mat.setTranslation( vecPosition );
 }
 
 const CVector C3DMarkerSA::GetPosition( void )
 {
-	DEBUG_TRACE("const CVector& C3DMarkerSA::GetPosition( void )");
 	return this->GetInterface()->m_mat.getTranslation();
 }
 
-DWORD C3DMarkerSA::GetType()
+DWORD C3DMarkerSA::GetType( void )
 {
-	DEBUG_TRACE("DWORD C3DMarkerSA::GetType()");
 	return this->GetInterface()->m_nType;
 }
 
-void C3DMarkerSA::SetType(DWORD dwType)
+void C3DMarkerSA::SetType( DWORD dwType )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetType(DWORD dwType)");
 	this->GetInterface()->m_nType = (unsigned short)(dwType);
 }
 
-bool C3DMarkerSA::IsActive()
+bool C3DMarkerSA::IsActive( void )
 {
-	DEBUG_TRACE("bool C3DMarkerSA::IsActive()");
 	return (bool)this->GetInterface()->m_bIsUsed;
 }
 
-DWORD C3DMarkerSA::GetIdentifier()
+DWORD C3DMarkerSA::GetIdentifier( void )
 {
-	DEBUG_TRACE("DWORD C3DMarkerSA::GetIdentifier()");
 	return this->GetInterface()->m_nIdentifier;
 }
 
-RGBA C3DMarkerSA::GetColor()
+RGBA C3DMarkerSA::GetColor( void )
 {
-	DEBUG_TRACE("RGBA C3DMarkerSA::GetColor()");
 	return this->GetInterface()->rwColour;
 }
 
-void C3DMarkerSA::SetColor(RGBA color)
+void C3DMarkerSA::SetColor( RGBA color )
 {
 	this->GetInterface()->rwColour = color;
 }
 
-void C3DMarkerSA::SetPulsePeriod(WORD wPulsePeriod)
+void C3DMarkerSA::SetPulsePeriod( short wPulsePeriod )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetPulsePeriod(WORD wPulsePeriod)");
 	this->GetInterface()->m_nPulsePeriod = wPulsePeriod;
 }
 
-void C3DMarkerSA::SetRotateRate(short RotateRate)
+void C3DMarkerSA::SetRotateRate( short RotateRate )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetRotateRate(short RotateRate)");
 	this->GetInterface()->m_nRotateRate = RotateRate;
 }
 
-FLOAT C3DMarkerSA::GetSize()
+float C3DMarkerSA::GetSize( void )
 {
-	DEBUG_TRACE("FLOAT C3DMarkerSA::GetSize()");
 	return this->GetInterface()->m_fSize;
 }
 
-void C3DMarkerSA::SetSize(FLOAT fSize)
+void C3DMarkerSA::SetSize( float fSize )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetSize(FLOAT fSize)");
 	this->GetInterface()->m_fSize = fSize;
 }
 
-FLOAT C3DMarkerSA::GetBrightness()
+float C3DMarkerSA::GetBrightness( void )
 {
-	DEBUG_TRACE("FLOAT C3DMarkerSA::GetBrightness()");
 	return this->GetInterface()->m_fBrightness;
 }
 
-void C3DMarkerSA::SetBrightness(FLOAT fBrightness)
+void C3DMarkerSA::SetBrightness( float fBrightness )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetBrightness(FLOAT fBrightness)");
 	this->GetInterface()->m_fBrightness = fBrightness;
 }
 
-void C3DMarkerSA::SetCameraRange(FLOAT fCameraRange)
+void C3DMarkerSA::SetCameraRange( float fCameraRange )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetCameraRange(FLOAT fCameraRange)");
 	this->GetInterface()->m_fCameraRange = fCameraRange;
 }
 
-void C3DMarkerSA::SetPulseFraction(FLOAT fPulseFraction)
+void C3DMarkerSA::SetPulseFraction( float fPulseFraction )
 {
-	DEBUG_TRACE("void C3DMarkerSA::SetPulseFraction(FLOAT fPulseFraction)");
 	this->GetInterface()->m_fPulseFraction = fPulseFraction;
 }
 
-FLOAT C3DMarkerSA::GetPulseFraction()
+float C3DMarkerSA::GetPulseFraction( void )
 {
-	DEBUG_TRACE("FLOAT C3DMarkerSA::GetPulseFraction()");
 	return this->GetInterface()->m_fPulseFraction;
 }
 
-void C3DMarkerSA::Disable ()
+void C3DMarkerSA::Disable( void )
 {
-	DEBUG_TRACE("void C3DMarkerSA::Disable ()");
 	this->GetInterface()->m_nIdentifier = 0;
 }
 
-void C3DMarkerSA::DeleteMarkerObject ()
+void C3DMarkerSA::DeleteMarkerObject( void )
 {
 	if ( this->GetInterface()->m_pRwObject )
 	{
@@ -141,7 +124,7 @@ void C3DMarkerSA::DeleteMarkerObject ()
 	}
 }
 
-void C3DMarkerSA::Reset()
+void C3DMarkerSA::Reset( void )
 {
 	this->internalInterface->m_mat.setTranslation( CVectorGTA::unwrap( this->internalInterface->m_lastPosition ) );
 }

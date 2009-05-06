@@ -33,16 +33,16 @@ C3DMarkersSA::~C3DMarkersSA ()
 }
 
 
-C3DMarker *	C3DMarkersSA::CreateMarker(DWORD Identifier, e3DMarkerType dwType, CVector * vecPosition, FLOAT fSize, FLOAT fPulseFraction, BYTE r, BYTE g, BYTE b, BYTE a )
+C3DMarker *	C3DMarkersSA::CreateMarker(DWORD Identifier, e3DMarkerType dwType, CVector * vecPosition, float fSize, float fPulseFraction, BYTE r, BYTE g, BYTE b, BYTE a )
 {
-	DEBUG_TRACE("C3DMarkersSA::CreateMarker(DWORD Identifier, e3DMarkerType dwType, CVector * vecPosition, FLOAT fSize, FLOAT fPulseFraction)");
+	DEBUG_TRACE("C3DMarkersSA::CreateMarker(DWORD Identifier, e3DMarkerType dwType, CVector * vecPosition, float fSize, float fPulseFraction)");
 	/*
 	static C3dMarker *PlaceMarker(unsigned int nIdentifier, unsigned short nType, 
 	CVector &vecPosition, float fSize, unsigned char r, unsigned char g, unsigned char b, unsigned char a, 
 	unsigned short nPeriod, float fPulseFrac, short nRotRate, float normalX = 0.0f, 
 	float normalY = 0.0f, float normalZ = 0.0f, bool zCheck = FALSE);
 	*/
-	WORD wType = dwType;
+	short wType = dwType;
 	dwType = (e3DMarkerType)wType;
     bool bZCheck = true;
 

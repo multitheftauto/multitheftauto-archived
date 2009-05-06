@@ -65,14 +65,14 @@ public:
 	CPedSAInterface* m_ArrestingOfficer; // actually CCopPed *        // 8
 
 	CVector2D m_vecFightMovement;        // 12
-	FLOAT	m_moveBlendRatio;        // 20
-	FLOAT	m_fSprintEnergy;        // 24
-	//FLOAT	m_fSprintControlCounter; // Removed arbitatrily to aligned next byte, should be here really
+	float	m_moveBlendRatio;        // 20
+	float	m_fSprintEnergy;        // 24
+	//float	m_fSprintControlCounter; // Removed arbitatrily to aligned next byte, should be here really
 	BYTE	m_nChosenWeapon;        // 28
 	BYTE	m_nCarDangerCounter;        // 29
 	long	m_nStandStillTimer;        // 30
 	DWORD	m_nHitAnimDelayTimer;        // 34
-	FLOAT	m_fAttackButtonCounter;        // 38
+	float	m_fAttackButtonCounter;        // 38
 	CAutomobile *m_pDangerCar;        // 42
 
 	DWORD	m_bStoppedMoving : 1;        // 46
@@ -99,7 +99,7 @@ public:
 	BYTE	m_nDrugLevel;
 	BYTE	m_nScriptLimitToGangSize;
 	
-	FLOAT 	m_fBreath;  // for holding breath (ie underwater)
+	float 	m_fBreath;  // for holding breath (ie underwater)
 
 	// once a set of melee weapon anims have been loaded and referenced for the player
 	// we need to remember what we've referenced
@@ -107,14 +107,14 @@ public:
 	// this set is for the player's extra hand combo they can learn
 	AssocGroupId m_MeleeWeaponAnimReferencedExtra;
 
-	FLOAT	m_fFPSMoveHeading;
-	FLOAT	m_fLookPitch;
-	FLOAT	m_fSkateBoardSpeed;
-	FLOAT	m_fSkateBoardLean;
+	float	m_fFPSMoveHeading;
+	float	m_fLookPitch;
+	float	m_fSkateBoardSpeed;
+	float	m_fSkateBoardLean;
 	
 	DWORD *	m_pSpecialAtomic; // was rpAtomic
-	FLOAT	m_fGunSpinSpeed;
-	FLOAT	m_fGunSpinAngle;
+	float	m_fGunSpinSpeed;
+	float	m_fGunSpinAngle;
 
 	DWORD	m_LastTimeFiring;
 	DWORD	m_nTargetBone;
@@ -124,13 +124,13 @@ public:
 	bool 	m_bPlayerSprintDisabled;
 	bool 	m_bDontAllowWeaponChange;
 	bool	m_bForceInteriorLighting;
-	WORD	m_DPadDownPressedInMilliseconds;
-	WORD	m_DPadUpPressedInMilliseconds;
+	short	m_DPadDownPressedInMilliseconds;
+	short	m_DPadUpPressedInMilliseconds;
 		
 	BYTE	m_wetness;
 	BYTE 	m_playersGangActive;
 	BYTE	m_waterCoverPerc;
-	FLOAT	m_waterHeight;
+	float	m_waterHeight;
 
 	// used for doing lock-on with HS missiles
 	DWORD	m_FireHSMissilePressedTime;
@@ -188,31 +188,31 @@ public:
 	
 	// working counters to calculate how long player managed stuff
 	DWORD		nCarTwoWheelCounter;		// how long has player's car been on two wheels
-	FLOAT		fCarTwoWheelDist;
+	float		fCarTwoWheelDist;
 	DWORD		nCarLess3WheelCounter;	// how long has player's car been on less than 3 wheels
 	DWORD		nBikeRearWheelCounter;	// how long has player's bike been on rear wheel only
-	FLOAT		fBikeRearWheelDist;
+	float		fBikeRearWheelDist;
 	DWORD		nBikeFrontWheelCounter;	// how long has player's bike been on front wheel only
-	FLOAT		fBikeFrontWheelDist;
+	float		fBikeFrontWheelDist;
 	DWORD		nTempBufferCounter;		// so wheels can leave the ground for a few frames without stopping above counters
 	// best values for the script to check - will be zero most of the time, only value
 	// when finished trick - script should retreve value then reset to zero
 	DWORD		nBestCarTwoWheelsTimeMs;
-	FLOAT		fBestCarTwoWheelsDistM;
+	float		fBestCarTwoWheelsDistM;
 	DWORD		nBestBikeWheelieTimeMs;
-	FLOAT		fBestBikeWheelieDistM;
+	float		fBestBikeWheelieDistM;
 	DWORD		nBestBikeStoppieTimeMs;
-	FLOAT		fBestBikeStoppieDistM;
+	float		fBestBikeStoppieDistM;
 
-	WORD 		CarDensityForCurrentZone;
-	FLOAT		RoadDensityAroundPlayer;	// 1.0f for an average city.
+	short 		CarDensityForCurrentZone;
+	float		RoadDensityAroundPlayer;	// 1.0f for an average city.
 
 	DWORD		TimeOfLastCarExplosionCaused;
 	long		ExplosionMultiplier;
 	long		HavocCaused;			// A counter going up when the player does bad stuff.
 	short		TimeLastEaten;          // A counter that starts at 5000, increases by 1 every minute
 
-	FLOAT		CurrentChaseValue;		// How 'ill' is the chase at the moment
+	float		CurrentChaseValue;		// How 'ill' is the chase at the moment
 	
 	// 'Special' abilities that gets awarded during the game
 	bool 		DoesNotGetTired;
@@ -228,7 +228,7 @@ public:
 	bool		bCanDoDriveBy;
 	
 	BYTE		m_nBustedAudioStatus;
-	WORD		m_nLastBustMessageNumber;
+	short		m_nLastBustMessageNumber;
 
 	CPlayerCrossHairSAInterface  CrossHair;
 

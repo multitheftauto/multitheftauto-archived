@@ -51,13 +51,13 @@ public:
 	DWORD 	m_LastTimeWantedDecreased;
 	DWORD 	m_LastTimeWantedLevelChanged;
 	DWORD	m_TimeOfParole;
-	FLOAT	m_fMultiplier;		// New crimes have their wanted level contribution multiplied by this
+	float	m_fMultiplier;		// New crimes have their wanted level contribution multiplied by this
 	BYTE	m_nCopsInPursuit;	
 	BYTE	m_nMaxCopsInPursuit;
 	BYTE	m_nMaxCopCarsInPursuit;
 
 	BYTE	m_nCopsBeatingSuspect;
-	WORD	m_nChanceOnRoadBlock;	// /127 for each new roadsegment
+	short	m_nChanceOnRoadBlock;	// /127 for each new roadsegment
 	BYTE	m_PoliceBackOff : 1;			// If this is set the police will leave player alone (for cut-scenes)
 	BYTE	m_PoliceBackOffGarage : 1;		// If this is set the police will leave player alone (for garages)
 	BYTE	m_EverybodyBackOff : 1;		// If this is set then everybody (including police) will leave the player alone (for cut-scenes)

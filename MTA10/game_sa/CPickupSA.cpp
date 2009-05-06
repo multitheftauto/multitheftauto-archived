@@ -53,12 +53,12 @@ void CPickupSA::SetType( ePickupType type )
 	this->GetInterface()->Type = type;
 }
 
-FLOAT CPickupSA::GetCurrentValue( void )
+float CPickupSA::GetCurrentValue( void )
 {
 	return this->GetInterface()->CurrentValue;
 }
 
-void CPickupSA::SetCurrentValue( FLOAT fCurrentValue )
+void CPickupSA::SetCurrentValue( float fCurrentValue )
 {
 	this->GetInterface()->CurrentValue = fCurrentValue;	
 }
@@ -68,22 +68,22 @@ void CPickupSA::SetRegenerationTime( DWORD dwTime )
 	this->GetInterface()->RegenerationTime = dwTime;
 }
 
-void CPickupSA::SetMoneyPerDay( WORD wMoneyPerDay )
+void CPickupSA::SetMoneyPerDay( short wMoneyPerDay )
 {
 	this->GetInterface()->MoneyPerDay = wMoneyPerDay;
 }
 
-WORD CPickupSA::GetMoneyPerDay( void )
+short CPickupSA::GetMoneyPerDay( void )
 {
 	return this->GetInterface()->MoneyPerDay;
 }
 
-WORD CPickupSA::GetModel( void )
+short CPickupSA::GetModel( void )
 {
 	return this->GetInterface()->MI;
 }
 
-void CPickupSA::SetModel( WORD wModelIndex )
+void CPickupSA::SetModel( short wModelIndex )
 {
 	this->GetInterface()->MI = wModelIndex;
 }

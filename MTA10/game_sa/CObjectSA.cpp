@@ -232,7 +232,7 @@ void CObjectSA::SetScale( float faScale )
 		call	dwFunc
 	}
 
-//	*(FLOAT *)(this->GetInterface() + 348) = fScale;
+//	*(float *)(this->GetInterface() + 348) = fScale;
 }
 
 void CObjectSA::SetHealth ( float fHealth )

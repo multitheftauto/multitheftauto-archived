@@ -17,7 +17,7 @@
 
 enum {
 	/*********************************
-	 ALL FLOAT VALUES TO BE ADDED HERE
+	 ALL float VALUES TO BE ADDED HERE
 	 *********************************/
 	PROGRESS_MADE = 0,
 	TOTAL_PROGRESS,
@@ -65,9 +65,9 @@ enum {
 	
 	TATTOO_BUDGET,	// 30
 	HAIRDRESSING_BUDGET,
-	NOT_USED_FLOAT_6,
+	NOT_USED_float_6,
 	PROSTITUTE_BUDGET,
-	NOT_USED_FLOAT_2,
+	NOT_USED_float_2,
 	
 	MONEY_SPENT_GAMBLING,
 	MONEY_MADE_PIMPING,
@@ -78,8 +78,8 @@ enum {
 	LARGEST_BURGLARY_SWAG, // 40
 	MONEY_MADE_BURGLARY,
 	
-	NOT_USED_FLOAT_3,
-	NOT_USED_FLOAT_4,
+	NOT_USED_float_3,
+	NOT_USED_float_4,
 	
 	longEST_TREADMILL_TIME,
 	longEST_EXCERSISE_BIKE_TIME,
@@ -133,7 +133,7 @@ enum {
 
 	GAMBLING,
 
-	MAX_FLOAT_STATS  // must be last
+	MAX_float_STATS  // must be last
 };
 
 
@@ -414,7 +414,7 @@ enum {
 	STARTED_BADLANDS,
 	STARTED_CAT2,
 	STARTED_CRASH1,	
-	MAX_INT_FLOAT_STATS,  // this must be the last
+	MAX_INT_float_STATS,  // this must be the last
 };
 
 enum {
@@ -537,8 +537,8 @@ enum {
 	MAX_REACTION_STATS
 };	
 
-#define MAX_INT_STATS (MAX_INT_FLOAT_STATS - STATS_OFFSET)
-#define MAX_STATS (MAX_INT_STATS + MAX_FLOAT_STATS)
+#define MAX_INT_STATS (MAX_INT_float_STATS - STATS_OFFSET)
+#define MAX_STATS (MAX_INT_STATS + MAX_float_STATS)
 
 class CStats
 {

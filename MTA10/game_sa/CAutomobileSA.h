@@ -62,16 +62,16 @@
 // this is collision data (confirmed)
 class CAutomobileSAUnknownInterface // 40 bytes
 {
-	FLOAT 		detachablesPosX;	// 996
-	FLOAT 		detachablesPosY;	// 1000
-	FLOAT 		detachablesPosZ;	// 1004
-	FLOAT 		Unknown187;	// 1008
-	FLOAT 		Unknown188;	// 1012
-	FLOAT 		Unknown189;	// 1016
-	FLOAT 		Unknown190;	// 1020
-	FLOAT 		Unknown191;	// 1024
+	float 		detachablesPosX;	// 996
+	float 		detachablesPosY;	// 1000
+	float 		detachablesPosZ;	// 1004
+	float 		Unknown187;	// 1008
+	float 		Unknown188;	// 1012
+	float 		Unknown189;	// 1016
+	float 		Unknown190;	// 1020
+	float 		Unknown191;	// 1024
 	DWORD 		Unknown192;	// 1028
-	FLOAT 		Unknown193;	// 1032
+	float 		Unknown193;	// 1032
 };
 
 class CAutomobileSAInterface : public CVehicleSAInterface
@@ -105,68 +105,68 @@ public:
 	CAutomobileSAUnknownInterface UnknownData2;		// 1036
 	CAutomobileSAUnknownInterface UnknownData3;		// 1076
 	CAutomobileSAUnknownInterface UnknownData4;		// 1116
-	FLOAT 		WheelPositions[4];	// 1156
-	FLOAT 		WheelRelatedUnk[4];	// 1172
-	FLOAT 		WheelongroundRelated[4];	// 1188
-	FLOAT 		Unknown215;	// 1204
-	FLOAT 		WheelsOnGround[4];	// 1208
-	FLOAT 		Unknown216;	// 1224
-	FLOAT 		Unknown217;	// 1228
-	FLOAT 		DistanceTraveledByWheel[4];	// 1232
-	FLOAT 		Unknown218;	// 1248
-	FLOAT 		Unknown219;	// 1252
-	FLOAT 		Unknown220;	// 1256
-	FLOAT 		Unknown221;	// 1260
-	FLOAT 		WheelSpeed[4];	// 1264
+	float 		WheelPositions[4];	// 1156
+	float 		WheelRelatedUnk[4];	// 1172
+	float 		WheelongroundRelated[4];	// 1188
+	float 		Unknown215;	// 1204
+	float 		WheelsOnGround[4];	// 1208
+	float 		Unknown216;	// 1224
+	float 		Unknown217;	// 1228
+	float 		DistanceTraveledByWheel[4];	// 1232
+	float 		Unknown218;	// 1248
+	float 		Unknown219;	// 1252
+	float 		Unknown220;	// 1256
+	float 		Unknown221;	// 1260
+	float 		WheelSpeed[4];	// 1264
 	BYTE 		Unknown222;	// 1280
 	BYTE 		TaxiAvaliable;	// 1281
 	BYTE 		Unknown223;	// 1282
 	BYTE 		Unknown224;	// 1283
-	WORD 		Unknown225;	// 1284
-	WORD 		VoodooSuspension;	// 1286
+	short 		Unknown225;	// 1284
+	short 		VoodooSuspension;	// 1286
 	DWORD 		Unknown;	// 1288
-	FLOAT 		Unknown226;	// 1292
-	FLOAT 		WheelOffsetZ[4];	// 1296
-	FLOAT 		WheelSuspensionStrength[4];	// 1312
-	FLOAT 		Unknown227;	// 1328
-	FLOAT 		Unknown228;	// 1332
-	FLOAT 		Unknown229;	// 1336
-	FLOAT 		Unknown230;	// 1340
-	FLOAT 		Unknown231;	// 1344
-	FLOAT 		AutomobileSpeed;	// 1348
-	FLOAT 		Unknown232;	// 1352
-	FLOAT 		Unknown233;	// 1356
-	FLOAT 		Unknown234;	// 1360
-	FLOAT 		Unknown235;	// 1364
-	FLOAT 		Unknown236;	// 1368
-	FLOAT 		Unknown237;	// 1372
-	FLOAT 		Unknown237a;	// 1376
-	FLOAT 		UnknownWheelRelated[4];	// 1380
-	FLOAT 		Unknown241;	// 1396
-	FLOAT 		Unknown242;	// 1400
-	FLOAT 		Unknown243;	// 1404
-	FLOAT 		Unknown244;	// 1408
-	FLOAT 		Unknown245;	// 1412
-	FLOAT 		Unknown246;	// 1416
-	FLOAT 		Unknown247;	// 1420
-	FLOAT 		Unknown248;	// 1424
-	FLOAT 		Unknown249;	// 1428
-	FLOAT 		Unknown250;	// 1432
-	FLOAT 		Unknown251;	// 1436
-	FLOAT 		Unknown252;	// 1440
-	FLOAT 		Unknown253;	// 1444
-	FLOAT 		Unknown254;	// 1448
-	FLOAT 		Unknown255;	// 1452
-	FLOAT 		WeaponHorizontalRotation;	// 1456
-	FLOAT 		WeaponVerticalRotation;	// 1460
-	FLOAT 		Unknown255a;	// 1464
-	FLOAT 		Unknown255b;	// 1468
-	FLOAT 		Unknown256;	// 1472
+	float 		Unknown226;	// 1292
+	float 		WheelOffsetZ[4];	// 1296
+	float 		WheelSuspensionStrength[4];	// 1312
+	float 		Unknown227;	// 1328
+	float 		Unknown228;	// 1332
+	float 		Unknown229;	// 1336
+	float 		Unknown230;	// 1340
+	float 		Unknown231;	// 1344
+	float 		AutomobileSpeed;	// 1348
+	float 		Unknown232;	// 1352
+	float 		Unknown233;	// 1356
+	float 		Unknown234;	// 1360
+	float 		Unknown235;	// 1364
+	float 		Unknown236;	// 1368
+	float 		Unknown237;	// 1372
+	float 		Unknown237a;	// 1376
+	float 		UnknownWheelRelated[4];	// 1380
+	float 		Unknown241;	// 1396
+	float 		Unknown242;	// 1400
+	float 		Unknown243;	// 1404
+	float 		Unknown244;	// 1408
+	float 		Unknown245;	// 1412
+	float 		Unknown246;	// 1416
+	float 		Unknown247;	// 1420
+	float 		Unknown248;	// 1424
+	float 		Unknown249;	// 1428
+	float 		Unknown250;	// 1432
+	float 		Unknown251;	// 1436
+	float 		Unknown252;	// 1440
+	float 		Unknown253;	// 1444
+	float 		Unknown254;	// 1448
+	float 		Unknown255;	// 1452
+	float 		WeaponHorizontalRotation;	// 1456
+	float 		WeaponVerticalRotation;	// 1460
+	float 		Unknown255a;	// 1464
+	float 		Unknown255b;	// 1468
+	float 		Unknown256;	// 1472
 	BYTE 		Unknown256a;	// 1476
 	BYTE 		Unknown257;	// 1477
 	BYTE 		Unknown258;	// 1478
 	BYTE 		DriveWheelsOnGroundLastFrame;;	// 1479
-	FLOAT 		GasPedalAudioRevs;	// 1480
+	float 		GasPedalAudioRevs;	// 1480
 	DWORD 		m_aWheelState[4];	// 1484
 };
 

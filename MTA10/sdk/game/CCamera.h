@@ -104,7 +104,7 @@ public:
 	virtual CMatrix4&					GetMatrix ( CMatrix4& matrix )=0;
 	virtual void						SetMatrix ( const CMatrix4& matrix )=0;
 	virtual void						SetCamPositionForFixedMode ( CVector * vecPosition, CVector * vecUpOffset )=0;
-	virtual void						Find3rdPersonCamTargetVector ( FLOAT fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )=0;
+	virtual void						Find3rdPersonCamTargetVector ( float fDistance, CVector * vecGunMuzzle, CVector * vecSource, CVector * vecTarget )=0;
 	virtual BYTE						GetActiveCam()=0;
 	virtual CCam						* GetCam(BYTE bCameraID)=0;
 	virtual void						SetWidescreen(bool bWidescreen)=0;

@@ -27,7 +27,7 @@
 #define FUNC_TestLineAgainstWater          0x6E61B0
 
 typedef void (__cdecl *ReadWaterConfiguration_t)();
-typedef WORD (__cdecl *CreateWaterVertex_t)(short sX, short sY, float fZ, float fUnknown, float fHeight, WORD wFlow);
+typedef short (__cdecl *CreateWaterVertex_t)(short sX, short sY, float fZ, float fUnknown, float fHeight, short wFlow);
 typedef void (__cdecl *BuildWaterIndex_t)();
 typedef bool (__cdecl *TestLineAgainstWater_t)(float fStartX, float fStartY, float fStartZ, float fEndX, float fEndY, float fEndZ, CVectorGTA* pvecCollision);
 typedef bool (__cdecl *GetWaterLevel_t)(float fX, float fY, float fZ, float* pfLevel, bool bCheckWaves, CVectorGTA* pvecUnknown);
@@ -59,7 +59,7 @@ typedef bool (__cdecl *GetWaterLevel_t)(float fX, float fY, float fZ, float* pfL
 class CWaterPolyEntrySAInterface
 {
 public:
-    WORD m_wValue;
+    short m_wValue;
 };
 
 // -------------------------------
@@ -74,9 +74,9 @@ public:
     CWaterPolyEntrySAInterface*      GetInterface      () { return m_pInterface; }
     void                             SetInterface      ( CWaterPolyEntrySAInterface* pInterface ) { m_pInterface = pInterface; }
 
-    CWaterPolyEntrySAInterface*      AddPoly           ( EWaterPolyType type, WORD wID );
+    CWaterPolyEntrySAInterface*      AddPoly           ( EWaterPolyType type, short wID );
     CWaterPolyEntrySAInterface*      AddPoly           ( CWaterPoly* pPoly );
-    bool                             RemovePoly        ( EWaterPolyType type, WORD wID );
+    bool                             RemovePoly        ( EWaterPolyType type, short wID );
     bool                             RemovePoly        ( CWaterPoly* pPoly );
 
     class iterator

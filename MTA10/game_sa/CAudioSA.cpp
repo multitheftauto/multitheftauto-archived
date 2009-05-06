@@ -111,7 +111,7 @@ void CAudioSA::PlayFrontEndSound(DWORD dwSound)
     {
 	    DEBUG_TRACE("void CAudioSA::PlayFrontEndSound(DWORD dwSound)");
 	    DWORD dwFunc = FUNC_ReportFrontendAudioEvent;
-	    FLOAT fUnknown = 1.0f;
+	    float fUnknown = 1.0f;
 	    _asm
 	    {
 		    push	fUnknown

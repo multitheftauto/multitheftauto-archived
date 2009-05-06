@@ -147,16 +147,16 @@ public:
 
     virtual CPedSAInterface*	GetPedInterface( void ) = 0;
 
-	virtual void				AttachPedToBike( CEntity* entity, const CVector& vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType ) = 0;
+	virtual void				AttachPedToBike( CEntity* entity, const CVector& vector, unsigned short sUnk, float fUnk, float fUnk2, eWeaponType weaponType ) = 0;
     virtual void				DetachPedFromEntity( void ) = 0;
 
-	virtual bool				CanSeeEntity( CEntity* entity, FLOAT fDistance ) = 0;
+	virtual bool				CanSeeEntity( CEntity* entity, float fDistance ) = 0;
 	virtual CVehicle*			GetVehicle( void ) = 0;
 	virtual void				Respawn( const CVector& position,bool bCameraCut ) = 0;
 
     virtual void				SetModelIndex( unsigned long ulModel ) = 0;
 
-	virtual FLOAT				GetHealth( void ) = 0;
+	virtual float				GetHealth( void ) = 0;
     virtual void				SetHealth( float fHealth ) = 0;
     virtual float				GetArmor( void ) = 0;
     virtual void				SetArmor( float fArmor ) = 0;
@@ -174,10 +174,10 @@ public:
     virtual DWORD*				GetMemoryValue( DWORD dwOffset ) = 0;
 
 
-	virtual FLOAT				GetCurrentRotation( void ) = 0;
-	virtual FLOAT				GetTargetRotation( void ) = 0;
-	virtual void				SetCurrentRotation( FLOAT fRotation ) = 0;
-	virtual void				SetTargetRotation( FLOAT fRotation ) = 0;
+	virtual float				GetCurrentRotation( void ) = 0;
+	virtual float				GetTargetRotation( void ) = 0;
+	virtual void				SetCurrentRotation( float fRotation ) = 0;
+	virtual void				SetTargetRotation( float fRotation ) = 0;
     virtual eWeaponSlot			GetCurrentWeaponSlot( void ) = 0;
     virtual void				SetCurrentWeaponSlot( eWeaponSlot weaponSlot ) = 0;
 

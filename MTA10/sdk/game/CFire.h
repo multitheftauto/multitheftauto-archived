@@ -37,8 +37,8 @@ public:
 	virtual void					SetSilent( bool bSilent ) = 0;
 	virtual bool					IsBeingExtinguished( void ) = 0;
 	virtual void					Ignite( void ) = 0;
-	virtual	FLOAT					GetStrength( void ) = 0;
-	virtual	void					SetStrength( FLOAT fStrength ) = 0;
+	virtual	float					GetStrength( void ) = 0;
+	virtual	void					SetStrength( float fStrength ) = 0;
     virtual	void                    SetNumGenerationsAllowed( char generations ) = 0;
     virtual CFireInterface*         GetInterface( void ) = 0;
 };

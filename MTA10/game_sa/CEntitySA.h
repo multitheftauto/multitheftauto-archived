@@ -141,13 +141,13 @@ public:
 	unsigned long bTunnelTransition : 1;		// This model should be rendered from within and outside of the tunnel
 	/********** END CFLAGS **************/
 
-	WORD 		RandomSeed; //32
-	WORD 		m_nModelIndex;//34
+	short 		RandomSeed; //32
+	short 		m_nModelIndex;//34
 	CReferences	*pReferences; //36
 	
 	DWORD		* m_pLastRenderedLink; // 	CLink<CEntity*>* m_pLastRenderedLink; +40
 	
-	WORD m_nScanCode;			// 44
+	short m_nScanCode;			// 44
 	BYTE m_iplIndex;			// used to define which IPL file object is in +46
 	BYTE m_areaCode;			// used to define what objects are visible at this point +47
 	
@@ -200,7 +200,7 @@ public:
 	void						SetUnderwater( bool bUnderwater );
 	bool						GetUnderwater( void );
 
-	WORD						GetModelIndex( void );
+	short						GetModelIndex( void );
 	eEntityType					GetEntityType( void );
 	bool						IsOnScreen( void );
 
@@ -210,7 +210,7 @@ public:
     BYTE                        GetAreaCode( void );
     void                        SetAreaCode( BYTE areaCode );
 
-	FLOAT						GetDistanceFromCentreOfMassToBaseOfModel( void );
+	float						GetDistanceFromCentreOfMassToBaseOfModel( void );
 
 	void						SetEntityStatus( eEntityStatus bStatus );	// TODO: use enum
 	eEntityStatus				GetEntityStatus( void );

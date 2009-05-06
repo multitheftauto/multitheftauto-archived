@@ -19,28 +19,28 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-//006f47e0		public: FLOAT __thiscall CDoor::GetAngleOpenRatio(void)const 
+//006f47e0		public: float __thiscall CDoor::GetAngleOpenRatio(void)const 
 #define FUNC_GetAngleOpenRatio		0x6f47e0
 //006f4800		public: bool __thiscall CDoor::IsClosed(void)const 
 #define FUNC_IsClosed				0x6f4800
 //006f4820		public: bool __thiscall CDoor::IsFullyOpen(void)const 
 #define FUNC_IsFullyOpen			0x6f4820
-//006f4790		public: void __thiscall CDoor::Open(FLOAT)
+//006f4790		public: void __thiscall CDoor::Open(float)
 #define FUNC_Open					0x6f4790
 
 class CDoorSAInterface
 {
 public:
-	FLOAT m_fOpenAngle;
-	FLOAT m_fClosedAngle;
+	float m_fOpenAngle;
+	float m_fClosedAngle;
 	// got 2 8bit vars next so might as well make this 16bit and get more flags
-	WORD m_nDirn;
+	short m_nDirn;
 	BYTE m_nAxis;
 	BYTE m_nDoorState;
 	// simulation variables
-	FLOAT m_fAngle;
-	FLOAT m_fPrevAngle;
-	FLOAT m_fAngVel;
+	float m_fAngle;
+	float m_fPrevAngle;
+	float m_fAngVel;
 };
 
 /**
@@ -55,10 +55,10 @@ public:
 	CDoorSA(CDoorSAInterface * doorInterface) { internalInterface = doorInterface; };
 
 	CDoorSAInterface	* GetInterface() { return internalInterface; };
-	FLOAT			GetAngleOpenRatio ( );
+	float			GetAngleOpenRatio ( );
 	bool			IsClosed (  );
 	bool			IsFullyOpen (  );
-	void			Open ( FLOAT fUnknown );
+	void			Open ( float fUnknown );
 	eDoorState		GetDoorState() { return (eDoorState)this->GetInterface()->m_nDoorState; };
 };
 

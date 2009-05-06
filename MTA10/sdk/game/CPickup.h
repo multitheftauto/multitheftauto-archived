@@ -28,13 +28,13 @@ public:
 	
 	virtual ePickupType			GetType( void ) = 0;
 	virtual void				SetType( ePickupType type ) = 0;
-	virtual FLOAT				GetCurrentValue( void ) = 0;
-	virtual void				SetCurrentValue( FLOAT fCurrentValue ) = 0;
+	virtual float				GetCurrentValue( void ) = 0;
+	virtual void				SetCurrentValue( float fCurrentValue ) = 0;
 	virtual void				SetRegenerationTime( DWORD dwTime ) = 0;
-	virtual void				SetMoneyPerDay( WORD wMoneyPerDay ) = 0;
-	virtual WORD				GetMoneyPerDay( void ) = 0;
-	virtual WORD				GetModel( void ) = 0;
-	virtual void				SetModel( WORD wModelIndex ) = 0;
+	virtual void				SetMoneyPerDay( short wMoneyPerDay ) = 0;
+	virtual short				GetMoneyPerDay( void ) = 0;
+	virtual short				GetModel( void ) = 0;
+	virtual void				SetModel( short wModelIndex ) = 0;
 	virtual ePickupState		GetState( void ) = 0;
 	virtual void				SetState( ePickupState bState ) = 0;
 	virtual BYTE				GetAmmo( void ) = 0;

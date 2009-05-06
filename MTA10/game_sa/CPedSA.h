@@ -333,16 +333,16 @@ public:
 
 	void				Init( void );
 	void				SetModelIndex( DWORD dwModelIndex );
-	void				AttachPedToBike( CEntity * entity, const CVector& vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType );
-	void				AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, unsigned short sDirection, FLOAT fRotationLimit, eWeaponType weaponType, bool bChangeCamera );
+	void				AttachPedToBike( CEntity * entity, const CVector& vector, unsigned short sUnk, float fUnk, float fUnk2, eWeaponType weaponType );
+	void				AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, unsigned short sDirection, float fRotationLimit, eWeaponType weaponType, bool bChangeCamera );
     void                DetachPedFromEntity( void );
 	
-	bool				CanSeeEntity( CEntity * entity, FLOAT fDistance );
+	bool				CanSeeEntity( CEntity * entity, float fDistance );
 	CVehicle*			GetVehicle( void );
 	void				Respawn( const CVector& position, bool bCameraCut );
     bool                AddProjectile( eWeaponType eWeapon, const CVector& vecOrigin, float fForce, CVector* target, CEntity * targetEntity );
 
-	FLOAT				GetHealth( void );
+	float				GetHealth( void );
     void				SetHealth( float fHealth );
 
     float               GetArmor( void );
@@ -361,10 +361,10 @@ public:
 	void				SetType( DWORD dwType );
     DWORD*				GetMemoryValue( DWORD dwOffset );
 
-	FLOAT		        GetCurrentRotation( void );
-	FLOAT		        GetTargetRotation( void );
-	void		        SetCurrentRotation( FLOAT fRotation );
-	void		        SetTargetRotation( FLOAT fRotation );
+	float		        GetCurrentRotation( void );
+	float		        GetTargetRotation( void );
+	void		        SetCurrentRotation( float fRotation );
+	void		        SetTargetRotation( float fRotation );
 
     eWeaponSlot         GetCurrentWeaponSlot( void );
     void                SetCurrentWeaponSlot( eWeaponSlot weaponSlot );

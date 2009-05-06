@@ -32,7 +32,7 @@ CCheckpointsSA::~CCheckpointsSA ( void )
 /**
  * \todo Update default color to SA's orange instead of VC's pink
  */
-CCheckpoint * CCheckpointsSA::CreateCheckpoint( DWORD Identifier, WORD wType, const CVector& vecPosition, const CVector& vecPointDir, FLOAT fSize, FLOAT fPulseFraction, RGBA Color )
+CCheckpoint * CCheckpointsSA::CreateCheckpoint( DWORD Identifier, short wType, const CVector& vecPosition, const CVector& vecPointDir, float fSize, float fPulseFraction, RGBA Color )
 {
 	CCheckpoint * Checkpoint = FindFreeMarker();
 	if(Checkpoint)

@@ -20,16 +20,16 @@ class CColPointSAInterface
 {
 public:
 	CVectorGTA Position;
-	FLOAT fUnknown1;
+	float fUnknown1;
 	CVectorGTA Normal;
-	FLOAT fUnknown2;
+	float fUnknown2;
 	BYTE bSurfaceTypeA;
 	BYTE bPieceTypeA;
 	BYTE bLightingA;
 	BYTE bSurfaceTypeB;
 	BYTE bPieceTypeB;
 	BYTE bLightingB;
-	FLOAT fDepth;
+	float fDepth;
 /*
 	+0 Position (12 Bytes  Vector)
 	+12?
@@ -76,8 +76,8 @@ public:
 	void SetLightingA(BYTE bLighting) { this->GetInterface()->bLightingA = bLighting; };
 	void SetLightingB(BYTE bLighting) { this->GetInterface()->bLightingB = bLighting; };
 
-	FLOAT GetDepth() { return this->GetInterface()->fDepth; };
-	void SetDepth(FLOAT fDepth) { this->GetInterface()->fDepth = fDepth; };
+	float GetDepth() { return this->GetInterface()->fDepth; };
+	void SetDepth(float fDepth) { this->GetInterface()->fDepth = fDepth; };
 
 	void Destroy() { if ( this->internalInterface ) delete this->internalInterface; delete this; }
 };

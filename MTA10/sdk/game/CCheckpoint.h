@@ -45,12 +45,12 @@ public:
 	virtual DWORD			GetIdentifier( void ) = 0;
 	virtual RGBA			GetColor( void ) = 0;
 	virtual void			SetColor( RGBA color ) = 0;
-	virtual void			SetPulsePeriod( WORD wPulsePeriod ) = 0;
+	virtual void			SetPulsePeriod( short wPulsePeriod ) = 0;
 	virtual void			SetRotateRate( short RotateRate ) = 0;
-	virtual FLOAT			GetSize( void ) = 0;
-	virtual void			SetSize( FLOAT fSize ) = 0;
-	virtual void			SetCameraRange( FLOAT fCameraRange ) = 0;
-	virtual FLOAT			GetPulseFraction( void ) = 0;
+	virtual float			GetSize( void ) = 0;
+	virtual void			SetSize( float fSize ) = 0;
+	virtual void			SetCameraRange( float fCameraRange ) = 0;
+	virtual float			GetPulseFraction( void ) = 0;
 	virtual void			Remove( void ) = 0;
 };
 

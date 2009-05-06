@@ -42,9 +42,9 @@ public:
 	CControllerState	PCTempMouseState;
 	//264
 	BYTE				Phase;		// needed for switching into right state (analogue, pressure sensitive etc)
-	WORD				Mode;		// Configuration of keys as selected by the player
+	short				Mode;		// Configuration of keys as selected by the player
 	signed short		ShakeDur;	// How long will shake go on for (in msecs)
-	WORD				DisablePlayerControls;		// If TRUE then the player cannot move, shoot, etc.
+	short				DisablePlayerControls;		// If TRUE then the player cannot move, shoot, etc.
 	BYTE				ShakeFreq;	// What is the frequency of the shake
 	bool				bHornHistory[MAX_HORN_HISTORY]; // Store last 4 states of the horn key TRUE on else FALSE
 	BYTE				iCurrHornHistory;				// Where to store new history value

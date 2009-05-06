@@ -244,7 +244,7 @@ BYTE CWorldSA::GetLevelFromPosition( const CVector& vecPosition )
 float CWorldSA::FindGroundZForPosition( float fX, float fY )
 {
 	DWORD dwFunc = FUNC_FindGroundZFor3DCoord;
-	FLOAT fReturn = 0;
+	float fReturn = 0;
 	_asm
 	{
 		push	fY
@@ -259,10 +259,10 @@ float CWorldSA::FindGroundZForPosition( float fX, float fY )
 float CWorldSA::FindGroundZFor3DPosition( const CVector& vecPosition )
 {
 	DWORD dwFunc = FUNC_FindGroundZFor3DCoord;
-	FLOAT fReturn = 0;
-	FLOAT fX = vecPosition.getX();
-	FLOAT fY = vecPosition.getY();
-	FLOAT fZ = vecPosition.getZ();
+	float fReturn = 0;
+	float fX = vecPosition.getX();
+	float fY = vecPosition.getY();
+	float fZ = vecPosition.getZ();
 	_asm
 	{
 		push	0
@@ -277,7 +277,7 @@ float CWorldSA::FindGroundZFor3DPosition( const CVector& vecPosition )
 	return fReturn;
 }
 
-void CWorldSA::LoadMapAroundPoint( const CVector& vecPosition, FLOAT fRadius )
+void CWorldSA::LoadMapAroundPoint( const CVector& vecPosition, float fRadius )
 {
 	CVectorGTA vec = vecPosition;
 

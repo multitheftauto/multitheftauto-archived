@@ -21,7 +21,7 @@ class CExplosionManager
 {
 public:
 	virtual CExplosion*	AddExplosion( eExplosionType explosiontype, const CVector& vecPosition, CEntity* creator = NULL, bool bMakeSound = true, float fCamShake = -1.0f, bool bNoDamage = false )=0;
-	virtual void		RemoveAllExplosionsInArea( const CVector& vecPosition, FLOAT fRadius ) = 0;
+	virtual void		RemoveAllExplosionsInArea( const CVector& vecPosition, float fRadius ) = 0;
 	virtual void		RemoveAllExplosions( void ) = 0;
 	virtual CExplosion*	GetExplosion( DWORD ID ) = 0;
 	virtual CExplosion*	FindFreeExplosion( void ) = 0;

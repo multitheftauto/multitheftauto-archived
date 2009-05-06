@@ -56,7 +56,7 @@ void CMarkerSA::SetDisplay( eMarkerDisplay wDisplay )
  * Set the size of the sprite
  * @param wScale the relative size of the sprite. 1 is default.
  */
-void CMarkerSA::SetScale( WORD wScale = MARKER_SCALE_NORMAL)
+void CMarkerSA::SetScale( short wScale = MARKER_SCALE_NORMAL)
 {
 	internalInterface->nBlipScale = wScale;
 	internalInterface->fBlipMarkerScale = 20.0f;

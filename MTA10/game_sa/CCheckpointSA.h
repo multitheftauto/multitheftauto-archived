@@ -19,19 +19,19 @@
 class CCheckpointSAInterface
 {
 public:
-	WORD		m_nType;
+	short		m_nType;
 	bool		m_bIsUsed;
 	bool		m_rotFlag;
 	DWORD		m_nIdentifier;
 	RGBA		rwColour;
-	WORD 		m_nPulsePeriod;
+	short 		m_nPulsePeriod;
 	short		m_nRotateRate;	// deg per frame (in either direction)
 	CVectorGTA	m_pos;
 	CVectorGTA	m_pointDir;
-	FLOAT 		m_fPulseFraction;
-	FLOAT 		m_fSize;
-	FLOAT 		m_fCameraRange;
-	FLOAT		m_multiSize;	
+	float 		m_fPulseFraction;
+	float 		m_fSize;
+	float 		m_fCameraRange;
+	float		m_multiSize;	
 };
 
 class CCheckpointSA : public CCheckpoint
@@ -50,20 +50,20 @@ public:
 	void			SetPointDirection( const CVector& vecPointDirection );
 	const CVector	GetPointDirection( void );
 	DWORD			GetType( void ); // TODO: use enum
-	void			SetType( WORD wType ); // TODO: doesn't work properly (not virtual)
+	void			SetType( short wType ); // TODO: doesn't work properly (not virtual)
 	bool			IsActive( void );
 	void			Activate( void );
 	DWORD			GetIdentifier( void );
 	void			SetIdentifier( DWORD dwIdentifier );
 	RGBA			GetColor( void );
 	void			SetColor( RGBA color );
-	void			SetPulsePeriod( WORD wPulsePeriod );
+	void			SetPulsePeriod( short wPulsePeriod );
 	void			SetRotateRate( short RotateRate );
-	FLOAT			GetSize( void );
-	void			SetSize( FLOAT fSize );
-	void			SetCameraRange( FLOAT fCameraRange );
-	void			SetPulseFraction( FLOAT fPulseFraction ); // TODO: doesn't work properly (not virtual)
-	FLOAT			GetPulseFraction( void );
+	float			GetSize( void );
+	void			SetSize( float fSize );
+	void			SetCameraRange( float fCameraRange );
+	void			SetPulseFraction( float fPulseFraction ); // TODO: doesn't work properly (not virtual)
+	float			GetPulseFraction( void );
 	void			Remove( void );
 };
 

@@ -53,9 +53,9 @@ CExplosion* CExplosionManagerSA::AddExplosion ( eExplosionType explosiontype, co
 	unsigned char bMakeSound = true, float fCamShake=-1.0f, unsigned char noDamage=false);
 	*/
 
-	FLOAT fX = vecPosition.getX();
-	FLOAT fY = vecPosition.getY();
-	FLOAT fZ = vecPosition.getZ();
+	float fX = vecPosition.getX();
+	float fY = vecPosition.getY();
+	float fZ = vecPosition.getZ();
 
 	_asm
 	{
@@ -92,13 +92,13 @@ returnhere:
 /**
  * \todo Need to simulate this manually (loop and IsNear...)
  */
-void CExplosionManagerSA::RemoveAllExplosionsInArea( const CVector& vecPosition, FLOAT fRadius )
+void CExplosionManagerSA::RemoveAllExplosionsInArea( const CVector& vecPosition, float fRadius )
 {
 /*	DWORD dwFunction = FUNC_RemoveAllExplosionsInArea;
 	CVector * vecPos = (CVector *)vecPosition;
-	FLOAT fX = vecPos->getX();
-	FLOAT fY = vecPos->getY();
-	FLOAT fZ = vecPos->getZ();
+	float fX = vecPos->getX();
+	float fY = vecPos->getY();
+	float fZ = vecPos->getZ();
 	
 	_asm
 	{

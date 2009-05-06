@@ -25,13 +25,13 @@ public:
 	CVectorGTA	Coordinates;			// Where is it exactly.
 	DWORD		Identifier;				// Should be unique for each corona. Address or something (0 = empty)
 	RwTexture	* pTex;					// Pointer to the actual texture to be rendered
-	FLOAT		Size;					// How big is this fellow
-	FLOAT 		NormalAngle;			// Is corona normal (if relevant) facing the camera?
-	FLOAT		Range;					// How far away is this guy still visible
-	FLOAT		PullTowardsCam;			// How far away is the z value pulled towards camera.
-	FLOAT		HeightAboveGround;		// Stired so that we don't have to do a ProcessVerticalLine every frame
+	float		Size;					// How big is this fellow
+	float 		NormalAngle;			// Is corona normal (if relevant) facing the camera?
+	float		Range;					// How far away is this guy still visible
+	float		PullTowardsCam;			// How far away is the z value pulled towards camera.
+	float		HeightAboveGround;		// Stired so that we don't have to do a ProcessVerticalLine every frame
 										// The following fields are used for trails behind coronas (glowy lights)
-	FLOAT		FadeSpeed;				// The speed the corona fades in and out ##SA##
+	float		FadeSpeed;				// The speed the corona fades in and out ##SA##
 	BYTE		Red, Green, Blue;		// Rendering colour.
 	BYTE		Intensity;				// 255 = full
 	BYTE		FadedIntensity;			// Intensity that lags behind the given intenisty and fades out if the LOS is blocked
@@ -62,14 +62,14 @@ public:
 	const CVector	GetPosition( void );
 	void			SetPosition( const CVector& vector );
 
-	FLOAT			GetSize( void );
-	void			SetSize( FLOAT fSize );
+	float			GetSize( void );
+	void			SetSize( float fSize );
 
-	FLOAT			GetRange( void );
-	void			SetRange( FLOAT fRange );
+	float			GetRange( void );
+	void			SetRange( float fRange );
 
-	FLOAT			GetPullTowardsCamera( void );
-	void			SetPullTowardsCamera( FLOAT fPullTowardsCamera );
+	float			GetPullTowardsCamera( void );
+	void			SetPullTowardsCamera( float fPullTowardsCamera );
 
 	void			SetColor( BYTE Red, BYTE Green, BYTE Blue, BYTE Alpha );
 	void			SetTexture( RwTexture * texture );

@@ -28,7 +28,7 @@ class CMarker
 public:
 	virtual void			SetSprite( eMarkerSprite Sprite ) = 0;
 	virtual void			SetDisplay( eMarkerDisplay wDisplay ) = 0;
-	virtual void			SetScale( WORD wScale ) = 0;
+	virtual void			SetScale( short wScale ) = 0;
 
 	virtual void			SetColor( eMarkerColor color ) = 0;
 	virtual void			SetColor( RGBA color ) = 0;

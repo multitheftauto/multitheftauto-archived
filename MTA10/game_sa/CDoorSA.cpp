@@ -14,14 +14,14 @@
 
 /**
  * \todo Find out what GetAngleOpenRatio actually does
- * @return FLOAT Not sure...
+ * @return float Not sure...
  */
-FLOAT CDoorSA::GetAngleOpenRatio ( )
+float CDoorSA::GetAngleOpenRatio ( )
 {
-	DEBUG_TRACE("FLOAT CDoorSA::GetAngleOpenRatio ( )");
+	DEBUG_TRACE("float CDoorSA::GetAngleOpenRatio ( )");
 	DWORD dwFunction = FUNC_GetAngleOpenRatio;
 	DWORD dwPointer = (DWORD)this;
-	FLOAT fReturn = 0.0f;
+	float fReturn = 0.0f;
 	_asm
 	{
 		mov		ecx, dwPointer

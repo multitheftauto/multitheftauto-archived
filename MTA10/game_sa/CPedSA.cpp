@@ -102,16 +102,16 @@ bool CPedSA::IsInWater( void )
 	return ( pTask && ( pTask->GetTaskType () == TASK_COMPLEX_IN_WATER ) );
 }
 
-void CPedSA::AttachPedToBike( CEntity* entity, const CVector& vector, unsigned short sUnk, FLOAT fUnk, FLOAT fUnk2, eWeaponType weaponType )
+void CPedSA::AttachPedToBike( CEntity* entity, const CVector& vector, unsigned short sUnk, float fUnk, float fUnk2, eWeaponType weaponType )
 {
     CEntitySA* pEntitySA = dynamic_cast < CEntitySA* > ( entity );
 	if ( !pEntitySA ) return;
 
 	DWORD dwEntityInterface = (DWORD)pEntitySA->GetInterface();
 	DWORD dwFunc = FUNC_AttachPedToBike;
-	FLOAT fX = vector.getX();
-	FLOAT fY = vector.getY();
-	FLOAT fZ = vector.getZ();
+	float fX = vector.getX();
+	float fY = vector.getY();
+	float fZ = vector.getZ();
     DWORD dwThis = (DWORD)this->GetInterface();
 	_asm
 	{
@@ -150,14 +150,14 @@ bool CPedSA::InternalAttachEntityToEntity( DWORD dwEntityInterface, const CVecto
     return true;
 }
 
-void CPedSA::AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, unsigned short sDirection, FLOAT fRotationLimit, eWeaponType weaponType, bool bChangeCamera )
+void CPedSA::AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, unsigned short sDirection, float fRotationLimit, eWeaponType weaponType, bool bChangeCamera )
 {
     // sDirection and fRotationLimit only apply to first-person shooting (bChangeCamera)
 	DWORD dwFunc = FUNC_AttachPedToEntity;
     DWORD dwThis = (DWORD)this->GetInterface();
-	FLOAT fX = vector.getX();
-	FLOAT fY = vector.getY();
-	FLOAT fZ = vector.getZ();
+	float fX = vector.getX();
+	float fY = vector.getY();
+	float fZ = vector.getZ();
 	BYTE bPedType = ((CPedSAInterface*)GetInterface())->bPedType;
 
 	// Hack the CPed type(?) to non-player so the camera doesn't get changed
@@ -183,7 +183,7 @@ void CPedSA::AttachPedToEntity( DWORD dwEntityInterface, const CVector& vector, 
 		((CPedSAInterface*)GetInterface())->bPedType = bPedType;
 }
 
-bool CPedSA::CanSeeEntity( CEntity* entity, FLOAT fDistance )
+bool CPedSA::CanSeeEntity( CEntity* entity, float fDistance )
 {
 	DWORD dwFunc = FUNC_CanSeeEntity;
 	bool bReturn = false;
@@ -225,10 +225,10 @@ void CPedSA::Respawn( const CVector& position, bool bCameraCut )
         memset( (void*)0x4422EA, 0x90, 20 );
     }
 
-	FLOAT fX = position.getX();
-	FLOAT fY = position.getY();
-	FLOAT fZ = position.getZ();
-	FLOAT fUnk = 1.0f; 
+	float fX = position.getX();
+	float fY = position.getY();
+	float fZ = position.getZ();
+	float fUnk = 1.0f; 
 	DWORD dwFunc = FUNC_RestorePlayerStuffDuringResurrection;
 	DWORD dwThis = (DWORD)this->GetInterface();
 	_asm
@@ -268,7 +268,7 @@ void CPedSA::Respawn( const CVector& position, bool bCameraCut )
     //OutputDebugString ( "Respawn!!!!" );
 }
 
-FLOAT CPedSA::GetHealth( void )
+float CPedSA::GetHealth( void )
 {
 	return GetPedInterface()->fHealth;
 }
@@ -430,17 +430,17 @@ void CPedSA::ClearWeapons ( void )
     }
 }
 
-FLOAT CPedSA::GetCurrentRotation()
+float CPedSA::GetCurrentRotation()
 {
 	return GetPedInterface ()->fCurrentRotation;
 }
 
-FLOAT CPedSA::GetTargetRotation()
+float CPedSA::GetTargetRotation()
 {
 	return GetPedInterface ()->fTargetRotation;
 }
 
-void CPedSA::SetCurrentRotation(FLOAT fRotation)
+void CPedSA::SetCurrentRotation(float fRotation)
 {
 	GetPedInterface ()->fCurrentRotation = fRotation;
 	
@@ -449,7 +449,7 @@ void CPedSA::SetCurrentRotation(FLOAT fRotation)
 //	OutputDebugString(szDebug);
 }
 
-void CPedSA::SetTargetRotation(FLOAT fRotation)
+void CPedSA::SetTargetRotation(float fRotation)
 {
 	GetPedInterface ()->fTargetRotation = fRotation;
 }
@@ -885,7 +885,7 @@ bool CPedSA::CanPedReturnToState (  )
 	return bReturn;
 }*/
 /*
-bool CPedSA::CanSeeEntity ( CEntity * entity, FLOAT fUnknown )
+bool CPedSA::CanSeeEntity ( CEntity * entity, float fUnknown )
 {
 	DWORD dwFunction = FUNC_CanSeeEntity;
 	DWORD dwThis = (DWORD)this->GetInterface();
@@ -1141,7 +1141,7 @@ void CPedSA::SetDead (  )
 	}
 }
 
-void CPedSA::SetDie ( DWORD AnimationID, FLOAT fUnknown1, FLOAT fUnknown2 )
+void CPedSA::SetDie ( DWORD AnimationID, float fUnknown1, float fUnknown2 )
 {
 	DWORD dwFunction = FUNC_SetDie;
 	DWORD dwThis = (DWORD)this->GetInterface();
@@ -1366,7 +1366,7 @@ void CPedSA::SetObjective ( eObjective  objective, CVector * vecPoint )
 {
 	DWORD dwFunction = FUNC_SetObjective_VECTOR;
 	DWORD dwThis = (DWORD)this->GetInterface();
-	FLOAT fx, fy, fz;
+	float fx, fy, fz;
 	fx = ((CVector *)vecPoint)->getX();
 	fy = ((CVector *)vecPoint)->getY();
 	fz = ((CVector *)vecPoint)->getZ();
@@ -1454,7 +1454,7 @@ void CPedSA::Teleport ( CVector * vecPoint )
 {
 	DWORD dwFunction = FUNC_Teleport;
 	DWORD dwThis = (DWORD)this->GetInterface();
-	FLOAT fx, fy, fz;
+	float fx, fy, fz;
 	fx = ((CVector *)vecPoint)->getX();
 	fy = ((CVector *)vecPoint)->getY();
 	fz = ((CVector *)vecPoint)->getZ();
@@ -1520,13 +1520,13 @@ void CPedSA::WarpPedIntoCar ( CVehicle * vehicle )
 	}
 }
 
-FLOAT CPedSA::GetHealth ( )
+float CPedSA::GetHealth ( )
 {
 	CPedSAInterface * ped = (CPedSAInterface *)this->GetInterface();
 	return ped->Health;
 }
 
-void CPedSA::SetHealth ( FLOAT fHealth )
+void CPedSA::SetHealth ( float fHealth )
 {
 	CPedSAInterface * ped = (CPedSAInterface *)this->GetInterface();
 	ped->Health = fHealth;

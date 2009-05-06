@@ -26,26 +26,26 @@ public:
     float m_fHeight;
     char m_cFlowX;
     char m_cFlowY;
-    WORD m_wPadding;   
+    short m_wPadding;   
 };
 
 class CWaterPolySAInterface
 {
 public:
-    WORD m_wVertexIDs[3];
+    short m_wVertexIDs[3];
 };
 
 class CWaterQuadSAInterface : public CWaterPolySAInterface
 {
 public:
-    WORD m_wFourthVertexIDDummy;
-    WORD m_wFlags;
+    short m_wFourthVertexIDDummy;
+    short m_wFlags;
 };
 
 class CWaterTriangleSAInterface : public CWaterPolySAInterface
 {
 public:
-    WORD m_wFlags;
+    short m_wFlags;
 };
 
 // -------------------------------
@@ -60,7 +60,7 @@ public:
     CWaterVertexSAInterface*         GetInterface      () { return m_pInterface; }
     void                             SetInterface      ( CWaterVertexSAInterface* pInterface ) { m_pInterface = pInterface; }
 
-    WORD                             GetID             ();
+    short                             GetID             ();
 
     void                             GetPosition       ( CVector& vec );
     bool                             SetPosition       ( const CVector& vec, void* pChangeSource = NULL );
@@ -77,13 +77,13 @@ public:
 
     virtual EWaterPolyType           GetType           () = 0;
     virtual int                      GetNumVertices    () = 0;
-    WORD                             GetID             () { return m_wID; }
+    short                             GetID             () { return m_wID; }
     CWaterVertex*                    GetVertex         ( int index );
     bool                             ContainsPoint     ( float fX, float fY );
 
 protected:
     CWaterPolySAInterface*           m_pInterface;
-    WORD                             m_wID;
+    short                             m_wID;
 };
 
 class CWaterQuadSA : public CWaterPolySA

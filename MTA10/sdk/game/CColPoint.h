@@ -49,8 +49,8 @@ public:
 	virtual void					SetLightingA( BYTE bLighting ) = 0;
 	virtual void					SetLightingB( BYTE bLighting ) = 0;
 
-	virtual FLOAT					GetDepth( void ) = 0;
-	virtual void					SetDepth( FLOAT fDepth ) = 0;
+	virtual float					GetDepth( void ) = 0;
+	virtual void					SetDepth( float fDepth ) = 0;
 
 	virtual void					Destroy( void ) = 0;
 };
