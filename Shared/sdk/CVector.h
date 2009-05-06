@@ -23,6 +23,7 @@
 #include <vectormath/cpp/vectormath_aos.h>
 typedef Vectormath::Aos::Vector3	CVector3;
 typedef Vectormath::Aos::Vector4	CVector4;
+typedef Vectormath::Aos::Point3		CPoint;
 
 typedef CVector3 CVector;
 
