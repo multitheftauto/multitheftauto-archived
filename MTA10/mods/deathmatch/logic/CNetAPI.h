@@ -26,6 +26,7 @@ class CNetAPI;
 #include "CClientCommon.h"
 #include "CClientManager.h"
 #include "CInterpolator.h"
+#include "CRotationInterpolator.h"
 #include "CBitStream.h"
 #include <ctime>
 

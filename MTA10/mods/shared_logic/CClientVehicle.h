@@ -326,12 +326,12 @@ public:
 
     // Time dependent interpolation
     inline void                 GetTargetPosition       ( CVector& vecPosition )            { vecPosition = m_interp.pos.vecTarget; }
-    void                        SetTargetPosition       ( CVector& vecPosition, unsigned long ulDelay, bool bExtrapolateAfterInterpolation = true );
+    void                        SetTargetPosition       ( CVector& vecPosition, unsigned long ulDelay, unsigned long ulPeerDelay = 0 );
     void                        RemoveTargetPosition    ( void );
     inline bool                 HasTargetPosition       ( void )                            { return ( m_interp.pos.ulFinishTime != 0 ); }
 
     inline void                 GetTargetRotation       ( CVector& vecRotation )            { vecRotation = m_interp.rot.vecTarget; }
-    void                        SetTargetRotation       ( CVector& vecRotation, unsigned long ulDelay, bool bExtrapolateAfterInterpolation = true );
+    void                        SetTargetRotation       ( CVector& vecRotation, unsigned long ulDelay, unsigned long ulPeerDelay = 0 );
     void                        RemoveTargetRotation    ( void );
     inline bool                 HasTargetRotation       ( void )                            { return ( m_interp.rot.ulFinishTime != 0 ); }
 
@@ -466,26 +466,35 @@ protected:
     bool                        m_bTrainDirection;
     float                       m_fTrainSpeed;
 
-    // Time dependent interpolation
+    // Time dependent error compensation interpolation
     struct
     {
         struct
         {
-            CVector vecOrigin;
-            CVector vecTarget;
-            unsigned long ulStartTime;
-            unsigned long ulFinishTime;
-            bool bExtrapolateAfterInterpolation;
+            CInterpolator < CVector, 1024 > localInterpolator;
+#ifdef MTA_DEBUG
+            CVector         vecOrigin;
+            CVector         vecTarget;
+#endif
+            CVector         vecError;
+            CVector         vecUnappliedError;
+            float           fLastAlpha;
+            unsigned long   ulStartTime;
+            unsigned long   ulFinishTime;
         } pos;
 
         struct
         {
-            CVector vecOrigin;
-            CVector vecTarget;
-            CVector vecOffset;
-            unsigned long ulStartTime;
-            unsigned long ulFinishTime;
-            bool bExtrapolateAfterInterpolation;
+            CRotationInterpolator < 1024 > localInterpolator;
+#ifdef MTA_DEBUG
+            CVector         vecOrigin;
+            CVector         vecTarget;
+#endif
+            CVector         vecError;
+            CVector         vecUnappliedError;
+            float           fLastAlpha;
+            unsigned long   ulStartTime;
+            unsigned long   ulFinishTime;
         } rot;
     } m_interp;
 

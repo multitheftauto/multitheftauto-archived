@@ -1849,10 +1849,21 @@ void CClientVehicle::StreamedInPulse ( void )
         }
         */
 
+        // Save the locally known position and rotation for error-compensated interpolation
+        unsigned long ulTime = CClientTime::GetTime ();
+
+        CVector vecPosition = *m_pVehicle->GetPosition ();
+        m_interp.pos.localInterpolator.Push ( vecPosition + m_interp.pos.vecUnappliedError, ulTime );
+
+        CVector vecRotationDegrees;
+        GetRotationDegrees ( vecRotationDegrees );
+        m_interp.rot.localInterpolator.Push ( vecRotationDegrees + m_interp.rot.vecUnappliedError, ulTime );
+
+        // Interpolate
         Interpolate ();
 
         // Grab our current position
-        CVector vecPosition = *m_pVehicle->GetPosition ();
+        vecPosition = *m_pVehicle->GetPosition ();
 
         if ( m_pAttachedToEntity )
         {
@@ -2173,6 +2184,10 @@ void CClientVehicle::Create ( void )
 
         // Tell the streamer we've created this object
         NotifyCreate ();
+
+        // Clear the interpolators
+        m_interp.pos.localInterpolator.Clear ();
+        m_interp.rot.localInterpolator.Clear ();
     }
 }
 
@@ -2787,29 +2802,39 @@ void CClientVehicle::GetInitialDoorStates ( unsigned char * pucDoorStates )
 }
 
 
-void CClientVehicle::SetTargetPosition ( CVector& vecPosition, unsigned long ulDelay, bool bExtrapolateAfterInterpolation )
+void CClientVehicle::SetTargetPosition ( CVector& vecPosition, unsigned long ulDelay, unsigned long ulPeerDelay )
 {   
     // Are we streamed in?
-    if ( m_pVehicle )
+    if ( m_pVehicle && false )
     {
         UpdateTargetPosition ();
-#if 0
-        if ( HasTargetPosition () )
+
+        unsigned long ulTime = CClientTime::GetTime ();
+        CVector vecLocalPosition;
+
+        if ( ! m_interp.pos.localInterpolator.Evaluate ( ulTime - ulPeerDelay, &vecLocalPosition ) )
         {
-            // We didn't have enough time to finish the interpolation,
-            // so we move the vehicle directly there and start from it.
-            SetPosition ( m_interp.pos.vecTarget, false );
-            m_interp.pos.vecOrigin = m_interp.pos.vecTarget;
+            // If we don't have yet any vehicle data, don't interpolate and jump straight
+            // to the target position.
+            SetPosition ( vecPosition );
         }
         else
+        {
+#ifdef MTA_DEBUG
+            m_interp.pos.vecOrigin = vecLocalPosition;
+            m_interp.pos.vecTarget = vecPosition;
 #endif
-            GetPosition ( m_interp.pos.vecOrigin );
-        m_interp.pos.vecTarget = vecPosition;
+            // Calculate the relative error
+            m_interp.pos.vecError = vecPosition - vecLocalPosition;
+            m_interp.pos.vecUnappliedError = m_interp.pos.vecError;
 
-       unsigned long ulTime = CClientTime::GetTime ();
-        m_interp.pos.ulStartTime = ulTime;
-        m_interp.pos.ulFinishTime = ulTime + ulDelay;
-        m_interp.pos.bExtrapolateAfterInterpolation = bExtrapolateAfterInterpolation;
+            // Get the interpolation interval
+            m_interp.pos.ulStartTime = ulTime;
+            m_interp.pos.ulFinishTime = ulTime + ulDelay;
+
+            // Initialize the interpolation
+            m_interp.pos.fLastAlpha = 0.0f;
+        }
     }
     else
     {
@@ -2825,25 +2850,41 @@ void CClientVehicle::RemoveTargetPosition ( void )
 }
 
 
-void CClientVehicle::SetTargetRotation ( CVector& vecRotation, unsigned long ulDelay, bool bExtrapolateAfterInterpolation )
+void CClientVehicle::SetTargetRotation ( CVector& vecRotation, unsigned long ulDelay, unsigned long ulPeerDelay )
 {
     // Are we streamed in?
     if ( m_pVehicle )
     {
         UpdateTargetRotation ();
 
-        GetRotationDegrees ( m_interp.rot.vecOrigin );
-        m_interp.rot.vecTarget = vecRotation;
-
-        // Pre-calculate offsets
-        m_interp.rot.vecOffset.fX = GetOffsetDegrees ( m_interp.rot.vecOrigin.fX, m_interp.rot.vecTarget.fX );
-        m_interp.rot.vecOffset.fY = GetOffsetDegrees ( m_interp.rot.vecOrigin.fY, m_interp.rot.vecTarget.fY );
-        m_interp.rot.vecOffset.fZ = GetOffsetDegrees ( m_interp.rot.vecOrigin.fZ, m_interp.rot.vecTarget.fZ );
-
         unsigned long ulTime = CClientTime::GetTime ();
-        m_interp.rot.ulStartTime = ulTime;
-        m_interp.rot.ulFinishTime = ulTime + ulDelay;
-        m_interp.rot.bExtrapolateAfterInterpolation = bExtrapolateAfterInterpolation;
+        CVector vecLocalRotation;
+
+        if ( ! m_interp.rot.localInterpolator.Evaluate ( ulTime - ulPeerDelay, &vecLocalRotation ) )
+        {
+            // If we don't have yet any vehicle data, don't interpolate and jump straight
+            // to the target position.
+            SetRotationDegrees ( vecRotation );
+        }
+        else
+        {
+#ifdef MTA_DEBUG
+            m_interp.rot.vecOrigin = vecLocalRotation;
+            m_interp.rot.vecTarget = vecRotation;
+#endif
+            // Get the error
+            m_interp.rot.vecError.fX = GetOffsetDegrees ( vecLocalRotation.fX, vecRotation.fX );
+            m_interp.rot.vecError.fY = GetOffsetDegrees ( vecLocalRotation.fY, vecRotation.fY );
+            m_interp.rot.vecError.fZ = GetOffsetDegrees ( vecLocalRotation.fZ, vecRotation.fZ );
+            m_interp.rot.vecUnappliedError = m_interp.rot.vecError;
+        
+            // Get the interpolation interval
+            m_interp.rot.ulStartTime = ulTime;
+            m_interp.rot.ulFinishTime = ulTime + ulDelay;
+
+            // Initialize the interpolation
+            m_interp.rot.fLastAlpha = 0.0f;
+        }
     }
     else
     {
@@ -2862,42 +2903,36 @@ void CClientVehicle::UpdateTargetPosition ( void )
 {
     if ( HasTargetPosition () )
     {
-        // Grab the previous position to update contact peds
-        CVector vecPrevPos;
-        GetPosition ( vecPrevPos );
-
-        CVector vecNewPosition;
-        unsigned long ulCurrentTime = CClientTime::GetTime ();
+        // Grab the current game position
+        CVector vecCurrentPosition;
+        GetPosition ( vecCurrentPosition );
 
         // Get the factor of time spent from the interpolation start
         // to the current time.
+        unsigned long ulCurrentTime = CClientTime::GetTime ();
         float fAlpha = SharedUtil::Unlerp ( m_interp.pos.ulStartTime,
                                             ulCurrentTime,
                                             m_interp.pos.ulFinishTime );
 
-        // If the factor is bigger or equal to 1.0f, then
-        // we have finished interpolating.
-        if ( !m_interp.pos.bExtrapolateAfterInterpolation &&
-              fAlpha >= 1.0f )
+        // Don't let it to overcompensate the error
+        fAlpha = SharedUtil::Clamp ( 0.0f, fAlpha, 1.0f );
+
+        // Get the current error portion to compensate
+        float fCurrentAlpha = fAlpha - m_interp.pos.fLastAlpha;
+        m_interp.pos.fLastAlpha = fAlpha;
+
+        // Apply the error compensation
+        CVector vecCompensation = SharedUtil::Lerp ( CVector (), fCurrentAlpha, m_interp.pos.vecError );
+        m_interp.pos.vecUnappliedError -= vecCompensation;
+
+        // If we finished compensating the error, finish it for the next pulse
+        if ( fAlpha == 1.0f )
         {
             m_interp.pos.ulFinishTime = 0;
-            vecNewPosition = m_interp.pos.vecTarget;
-        }
-        else
-        {
-            vecNewPosition = SharedUtil::Lerp ( m_interp.pos.vecOrigin,
-                                                fAlpha,
-                                                m_interp.pos.vecTarget );
+            m_interp.pos.vecUnappliedError = CVector ();
         }
 
-        // If the new position is close enough to the previous position, apply a filter to smooth the result
-        if ( ( vecPrevPos - vecNewPosition ).Length () < INTERPOLATION_WARP_THRESHOLD )
-        {
-            vecNewPosition = SharedUtil::Lerp ( vecPrevPos,
-                                                0.25f,
-                                                vecNewPosition );
-        }
-
+        CVector vecNewPosition = vecCurrentPosition + vecCompensation;
         SetPosition ( vecNewPosition, false );
 
 #ifdef MTA_DEBUG
@@ -2909,13 +2944,15 @@ void CClientVehicle::UpdateTargetPosition ( void )
                                 "vecOrigin: %f %f %f\n"
                                 "vecTarget: %f %f %f\n"
                                 "Position: %f %f %f\n"
+                                "Error: %f %f %f\n"
                                 "Alpha: %f\n"
                                 "Interpolating: %s\n",
                                 m_interp.pos.vecOrigin.fX, m_interp.pos.vecOrigin.fY, m_interp.pos.vecOrigin.fZ,
                                 m_interp.pos.vecTarget.fX, m_interp.pos.vecTarget.fY, m_interp.pos.vecTarget.fZ,
                                 vecNewPosition.fX, vecNewPosition.fY, vecNewPosition.fZ,
+                                m_interp.pos.vecError.fX, m_interp.pos.vecError.fY, m_interp.pos.vecError.fZ,
                                 fAlpha, ( m_interp.pos.ulFinishTime == 0 ? "no" : "yes" ) );
-            g_pClientGame->GetManager ()->GetDisplayManager ()->DrawText2D ( strBuffer, CVector ( 0.45f, 0.05f, 0 ), 1.0f, 0xFFBBBBFF );
+            g_pClientGame->GetManager ()->GetDisplayManager ()->DrawText2D ( strBuffer, CVector ( 0.45f, 0.05f, 0 ), 1.0f, 0xFFFFFFFF );
         }
 #endif
 
@@ -2927,7 +2964,7 @@ void CClientVehicle::UpdateTargetPosition ( void )
         {
             CClientPed * pModel = *iter;
             pModel->GetPosition ( vecPlayerPosition );                
-            vecOffset = vecPlayerPosition - vecPrevPos;
+            vecOffset = vecPlayerPosition - vecCurrentPosition;
             vecPlayerPosition = vecNewPosition + vecOffset;
             pModel->SetPosition ( vecPlayerPosition );
         }
@@ -2940,31 +2977,35 @@ void CClientVehicle::UpdateTargetRotation ( void )
     // Do we have a rotation to move towards? and are we streamed in?
     if ( HasTargetRotation () )
     {
-        CVector vecNewRotation;
-        unsigned long ulCurrentTime = CClientTime::GetTime ();
+        // Grab the current game rotation
+        CVector vecCurrentRotation;
+        GetRotationDegrees ( vecCurrentRotation );
 
         // Get the factor of time spent from the interpolation start
         // to the current time.
+        unsigned long ulCurrentTime = CClientTime::GetTime ();
         float fAlpha = SharedUtil::Unlerp ( m_interp.rot.ulStartTime,
                                             ulCurrentTime,
                                             m_interp.rot.ulFinishTime );
 
-        // If the factor is bigger or equal to 1.0f, then
-        // we have finished interpolating.
-        if ( !m_interp.rot.bExtrapolateAfterInterpolation &&
-             fAlpha >= 1.0f )
+        // Don't let it to overcompensate the error
+        fAlpha = SharedUtil::Clamp ( 0.0f, fAlpha, 1.0f );
+
+        // Get the current error portion to compensate
+        float fCurrentAlpha = fAlpha - m_interp.rot.fLastAlpha;
+        m_interp.rot.fLastAlpha = fAlpha;
+
+        CVector vecCompensation = SharedUtil::Lerp ( CVector (), fCurrentAlpha, m_interp.rot.vecError );
+        m_interp.rot.vecUnappliedError -= vecCompensation;
+
+        // If we finished compensating the error, finish it for the next pulse
+        if ( fAlpha == 1.0f )
         {
             m_interp.rot.ulFinishTime = 0;
-            vecNewRotation = m_interp.rot.vecTarget;
+            m_interp.rot.vecUnappliedError = CVector ();
         }
-        else
-        {
-            vecNewRotation = SharedUtil::Lerp ( CVector (),
-                                                fAlpha,
-                                                m_interp.rot.vecOffset );
-            vecNewRotation += m_interp.rot.vecOrigin;
-        }
-        SetRotationDegrees ( vecNewRotation, false );
+
+        SetRotationDegrees ( vecCurrentRotation + vecCompensation, false );
     }
 }
 
