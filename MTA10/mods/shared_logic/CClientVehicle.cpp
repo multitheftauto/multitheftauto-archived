@@ -2805,7 +2805,7 @@ void CClientVehicle::GetInitialDoorStates ( unsigned char * pucDoorStates )
 void CClientVehicle::SetTargetPosition ( CVector& vecPosition, unsigned long ulDelay, unsigned long ulPeerDelay )
 {   
     // Are we streamed in?
-    if ( m_pVehicle && false )
+    if ( m_pVehicle )
     {
         UpdateTargetPosition ();
 
