@@ -46,6 +46,7 @@ class CClientManager;
 #include "CClientColManager.h"
 #include "CClientGroups.h"
 #include "CClientWaterManager.h"
+#include "CClientWeaponManager.h"
 
 class CClientProjectileManager;
 class CClientExplosionManager;
@@ -92,6 +93,7 @@ public:
     inline CClientPacketRecorder*       GetPacketRecorder           ( void )        { return m_pPacketRecorder; }
     inline CClientWaterManager*         GetWaterManager             ( void )        { return m_pWaterManager; }
     inline CClientRadio*                GetRadio                    ( void )        { return m_pRadio; }
+    inline CClientWeaponManager*        GetWeaponManager            ( void )        { return m_pWeaponManager; }
 
     inline CGUITexture*                 GetConnectionTroubleTexture ( void )        { return m_pConnectionTroubleTexture; }
 
@@ -141,6 +143,7 @@ private:
     CGUITexture*                        m_pConnectionTroubleTexture;
     CClientPacketRecorder*              m_pPacketRecorder;
     CClientRadio*                       m_pRadio;
+    CClientWeaponManager*               m_pWeaponManager;
     bool                                m_bBeingDeleted;
 };
 

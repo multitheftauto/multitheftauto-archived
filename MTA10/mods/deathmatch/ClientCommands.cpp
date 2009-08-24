@@ -1067,7 +1067,7 @@ float fTest = 0;
 #include <crtdbg.h>
 void COMMAND_Debug2 ( const char *szCmdLine )
 {
-    g_pGame->GetAudio ()->StopRadio ();
+    g_pGame->GetAudioEngine ()->StopRadio ();
 }
 
 CClientPed* pTest = NULL;
@@ -1082,8 +1082,8 @@ void COMMAND_Debug3 ( const char *szCmdLine )
         call    eax
         popad
     }
-    g_pGame->GetAudio()->StopRadio();
-    g_pGame->GetAudio()->StartRadio(1);
+    g_pGame->GetAudioEngine()->StopRadio();
+    g_pGame->GetAudioEngine()->StartRadio(1);
     return;
 }
 

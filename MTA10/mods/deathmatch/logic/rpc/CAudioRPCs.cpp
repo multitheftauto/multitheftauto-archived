@@ -34,14 +34,14 @@ void CAudioRPCs::PlaySound ( NetBitStreamInterface& bitStream )
 				unsigned long ulSound;
 				if ( bitStream.Read ( ulSound ) )
 				{
-					g_pGame->GetAudio ()->PlayFrontEndSound ( ulSound );
+					g_pGame->GetAudioEngine ()->PlayFrontEndSound ( ulSound );
 				}
 				break;
 			case AUDIO_MISSION_PRELOAD:
 				if ( bitStream.Read ( usSound ) && bitStream.Read ( usSlot ) )
 				{
 					g_pCore->ChatPrintf ( "Preload %u into slot %u", false, usSound, usSlot );
-					g_pGame->GetAudio ()->PreloadMissionAudio ( usSound, usSlot );
+					g_pGame->GetAudioEngine ()->PreloadMissionAudio ( usSound, usSlot );
 				}
 				break;
 			case AUDIO_MISSION_PLAY:
@@ -52,8 +52,8 @@ void CAudioRPCs::PlaySound ( NetBitStreamInterface& bitStream )
 //						g_pGame->GetAudio ()->SetMissionAudioPosition ( &vecPosition, usSlot );
 
                     // Play the sound if it's loaded
-					if ( g_pGame->GetAudio ()->GetMissionAudioLoadingStatus ( usSlot ) == 1 )
-						g_pGame->GetAudio ()->PlayLoadedMissionAudio ( usSlot );
+					if ( g_pGame->GetAudioEngine ()->GetMissionAudioLoadingStatus ( usSlot ) == 1 )
+						g_pGame->GetAudioEngine ()->PlayLoadedMissionAudio ( usSlot );
 				}
 				break;
 			default:

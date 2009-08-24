@@ -78,10 +78,10 @@ void CClientRadio::DoPulse ( void )
         {
             // Stop the tuning in
             m_bTuning = false;
-            g_pGame->GetAudio ()->PlayFrontEndSound ( RADIO_SOUND_STOP_TUNE );
+            g_pGame->GetAudioEngine ()->PlayFrontEndSound ( RADIO_SOUND_STOP_TUNE );
 
             // Are we still turned on?
-            g_pGame->GetAudio ()->StartRadio ( m_Channel );
+            g_pGame->GetAudioEngine ()->StartRadio ( m_Channel );
         }
     }
 
@@ -157,7 +157,7 @@ void CClientRadio::Start ( void )
     else if ( !m_bPoliceRadio && m_Channel == CHANNEL_POLICE ) m_Channel = m_PreviousChannel;
 
     // Start the radio on our current channel
-    g_pGame->GetAudio ()->StartRadio ( m_Channel );
+    g_pGame->GetAudioEngine ()->StartRadio ( m_Channel );
     m_bPlaying = true;
     m_bTuning = false;
     m_bTuneForThisChannel = false;
@@ -168,8 +168,8 @@ void CClientRadio::Start ( void )
 void CClientRadio::Stop ( void )
 {   
     // Stop the radio
-    g_pGame->GetAudio ()->StopRadio ();
-    if ( m_bTuning ) g_pGame->GetAudio ()->PlayFrontEndSound ( RADIO_SOUND_STOP_TUNE );
+    g_pGame->GetAudioEngine ()->StopRadio ();
+    if ( m_bTuning ) g_pGame->GetAudioEngine ()->PlayFrontEndSound ( RADIO_SOUND_STOP_TUNE );
     m_bPlaying = false;
     m_bTuning = false;
     m_bTuneForThisChannel = false;
@@ -207,24 +207,24 @@ void CClientRadio::SetChannel ( eRadioChannel channel )
                 m_Channel = channel;
 
                 // Save our current radio status by calling StopRadio
-                g_pGame->GetAudio ()->StopRadio ();
+                g_pGame->GetAudioEngine ()->StopRadio ();
 
                 // Does this channel need to be tuned in first?
                 if ( m_bTuneForThisChannel )
                 {              
                     // Sound fx
-                    g_pGame->GetAudio ()->PlayFrontEndSound ( RADIO_SOUND_TUNE );
+                    g_pGame->GetAudioEngine ()->PlayFrontEndSound ( RADIO_SOUND_TUNE );
                 }
                 // If not select it right now
                 else
                 {
                     // Sound fx
-                    g_pGame->GetAudio ()->PlayFrontEndSound ( RADIO_SOUND_STOP_TUNE );
-                    g_pGame->GetAudio ()->PlayFrontEndSound ( RADIO_SOUND_SELECT );
+                    g_pGame->GetAudioEngine ()->PlayFrontEndSound ( RADIO_SOUND_STOP_TUNE );
+                    g_pGame->GetAudioEngine ()->PlayFrontEndSound ( RADIO_SOUND_SELECT );
 
                     // Save our current radio status by calling StopRadio
-                    g_pGame->GetAudio ()->StopRadio ();
-                    g_pGame->GetAudio ()->StartRadio ( m_Channel );                    
+                    g_pGame->GetAudioEngine ()->StopRadio ();
+                    g_pGame->GetAudioEngine ()->StartRadio ( m_Channel );                    
                 }
             }
         }

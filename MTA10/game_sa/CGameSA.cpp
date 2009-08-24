@@ -57,7 +57,7 @@ CGameSA::CGameSA()
     }
 
 	DEBUG_TRACE("CGameSA::CGameSA()");
-	this->m_pAudio					= new CAudioSA();
+	this->m_pAudioEngine			= new CAudioEngineSA((CAudioEngineSAInterface*)CLASS_CAudioEngine);
 	this->m_pWorld					= new CWorldSA();
 	this->m_pPools					= new CPoolsSA();
 	this->m_pClock					= new CClockSA();
@@ -97,6 +97,7 @@ CGameSA::CGameSA()
     this->m_pRopes                  = new CRopesSA;
     this->m_pFx                     = new CFxSA ( (CFxSAInterface *)CLASS_CFx );
     this->m_pWaterManager           = new CWaterManagerSA ();
+    this->m_pPointLights            = new CPointLightsSA ();
 
     // Normal weapon types (WEAPONSKILL_STD)
 	for ( int i = 0; i < NUM_WeaponInfosStdSkill; i++)
@@ -132,6 +133,7 @@ CGameSA::~CGameSA ( void )
         delete reinterpret_cast < CWeaponInfoSA* > ( WeaponInfos [i] );
     }
 
+    delete reinterpret_cast < CPointLightsSA * > ( m_pPointLights );
     delete reinterpret_cast < CFxSA * > ( m_pFx );
     delete reinterpret_cast < CRopesSA * > ( m_pRopes );
     delete reinterpret_cast < CKeyGenSA * > ( m_pKeyGen );
@@ -163,7 +165,7 @@ CGameSA::~CGameSA ( void )
     delete reinterpret_cast < CClockSA* > ( m_pClock );
     delete reinterpret_cast < CPoolsSA* > ( m_pPools );
     delete reinterpret_cast < CWorldSA* > ( m_pWorld );
-	delete reinterpret_cast < CAudioSA* > ( m_pAudio );  
+	delete reinterpret_cast < CAudioEngineSA* > ( m_pAudioEngine );  
 }
 
 CWeaponInfo	* CGameSA::GetWeaponInfo(eWeaponType weapon, eWeaponSkill skill)
@@ -583,4 +585,10 @@ void CGameSA::SetupSpecialCharacters ( void )
     ModelInfo[315].MakePedModel ( "COPGRL2" );
     ModelInfo[316].MakePedModel ( "NURGRL2" );
     */
+}
+
+
+CWeapon * CGameSA::CreateWeapon ( void )
+{
+    return new CWeaponSA ( new CWeaponSAInterface, NULL, WEAPONSLOT_MAX );
 }

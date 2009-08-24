@@ -300,8 +300,8 @@ CClientGame::~CClientGame ( void )
     // playing these special IDS.
     if ( m_bGameLoaded )
     {
-        g_pGame->GetAudio ()->PlayFrontEndSound ( 35 );
-        g_pGame->GetAudio ()->PlayFrontEndSound ( 48 );
+        g_pGame->GetAudioEngine ()->PlayFrontEndSound ( 35 );
+        g_pGame->GetAudioEngine ()->PlayFrontEndSound ( 48 );
     }
 
 	// Reset the GUI input mode

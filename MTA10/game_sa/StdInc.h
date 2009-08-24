@@ -53,7 +53,7 @@
 #include "CTextSA.h"
 #include "CPedSA.h"
 #include "CPedSoundSA.h"
-#include "CAudioSA.h"
+#include "CAudioEngineSA.h"
 #include "CPlayerInfoSA.h"
 #include "CPopulationSA.h"
 #include "CSettingsSA.h"
@@ -99,3 +99,4 @@
 #include "CWaterManagerSA.h"
 #include "CPedDamageResponseSA.h"
 #include "CPedDamageResponseCalculatorSA.h"
+#include "CPointLightsSA.h"

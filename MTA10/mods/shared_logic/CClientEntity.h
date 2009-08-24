@@ -233,6 +233,7 @@ public:
     virtual void                                SetInterior                 ( unsigned char ucInterior );
     bool                                        IsOnScreen                  ( void );
     virtual RpClump *                           GetClump                    ( void );
+    void                                        WorldIgnore                 ( bool bIgnore );
 
 protected:
     CClientManager*                             m_pManager;
@@ -268,6 +269,7 @@ protected:
     std::list < CClientPed * >                  m_OriginSourceUsers;
     std::list < CClientPed * >                  m_Contacts;
     unsigned char                               m_ucInterior;
+    bool                                        m_bWorldIgnored;
 
 private:
     static int                                  iCount;

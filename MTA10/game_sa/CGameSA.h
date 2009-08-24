@@ -87,7 +87,7 @@ public:
 	inline CPad					    * GetPad()					{ DEBUG_TRACE("CPad     * GetPad()");return m_pPad; };
 	inline CTheCarGenerators	    * GetTheCarGenerators()		{ DEBUG_TRACE("CTheCarGenerators  * GetTheCarGenerators()");return m_pTheCarGenerators; };
 	inline CAERadioTrackManager	    * GetAERadioTrackManager()	{ DEBUG_TRACE("CAERadioTrackManager * GetAERadioTrackManager()");return m_pCAERadioTrackManager; };
-	inline CAudio				    * GetAudio()				{ DEBUG_TRACE("CAudio     * GetAudio()");return m_pAudio; };
+	inline CAudioEngine				* GetAudioEngine()			{ DEBUG_TRACE("CAudio     * GetAudio()");return m_pAudioEngine; };
 	inline CMenuManager			    * GetMenuManager()			{ DEBUG_TRACE("CMenuManager			* GetMenuManager()");return m_pMenuManager; };
 	inline CText				    * GetText()					{ DEBUG_TRACE("CText					* GetText()");return m_pText; };
 	inline CStats				    * GetStats()				{ DEBUG_TRACE("CStats					* GetStats()");return m_pStats; };
@@ -108,6 +108,7 @@ public:
     inline CRopes                   * GetRopes ()                { return m_pRopes; }
     inline CFx                      * GetFx ()                   { return m_pFx; }
     inline CWaterManager            * GetWaterManager ()         { return m_pWaterManager; }
+    inline CPointLights             * GetPointLights ()          { return m_pPointLights; }
 
 	CWeaponInfo				* GetWeaponInfo(eWeaponType weapon,eWeaponSkill skill=WEAPONSKILL_STD);
 	CModelInfo				* GetModelInfo( DWORD dwModelID );
@@ -166,6 +167,7 @@ public:
     bool                    IsTakingPhoto           ( void );
 
     void                    SetupSpecialCharacters  ( void );
+    CWeapon *               CreateWeapon            ( void );
 
 private:
 	CPools					* m_pPools;
@@ -198,11 +200,12 @@ private:
     CRopes                  * m_pRopes;
     CFx                     * m_pFx;
     CWaterManager           * m_pWaterManager;
+    CPointLights            * m_pPointLights;
 
 	CPad					    * m_pPad;
 	CTheCarGenerators		    * m_pTheCarGenerators;
 	CAERadioTrackManager	    * m_pCAERadioTrackManager;
-	CAudio					    * m_pAudio;
+	CAudioEngine    		    * m_pAudioEngine;
 	CMenuManager			    * m_pMenuManager;
 	CText					    * m_pText;
 	CStats					    * m_pStats;

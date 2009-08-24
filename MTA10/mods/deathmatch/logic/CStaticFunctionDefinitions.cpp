@@ -3031,9 +3031,9 @@ bool CStaticFunctionDefinitions::PlayMissionAudio ( const CVector& vecPosition, 
     // TODO: Position of the sound
 
     // Play the sound if it's loaded
-	if ( g_pGame->GetAudio ()->GetMissionAudioLoadingStatus ( usSlot ) == 1 )
+	if ( g_pGame->GetAudioEngine ()->GetMissionAudioLoadingStatus ( usSlot ) == 1 )
     {
-		g_pGame->GetAudio ()->PlayLoadedMissionAudio ( usSlot );
+		g_pGame->GetAudioEngine ()->PlayLoadedMissionAudio ( usSlot );
         return true;
     }
 
@@ -3043,7 +3043,7 @@ bool CStaticFunctionDefinitions::PlayMissionAudio ( const CVector& vecPosition, 
 
 bool CStaticFunctionDefinitions::PlaySoundFrontEnd ( unsigned long ulSound )
 {
-    g_pGame->GetAudio ()->PlayFrontEndSound ( ulSound );
+    g_pGame->GetAudioEngine ()->PlayFrontEndSound ( ulSound );
     return true;
 }
 
@@ -3051,7 +3051,7 @@ bool CStaticFunctionDefinitions::PlaySoundFrontEnd ( unsigned long ulSound )
 bool CStaticFunctionDefinitions::PreloadMissionAudio ( unsigned short usSound, unsigned short usSlot )
 {
     g_pCore->ChatPrintf ( "Preload %u into slot %u", false, usSound, usSlot );
-	g_pGame->GetAudio ()->PreloadMissionAudio ( usSound, usSlot );
+	g_pGame->GetAudioEngine ()->PreloadMissionAudio ( usSound, usSlot );
     return true;
 }
 

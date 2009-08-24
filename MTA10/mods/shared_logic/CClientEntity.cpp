@@ -38,6 +38,7 @@ CClientEntity::CClientEntity ( ElementID ID )
     m_bSystemEntity = false;
     m_ucSyncTimeContext = 0;
     m_ucInterior = 0;
+    m_bWorldIgnored = false;
 
     // Need to generate a clientside ID?
     if ( ID == INVALID_ELEMENT_ID )
@@ -1237,6 +1238,24 @@ RpClump * CClientEntity::GetClump ( void )
         return pEntity->GetRpClump ();
     }
     return NULL;
+}
+
+
+void CClientEntity::WorldIgnore ( bool bIgnore )
+{
+    CEntity * pEntity = GetGameEntity ();
+    if ( bIgnore )
+    {
+        if ( pEntity )
+        {
+            g_pGame->GetWorld ()->IgnoreEntity ( pEntity );
+        }
+    }
+    else
+    {
+        g_pGame->GetWorld ()->IgnoreEntity ( NULL );
+    }
+    m_bWorldIgnored = bIgnore;
 }
 
 

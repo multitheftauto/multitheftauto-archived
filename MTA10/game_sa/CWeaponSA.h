@@ -15,13 +15,18 @@
 #ifndef __CGAMESA_WEAPON
 #define __CGAMESA_WEAPON
 
-
 #include "CGameSA.h"
 #include <game/CWeapon.h>
 #include <game/CPed.h>
 
 #define FUNC_Shutdown                                   0x73A380
 #define FUNC_CWeapon_CheckForShootingVehicleOccupant    0x73f480
+#define FUNC_CWeapon_Initialize                         0x73b4a0
+#define FUNC_CWeapon_Update                             0x73db40
+#define FUNC_CWeapon_Fire                               0x742300
+#define FUNC_CWeapon_AddGunshell                        0x73a3e0
+#define FUNC_CWeapon_DoBulletImpact                     0x73b550
+#define FUNC_CWeapon_GenerateDamageEvent                0x73a530
 
 extern CGameSA * pGame;
 
@@ -33,34 +38,45 @@ public:
 	DWORD			m_nAmmoInClip;
 	DWORD			m_nAmmoTotal;
 	DWORD			m_nTimer;
-	DWORD			m_Unknown;
+    DWORD           m_Unknown_1;
     DWORD           m_Unknown_2;
 };
 
 class CWeaponSA : public CWeapon
 {
-private:
-	CWeaponSAInterface		* internalInterface;
-	CPed					* owner;
-	eWeaponSlot 			m_weaponSlot;
 public:
-	CWeaponSA(CWeaponSAInterface * weaponInterface, CPed * ped, eWeaponSlot weaponSlot);
-	eWeaponType		GetType(  );
-	VOID			SetType( eWeaponType type );
-	eWeaponState	GetState(  );
-    void            SetState ( eWeaponState state );
-	DWORD			GetAmmoInClip(  );
-	VOID			SetAmmoInClip( DWORD dwAmmoInClip );
-	DWORD			GetAmmoTotal(  );
-	VOID			SetAmmoTotal( DWORD dwAmmoTotal );
+	                        CWeaponSA           ( CWeaponSAInterface * pInterface, CPed * pOwner, eWeaponSlot weaponSlot );
 	
-	CPed			* GetPed();
-	eWeaponSlot		GetSlot();
+    void                    Destroy             ( void );
 
-	VOID			SetAsCurrentWeapon();
-	CWeaponInfo		* GetInfo() { return pGame->GetWeaponInfo(internalInterface->m_eWeaponType); };
+    eWeaponType		        GetType             ( void );
+	void			        SetType             ( eWeaponType type );
+	eWeaponState	        GetState            ( void );
+    void                    SetState            ( eWeaponState state );
+	DWORD			        GetAmmoInClip       ( void );
+	void			        SetAmmoInClip       ( DWORD dwAmmoInClip );
+	DWORD			        GetAmmoTotal        ( void );
+	void			        SetAmmoTotal        ( DWORD dwAmmoTotal );
+	
+	CPed *                  GetPed              ( void );
+	eWeaponSlot		        GetSlot             ( void );
 
-    void            Remove ();
+	void			        SetAsCurrentWeapon  ( void );
+	CWeaponInfo *           GetInfo             ( void ) { return pGame->GetWeaponInfo ( GetType () ); }
+
+    void                    Remove              ( void );
+
+    void                    Initialize          ( eWeaponType type, unsigned int uiAmmo, CPed * pPed );
+    void                    Update              ( CPed * pPed );
+    bool                    Fire                ( CEntity * pFiringEntity, CVector * pvecOrigin, CVector * pvecOffset, CEntity * pTargetEntity, CVector * pvec_1, CVector * pvec_2 );
+    void                    AddGunshell         ( CEntity * pFiringEntity, CVector * pvecOrigin, CVector2D * pvecDirection, float fSize );
+    void                    DoBulletImpact      ( CEntity * pFiringEntity, CEntity * pEntity, CVector * pvecOrigin, CVector * pvecTarget, CColPoint * pColPoint, int i_1 );
+    unsigned char           GenerateDamageEvent ( CPed * pPed, CEntity * pResponsible, eWeaponType weaponType, int iDamagePerHit, ePedPieceTypes hitZone, int i_2 );
+
+private:
+	CWeaponSAInterface *    m_pInterface;
+	CPed *                  m_pOwner;
+	eWeaponSlot 			m_weaponSlot;
 };
 
 #endif
