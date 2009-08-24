@@ -829,6 +829,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\shared_logic\CClientRope.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\shared_logic\CClientSound.cpp"
 					>
 				</File>
@@ -1720,6 +1724,10 @@
 				</File>
 				<File
 					RelativePath="..\shared_logic\CClientRadio.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared_logic\CClientRope.h"
 					>
 				</File>
 				<File

@@ -70,6 +70,7 @@ enum eClientEntityType
     CCLIENTSOUND,
     CCLIENTHANDLING,
     CCLIENTWATER,
+    CCLIENTROPE,
     CCLIENTUNKNOWN,
 };
 
