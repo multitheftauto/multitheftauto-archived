@@ -172,6 +172,7 @@ public:
     float                           m_fPretendHealthSmoothed;
     float                           m_fPretendArmorSmoothed;
 
+public:
     unsigned long                   m_ulSyncFrequency;
     unsigned long                   m_ulLastSyncTick;
 };
