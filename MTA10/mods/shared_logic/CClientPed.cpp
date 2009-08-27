@@ -4231,10 +4231,11 @@ void CClientPed::SetTargetPosition ( CVector& vecPosition, unsigned long ulTime,
     {
         CVector vecCurrentPosition;
         GetPosition ( vecCurrentPosition );
-        vecCurrentPosition -= vecOrigin;     
+        vecCurrentPosition -= vecOrigin;
 
         m_vecTargetPosition = vecPosition;
         m_targetPositionError = m_vecTargetPosition - vecCurrentPosition;
+        if ( m_targetPositionError.current.Length () >= 15.0f ) ulTime = 0;
         m_targetPositionError.lerp ( CVector (), ulTime );
         m_bHasTargetPosition = true;
     }
@@ -4242,7 +4243,7 @@ void CClientPed::SetTargetPosition ( CVector& vecPosition, unsigned long ulTime,
     {
         vecPosition += vecOrigin;
         SetPosition ( vecPosition );
-        m_bHasTargetPosition - false;
+        m_bHasTargetPosition = false;
     }
 }
 

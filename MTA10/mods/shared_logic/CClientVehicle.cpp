@@ -2814,6 +2814,7 @@ void CClientVehicle::SetTargetPosition ( CVector& vecPosition, unsigned long ulT
         GetPosition ( vecCurrentPosition );        
         m_vecTargetPosition = vecPosition;
         m_targetPositionError = ( m_vecTargetPosition - vecCurrentPosition );
+        if ( m_targetPositionError.current.Length () >= 50.0f ) ulTime = 0;
         m_targetPositionError.lerp ( CVector (), ulTime );
         m_bHasTargetPosition = true;
     }
