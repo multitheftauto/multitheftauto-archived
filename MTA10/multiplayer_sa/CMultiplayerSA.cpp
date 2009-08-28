@@ -154,9 +154,6 @@ DWORD RETURN_CAnimManager_BlendAnimation =                  0x4D4617;
 #define HOOKPOS_CPed_GetWeaponSkill                         0x5e3b60
 DWORD RETURN_CPed_GetWeaponSkill =                          0x5E3B68;
 
-#define HOOKPOS_CTaskSimplePlayerOnFoot_MakeAbortable       0x68596F
-DWORD RETURN_CTaskSimplePlayerOnFoot_MakeAbortable =        0x685980;
-
 #define HOOKPOS_CPed_AddGogglesModel                        0x5E3ACB
 DWORD RETURN_CPed_AddGogglesModel =                         0x5E3AD4;
 
@@ -217,7 +214,6 @@ PostWorldProcessHandler * m_pPostWorldProcessHandler = NULL;
 IdleHandler * m_pIdleHandler = NULL;
 AddAnimationHandler* m_pAddAnimationHandler = NULL;
 BlendAnimationHandler* m_pBlendAnimationHandler = NULL;
-PreHudDrawHandler* m_pPreHudDrawHandler = NULL;
 
 CEntitySAInterface * dwSavedPlayerPointer = 0;
 CEntitySAInterface * activeEntityForStreaming = 0; // the entity that the streaming system considers active
@@ -276,7 +272,6 @@ void HOOK_CEventHandler_ComputeKnockOffBikeResponse ();
 void HOOK_CAnimManager_AddAnimation ();
 void HOOK_CAnimManager_BlendAnimation ();
 void HOOK_CPed_GetWeaponSkill ();
-void HOOK_CTaskSimplePlayerOnFoot_MakeAbortable ();
 void HOOK_CPed_AddGogglesModel ();
 
 void vehicle_lights_init ();
@@ -389,7 +384,6 @@ void CMultiplayerSA::InitHooks()
     HookInstall(HOOKPOS_CAnimManager_AddAnimation, (DWORD)HOOK_CAnimManager_AddAnimation, 10 ); 
     HookInstall(HOOKPOS_CAnimManager_BlendAnimation, (DWORD)HOOK_CAnimManager_BlendAnimation, 7 );
     HookInstall(HOOKPOS_CPed_GetWeaponSkill, (DWORD)HOOK_CPed_GetWeaponSkill, 8 );
-    HookInstall(HOOKPOS_CTaskSimplePlayerOnFoot_MakeAbortable, (DWORD)HOOK_CTaskSimplePlayerOnFoot_MakeAbortable, 11 );
     HookInstall(HOOKPOS_CPed_AddGogglesModel, (DWORD)HOOK_CPed_AddGogglesModel, 6);
     
     HookInstallCall ( CALL_CBike_ProcessRiderAnims, (DWORD)HOOK_CBike_ProcessRiderAnims );
@@ -1278,11 +1272,6 @@ void CMultiplayerSA::SetBlendAnimationHandler ( BlendAnimationHandler * pHandler
     m_pBlendAnimationHandler = pHandler;
 }
 
-void CMultiplayerSA::SetPreHudDrawHandler ( PreHudDrawHandler * pHandler )
-{
-    m_pPreHudDrawHandler = pHandler;
-}
-
 void CMultiplayerSA::HideRadar ( bool bHide )
 {
 	bHideRadar = bHide;
@@ -1462,17 +1451,19 @@ void _declspec(naked) HOOK_CStreaming_Update_Caller()
     }
 }
 
-
 void _declspec(naked) HOOK_CHud_Draw_Caller()
 {
-	/* This hook removes calls CAudioEngine::DisplayRadioStationName and CHud::Draw,
-       the first is handled by MTA and the second is called in this function.
+	/*
 	0053E4FA   . E8 318BFCFF                          CALL gta_sa_u.00507030
 	0053E4FF   . E8 DC150500                          CALL gta_sa_u.0058FAE0
 	*/
-	_asm pushad;
+	_asm
+	{
+        pushad
 
-    if ( m_pPreHudDrawHandler ) m_pPreHudDrawHandler ();
+		mov		edx, CMultiplayerSA::FUNC_CAudioEngine__DisplayRadioStationName
+		call	edx
+	}
 
 	if(!bSetCenterOfWorld)
 	{
@@ -2504,26 +2495,16 @@ void _declspec(naked) HOOK_CVehicle_ResetAfterRender ()
 /**
  ** Objects
  **/
-static bool bObjectIsAGangTag = false;
 static void SetObjectAlpha ()
 {
     bEntityHasAlpha = false;
-    bObjectIsAGangTag = false;
 
     if ( dwAlphaEntity )
     {
         CObject* pObject = pGameInterface->GetPools()->GetObject ( (DWORD *)dwAlphaEntity );
         if ( pObject )
         {
-            if ( pObject->IsAGangTag () )
-            {
-                // For some weird reason, gang tags don't appear unsprayed
-                // if we don't set their alpha to a value less than 255.
-                bObjectIsAGangTag = true;
-                GetAlphaAndSetNewValues ( SharedUtil::Min ( pObject->GetAlpha (), (unsigned char)254 ) );
-            }
-            else
-                GetAlphaAndSetNewValues ( pObject->GetAlpha () );
+            GetAlphaAndSetNewValues ( pObject->GetAlpha () );
         }
     }
 }
@@ -2564,30 +2545,7 @@ void _declspec(naked) HOOK_CObject_Render ()
         mov         dwCObjectRenderRet, edx
         mov         edx, HOOK_CObject_PostRender
         mov         [esp], edx
-        pushad
-    }
-
-    if ( bObjectIsAGangTag )
-        goto render_a_tag;
-
-    _asm
-    {
-        popad
         jmp         FUNC_CEntity_Render
-render_a_tag:
-        popad
-        // We simulate here the header of the CEntity::Render function
-        // but then go straight to CTagManager::RenderTagForPC.
-        push        ecx
-        push        esi
-        mov         eax, [esi+0x18]
-        test        eax, eax
-        jz          no_clump
-        mov         eax, 0x534331
-        jmp         eax
-no_clump:
-        mov         eax, 0x5343EB
-        jmp         eax
     }
 }
 
@@ -4118,46 +4076,6 @@ void _declspec(naked) HOOK_CPed_GetWeaponSkill ()
             mov     esi, [esp+8]
             cmp     esi, 16h
             jmp     RETURN_CPed_GetWeaponSkill
-        }
-    }
-}
-
-CPedSAInterface * pOnFootPed;
-DWORD FUNC_CCamera_ClearPlayerWeaponMode = 0x50AB10;
-DWORD FUNC_CWeaponEffects_ClearCrossHair = 0x742C60;
-void _declspec(naked) HOOK_CTaskSimplePlayerOnFoot_MakeAbortable ()
-{
-    /* Replaces:
-        call    CCamera_ClearPlayerWeaponMode
-        mov     eax, [esi+598h]
-        push    eax
-        call    CWeaponEffects_ClearCrossHair
-    */
-    _asm
-    {
-        mov     pOnFootPed, esi
-        pushad
-    }
-    if ( IsLocalPlayer ( pOnFootPed ) )
-    {
-        _asm
-        {
-            popad
-            call    FUNC_CCamera_ClearPlayerWeaponMode
-            mov     eax, [esi+598h]
-            push    eax
-            call    FUNC_CWeaponEffects_ClearCrossHair
-            jmp     RETURN_CTaskSimplePlayerOnFoot_MakeAbortable
-        }
-    }
-    else
-    {
-        _asm
-        {
-            popad
-            mov     eax, [esi+598h]
-            push    eax
-            jmp     RETURN_CTaskSimplePlayerOnFoot_MakeAbortable
         }
     }
 }

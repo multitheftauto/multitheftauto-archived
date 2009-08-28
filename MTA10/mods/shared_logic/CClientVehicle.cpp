@@ -1589,8 +1589,6 @@ void CClientVehicle::SetFrozen ( bool bFrozen )
     if ( m_bScriptFrozen && bFrozen )
     {
         m_bIsFrozen = bFrozen;
-        SetStatic ( bFrozen );
-        
         CVector vecTemp;
         if ( m_pVehicle )
         {
@@ -1608,7 +1606,6 @@ void CClientVehicle::SetFrozen ( bool bFrozen )
     else if ( !m_bScriptFrozen )
     {
         m_bIsFrozen = bFrozen;
-        SetStatic ( bFrozen );
 
         if ( bFrozen )
         {
@@ -1626,7 +1623,7 @@ void CClientVehicle::SetFrozen ( bool bFrozen )
                 m_vecTurnSpeed = vecTemp;
             }
         }
-    }    
+    }
 }
 
 
@@ -2012,7 +2009,6 @@ void CClientVehicle::Create ( void )
         // Got any settings to restore?
         m_pVehicle->SetMatrix ( &m_Matrix );
         m_matFrozen = m_Matrix;
-        SetStatic ( m_bIsFrozen );
         m_pVehicle->SetMoveSpeed ( &m_vecMoveSpeed );
         m_pVehicle->SetTurnSpeed ( &m_vecTurnSpeed );
         m_pVehicle->SetVisible ( m_bVisible );
@@ -3004,34 +3000,6 @@ bool CClientVehicle::HasPoliceRadio ( void )
     }
     return false;
 }
-
-
-void CClientVehicle::DoTankFire ( void )
-{
-    if ( m_pVehicle && m_usModel == VT_RHINO )
-    {
-        // Our turret offset
-        CVector vecOffset ( 0, 6.5f, 1.4f );
-
-        // Apply turret rotation
-        float turretX, turretY;
-        GetTurretRotation ( turretX, turretY );
-        RotateVector ( vecOffset, CVector ( -turretY, 0, -turretX ) );
-
-        // Apply vehicle rotation
-        CMatrix matrix, returnMatrix;
-        GetMatrix ( matrix );
-        AttachedMatrix ( matrix, returnMatrix, vecOffset, CVector () );
-
-        // Grab turret firing direction
-        CVector vecDirection = returnMatrix.vPos - matrix.vPos;    
-        vecDirection.Normalize ();
-
-        // Fiiiiiiiire!
-        g_pGame->GetFx ()->TriggerTankFire ( returnMatrix.vPos, vecDirection );
-    }
-}
-
 
 void CClientVehicle::RemoveAllProjectiles ( void )
 {

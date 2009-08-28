@@ -22,8 +22,6 @@ CDeathmatchVehicle::CDeathmatchVehicle ( CClientManager* pManager, CUnoccupiedVe
     memset ( m_ucLastPanelStates, 0, sizeof ( m_ucLastPanelStates ) );
     memset ( m_ucLastLightStates, 0, sizeof ( m_ucLastLightStates ) );
     m_bIsSyncing = false;
-    m_ulSyncFrequency = 0;
-    m_ulLastSyncTick = 0;
 
     SetIsSyncing ( false );
 }
@@ -134,65 +132,4 @@ void CDeathmatchVehicle::ResetDamageModelSync ( void )
     for ( int i = 0; i < MAX_WHEELS; i++ ) m_ucLastWheelStates [i] = GetWheelStatus ( i );
     for ( int i = 0; i < MAX_PANELS; i++ ) m_ucLastPanelStates [i] = GetPanelStatus ( i );
     for ( int i = 0; i < MAX_LIGHTS; i++ ) m_ucLastLightStates [i] = GetLightStatus ( i );
-}
-
-
-void CDeathmatchVehicle::UpdateSyncTimes ( void )
-{
-    unsigned long time = GetTickCount ();
-    m_ulSyncFrequency = time - m_ulLastSyncTick;
-    m_ulLastSyncTick = time;
-}
-
-
-void CDeathmatchVehicle::SetAdjustablePropertyValue ( unsigned short usValue )
-{
-    if ( UseInterpolation () )
-    {
-        if ( m_usModel == VT_HYDRA ) usValue = 5000 - usValue;
-        m_adjustableProperty.lerp ( usValue, m_ulSyncFrequency );
-    }
-    else
-    {
-        CClientVehicle::SetAdjustablePropertyValue ( usValue );
-    }
-}
-
-
-void CDeathmatchVehicle::SetTurretRotation ( float fHorizontal, float fVertical )
-{
-    if ( UseInterpolation () )
-    {
-        m_turretX.lerp ( fHorizontal, m_ulSyncFrequency );
-        m_turretY.lerp ( fVertical, m_ulSyncFrequency );
-    }
-    else
-    {
-        CClientVehicle::SetTurretRotation ( fHorizontal, fVertical );
-    }
-}
-
-
-bool CDeathmatchVehicle::UseInterpolation ( void )
-{
-    // Use smoothing if: It has a driver and it's not local and we're not syncing it or
-    //                    It has no driver and we're not syncing it.
-    if ( ( m_pDriver && !m_pDriver->IsLocalPlayer () && !IsSyncing () ) ||
-         ( !m_pDriver && !IsSyncing () ) )
-    {
-        return true;
-    }
-    return false;
-}
-
-
-void CDeathmatchVehicle::StreamedInPulse ( void )
-{
-    CClientVehicle::StreamedInPulse ();
-
-    if ( UseInterpolation () )
-    {
-        CClientVehicle::_SetAdjustablePropertyValue ( m_adjustableProperty.update () );
-        CClientVehicle::SetTurretRotation ( m_turretX.updateRotRad (), m_turretY.updateRotRad () ); 
-    }
 }

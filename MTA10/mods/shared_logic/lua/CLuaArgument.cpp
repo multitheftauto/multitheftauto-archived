@@ -116,15 +116,6 @@ CLuaArgument::~CLuaArgument ( void )
     DeleteTableData ();
 }
 
-void CLuaArgument::Clear ( void )
-{
-    m_strString = "";
-    DeleteTableData ();
-    m_iType = LUA_TNIL;
-    m_pTableData = NULL;
-    m_pLightUserData = NULL;
-}
-
 void CLuaArgument::CopyRecursive ( const CLuaArgument& Argument, std::map < CLuaArguments*, CLuaArguments* > * pKnownTables )
 {
     // Clear the string
@@ -234,16 +225,20 @@ bool CLuaArgument::CompareRecursive ( const CLuaArgument& Argument, std::set < C
             if ( m_pTableData->Count () != Argument.m_pTableData->Count () )
                 return false;
 
-            for ( unsigned int i = 0; i < m_pTableData->Count (); ++i )
+            vector < CLuaArgument * > ::const_iterator iter = m_pTableData->IterBegin ();
+            vector < CLuaArgument * > ::const_iterator iterCompare = Argument.m_pTableData->IterBegin ();
+            while ( iter != m_pTableData->IterEnd () && iterCompare != Argument.m_pTableData->IterEnd () )
             {
                 if ( pKnownTables->find ( m_pTableData ) == pKnownTables->end () )
                 {
                     pKnownTables->insert ( m_pTableData );
-                    if ( (*m_pTableData) [ i ] != (*Argument.m_pTableData) [ i ] )
+                    if ( *iter != *iterCompare )
                         return false;
                 }
+            
+                iter++;
+                iterCompare++;
             }
-
             return true;
         }
         case LUA_TSTRING:
@@ -399,19 +394,6 @@ void CLuaArgument::Read ( CClientEntity* pElement )
         m_iType = LUA_TNIL;
 }
 
-void CLuaArgument::Read ( const CLuaArgument& Argument, std::map < CLuaArguments*, CLuaArguments* > * pKnownTables )
-{
-    m_strString = "";
-    DeleteTableData ();
-    CopyRecursive ( Argument, pKnownTables );
-}
-
-void CLuaArgument::Read ( NetBitStreamInterface& bitStream, std::vector < CLuaArguments* > * pKnownTables )
-{
-    m_strString = "";
-    DeleteTableData ();
-    ReadFromBitStream ( bitStream, pKnownTables );
-}
 
 void CLuaArgument::ReadElementID ( ElementID ID )
 {

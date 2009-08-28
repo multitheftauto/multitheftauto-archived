@@ -1060,7 +1060,6 @@ void CNetAPI::ReadVehiclePuresync ( CClientPlayer* pPlayer, CClientVehicle* pVeh
     unsigned short usLatency;
     BitStream.ReadCompressed ( usLatency );
     pPlayer->SetLatency ( usLatency + g_pNet->GetPing () );
-    static_cast < CDeathmatchVehicle * > ( pVehicle )->UpdateSyncTimes ();
     pPlayer->SetPing ( usLatency );
 
     // Read out the keysync

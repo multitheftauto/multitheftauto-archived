@@ -157,7 +157,7 @@ public:
 	void						SetColor				( unsigned char ucColor1, unsigned char ucColor2, unsigned char ucColor3, unsigned char ucColor4 );
 
 	void						GetTurretRotation		( float& fHorizontal, float& fVertical );
-    virtual void                SetTurretRotation       ( float fHorizontal, float fVertical );
+    void                        SetTurretRotation       ( float fHorizontal, float fVertical );
 
     inline unsigned short       GetModel                ( void )                            { return m_usModel; };
     void                        SetModelBlocking        ( unsigned short usModel, bool bLoadImmediately = false );
@@ -189,15 +189,15 @@ public:
 
     inline bool                 HasLandingGear          ( void )                            { return m_bHasLandingGear; };
     float                       GetLandingGearPosition  ( void );
-    virtual void                SetLandingGearPosition  ( float fPosition );
+    void                        SetLandingGearPosition  ( float fPosition );
     bool                        IsLandingGearDown       ( void );
     void                        SetLandingGearDown      ( bool bLandingGearDown );
 
     inline bool                 HasAdjustableProperty       ( void )                        { return m_bHasAdjustableProperty; };
     unsigned short              GetAdjustablePropertyValue  ( void );
-    virtual void                SetAdjustablePropertyValue  ( unsigned short usValue );
+    void                        SetAdjustablePropertyValue  ( unsigned short usValue );
     bool                        HasMovingCollision          ( void );
-protected:
+private:
     void                        _SetAdjustablePropertyValue ( unsigned short usValue );
 public:
 
@@ -346,8 +346,6 @@ public:
     bool                        HasRadio                ( void );
     bool                        HasPoliceRadio          ( void );
 
-    void                        DoTankFire              ( void );
-
     void                        ReCreate                ( void );
 
     void                        ModelRequestCallback    ( CModelInfo* pModelInfo );
@@ -382,7 +380,7 @@ protected:
 
     bool                        DoCheckHasLandingGear   ( void );
 
-    virtual void                StreamedInPulse         ( void );
+    void                        StreamedInPulse         ( void );
     void                        Dump                    ( FILE* pFile, bool bDumpDetails, unsigned int uiIndex );
 
     class CClientObjectManager* m_pObjectManager;

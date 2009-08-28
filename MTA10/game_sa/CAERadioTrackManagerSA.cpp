@@ -14,12 +14,12 @@
 
 BYTE CAERadioTrackManagerSA::GetCurrentRadioStationID()
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_GetCurrentRadioStationID;
+	DEBUG_TRACE("BYTE CAERadioTrackManagerSA::GetCurrentRadioStationID()");
+	DWORD dwFunc = FUNC_GetCurrentRadioStationID;
 	BYTE bReturn = 0;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		call	dwFunc
 		mov		bReturn, al
 	}
@@ -29,12 +29,12 @@ BYTE CAERadioTrackManagerSA::GetCurrentRadioStationID()
 
 BYTE CAERadioTrackManagerSA::IsVehicleRadioActive()
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_IsVehicleRadioActive;
+	DEBUG_TRACE("BYTE CAERadioTrackManagerSA::IsVehicleRadioActive()");
+	DWORD dwFunc = FUNC_IsVehicleRadioActive;
 	BYTE bReturn = 0;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		call	dwFunc
 		mov		bReturn, al
 	}
@@ -44,13 +44,13 @@ BYTE CAERadioTrackManagerSA::IsVehicleRadioActive()
 
 char * CAERadioTrackManagerSA::GetRadioStationName(BYTE bStationID)
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_GetRadioStationName;
+	DEBUG_TRACE("char * CAERadioTrackManagerSA::GetRadioStationName(BYTE bStationID)");
+	DWORD dwFunc = FUNC_GetRadioStationName;
 	char * cReturn = 0;
 	DWORD dwStationID = bStationID;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		push	dwStationID
 		call	dwFunc
 		mov		cReturn, eax
@@ -61,12 +61,12 @@ char * CAERadioTrackManagerSA::GetRadioStationName(BYTE bStationID)
 
 BOOL CAERadioTrackManagerSA::IsRadioOn()
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_IsRadioOn;
+	DEBUG_TRACE("BOOL CAERadioTrackManagerSA::IsRadioOn()");
+	DWORD dwFunc = FUNC_IsRadioOn;
 	BYTE bReturn = 0;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		call	dwFunc
 		mov		bReturn, al
 	}
@@ -74,39 +74,39 @@ BOOL CAERadioTrackManagerSA::IsRadioOn()
 	return bReturn;
 }
 
-void CAERadioTrackManagerSA::SetBassSetting(DWORD dwBass)
+VOID CAERadioTrackManagerSA::SetBassSetting(DWORD dwBass)
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_SetBassSetting;
+	DEBUG_TRACE("VOID CAERadioTrackManagerSA::SetBassSetting(DWORD dwBass)");
+	DWORD dwFunc = FUNC_SetBassSetting;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		push	0x3F800000 // 1.0f
 		push	dwBass
 		call	dwFunc
 	}
 }
 
-void CAERadioTrackManagerSA::Reset()
+VOID CAERadioTrackManagerSA::Reset()
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_Reset;
+	DEBUG_TRACE("VOID CAERadioTrackManagerSA::Reset()");
+	DWORD dwFunc = FUNC_Reset;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		call	dwFunc
 	}
 }
 
-void CAERadioTrackManagerSA::StartRadio(BYTE bStationID, BYTE bUnknown)
+VOID CAERadioTrackManagerSA::StartRadio(BYTE bStationID, BYTE bUnknown)
 {
-    DWORD dwThis = ( DWORD ) m_pInterface;
-	DWORD dwFunc = FUNC_CAERadioTrackManager_StartRadio;
+	DEBUG_TRACE("VOID CAERadioTrackManagerSA::StartRadio(BYTE bStationID, BYTE bUnknown)");
+	DWORD dwFunc = FUNC_StartRadio;
 	DWORD dwStationID = bStationID;
 	DWORD dwUnknown = bUnknown;
 	_asm
 	{
-		mov		ecx, dwThis
+		mov		ecx, CLASS_CAERadioTrackManager
 		push	0
 		push	0
 		push	dwUnknown

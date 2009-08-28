@@ -21,7 +21,6 @@ CClientExplosionManager::CClientExplosionManager ( CClientManager * pManager )
     m_pManager = pManager;
     m_LastWeaponType = WEAPONTYPE_UNARMED;
     m_pLastCreator = NULL;
-    m_bCreatingExplosion = false;
 }
 
 
@@ -141,8 +140,6 @@ CExplosion * CClientExplosionManager::Create ( eExplosionType explosionType, CVe
         }
     }
 
-    m_bCreatingExplosion = true;
     CExplosion * pExplosion = g_pGame->GetExplosionManager ()->AddExplosion ( NULL, pGameCreator, explosionType, vecPosition, 0, bMakeSound, fCamShake, bNoDamage );
-    m_bCreatingExplosion = false;
     return pExplosion;
 }

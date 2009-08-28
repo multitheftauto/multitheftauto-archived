@@ -63,7 +63,6 @@ public:
     void                    SetDimension            ( unsigned short usDimension );
     void                    RelateDimension         ( unsigned short usDimension );
 
-    bool                    CanWeHearSound          ( void );
 
 protected:
 

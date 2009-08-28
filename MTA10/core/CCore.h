@@ -126,7 +126,6 @@ public:
     bool                    IsCursorControlsToggled         ( void ) { return m_bCursorToggleControls; }
     void                    HideMainMenu                    ( void );
 	void			        SetCenterCursor                 ( bool bEnabled );
-    bool                    CanDrawGUI                      ( void );
 
     // Configuration
     void                    ApplyConsoleSettings            ( void );

@@ -128,7 +128,6 @@ void CUnoccupiedVehicleSync::Packet_UnoccupiedVehicleStartSync ( NetBitStreamInt
         CDeathmatchVehicle* pVehicle = static_cast < CDeathmatchVehicle* > ( m_pVehicleManager->Get ( ID ) );
         if ( pVehicle )
         {
-            pVehicle->UpdateSyncTimes ();
             // Read out and set its current state, so we start off sync'd with the server
             
             // Read out the position

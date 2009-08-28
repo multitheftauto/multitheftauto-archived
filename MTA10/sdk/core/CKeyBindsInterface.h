@@ -19,12 +19,9 @@
 
 class CKeyFunctionBind;
 class CControlFunctionBind;
-struct SBindableKey;
 
 typedef void ( *KeyFunctionBindHandler ) ( CKeyFunctionBind* pBind );
 typedef void ( *ControlFunctionBindHandler ) ( CControlFunctionBind* pBind );
-typedef void ( *KeyStrokeHandler ) ( const SBindableKey * pKey, bool bState );
-typedef bool ( *CharacterKeyHandler ) ( WPARAM wChar );
 
 enum eKeyData
 {
@@ -200,8 +197,6 @@ public:
     virtual bool                    IsKey                       ( const char* szKey ) = 0;
     virtual char*                   GetKeyFromGTARelative       ( int iGTAKey ) = 0;
     virtual const SBindableKey*     GetBindableFromMessage      ( UINT uMsg, WPARAM wParam, LPARAM lParam, bool& bState ) = 0;
-    virtual void                    SetKeyStrokeHandler         ( KeyStrokeHandler Handler ) = 0;
-    virtual void                    SetCharacterKeyHandler      ( CharacterKeyHandler Handler ) = 0;
 
     // Control/action funcs
     virtual char*                   GetControlFromAction        ( eControllerAction action ) = 0;

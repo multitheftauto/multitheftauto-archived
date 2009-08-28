@@ -293,16 +293,12 @@ public:
 
     void                                SetAllDimensions                ( unsigned short usDimension );
 
-    static void                         StaticKeyStrokeHandler          ( const SBindableKey * pKey, bool bState );
-    void                                KeyStrokeHandler                ( const SBindableKey * pKey, bool bState );
-    static bool                         StaticCharacterKeyHandler       ( WPARAM wChar );
-    bool                                CharacterKeyHandler             ( WPARAM wChar );
-
     static void                         StaticProcessClientKeyBind      ( CKeyFunctionBind* pBind );
     void                                ProcessClientKeyBind            ( CKeyFunctionBind* pBind );
     static void                         StaticProcessClientControlBind  ( CControlFunctionBind* pBind );
     void                                ProcessClientControlBind        ( CControlFunctionBind* pBind );
   
+
     static void                         StaticProcessServerKeyBind      ( CKeyFunctionBind* pBind );
     void                                ProcessServerKeyBind            ( CKeyFunctionBind* pBind );
     static void                         StaticProcessServerControlBind  ( CControlFunctionBind* pBind );
@@ -420,8 +416,7 @@ private:
     static void                         StaticIdleHandler               ( void );
     static void                         StaticAddAnimationHandler       ( RpClump * pClump, AssocGroupId animGroup, AnimationId animID );
     static void                         StaticBlendAnimationHandler     ( RpClump * pClump, AssocGroupId animGroup, AnimationId animID, float fBlendDelta );
-    static void                         StaticPreHudDrawHandler         ( void );
-
+    
     bool                                DamageHandler                   ( CPed* pDamagePed, CEventDamage * pEvent );
     void                                FireHandler                     ( CFire* pFire );
     bool                                BreakTowLinkHandler             ( CVehicle* pTowedVehicle );
@@ -433,8 +428,7 @@ private:
     void                                IdleHandler                     ( void );
     void                                AddAnimationHandler             ( RpClump * pClump, AssocGroupId animGroup, AnimationId animID );
     void                                BlendAnimationHandler           ( RpClump * pClump, AssocGroupId animGroup, AnimationId animID, float fBlendDelta );
-    void                                PreHudDrawHandler               ( void );
-
+    
     static bool                         StaticProcessMessage            ( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
     bool                                ProcessMessage                  ( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
@@ -626,6 +620,5 @@ private:
 };
 
 extern CClientGame* g_pClientGame;
-extern float        g_fTimeSlice;
 
 #endif

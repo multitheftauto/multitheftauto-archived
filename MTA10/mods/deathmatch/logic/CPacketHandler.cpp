@@ -1075,7 +1075,7 @@ void CPacketHandler::Packet_ChatEcho ( NetBitStreamInterface& bitStream )
             szMessage [iNumberOfBytesUsed] = 0;
 
             // Strip it for bad characters
-            StripUnwantedCharacters ( szMessage, ' ' );
+            StripControlCodes ( szMessage, ' ' );
 
 			// Call an event
 			CLuaArguments Arguments;
@@ -1106,7 +1106,7 @@ void CPacketHandler::Packet_ConsoleEcho ( NetBitStreamInterface& bitStream )
         szMessage [iNumberOfBytesUsed] = 0;
 
         // Strip it for bad characters
-        StripUnwantedCharacters ( szMessage, ' ' );
+        StripControlCodes ( szMessage, ' ' );
 
         // Echo it
         g_pCore->GetConsole ()->Echo ( szMessage );
@@ -1153,7 +1153,7 @@ void CPacketHandler::Packet_DebugEcho ( NetBitStreamInterface& bitStream )
         szMessage [iNumberOfBytesUsed] = 0;
 
         // Strip it for bad characters
-        StripUnwantedCharacters ( szMessage, ' ' );
+        StripControlCodes ( szMessage, ' ' );
 
         switch ( ucLevel )
         {
@@ -1929,10 +1929,9 @@ void CPacketHandler::Packet_MapInfo ( NetBitStreamInterface& bitStream )
     SFunBugsStateSync funBugs;
     if ( !bitStream.Read ( &funBugs ) )
         return;
-
-    g_pClientGame->SetGlitchEnabled ( CClientGame::GLITCH_QUICKRELOAD, funBugs.data.bQuickReload );
-    g_pClientGame->SetGlitchEnabled ( CClientGame::GLITCH_FASTFIRE, funBugs.data.bFastFire );
-    g_pClientGame->SetGlitchEnabled ( CClientGame::GLITCH_FASTMOVE, funBugs.data.bFastMove );
+    g_pClientGame->m_Glitches [ CClientGame::GLITCH_QUICKRELOAD ] = funBugs.data.bQuickReload;
+    g_pClientGame->m_Glitches [ CClientGame::GLITCH_FASTFIRE ]    = funBugs.data.bFastFire;
+    g_pClientGame->m_Glitches [ CClientGame::GLITCH_FASTMOVE ]    = funBugs.data.bFastMove;
 }
 
 
@@ -2261,16 +2260,12 @@ void CPacketHandler::Packet_EntityAdd ( NetBitStreamInterface& bitStream )
                         if ( bitStream.ReadBit ( bIsMoving ) && bIsMoving )
                         {
                             unsigned long ulMoveTimeLeft;
-                            // Needs to be CVector as we can have a value of over 2xPI here (for multiple rotations)
-                            CVector vecRotationRadians;
                             if ( bitStream.ReadCompressed ( ulMoveTimeLeft ) &&
                                  bitStream.Read ( &position ) &&
-                                 bitStream.Read ( vecRotationRadians.fX ) &&
-                                 bitStream.Read ( vecRotationRadians.fY ) &&
-                                 bitStream.Read ( vecRotationRadians.fZ ) )
+                                 bitStream.Read ( &rotationRadians ) )
                             {
                                 pObject->StartMovement ( position.data.vecPosition,
-                                                         vecRotationRadians,
+                                                         rotationRadians.data.vecRotation,
                                                          ulMoveTimeLeft );
                             }
                         }                                 
@@ -3644,13 +3639,6 @@ void CPacketHandler::Packet_ExplosionSync ( NetBitStreamInterface& bitStream )
     else
     {
         bCancelExplosion = !g_pClientGame->GetRootEntity ()->CallEvent ( "onClientExplosion", Arguments, false );
-    }
-
-    // Do our tank firing effect? (disabled through the fire key in CNetAPI)
-    if ( pCreator && !pCreator->IsLocalPlayer () && Type == EXP_TYPE_TANK_GRENADE )
-    {
-        CClientVehicle * pVehicle = pCreator->GetOccupiedVehicle ();
-        if ( pVehicle ) pVehicle->DoTankFire ();
     }
 
     // Is it a vehicle explosion?

@@ -230,8 +230,6 @@ CKeyBinds::CKeyBinds ( CCore* pCore )
     m_bInVehicle = false;
     m_pChatBoxBind = NULL;
     m_bProcessingKeyStroke = false;
-    m_KeyStrokeHandler = NULL;
-    m_CharacterKeyHandler = NULL;
 }
 
 
@@ -246,16 +244,10 @@ bool CKeyBinds::ProcessMessage ( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 {
     bool bState;
     const SBindableKey * pKey = GetBindableFromMessage ( uMsg, wParam, lParam, bState );
-    if ( pKey ) return ProcessKeyStroke ( pKey, bState );
-
-    if ( uMsg == WM_CHAR ) return ProcessCharacter ( wParam );
-    return false;
-}
-
-
-bool CKeyBinds::ProcessCharacter ( WPARAM wChar )
-{
-    if ( m_CharacterKeyHandler && m_CharacterKeyHandler ( wChar ) ) return true;
+    if ( pKey )
+    {
+        return ProcessKeyStroke ( pKey, bState );
+    }
     return false;
 }
 
@@ -298,9 +290,6 @@ bool CKeyBinds::ProcessKeyStroke ( const SBindableKey * pKey, bool bState )
 
     if ( pKey->iGTARelative == GTA_KEY_MSCROLLUP || pKey->iGTARelative == GTA_KEY_MSCROLLDOWN )
         m_bMouseWheel = true;
-
-    // Call the key-stroke handler if we have one
-    if ( m_KeyStrokeHandler ) m_KeyStrokeHandler ( pKey, bState );
 
     // Search through binds
     bool bFound = false;
@@ -1000,7 +989,8 @@ void CKeyBinds::CallGTAControlBind ( CGTAControlBind* pBind, bool bState )
             return;
 
         // Don't allow custom track skips. Crashes for some reason.
-        if ( pBind->control->action == RADIO_USER_TRACK_SKIP ) return;
+        if ( pBind->control->action == RADIO_USER_TRACK_SKIP )
+            return;
 
         // Set this binds state
         pBind->bState = bState;

@@ -181,19 +181,12 @@ void CClientStreamer::ConnectRow ( CClientStreamSectorRow * pRow )
     pRow->GetPosition ( fTop, fBottom );
 
     // Connect up our row
-    CClientStreamSectorRow * pTop = FindRow ( fTop + ( ROW_SIZE / 2.0f ) );
-    CClientStreamSectorRow * pBottom = FindRow ( fBottom - ( ROW_SIZE / 2.0f ) );
+    pRow->m_pTop = FindRow ( fTop + ( ROW_SIZE / 2.0f ) );
+    pRow->m_pBottom = FindRow ( fBottom - ( ROW_SIZE / 2.0f ) );
 
-    if ( pTop && pTop != pRow )
-    {
-        pRow->m_pTop = pTop;
-        pTop->m_pBottom = pRow;
-    }
-    if ( pBottom && pBottom != pRow )
-    {
-        pRow->m_pBottom = pBottom;
-        pBottom->m_pTop = pRow;
-    }
+    // Connect the other rows to us
+    if ( pRow->m_pTop ) pRow->m_pTop->m_pBottom = pRow;
+    if ( pRow->m_pBottom ) pRow->m_pBottom->m_pTop = pRow;
 }
 
     

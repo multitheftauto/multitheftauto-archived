@@ -39,7 +39,6 @@ CRITICAL_SECTION CClientGame::m_crVoice;
 #endif
 
 bool g_bBoundsChecker = true;
-
 #define DEFAULT_GRAVITY 0.008f
 #define DEFAULT_GAME_SPEED 1.0f
 #define DEFAULT_BLUR_LEVEL 36
@@ -215,7 +214,7 @@ CClientGame::CClientGame ( bool bLocalPlay )
     m_dwFrameTimeSlice = 0;
     m_dwLastFrameTick = 0;
 
-    // Register our handlers
+    // Register the message and the net packet handler
     g_pMultiplayer->SetPreWeaponFireHandler ( CClientGame::PreWeaponFire );
     g_pMultiplayer->SetPostWeaponFireHandler ( CClientGame::PostWeaponFire );
     g_pMultiplayer->SetExplosionHandler ( CClientExplosionManager::Hook_StaticExplosionCreation );
@@ -231,11 +230,8 @@ CClientGame::CClientGame ( bool bLocalPlay )
     g_pMultiplayer->SetIdleHandler ( CClientGame::StaticIdleHandler );
     g_pMultiplayer->SetAddAnimationHandler ( CClientGame::StaticAddAnimationHandler );
     g_pMultiplayer->SetBlendAnimationHandler ( CClientGame::StaticBlendAnimationHandler );
-    g_pMultiplayer->SetPreHudDrawHandler ( CClientGame::StaticPreHudDrawHandler );
     m_pProjectileManager->SetInitiateHandler ( CClientGame::StaticProjectileInitiateHandler );
     g_pCore->SetMessageProcessor ( CClientGame::StaticProcessMessage );
-    g_pCore->GetKeyBinds ()->SetKeyStrokeHandler ( CClientGame::StaticKeyStrokeHandler );
-    g_pCore->GetKeyBinds ()->SetCharacterKeyHandler ( CClientGame::StaticCharacterKeyHandler );
     g_pNet->RegisterPacketHandler ( CClientGame::StaticProcessPacket );
 
     m_pLuaManager = new CLuaManager ( this );
@@ -366,11 +362,8 @@ CClientGame::~CClientGame ( void )
     g_pMultiplayer->SetIdleHandler ( NULL );
     g_pMultiplayer->SetAddAnimationHandler ( NULL );
     g_pMultiplayer->SetBlendAnimationHandler ( NULL );
-    g_pMultiplayer->SetPreHudDrawHandler ( NULL );
     m_pProjectileManager->SetInitiateHandler ( NULL );
     g_pCore->SetMessageProcessor ( NULL );
-    g_pCore->GetKeyBinds ()->SetKeyStrokeHandler ( NULL );
-    g_pCore->GetKeyBinds ()->SetCharacterKeyHandler ( NULL );
     g_pNet->StopNetwork ();
     g_pNet->RegisterPacketHandler ( NULL );
     CKeyBindsInterface * pKeyBinds = g_pCore->GetKeyBinds ();
@@ -659,7 +652,7 @@ void CClientGame::SendVoiceData ( const unsigned char * pData, int len )
 
 
 void CClientGame::DoPulsePostFrame ( void )
-{      
+{
     #ifdef DEBUG_KEYSTATES
         // Get the controller state
         CControllerState cs;
@@ -1081,16 +1074,28 @@ void CClientGame::HandleException ( CExceptionInformation* pExceptionInformation
 
 void CClientGame::HandleRadioNext ( CControlFunctionBind*  )
 {
-    if ( g_pClientGame ) g_pClientGame->GetManager ()->GetRadio ()->NextChannel ();
+    if ( g_pClientGame )
+    {
+        CClientPlayer* pPlayer = g_pClientGame->m_pPlayerManager->GetLocalPlayer ();
+        if ( pPlayer )
+        {
+            pPlayer->NextRadioChannel ();
+        }
+    }
 }
 
 
 void CClientGame::HandleRadioPrevious ( CControlFunctionBind*  )
 {
-    if ( g_pClientGame ) g_pClientGame->GetManager ()->GetRadio ()->PreviousChannel ();
+    if ( g_pClientGame )
+    {
+        CClientPlayer* pPlayer = g_pClientGame->m_pPlayerManager->GetLocalPlayer ();
+        if ( pPlayer )
+        {
+            pPlayer->PreviousRadioChannel ();
+        }
+    }
 }
-
-
 bool CClientGame::IsNametagValid ( const char* szNick )
 {
     // Grab the size of the nametag. Check that it's not to long or short
@@ -1946,50 +1951,6 @@ void CClientGame::SetAllDimensions ( unsigned short usDimension )
 }
 
 
-void CClientGame::StaticKeyStrokeHandler ( const SBindableKey * pKey, bool bState )
-{
-    g_pClientGame->KeyStrokeHandler ( pKey, bState );
-}
-
-
-void CClientGame::KeyStrokeHandler ( const SBindableKey * pKey, bool bState )
-{
-    // Do we have a root yet?
-    if ( m_pRootEntity )
-    {
-        // Call our key-stroke event
-        CLuaArguments Arguments;
-        Arguments.PushString ( pKey->szKey );
-        Arguments.PushBoolean ( bState );
-        m_pRootEntity->CallEvent ( "onClientKey", Arguments, false );
-    }
-}
-
-
-bool CClientGame::StaticCharacterKeyHandler ( WPARAM wChar )
-{
-    return g_pClientGame->CharacterKeyHandler ( wChar );
-}
-
-
-bool CClientGame::CharacterKeyHandler ( WPARAM wChar )
-{
-    // Do we have a root yet?
-    if ( m_pRootEntity )
-    {
-        char szCharacter [ 2 ] = { wChar, 0 };
-
-        // Call our character event
-        CLuaArguments Arguments;
-        Arguments.PushString ( szCharacter );
-        Arguments.PushNumber ( wChar );
-        m_pRootEntity->CallEvent ( "onClientCharacter", Arguments, false );
-    }
-
-    return false;
-}
-
-
 void CClientGame::StaticProcessClientKeyBind ( CKeyFunctionBind* pBind )
 {
     g_pClientGame->ProcessClientKeyBind ( pBind );
@@ -2291,6 +2252,7 @@ void CClientGame::SetMoney ( long lMoney )
 
 void CClientGame::AddBuiltInEvents ( void )
 {
+
     // Resource events
     m_Events.AddEvent ( "onClientResourceStart", "resource", NULL, false );
     m_Events.AddEvent ( "onClientResourceStop", "resource", NULL, false );
@@ -2346,7 +2308,6 @@ void CClientGame::AddBuiltInEvents ( void )
     //m_Events.AddEvent ( "onClientGUIKeyDown", "element", NULL, false );
     m_Events.AddEvent ( "onClientGUITabSwitched", "element", NULL, false );
 
-    // Input events
     m_Events.AddEvent ( "onClientDoubleClick", "button, state, screenX, screenY, worldX, worldY, worldZ, element", NULL, false );
     m_Events.AddEvent ( "onClientMouseMove", "screenX, screenY", NULL, false );
     m_Events.AddEvent ( "onClientMouseEnter", "screenX, screenY", NULL, false );
@@ -2354,8 +2315,6 @@ void CClientGame::AddBuiltInEvents ( void )
     m_Events.AddEvent ( "onClientMouseWheel", "", NULL, false );
     m_Events.AddEvent ( "onClientGUIMove", "", NULL, false );
     m_Events.AddEvent ( "onClientGUISize", "", NULL, false );
-    m_Events.AddEvent ( "onClientKey", "key, state", NULL, false );
-    m_Events.AddEvent ( "onClientCharacter", "character", NULL, false );
 
     // Console events
     m_Events.AddEvent ( "onClientConsole", "text", NULL, false );
@@ -2672,7 +2631,7 @@ void CClientGame::UpdateMimics ( void )
         }
 
         // Simulate lag (or not)
-        if ( !m_bMimicLag || CClientTime::GetTime () >= m_ulLastMimicLag + 1000 ) // TICK_RATE )
+        if ( !m_bMimicLag || CClientTime::GetTime () >= m_ulLastMimicLag + 200 ) // TICK_RATE )
         {
             m_ulLastMimicLag = CClientTime::GetTime ();
 
@@ -2829,10 +2788,6 @@ void CClientGame::UpdateMimics ( void )
 					pVehicle->GetMoveSpeed ( vecMoveSpeed );
                     pVehicle->GetTurnSpeed ( vecTurnSpeed );
                     fHealth = pVehicle->GetHealth ();
-                    unsigned short usAdjustable = pVehicle->GetAdjustablePropertyValue ();
-                    float turretX, turretY;
-                    pVehicle->GetTurretRotation ( turretX, turretY );
-                    float fLandingGear = pVehicle->GetLandingGearPosition ();
 
                     if ( pMimicVehicle && pMimicVehicle->GetModel () != uiModel )
                     {
@@ -2842,7 +2797,7 @@ void CClientGame::UpdateMimics ( void )
 
                     vecPosition.fX += ( ( float ) ( uiMimicIndex + 1 ) * 10.0f );
 
-                    if ( !pMimicVehicle )
+                    if ( pMimicVehicle == NULL )
                     {
                         pMimicVehicle = new CDeathmatchVehicle ( m_pManager, m_pUnoccupiedVehicleSync, INVALID_ELEMENT_ID, uiModel );
                         pMimicVehicle->SetPosition ( vecPosition );
@@ -2859,13 +2814,12 @@ void CClientGame::UpdateMimics ( void )
                         m_vecLastMimicPos = vecPosition;
                     }
 
-                    static_cast < CDeathmatchVehicle * > ( pMimicVehicle )->UpdateSyncTimes ();
                     if ( m_bMimicLag )
                     {
                         pMimicVehicle->SetTargetPosition ( vecPosition );
                         pMimicVehicle->SetTargetRotation ( vecRotationDegrees );
                         pMimicVehicle->SetMoveSpeed ( vecMoveSpeed );
-                        pMimicVehicle->SetTurnSpeed ( vecTurnSpeed );                        
+                        pMimicVehicle->SetTurnSpeed ( vecTurnSpeed );
                     }
                     else
                     {
@@ -2875,9 +2829,6 @@ void CClientGame::UpdateMimics ( void )
                         pMimicVehicle->SetTurnSpeed ( vecTurnSpeed );
                     }
                     pMimicVehicle->SetHealth ( fHealth );
-                    pMimicVehicle->SetAdjustablePropertyValue ( usAdjustable );
-                    pMimicVehicle->SetTurretRotation ( turretX, turretY );
-                    pMimicVehicle->SetLandingGearPosition ( fLandingGear );
                     if ( pMimic->GetOccupiedVehicle () != pMimicVehicle )
                         pMimic->WarpIntoVehicle ( pMimicVehicle, uiSeat );
 
@@ -3160,11 +3111,6 @@ void CClientGame::StaticBlendAnimationHandler ( RpClump * pClump, AssocGroupId a
     g_pClientGame->BlendAnimationHandler ( pClump, animGroup, animID, fBlendDelta );
 }
 
-void CClientGame::StaticPreHudDrawHandler ( void )
-{
-    g_pClientGame->PreHudDrawHandler ();
-}
-
 void CClientGame::StaticPostWorldProcessHandler ( void )
 {
     g_pClientGame->PostWorldProcessHandler ();
@@ -3292,17 +3238,9 @@ void CClientGame::AddAnimationHandler ( RpClump * pClump, AssocGroupId animGroup
     //CClientPed * pPed = m_pPedManager->Get ( pClump, true );
 }
 
-
 void CClientGame::BlendAnimationHandler ( RpClump * pClump, AssocGroupId animGroup, AnimationId animID, float fBlendDelta )
 {   
     //CClientPed * pPed = m_pPedManager->Get ( pClump, true );
-}
-
-
-void CClientGame::PreHudDrawHandler ( void )
-{
-    // Render our radio just before the HUD
-    m_pManager->GetRadio ()->Render ();    
 }
 
 
@@ -3380,8 +3318,6 @@ bool CClientGame::DamageHandler ( CPed* pDamagePed, CEventDamage * pEvent )
 {
     // CEventDamage::AffectsPed: This is/can be called more than once for each bit of damage (and may not actually take any more health (even if we return true))
     
-    CClientExplosionManager * pExplosionManager = m_pManager->GetExplosionManager ();
-        
     // Grab some data from the event
     CEntity * pInflictor = pEvent->GetInflictingEntity ();
     eWeaponType weaponUsed = pEvent->GetWeaponUsed ();
@@ -3406,14 +3342,15 @@ bool CClientGame::DamageHandler ( CPed* pDamagePed, CEventDamage * pEvent )
     if ( pInflictor ) pInflictingEntity = m_pManager->FindEntity ( pInflictor );
 
     // If the damage was caused by an explosion
-    if ( weaponUsed == WEAPONTYPE_EXPLOSION || pExplosionManager->m_bCreatingExplosion )
-    {       
+    if ( weaponUsed == WEAPONTYPE_EXPLOSION )
+    {
+        CClientEntity * pLastExplosionCreator = m_pManager->GetExplosionManager ()->m_pLastCreator;
+        
+        // If we don't have an inflictor, look for the last explosion creator
+        if ( !pInflictor && pLastExplosionCreator ) pInflictingEntity = pLastExplosionCreator;
+        
         // Change the weapon used to whatever created the explosion
-        weaponUsed = pExplosionManager->m_LastWeaponType;
-
-        // Look for the last explosion creator
-        CClientEntity * pLastExplosionCreator = pExplosionManager->m_pLastCreator;        
-        if ( pLastExplosionCreator && ( !pInflictor || pExplosionManager->m_bCreatingExplosion ) ) pInflictingEntity = pLastExplosionCreator;
+        weaponUsed = m_pManager->GetExplosionManager ()->m_LastWeaponType;
     }
 
     // Do we have a damaged ped?

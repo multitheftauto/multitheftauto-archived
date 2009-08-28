@@ -98,31 +98,27 @@ void CDirect3DEvents9::OnPresent ( IDirect3DDevice9 *pDevice )
     // Notify core
     CCore::GetSingleton ().DoPostFramePulse ();
 
-    // Are we allowed to draw the gui?
-    if ( CCore::GetSingleton ().CanDrawGUI () )
+    // Create a state block.
+    IDirect3DStateBlock9 * pDeviceState = NULL;
+    pDevice->CreateStateBlock ( D3DSBT_ALL, &pDeviceState );
+
+    // Draw pre-GUI primitives
+    CGraphics::GetSingleton ().DrawPreGUIQueue ();
+
+    // Draw the GUI
+    CLocalGUI::GetSingleton().Draw ();
+
+    // Draw post-GUI primitives
+    CGraphics::GetSingleton ().DrawPostGUIQueue ();
+
+    // Redraw the mouse cursor so it will always be over other elements
+    CLocalGUI::GetSingleton().DrawMouseCursor();
+
+    // Restore the render states
+    if ( pDeviceState )
     {
-        // Create a state block.
-        IDirect3DStateBlock9 * pDeviceState = NULL;
-        pDevice->CreateStateBlock ( D3DSBT_ALL, &pDeviceState );
-
-        // Draw pre-GUI primitives
-        CGraphics::GetSingleton ().DrawPreGUIQueue ();
-
-        // Draw the GUI
-        CLocalGUI::GetSingleton().Draw ();
-
-        // Draw post-GUI primitives
-        CGraphics::GetSingleton ().DrawPostGUIQueue ();
-
-        // Redraw the mouse cursor so it will always be over other elements
-        CLocalGUI::GetSingleton().DrawMouseCursor();
-
-        // Restore the render states
-        if ( pDeviceState )
-        {
-            pDeviceState->Apply ( );
-            pDeviceState->Release ( );
-        }
+        pDeviceState->Apply ( );
+        pDeviceState->Release ( );
     }
     
     // End the scene that we started.

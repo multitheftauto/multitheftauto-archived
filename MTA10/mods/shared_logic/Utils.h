@@ -174,22 +174,6 @@ inline float GetOffsetDegrees ( float a, float b )
         c = ( 360.0f + c );
     return c;
 }
-inline float GetOffsetRadians ( float a, float b )
-{
-    float c = GetOffsetDegrees ( ConvertRadiansToDegrees ( a ), ConvertRadiansToDegrees ( b ) );
-    return ConvertDegreesToRadiansNoWrap ( c );
-}
-inline void NormalizeRadian ( float & a )
-{
-    if ( a < 0 ) a += ( 2 * PI );
-    else if ( a >= ( 2 * PI ) ) a -= ( 2 * PI );
-}
-inline void NormalizeRadian ( CVector & a )
-{
-    NormalizeRadian ( a.fX );
-    NormalizeRadian ( a.fY );
-    NormalizeRadian ( a.fZ );
-}
 
 
 bool            DoesFileExist               ( const char* szFilename );
@@ -197,7 +181,9 @@ bool            DoesFileExist               ( const char* szFilename );
 // Misc utility functions
 char*           ReplaceAnyStringOccurrence  ( char* szBuffer, const char* szWhat, const char* szWith, size_t sizeMax );
 unsigned int    StripUnwantedCharacters     ( char* szText, unsigned char cReplace = ' ' );
+unsigned int    StripControlCodes           ( char* szText, unsigned char cReplace = ' ' );
 bool            IsWantedCharacter           ( unsigned char c );
+bool            IsControlCode               ( unsigned char c );
 bool            IsValidFilePath	            ( const char* szDir );
 void			ReplaceOccurrencesInString  ( std::string &s, const char *a, const char *b );
 
@@ -231,52 +217,5 @@ void            MakeSureDirExists           ( const char* szPath );
 #ifdef MTA_DEBUG
 HMODULE RemoteLoadLibrary(HANDLE hProcess, const char* szLibPath);
 #endif
-
-// Simple class to interpolate variables
-template < class T >
-class CInterpolatedVar
-{
-public:
-                    CInterpolatedVar    ( void ) { begin = end = current = beginTime = endTime = 0; }
-    
-    T &             operator =          ( T var )               { return current = end = var; }
-    T               operator +          ( T var )               { return T ( current + var ); }
-    T *             operator &          ( void )                { return &current; }
-    operator        T &                 ( void )                { return current; }
-
-    void            lerp                ( T target, unsigned long time )
-    {
-        update ();
-        begin = current;
-        end = target;
-        beginTime = GetTickCount ();
-        endTime = beginTime + time;
-    }        
-    T &             update              ( void )
-    {
-        if ( beginTime == 0 && endTime == 0 ) return current;
-        return current = Lerp < T > ( begin, UnlerpClamped ( beginTime, GetTickCount (), endTime ), end );
-    }
-    T &             updateRotRad        ( void )
-    {
-        return current = LerpRotationRad < T > ( begin, UnlerpClamped ( beginTime, GetTickCount (), endTime ), end );
-    }
-    T &             updateRotDeg        ( void )
-    {
-        return current = LerpRotationDeg < T > ( begin, UnlerpClamped ( beginTime, GetTickCount (), endTime ), end );
-    }
-    T &             finish             ( void )
-    {        
-        endTime = GetTickCount ();
-        return current = end;
-    }
-    bool            finished            ( void )
-    {
-        return ( GetTickCount () >= endTime && current == end );
-    }
-
-    T               begin, end, current;
-    unsigned long   beginTime, endTime;
-};
 
 #endif

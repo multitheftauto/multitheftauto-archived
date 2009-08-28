@@ -177,8 +177,6 @@ public:
     virtual bool                IsCheatEnabled              ( const char* szCheatName ) = 0;
     virtual bool                SetCheatEnabled             ( const char* szCheatName, bool bEnable ) = 0;
     virtual void                ResetCheats                 () = 0;
-
-    virtual bool                IsTakingPhoto           ( void ) = 0;
 };
 
 #endif

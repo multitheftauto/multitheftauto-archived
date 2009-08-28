@@ -42,13 +42,6 @@ public:
 		this->fZ = fZ;
 	}
 
-    CVector ( float f )
-    {
-        this->fX = f;
-        this->fY = f;
-        this->fZ = f;
-    }
-
     float Normalize ( void ) 
     { 
         double t = sqrt(fX*fX + fY*fY + fZ*fZ);

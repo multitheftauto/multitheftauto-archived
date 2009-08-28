@@ -21,8 +21,6 @@
 class ePedStats;
 typedef long AssocGroupID;
 
-#define     FUNC_CPedModelInfo_Constructor                  0x4c57a0
-#define     VAR_CPedModelInfo_VTBL                          0x85bdc0
 #define		FUNC_SetMotionAnimGroup				            0x5b3580
 
 // CPedModelInfo:
@@ -43,12 +41,10 @@ typedef long AssocGroupID;
 class CPedModelInfoSAInterface : public CBaseModelInfoSAInterface
 {
 public:
-                        CPedModelInfoSAInterface        ( void );
-
     BYTE                pad [ 4 ];              // 32   
     AssocGroupID        motionAnimGroup;        // 36   Motion anim group (AssocGroupID, long)
     DWORD               pedType;                // 40   Default ped type (long)
-    DWORD               pedStatsID;             // 44   Default ped stats (ePedStats)
+    ePedStats *         pedStats;               // 44   Default ped stats (ePedStats)
     BYTE                bCanDriveCars;          // 48   Can drive cars (byte)
     BYTE                pad2 [ 1 ];             // 49   
     short               pedFlags;               // 50   Ped flags (short)
@@ -66,13 +62,9 @@ public:
 class CPedModelInfoSA : public CModelInfoSA, public CPedModelInfo
 {
 public:
-                                    CPedModelInfoSA             ( void );
-    CPedModelInfoSAInterface *      GetPedModelInfoInterface    ( void )        { return m_pPedModelInterface; }
+    CPedModelInfoSAInterface *      GetPedModelInfoInterface   ( void )        { return reinterpret_cast < CPedModelInfoSAInterface * > ( m_pInterface ); }
 
-	void							SetMotionAnimGroup	        ( AssocGroupId animGroup );
-
-private:
-    CPedModelInfoSAInterface *      m_pPedModelInterface;
+	void							SetMotionAnimGroup	       ( AssocGroupId animGroup );
 };
 
 #endif
