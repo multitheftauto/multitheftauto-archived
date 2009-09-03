@@ -3255,6 +3255,7 @@ void CClientGame::Render3DStuffHandler ( void )
 void CClientGame::PostWorldProcessHandler ( void )
 {
     m_pManager->GetMarkerManager ()->DoPulse ();
+    m_pManager->GetRopeManager ()->DoPulse ();
 
     // Update frame time slice
     DWORD dwCurrentTick = GetTickCount ();

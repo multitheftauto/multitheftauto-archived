@@ -64,6 +64,7 @@
 #include <CClientProjectileManager.h>
 #include <CClientRadio.h>
 #include <CClientRope.h>
+#include <CClientRopeManager.h>
 #include <CClientStreamSector.h>
 #include <CClientStreamSectorRow.h>
 #include <CClientTask.h>

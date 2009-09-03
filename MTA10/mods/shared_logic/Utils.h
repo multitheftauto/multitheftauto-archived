@@ -267,19 +267,19 @@ public:
     }        
     T &             update              ( void )
     {
-        if ( beginTime == 0 && endTime == 0 ) return current;
+        if ( beginTime == 0 || endTime == 0 ) return current;
         previous = current;
         return current = Lerp < T > ( begin, UnlerpClamped ( beginTime, GetTickCount (), endTime ), end );
     }
     T &             updateRotRad        ( void )
     {
-        if ( beginTime == 0 && endTime == 0 ) return current;
+        if ( beginTime == 0 || endTime == 0 ) return current;
         previous = current;
         return current = LerpRotationRad < T > ( begin, UnlerpClamped ( beginTime, GetTickCount (), endTime ), end );
     }
     T &             updateRotDeg        ( void )
     {
-        if ( beginTime == 0 && endTime == 0 ) return current;
+        if ( beginTime == 0 || endTime == 0 ) return current;
         previous = current;
         return current = LerpRotationDeg < T > ( begin, UnlerpClamped ( beginTime, GetTickCount (), endTime ), end );
     }

@@ -205,9 +205,10 @@ void CUnoccupiedVehicleSync::Packet_UnoccupiedVehicleSync ( NetBitStreamInterfac
         SUnoccupiedVehicleSync vehicle;
         if ( BitStream.Read ( &vehicle ) )
         {
-            CClientVehicle* pVehicle = m_pVehicleManager->Get ( vehicle.data.vehicleID );
+            CDeathmatchVehicle* pVehicle = static_cast < CDeathmatchVehicle* > ( m_pVehicleManager->Get ( vehicle.data.vehicleID ) );
             if ( pVehicle && pVehicle->CanUpdateSync ( vehicle.data.ucTimeContext ) )
             {
+                pVehicle->UpdateSyncTimes ();
                 if ( vehicle.data.bSyncPosition )       pVehicle->SetTargetPosition ( vehicle.data.vecPosition, static_cast < CDeathmatchVehicle * > ( pVehicle )->m_ulSyncFrequency );
                 if ( vehicle.data.bSyncRotation )       pVehicle->SetTargetRotation ( vehicle.data.vecRotation, static_cast < CDeathmatchVehicle * > ( pVehicle )->m_ulSyncFrequency );
                 if ( vehicle.data.bSyncVelocity )       pVehicle->SetMoveSpeed ( vehicle.data.vecVelocity );

@@ -14,43 +14,60 @@
 
 #include "CClientEntity.h"
 
+class CClientManager;
+
 class CClientRopeLink
 {
 public:
-                            CClientRopeLink     ( void )    { pNextLink = NULL; }
+                            CClientRopeLink     ( void )    { pNextLink = pPreviousLink = NULL; }
 
-    CClientRopeLink *       pNextLink;
-    CVector                 vecPosition;
+    CClientRopeLink         * pNextLink, *pPreviousLink;
+    CVector                 vecPosition, vecSpeed;
 };
 
 class CClientRope : public CClientEntity
 {
 public:
-                            CClientRope     ( unsigned int links, float fLinkDistance );
-                            ~CClientRope    ( void );
+                            CClientRope         ( CClientManager * pManager, unsigned int links, float fLinkDistance );
+                            ~CClientRope        ( void );
 
-    eClientEntityType       GetType         ( void ) const      { return CCLIENTROPE; }
-    void                    Unlink          ( void );
+    eClientEntityType       GetType             ( void ) const      { return CCLIENTROPE; }
+    void                    Unlink              ( void );
 
-    void                    DoPulse         ( void );
-    void                    Render          ( void );
+    unsigned int            GetLinks            ( void )            { return m_uiLinks; }
 
-    void                    GetPosition     ( CVector & vecPosition ) const;
-    void                    GetEndPosition  ( CVector & vecPosition ) const;
-    void                    SetPosition     ( const CVector & vecPosition );    
+    void                    DoPulse             ( void );
+    void                    Render              ( void );
+    void                    DoPhysics           ( void );
 
-    void                    AddLink         ( void );
-    void                    RemoveLinks     ( void );
+    void                    GetPosition         ( CVector & vecPosition ) const;
+    void                    GetEndPosition      ( CVector & vecPosition ) const;
+    void                    SetPosition         ( const CVector & vecPosition );
 
-    void                    Drag            ( CVector & vecDirection );
-    void                    DragTo          ( CVector vecPosition );
-    void                    Stretch         ( CVector & vecDirection );
+    void                    AddLink             ( void );
+    void                    RemoveLinks         ( void );
+
+    void                    Drag                ( CVector & vecDirection );
+    void                    DragTo              ( CVector vecPosition );
+    void                    DragEndTo           ( CVector vecPosition );
+    void                    Stretch             ( CVector & vecDirection );
+
+    void                    ApplyForce          ( CVector & vecDirection );
+    void                    ApplyConstantForce  ( CVector & vecDirection );
+    void                    ApplyLinkForce      ( unsigned int link, CVector & vecDirection );
+
+    void                    GetLinkSpeed        ( unsigned int link, CVector & vecSpeed );
+    void                    SetLinkSpeed        ( unsigned int link, CVector & vecSpeed );
 
 private:
+    CClientRopeLink *       GetLink             ( unsigned int link );
+
     unsigned int            m_uiLinks;
     float                   m_fLinkDistance;
     CClientRopeLink *       m_pFirstLink;
     CClientRopeLink *       m_pLastLink;
+    CPhysical *             m_pPhysical;
+    CVector                 m_vecConstantForce;
 };
 
 #endif

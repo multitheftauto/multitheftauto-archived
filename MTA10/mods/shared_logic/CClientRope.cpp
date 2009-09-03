@@ -10,20 +10,25 @@
 *****************************************************************************/
 
 #include "StdInc.h"
+#include <list>
 
-CClientRope::CClientRope ( unsigned int links, float fLinkDistance ) : CClientEntity ( INVALID_ELEMENT_ID )
+CClientRope::CClientRope ( CClientManager * pManager, unsigned int links, float fLinkDistance ) : CClientEntity ( INVALID_ELEMENT_ID )
 {
+    m_pManager = pManager;
     m_uiLinks = links;
     m_fLinkDistance = fLinkDistance;
     m_pFirstLink = m_pLastLink = NULL;
 
     for ( unsigned int i = 0 ; i < links ; i++ ) AddLink ();
+
+    m_pManager->GetRopeManager ()->AddToList ( this );
 }
 
 
 CClientRope::~CClientRope ( void )
-{
+{    
     RemoveLinks ();
+    m_pManager->GetRopeManager ()->RemoveFromList ( this );
 }
 
 
@@ -35,36 +40,80 @@ void CClientRope::Unlink ( void )
 void CClientRope::DoPulse ( void )
 {
     DoAttaching ();
+    DoPhysics ();
+
+    CMatrix attachMatrix;
+    if ( m_pAttachedToEntity ) m_pAttachedToEntity->GetMatrix ( attachMatrix );
+    GetEndPosition ( attachMatrix.vPos );
+
+    std::list < CClientEntity * > ::const_iterator iter = AttachedEntitiesBegin ();
+    for ( ; iter != AttachedEntitiesEnd () ; iter++ )
+    {
+        (*iter)->SetMatrix ( attachMatrix );
+    }
 }
 
 
 void CClientRope::Render ( void )
 {
-    /*
-    float boxSize = 0.1f;
-    CVector * pvecPos;
-    CClientRopeLink * pLink = m_pFirstLink;
-    while ( pLink )
+    if ( false )
     {
-        pvecPos = &pLink->vecPosition;
-        g_pCore->GetGraphics ()->Draw3DBox ( pvecPos->fX, pvecPos->fY, pvecPos->fZ, boxSize, boxSize, boxSize, 0xFFFFFF00, false );
-        pLink = pLink->pNextLink;
-    }*/
-
-    CVector * pvecBegin = NULL, * pvecEnd = NULL;
-    CClientRopeLink * pLink = m_pFirstLink;
-    while ( pLink )
-    {
-        if ( !pvecBegin ) pvecBegin = &pLink->vecPosition;
-        else if ( !pvecEnd ) pvecEnd = &pLink->vecPosition;
-
-        if ( pvecBegin && pvecEnd )
+        float boxSize = 0.1f;
+        CVector * pvecPos;
+        CClientRopeLink * pLink = m_pFirstLink;
+        while ( pLink )
         {
-            g_pCore->GetGraphics ()->DrawLine3D ( *pvecBegin, *pvecEnd, 0xFFFFFF00, 3 );
-            pvecBegin = pvecEnd;
-            pvecEnd = NULL;
+            pvecPos = &pLink->vecPosition;
+            g_pCore->GetGraphics ()->Draw3DBox ( pvecPos->fX, pvecPos->fY, pvecPos->fZ, boxSize, boxSize, boxSize, 0xFFFFFF00, false );
+            pLink = pLink->pNextLink;
         }
-        pLink = pLink->pNextLink;
+    }
+    else
+    {
+        CVector * pvecBegin = NULL, * pvecEnd = NULL;
+        CClientRopeLink * pLink = m_pFirstLink;
+        while ( pLink )
+        {
+            if ( !pvecBegin ) pvecBegin = &pLink->vecPosition;
+            else if ( !pvecEnd ) pvecEnd = &pLink->vecPosition;
+
+            if ( pvecBegin && pvecEnd )
+            {
+                g_pCore->GetGraphics ()->DrawLine3D ( *pvecBegin, *pvecEnd, 0xFFFF0000, 5 );
+                pvecBegin = pvecEnd;
+                pvecEnd = NULL;
+            }
+            pLink = pLink->pNextLink;
+        }
+    }
+}
+
+
+void CClientRope::DoPhysics ( void )
+{
+    if ( m_pFirstLink )
+    {
+        m_pFirstLink->vecSpeed += m_vecConstantForce;
+        m_pFirstLink->vecPosition += m_pFirstLink->vecSpeed;
+        CVector vecPosition = m_pFirstLink->vecPosition, vecDirection, vecWantedPosition;
+
+        CClientRopeLink * pLink = m_pFirstLink->pNextLink;
+        while ( pLink )
+        {
+            pLink->vecSpeed += m_vecConstantForce;
+            vecWantedPosition = pLink->vecPosition + pLink->vecSpeed;
+            if ( DistanceBetweenPoints3D ( vecPosition, vecWantedPosition ) > m_fLinkDistance )
+            {
+                vecDirection = vecWantedPosition - vecPosition;
+                vecDirection.Normalize ();
+                vecDirection *= m_fLinkDistance;
+                vecPosition += vecDirection;
+            }
+            else vecPosition = vecWantedPosition;
+
+            pLink->vecPosition = vecPosition;
+            pLink = pLink->pNextLink;
+        }
     }
 }
 
@@ -96,6 +145,7 @@ void CClientRope::AddLink ( void )
     {
         pLink->vecPosition = m_pLastLink->vecPosition;
         m_pLastLink->pNextLink = pLink;
+        pLink->pPreviousLink = m_pLastLink;
     }
     else m_pFirstLink = pLink;
     m_pLastLink = pLink;
@@ -148,6 +198,29 @@ void CClientRope::DragTo ( CVector vecPosition )
 }
 
 
+void CClientRope::DragEndTo ( CVector vecPosition )
+{
+    if ( m_pFirstLink )
+    {
+        CVector vecDirection;
+
+        m_pLastLink->vecPosition = vecPosition;
+        CClientRopeLink * pLink = m_pLastLink->pPreviousLink;
+        while ( pLink )
+        {
+            if ( DistanceBetweenPoints3D ( pLink->vecPosition, vecPosition ) <= m_fLinkDistance ) break;
+
+            vecDirection = vecPosition - pLink->vecPosition;
+            vecDirection.Normalize ();
+            vecDirection *= m_fLinkDistance;
+            vecPosition -= vecDirection;
+            pLink->vecPosition = vecPosition;
+            pLink = pLink->pPreviousLink;
+        }
+    }
+}
+
+
 void CClientRope::Stretch ( CVector & vecDirection )
 {
     if ( m_uiLinks >= 2 )
@@ -164,4 +237,55 @@ void CClientRope::Stretch ( CVector & vecDirection )
             pLink = pLink->pNextLink;
         }
     }
+}
+
+
+void CClientRope::ApplyForce ( CVector & vecDirection )
+{
+    CClientRopeLink * pLink = m_pFirstLink;
+    while ( pLink )
+    {       
+        pLink->vecSpeed += vecDirection;
+        pLink = pLink->pNextLink;
+    }
+}
+
+
+void CClientRope::ApplyConstantForce ( CVector & vecDirection )
+{
+    m_vecConstantForce += vecDirection;
+}
+
+
+void CClientRope::ApplyLinkForce ( unsigned int link, CVector & vecDirection )
+{
+    CClientRopeLink * pLink = GetLink ( link );
+    if ( pLink ) pLink->vecSpeed += vecDirection;
+}
+
+
+void CClientRope::GetLinkSpeed ( unsigned int link, CVector & vecSpeed )
+{
+    CClientRopeLink * pLink = GetLink ( link );
+    if ( pLink ) vecSpeed = pLink->vecSpeed;
+    else vecSpeed = CVector ();
+}
+
+
+void CClientRope::SetLinkSpeed ( unsigned int link, CVector & vecSpeed )
+{
+    CClientRopeLink * pLink = GetLink ( link );
+    if ( pLink ) pLink->vecSpeed = vecSpeed;
+}
+
+
+CClientRopeLink * CClientRope::GetLink ( unsigned int link )
+{
+    CClientRopeLink * pLink = NULL;
+    if ( link < m_uiLinks )
+    {
+        pLink = m_pFirstLink;
+        for ( unsigned int i = 0 ; i < link ; i++ ) pLink = pLink->pNextLink;
+    }
+    return pLink;
 }

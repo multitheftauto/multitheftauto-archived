@@ -62,6 +62,7 @@ CClientManager::CClientManager ( void )
     m_pWaterManager = new CClientWaterManager ( this );
     m_pRadio = new CClientRadio ( this );
     m_pWeaponManager = new CClientWeaponManager ( this );
+    m_pRopeManager = new CClientRopeManager ( this );
 
 	m_pPacketRecorder = new CClientPacketRecorder ( this );
 
@@ -82,6 +83,9 @@ CClientManager::~CClientManager ( void )
     // We need to call this after deleting resources but before deleting entities
     g_pClientGame->GetElementDeleter ()->DoDeleteAll ();
     g_pCore->GetGUI ()->CleanDeadPool ();
+
+    delete m_pRopeManager;
+    m_pRopeManager = NULL;
 
     delete m_pWeaponManager;
     m_pWeaponManager = NULL;
@@ -189,10 +193,7 @@ void CClientManager::DoPulse ( void )
     if ( IsGameLoaded () )
     {
         m_pModelRequestManager->DoPulse ();
-        m_pCamera->DoPulse ();
-        /* now called from CClientGame::PostWorldProcessHandler so marker positions
-           are no longer a frame behind when attached to other entities.
-        m_pMarkerManager->DoPulse (); */ 
+        m_pCamera->DoPulse ();        
         m_pRadarAreaManager->DoPulse ( false ); // DoPulse, but do not render (we render them from a hook to avoid render issues - the mask not blocking the edges)
         m_pVehicleManager->DoPulse ();
         m_pPathManager->DoPulse ();
@@ -205,6 +206,11 @@ void CClientManager::DoPulse ( void )
         m_pPlayerManager->DoPulse ();
         m_pRadio->DoPulse ();
         m_pColManager->DoPulse ();
+        m_pRopeManager->Render ();
+        /* The following are called from CClientGame::PostWorldProcessHandler..
+           ..as GTA updates positions after this.
+        m_pMarkerManager->DoPulse (); 
+        m_pRopeManager->DoPulse (); */
     }
 }
 
