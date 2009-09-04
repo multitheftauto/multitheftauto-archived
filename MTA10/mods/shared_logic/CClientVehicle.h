@@ -326,12 +326,12 @@ public:
 
     // Time dependent interpolation
     inline void                 GetTargetPosition       ( CVector& vecPosition )            { vecPosition = m_interp.pos.vecTarget; }
-    void                        SetTargetPosition       ( CVector& vecPosition, unsigned long ulDelay, unsigned long ulPeerDelay = 0 );
+    void                        SetTargetPosition       ( CVector& vecPosition, unsigned long ulDelay );
     void                        RemoveTargetPosition    ( void );
     inline bool                 HasTargetPosition       ( void )                            { return ( m_interp.pos.ulFinishTime != 0 ); }
 
     inline void                 GetTargetRotation       ( CVector& vecRotation )            { vecRotation = m_interp.rot.vecTarget; }
-    void                        SetTargetRotation       ( CVector& vecRotation, unsigned long ulDelay, unsigned long ulPeerDelay = 0 );
+    void                        SetTargetRotation       ( CVector& vecRotation, unsigned long ulDelay );
     void                        RemoveTargetRotation    ( void );
     inline bool                 HasTargetRotation       ( void )                            { return ( m_interp.rot.ulFinishTime != 0 ); }
 
@@ -471,13 +471,11 @@ protected:
     {
         struct
         {
-            CInterpolator < CVector, 1024 > localInterpolator;
 #ifdef MTA_DEBUG
             CVector         vecOrigin;
-            CVector         vecTarget;
 #endif
+            CVector         vecTarget;
             CVector         vecError;
-            CVector         vecUnappliedError;
             float           fLastAlpha;
             unsigned long   ulStartTime;
             unsigned long   ulFinishTime;
@@ -485,13 +483,11 @@ protected:
 
         struct
         {
-            CRotationInterpolator < 1024 > localInterpolator;
 #ifdef MTA_DEBUG
             CVector         vecOrigin;
-            CVector         vecTarget;
 #endif
+            CVector         vecTarget;
             CVector         vecError;
-            CVector         vecUnappliedError;
             float           fLastAlpha;
             unsigned long   ulStartTime;
             unsigned long   ulFinishTime;
