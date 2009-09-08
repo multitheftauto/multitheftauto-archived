@@ -158,6 +158,15 @@ public:
 class CTaskSimpleStealthKillInterface : public CTaskSimpleSAInterface
 {
 public:
+    bool m_bAttacker;
+	CPed *m_pOtherPed;
+	AssocGroupId m_nAnimGroup;
+
+	bool m_bIsFinished;
+	bool m_bAnimAdded;
+	CAnimBlendAssociation *m_pAnim;
+	
+	unsigned int m_nWaitForAnimCounter;
 };
 
 class CTaskSimpleStealthKillSA : public virtual CTaskSimpleSA, public virtual CTaskSimpleStealthKill
