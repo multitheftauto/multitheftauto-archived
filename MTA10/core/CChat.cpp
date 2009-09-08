@@ -859,6 +859,7 @@ CChatLineSection::CChatLineSection ()
 {
     m_fCachedWidth = -1.0f;
     m_uiCachedLength = 0;
+    m_fCachedOnScaleX = 0.0f;
 }
 
 CChatLineSection::CChatLineSection ( const CChatLineSection& other )
@@ -872,6 +873,7 @@ CChatLineSection& CChatLineSection::operator = ( const CChatLineSection& other )
     m_Color = other.m_Color;
     m_fCachedWidth = other.m_fCachedWidth;
     m_uiCachedLength = other.m_uiCachedLength;
+    m_fCachedOnScaleX = other.m_fCachedOnScaleX;
     return *this;
 }
 
@@ -892,7 +894,7 @@ void CChatLineSection::Draw ( CVector2D& vecPosition, unsigned char ucAlpha, boo
 
 float CChatLineSection::GetWidth ()
 {
-    if ( m_fCachedWidth < 0.0f || m_strText.size () != m_uiCachedLength )
+    if ( m_fCachedWidth < 0.0f || m_strText.size () != m_uiCachedLength || g_pChat->m_vecScale.fX != m_fCachedOnScaleX )
     {
         m_fCachedWidth = 0.0f;
         for ( unsigned int i = 0; i < m_strText.size (); i++ )
@@ -900,6 +902,7 @@ float CChatLineSection::GetWidth ()
             m_fCachedWidth += CChat::GetCharacterWidth ( m_strText [ i ], g_pChat->m_vecScale.fX );            
         }
         m_uiCachedLength = m_strText.size ();
+        m_fCachedOnScaleX = g_pChat->m_vecScale.fX;
     }
     return m_fCachedWidth;
 }

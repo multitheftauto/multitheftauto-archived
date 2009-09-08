@@ -87,6 +87,7 @@ protected:
     CColor                      m_Color;
     float                       m_fCachedWidth;
     unsigned int                m_uiCachedLength;
+    float                       m_fCachedOnScaleX;
 };
 
 class CChatLine
