@@ -201,7 +201,6 @@ bool CPlayerPuresyncPacket::Read ( NetBitStreamInterface& BitStream )
                 return false;
 
             pSourcePlayer->SetDamageInfo ( DamagerID, weaponType.data.ucWeaponType, bodyPart.data.uiBodypart );
-            bDamageInfo = true;
         }
 
         // If we know the player's dead, make sure the health we send on is 0

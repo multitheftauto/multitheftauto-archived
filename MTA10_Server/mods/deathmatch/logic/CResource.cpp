@@ -904,6 +904,9 @@ bool CResource::Stop ( bool bStopManually )
 
 	    // Broadcast the packet to joined players
 	    g_pGame->GetPlayerManager()->BroadcastOnlyJoined ( removePacket );
+
+        // Remove all our deleted elements now, before the resource is possibly restarted.
+        g_pGame->GetElementDeleter ()->DoDeleteAll ();
     }
     return !m_bActive;
 }

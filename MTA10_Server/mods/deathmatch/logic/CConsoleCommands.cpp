@@ -214,6 +214,62 @@ bool CConsoleCommands::StartResource ( CConsole* pConsole, const char* szArgumen
     return true;
 }
 
+bool CConsoleCommands::StopResource ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
+{
+    if ( szArguments && szArguments[0] )
+    {
+        CResource * resource = g_pGame->GetResourceManager()->GetResource ( (char *)szArguments );
+        if ( resource )
+        {
+			if ( pClient->GetNick () )
+				CLogger::LogPrintf ( "stop: Requested by %s\n", pClient->GetNick () );
+
+            if ( resource->IsLoaded() )
+            {
+                if ( resource->IsActive() )
+                {
+					if ( resource->IsProtected() )
+					{
+						if ( !g_pGame->GetACLManager()->CanObjectUseRight ( pClient->GetNick(), CAccessControlListGroupObject::OBJECT_TYPE_USER, "stop.protected", CAccessControlListRight::RIGHT_TYPE_COMMAND, false ) )
+						{
+							pEchoClient->SendConsole ( "stop: Resource could not be stopped as it is protected" );
+							return false;
+						}
+					}
+
+                    g_pGame->GetResourceManager ()->QueueResource ( resource, CResourceManager::QUEUE_STOP, NULL );
+                    pEchoClient->SendConsole ( "stop: Resource stopping" );
+                }
+                else
+                    pEchoClient->SendConsole ( "stop: Resource is not running" );
+            }
+            else
+                pEchoClient->SendConsole( "stop: Resource is loaded, but has errors" );
+        }
+        else
+            pEchoClient->SendConsole ( "stop: Resource could not be found" );
+        return true;
+    }
+    else
+        pEchoClient->SendConsole ( "* Syntax: stop <resource-name>" );
+
+    return false;
+}
+
+
+bool CConsoleCommands::StopAllResources ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
+{
+	if ( !g_pGame->GetACLManager()->CanObjectUseRight ( pClient->GetNick(), CAccessControlListGroupObject::OBJECT_TYPE_USER, "stopall", CAccessControlListRight::RIGHT_TYPE_COMMAND, false ) )
+	{
+		pEchoClient->SendConsole ( "stopall: You do not have sufficient rights to stop all the resources." );
+		return false;
+	}
+
+    g_pGame->GetResourceManager()->QueueResource ( NULL, CResourceManager::QUEUE_STOPALL, NULL );
+    pEchoClient->SendConsole ( "stopall: Stopping all resources" );
+	return true;
+}
+
 bool CConsoleCommands::RestartResource ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
 {
     if ( szArguments && szArguments[0] )
@@ -287,62 +343,6 @@ bool CConsoleCommands::ResourceInfo ( CConsole* pConsole, const char* szArgument
         return true;
     }
     return false;
-}
-
-bool CConsoleCommands::StopResource ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
-{
-    if ( szArguments && szArguments[0] )
-    {
-        CResource * resource = g_pGame->GetResourceManager()->GetResource ( (char *)szArguments );
-        if ( resource )
-        {
-			if ( pClient->GetNick () )
-				CLogger::LogPrintf ( "stop: Requested by %s\n", pClient->GetNick () );
-
-            if ( resource->IsLoaded() )
-            {
-                if ( resource->IsActive() )
-                {
-					if ( resource->IsProtected() )
-					{
-						if ( !g_pGame->GetACLManager()->CanObjectUseRight ( pClient->GetNick(), CAccessControlListGroupObject::OBJECT_TYPE_USER, "stop.protected", CAccessControlListRight::RIGHT_TYPE_COMMAND, false ) )
-						{
-							pEchoClient->SendConsole ( "stop: Resource could not be stopped as it is protected" );
-							return false;
-						}
-					}
-
-                    g_pGame->GetResourceManager ()->QueueResource ( resource, CResourceManager::QUEUE_STOP, NULL );
-                    pEchoClient->SendConsole ( "stop: Resource stopping" );
-                }
-                else
-                    pEchoClient->SendConsole ( "stop: Resource is not running" );
-            }
-            else
-                pEchoClient->SendConsole( "stop: Resource is loaded, but has errors" );
-        }
-        else
-            pEchoClient->SendConsole ( "stop: Resource could not be found" );
-        return true;
-    }
-    else
-        pEchoClient->SendConsole ( "* Syntax: stop <resource-name>" );
-
-    return false;
-}
-
-
-bool CConsoleCommands::StopAllResources ( CConsole* pConsole, const char* szArguments, CClient* pClient, CClient* pEchoClient )
-{
-	if ( !g_pGame->GetACLManager()->CanObjectUseRight ( pClient->GetNick(), CAccessControlListGroupObject::OBJECT_TYPE_USER, "stopall", CAccessControlListRight::RIGHT_TYPE_COMMAND, false ) )
-	{
-		pEchoClient->SendConsole ( "stopall: You do not have sufficient rights to stop all the resources." );
-		return false;
-	}
-
-    g_pGame->GetResourceManager()->QueueResource ( NULL, CResourceManager::QUEUE_STOPALL, NULL );
-    pEchoClient->SendConsole ( "stopall: Stopping all resources" );
-	return true;
 }
 
 
